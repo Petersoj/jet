@@ -31,7 +31,7 @@ dependencies {
 
     implementation("org.jspecify:jspecify:1.0.0")
 
-    implementation("com.google.guava:guava:33.5.0-jre")
+    api("com.google.guava:guava:33.5.0-jre")
 }
 
 tasks.withType(JavaCompile::class) {
@@ -63,6 +63,7 @@ tasks.javadoc.configure {
         (this as CoreJavadocOptions).addBooleanOption("Xdoclint:none", true)
         addStringOption("link",
                 "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/")
+        addStringOption("link", "https://guava.dev/releases/snapshot-jre/api/docs/")
     }
 }
 
