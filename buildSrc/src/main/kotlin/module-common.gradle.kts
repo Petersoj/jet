@@ -4,6 +4,7 @@ import org.gradle.api.JavaVersion.VERSION_25
 
 plugins {
     `java-library`
+    jacoco
     `maven-publish`
     id("io.freefair.lombok")
     id("net.ltgt.errorprone")
@@ -32,6 +33,12 @@ dependencies {
     implementation("org.jspecify:jspecify:1.0.0")
 
     api("com.google.guava:guava:33.5.0-jre")
+
+    testImplementation(platform("org.junit:junit-bom:6.0.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.21")
 }
 
 tasks.withType(JavaCompile::class) {
@@ -65,6 +72,18 @@ tasks.javadoc.configure {
                 "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/")
         addStringOption("link", "https://guava.dev/releases/snapshot-jre/api/docs/")
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
 }
 
 publishing {
