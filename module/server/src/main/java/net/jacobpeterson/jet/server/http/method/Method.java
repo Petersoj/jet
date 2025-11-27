@@ -6,6 +6,11 @@ import static java.util.Locale.ROOT;
 
 /**
  * {@link Method} is an enum that represents a standardized HTTP request method.
+ * <p>
+ * HTTP defines a set of request methods to indicate the purpose of the request and what is expected if the request is
+ * successful. Although they can also be nouns, these request methods are sometimes referred to as HTTP verbs. Each
+ * request method has its own semantics, but some characteristics are shared across multiple methods, specifically
+ * request methods can be {@link #isSafe()}, {@link #isIdempotent()}, or {@link #isCacheable()}.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods>developer.mozilla.org</a>
  */
@@ -87,6 +92,41 @@ public enum Method {
      * developer.mozilla.org</a>
      */
     PATCH;
+
+    /**
+     * @return <code>true</code> if this {@link Method} is
+     * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP">safe</a>, <code>false</code> otherwise
+     */
+    public boolean isSafe() {
+        return switch (this) {
+            case GET, HEAD, OPTIONS, TRACE -> true;
+            case POST, PUT, DELETE, CONNECT, PATCH -> false;
+        };
+    }
+
+    /**
+     * @return <code>true</code> if this {@link Method} is
+     * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Idempotent">idempotent</a>, <code>false</code>
+     * otherwise
+     */
+    public boolean isIdempotent() {
+        return switch (this) {
+            case GET, HEAD, PUT, DELETE, OPTIONS, TRACE -> true;
+            case POST, CONNECT, PATCH -> false;
+        };
+    }
+
+    /**
+     * @return <code>true</code> if this {@link Method} is
+     * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Cacheable">cacheable</a>, <code>false</code>
+     * otherwise
+     */
+    public boolean isCacheable() {
+        return switch (this) {
+            case GET, HEAD -> true;
+            case POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH -> false;
+        };
+    }
 
     /**
      * Gets the {@link Method} of the given <code>name</code>.
