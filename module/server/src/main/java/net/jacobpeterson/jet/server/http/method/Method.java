@@ -5,12 +5,12 @@ import org.jspecify.annotations.NullMarked;
 import static java.util.Locale.ROOT;
 
 /**
- * {@link HttpMethod} is an enum that represents a standardized HTTP request method.
+ * {@link Method} is an enum that represents a standardized HTTP request method.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods>developer.mozilla.org</a>
  */
 @NullMarked
-public enum HttpMethod {
+public enum Method {
 
     /**
      * The <code>GET</code> method requests a representation of the specified resource. Requests using <code>GET</code>
@@ -89,15 +89,15 @@ public enum HttpMethod {
     PATCH;
 
     /**
-     * Gets the {@link HttpMethod} of the given <code>name</code>.
+     * Gets the {@link Method} of the given <code>name</code>.
      *
      * @param name the case-insensitive HTTP method name {@link String}
      *
-     * @return the {@link HttpMethod}
+     * @return the {@link Method}
      *
      * @throws IllegalArgumentException thrown if the given <code>name</code> is invalid
      */
-    public static HttpMethod ofName(final String name) throws IllegalArgumentException {
+    public static Method ofName(final String name) throws IllegalArgumentException {
         return valueOf(name.toUpperCase(ROOT));
     }
 }

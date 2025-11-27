@@ -3,12 +3,12 @@ package net.jacobpeterson.jet.server.http.header;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@link HttpHeader} contains standardized HTTP header {@link String} constants.
+ * {@link Header} contains standardized HTTP header {@link String} constants.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers">developer.mozilla.org</a>
  */
 @NullMarked
-public final class HttpHeader {
+public final class Header {
 
     /**
      * Defines the authentication method that should be used to access a resource.

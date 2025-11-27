@@ -7,7 +7,7 @@ import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.jacobpeterson.jet.server.http.header.HttpHeader;
+import net.jacobpeterson.jet.server.http.header.Header;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -33,7 +33,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">
  * developer.mozilla.org</a>
- * @see HttpHeader#CONTENT_TYPE
+ * @see Header#CONTENT_TYPE
  * @see MediaType
  */
 @NullMarked
@@ -148,7 +148,7 @@ public class ContentType {
      * HTML tag without the need for any extra plugins and has a very low likelihood of being vulnerable to XSS attacks
      * if the content is used with the proper HTML tag or directly rendered in a browser tab. The content type of
      * untrusted content (e.g. user-submitted files) should be checked against this {@link Set} before setting the
-     * {@link HttpHeader#CONTENT_TYPE} response header to the value from {@link #forFileExtension(String)}.
+     * {@link Header#CONTENT_TYPE} response header to the value from {@link #forFileExtension(String)}.
      */
     public static final Set<ContentType> LIKELY_XSS_SAFE_HTML_TAG_CONTENT_TYPES = Set.of(
             IMAGE_BMP, IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIF,

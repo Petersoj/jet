@@ -13,13 +13,13 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
- * {@link HttpStatus} is an enum that represents a standardized HTTP response status.
+ * {@link Status} is an enum that represents a standardized HTTP response status.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status">developer.mozilla.org</a>
  */
 @NullMarked
 @RequiredArgsConstructor
-public enum HttpStatus {
+public enum Status {
 
     /**
      * This interim response indicates that the client should continue the request or ignore the response if the request
@@ -586,7 +586,7 @@ public enum HttpStatus {
     private final @Getter String description;
 
     /**
-     * @return <code>true</code> if this {@link HttpStatus} represents an informational status, <code>false</code>
+     * @return <code>true</code> if this {@link Status} represents an informational status, <code>false</code>
      * otherwise
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#informational_responses">
@@ -597,7 +597,7 @@ public enum HttpStatus {
     }
 
     /**
-     * @return <code>true</code> if this {@link HttpStatus} represents a successful status, <code>false</code> otherwise
+     * @return <code>true</code> if this {@link Status} represents a successful status, <code>false</code> otherwise
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#successful_responses">
      * developer.mozilla.org</a>
@@ -607,7 +607,7 @@ public enum HttpStatus {
     }
 
     /**
-     * @return <code>true</code> if this {@link HttpStatus} represents a redirection status, <code>false</code>
+     * @return <code>true</code> if this {@link Status} represents a redirection status, <code>false</code>
      * otherwise
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#redirection_responses">
@@ -618,7 +618,7 @@ public enum HttpStatus {
     }
 
     /**
-     * @return <code>true</code> if this {@link HttpStatus} represents a client error status, <code>false</code>
+     * @return <code>true</code> if this {@link Status} represents a client error status, <code>false</code>
      * otherwise
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#client_error_responses">
@@ -629,7 +629,7 @@ public enum HttpStatus {
     }
 
     /**
-     * @return <code>true</code> if this {@link HttpStatus} represents a server error status, <code>false</code>
+     * @return <code>true</code> if this {@link Status} represents a server error status, <code>false</code>
      * otherwise
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#server_error_responses">
@@ -644,38 +644,38 @@ public enum HttpStatus {
         return code + " " + description;
     }
 
-    private static final Map<Integer, HttpStatus> HTTP_STATUSES_OF_CODES = stream(values())
-            .collect(toUnmodifiableMap(HttpStatus::getCode, identity()));
-    private static final Map<String, HttpStatus> HTTP_STATUSES_OF_DESCRIPTIONS = stream(values())
-            .collect(toUnmodifiableMap(httpStatus -> httpStatus.getDescription().toLowerCase(ROOT), identity()));
+    private static final Map<Integer, Status> STATUSES_OF_CODES = stream(values())
+            .collect(toUnmodifiableMap(Status::getCode, identity()));
+    private static final Map<String, Status> STATUSES_OF_DESCRIPTIONS = stream(values())
+            .collect(toUnmodifiableMap(status -> status.getDescription().toLowerCase(ROOT), identity()));
 
     /**
-     * Gets the {@link HttpStatus} of the given <code>code</code>.
+     * Gets the {@link Status} of the given <code>code</code>.
      *
      * @param code the HTTP status code <code>int</code>
      *
-     * @return the {@link HttpStatus}
+     * @return the {@link Status}
      *
      * @throws IllegalArgumentException thrown if the given <code>code</code> is invalid
      */
-    public static HttpStatus ofCode(final int code) throws IllegalArgumentException {
-        final var httpStatus = HTTP_STATUSES_OF_CODES.get(code);
-        checkArgument(httpStatus != null, "Invalid `code`!");
-        return httpStatus;
+    public static Status ofCode(final int code) throws IllegalArgumentException {
+        final var status = STATUSES_OF_CODES.get(code);
+        checkArgument(status != null, "Invalid `code`!");
+        return status;
     }
 
     /**
-     * Gets the {@link HttpStatus} of the given <code>description</code>.
+     * Gets the {@link Status} of the given <code>description</code>.
      *
      * @param description the case-insensitive HTTP status description {@link String}
      *
-     * @return the {@link HttpStatus}
+     * @return the {@link Status}
      *
      * @throws IllegalArgumentException thrown if the given <code>description</code> is invalid
      */
-    public static HttpStatus ofDescription(final String description) throws IllegalArgumentException {
-        final var httpStatus = HTTP_STATUSES_OF_DESCRIPTIONS.get(description.toLowerCase(ROOT));
-        checkArgument(httpStatus != null, "Invalid `description`!");
-        return httpStatus;
+    public static Status ofDescription(final String description) throws IllegalArgumentException {
+        final var status = STATUSES_OF_DESCRIPTIONS.get(description.toLowerCase(ROOT));
+        checkArgument(status != null, "Invalid `description`!");
+        return status;
     }
 }
