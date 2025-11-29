@@ -5,9 +5,9 @@ import net.jacobpeterson.jet.server.http.status.Status;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@link JetStatusException} is an {@link StatusException} to be used and thrown internally by {@link Jet}, allowing
- * dependency consumers to distinguish an {@link StatusException} thrown by {@link Jet} versus an
- * {@link StatusException} thrown by a dependency consumer.
+ * {@link JetStatusException} is a {@link StatusException} meant to be thrown internally by {@link Jet}, allowing
+ * dependency consumers to distinguish a {@link StatusException} thrown by {@link Jet} versus a {@link StatusException}
+ * thrown by a dependency consumer.
  */
 @NullMarked
 public class JetStatusException extends StatusException {
@@ -24,27 +24,5 @@ public class JetStatusException extends StatusException {
      */
     public JetStatusException(final Status status, final String message) {
         super(status, message);
-    }
-
-    /**
-     * @see StatusException#StatusException(Status, String, Throwable)
-     */
-    public JetStatusException(final Status status, final String message, final Throwable cause) {
-        super(status, message, cause);
-    }
-
-    /**
-     * @see StatusException#StatusException(Status, Throwable)
-     */
-    public JetStatusException(final Status status, final Throwable cause) {
-        super(status, cause);
-    }
-
-    /**
-     * @see StatusException#StatusException(Status, String, Throwable, boolean, boolean)
-     */
-    public JetStatusException(final Status status, final String message, final Throwable cause,
-            final boolean enableSuppression, final boolean writableStackTrace) {
-        super(status, message, cause, enableSuppression, writableStackTrace);
     }
 }
