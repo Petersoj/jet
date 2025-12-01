@@ -26,13 +26,13 @@ repositories {
 }
 
 dependencies {
-    errorprone("com.google.errorprone:error_prone_core:2.44.0")
-    errorprone("com.uber.nullaway:nullaway:0.12.12")
-    errorprone("net.jacobpeterson:final-coat:1.1.0")
-
     implementation("org.jspecify:jspecify:1.0.0")
 
     api("com.google.guava:guava:33.5.0-jre")
+
+    errorprone("com.google.errorprone:error_prone_core:2.44.0")
+    errorprone("com.uber.nullaway:nullaway:0.12.13")
+    errorprone("net.jacobpeterson:final-coat:1.1.0")
 
     testImplementation(platform("org.junit:junit-bom:6.0.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -59,7 +59,7 @@ tasks.withType(JavaCompile::class) {
         check("NullAway", WARN)
         option("NullAway:OnlyNullMarked", true)
         option("NullAway:JSpecifyMode", true)
-        // TODO check("RequireExplicitNullMarking", WARN)
+        check("RequireExplicitNullMarking", WARN)
 
         check("FinalCoat", WARN)
     }
