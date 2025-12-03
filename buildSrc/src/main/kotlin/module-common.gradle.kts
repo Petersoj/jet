@@ -28,7 +28,7 @@ repositories {
 dependencies {
     implementation("org.jspecify:jspecify:1.0.0")
 
-    api("com.google.guava:guava:33.5.0-jre")
+    implementation("com.google.guava:guava:33.5.0-jre")
 
     errorprone("com.google.errorprone:error_prone_core:2.44.0")
     errorprone("com.uber.nullaway:nullaway:0.12.13")
@@ -47,14 +47,17 @@ tasks.withType(JavaCompile::class) {
         allSuggestionsAsWarnings = true
         disableWarningsInGeneratedCode = true
 
+        disable("MissingSummary")
+        check("Varifier", WARN)
         check("IdentifierName", WARN)
         check("MissingBraces", WARN)
         check("FieldCanBeFinal", WARN)
         check("MissingDefault", WARN)
         check("SwitchDefault", WARN)
+        check("RedundantNullCheck", WARN)
+        check("FieldMissingNullable", WARN)
+        check("ParameterMissingNullable", WARN)
         check("ReturnMissingNullable", WARN)
-        check("Varifier", WARN)
-        disable("MissingSummary")
 
         check("NullAway", WARN)
         option("NullAway:OnlyNullMarked", true)
@@ -70,7 +73,6 @@ tasks.javadoc.configure {
         (this as CoreJavadocOptions).addBooleanOption("Xdoclint:none", true)
         addStringOption("link",
                 "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/")
-        addStringOption("link", "https://guava.dev/releases/snapshot-jre/api/docs/")
     }
 }
 
