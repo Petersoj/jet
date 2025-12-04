@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    api(project(":module:common"))
+
     implementation("org.slf4j:slf4j-api:2.0.17")
 
     val brotliDependencyGroup = "com.aayushatharva.brotli4j"
@@ -37,7 +39,7 @@ publishing {
     publications {
         getByName<MavenPublication>("maven") {
             pom {
-                description = "A simple, configurable, turnkey, embedded Java web server library."
+                description = "A simple, modern, turnkey, Java web server library."
             }
         }
     }
