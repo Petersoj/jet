@@ -14,6 +14,19 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link Status} is an enum that represents a standardized HTTP response status.
+ * <p>
+ * HTTP response status codes indicate whether a specific <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">
+ * HTTP</a> request has been successfully completed. Responses are grouped in five classes:
+ * <ol>
+ * <li>{@link #isInformational()}</li>
+ * <li>{@link #isSuccessful()}</li>
+ * <li>{@link #isRedirection()}</li>
+ * <li>{@link #isClientError()}</li>
+ * <li>{@link #isServerError()}</li>
+ * </ol>
+ * <p>
+ * The status codes listed below are defined by
+ * <a href="https://httpwg.org/specs/rfc9110.html#overview.of.status.codes">RFC 9110</a>.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status">developer.mozilla.org</a>
  */
@@ -61,7 +74,7 @@ public enum Status {
     EARLY_HINTS_103(103, "Early Hints"),
 
     /**
-     * The request succeeded. The result and meaning of "success" depends on the HTTP method:</p>
+     * The request succeeded. The result and meaning of "success" depends on the HTTP method:
      * <ul>
      * <li>
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/GET"><code>GET</code></a>:
@@ -586,57 +599,45 @@ public enum Status {
     private final @Getter String description;
 
     /**
-     * @return <code>true</code> if this {@link Status} represents an informational status, <code>false</code>
-     * otherwise
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#informational_responses">
-     * developer.mozilla.org</a>
+     * @see #isInformational(int)
      */
     public boolean isInformational() {
-        return code > 100 && code <= 199;
+        return isInformational(code);
     }
 
     /**
-     * @return <code>true</code> if this {@link Status} represents a successful status, <code>false</code> otherwise
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#successful_responses">
-     * developer.mozilla.org</a>
+     * @see #isSuccessful(int)
      */
     public boolean isSuccessful() {
-        return code > 200 && code <= 299;
+        return isSuccessful(code);
     }
 
     /**
-     * @return <code>true</code> if this {@link Status} represents a redirection status, <code>false</code>
-     * otherwise
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#redirection_responses">
-     * developer.mozilla.org</a>
+     * @see #isRedirection(int)
      */
     public boolean isRedirection() {
-        return code > 300 && code <= 399;
+        return isRedirection(code);
     }
 
     /**
-     * @return <code>true</code> if this {@link Status} represents a client error status, <code>false</code>
-     * otherwise
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#client_error_responses">
-     * developer.mozilla.org</a>
+     * @see #isClientError(int)
      */
     public boolean isClientError() {
-        return code > 400 && code <= 499;
+        return isClientError(code);
     }
 
     /**
-     * @return <code>true</code> if this {@link Status} represents a server error status, <code>false</code>
-     * otherwise
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#server_error_responses">
-     * developer.mozilla.org</a>
+     * @see #isServerError(int)
      */
     public boolean isServerError() {
-        return code > 500 && code <= 599;
+        return isServerError(code);
+    }
+
+    /**
+     * @see #isError(int)
+     */
+    public boolean isError() {
+        return isError(code);
     }
 
     @Override
@@ -677,5 +678,80 @@ public enum Status {
         final var status = STATUSES_OF_DESCRIPTIONS.get(description.toLowerCase(ROOT));
         checkArgument(status != null, "Invalid `description`!");
         return status;
+    }
+
+    /**
+     * @param code the HTTP status code <code>int</code>
+     *
+     * @return <code>true</code> if the given <code>code</code> represents an informational status, <code>false</code>
+     * otherwise
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#informational_responses">
+     * developer.mozilla.org</a>
+     */
+    public static boolean isInformational(final int code) {
+        return code > 100 && code <= 199;
+    }
+
+    /**
+     * @param code the HTTP status code <code>int</code>
+     *
+     * @return <code>true</code> if the given <code>code</code> represents a successful status, <code>false</code>
+     * otherwise
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#successful_responses">
+     * developer.mozilla.org</a>
+     */
+    public static boolean isSuccessful(final int code) {
+        return code > 200 && code <= 299;
+    }
+
+    /**
+     * @param code the HTTP status code <code>int</code>
+     *
+     * @return <code>true</code> if the given <code>code</code> represents a redirection status, <code>false</code>
+     * otherwise
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#redirection_responses">
+     * developer.mozilla.org</a>
+     */
+    public static boolean isRedirection(final int code) {
+        return code > 300 && code <= 399;
+    }
+
+    /**
+     * @param code the HTTP status code <code>int</code>
+     *
+     * @return <code>true</code> if the given <code>code</code> represents a client error status, <code>false</code>
+     * otherwise
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#client_error_responses">
+     * developer.mozilla.org</a>
+     */
+    public static boolean isClientError(final int code) {
+        return code > 400 && code <= 499;
+    }
+
+    /**
+     * @param code the HTTP status code <code>int</code>
+     *
+     * @return <code>true</code> if the given <code>code</code> represents a server error status, <code>false</code>
+     * otherwise
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status#server_error_responses">
+     * developer.mozilla.org</a>
+     */
+    public static boolean isServerError(final int code) {
+        return code > 500 && code <= 599;
+    }
+
+    /**
+     * @param code the HTTP status code <code>int</code>
+     *
+     * @return <code>true</code> if {@link #isClientError(int)} or {@link #isServerError(int)}, <code>false</code>
+     * otherwise
+     */
+    public static boolean isError(final int code) {
+        return isClientError(code) || isServerError(code);
     }
 }
