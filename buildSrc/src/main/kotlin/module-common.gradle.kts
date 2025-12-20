@@ -30,15 +30,15 @@ dependencies {
 
     implementation("com.google.guava:guava:33.5.0-jre")
 
-    errorprone("com.google.errorprone:error_prone_core:2.44.0")
-    errorprone("com.uber.nullaway:nullaway:0.12.13")
+    errorprone("com.google.errorprone:error_prone_core:2.45.0")
+    errorprone("com.uber.nullaway:nullaway:0.12.15")
     errorprone("net.jacobpeterson:final-coat:1.1.0")
 
     testImplementation(platform("org.junit:junit-bom:6.0.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.21")
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.22")
 }
 
 tasks.withType(JavaCompile::class) {
