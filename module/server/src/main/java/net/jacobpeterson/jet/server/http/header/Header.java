@@ -1535,4 +1535,46 @@ public final class Header {
      * developer.mozilla.org</a>
      */
     public static final String WARNING = "Warning";
+
+    /**
+     * For Nginx proxy module: set the parameters of response
+     * <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_valid">caching</a>.
+     *
+     * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
+     */
+    public static final String X_ACCEL_EXPIRES = "X-Accel-Expires";
+
+    /**
+     * For Nginx proxy module: performs an
+     * <a href="https://nginx.org/en/docs/http/ngx_http_core_module.html#internal">internal redirect</a> to the
+     * specified URI.
+     *
+     * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
+     */
+    public static final String X_ACCEL_REDIRECT = "X-Accel-Redirect";
+
+    /**
+     * For Nginx proxy module: sets the
+     * <a href="https://nginx.org/en/docs/http/ngx_http_core_module.html#limit_rate">rate limit</a> for transmission of
+     * a response to a client.
+     *
+     * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
+     */
+    public static final String X_ACCEL_LIMIT_RATE = "X-Accel-Limit-Rate";
+
+    /**
+     * For Nginx proxy module: enables or disables
+     * <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering">buffering</a> of a response.
+     *
+     * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
+     */
+    public static final String X_ACCEL_BUFFERING = "X-Accel-Buffering";
+
+    /**
+     * For Nginx proxy module: sets the desired
+     * <a href="https://nginx.org/en/docs/http/ngx_http_charset_module.html#charset">charset</a> of a response.
+     *
+     * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
+     */
+    public static final String X_ACCEL_CHARSET = "X-Accel-Charset";
 }
