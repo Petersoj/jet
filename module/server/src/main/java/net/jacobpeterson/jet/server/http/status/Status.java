@@ -3,10 +3,10 @@ package net.jacobpeterson.jet.server.http.status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
@@ -645,39 +645,38 @@ public enum Status {
         return code + " " + description;
     }
 
-    private static final Map<Integer, Status> STATUSES_OF_CODES = stream(values())
+    /**
+     * An unmodifiable {@link Map} of {@link #getCode()} mapped to their {@link Status}.
+     */
+    public static final Map<Integer, Status> STATUSES_OF_CODES = stream(values())
             .collect(toUnmodifiableMap(Status::getCode, identity()));
-    private static final Map<String, Status> STATUSES_OF_DESCRIPTIONS = stream(values())
-            .collect(toUnmodifiableMap(status -> status.getDescription().toLowerCase(ROOT), identity()));
 
     /**
-     * Gets the {@link Status} of the given <code>code</code>.
+     * An unmodifiable {@link Map} of uppercased {@link #getDescription()} mapped to their {@link Status}.
+     */
+    public static final Map<String, Status> STATUSES_OF_DESCRIPTIONS = stream(values())
+            .collect(toUnmodifiableMap(status -> status.getDescription().toUpperCase(ROOT), identity()));
+
+    /**
+     * Gets the {@link Status} for the given <code>code</code>.
      *
      * @param code the HTTP status code <code>int</code>
      *
-     * @return the {@link Status}
-     *
-     * @throws IllegalArgumentException thrown if the given <code>code</code> is invalid
+     * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
-    public static Status ofCode(final int code) throws IllegalArgumentException {
-        final var status = STATUSES_OF_CODES.get(code);
-        checkArgument(status != null, "Invalid `code`!");
-        return status;
+    public static @Nullable Status forCode(final int code) {
+        return STATUSES_OF_CODES.get(code);
     }
 
     /**
-     * Gets the {@link Status} of the given <code>description</code>.
+     * Gets the {@link Status} for the given <code>description</code>.
      *
      * @param description the case-insensitive HTTP status description {@link String}
      *
-     * @return the {@link Status}
-     *
-     * @throws IllegalArgumentException thrown if the given <code>description</code> is invalid
+     * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
-    public static Status ofDescription(final String description) throws IllegalArgumentException {
-        final var status = STATUSES_OF_DESCRIPTIONS.get(description.toLowerCase(ROOT));
-        checkArgument(status != null, "Invalid `description`!");
-        return status;
+    public static @Nullable Status forDescription(final String description) {
+        return STATUSES_OF_DESCRIPTIONS.get(description.toUpperCase(ROOT));
     }
 
     /**
