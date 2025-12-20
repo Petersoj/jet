@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.server.http.method;
 
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import static java.util.Locale.ROOT;
 
@@ -129,15 +130,17 @@ public enum Method {
     }
 
     /**
-     * Gets the {@link Method} of the given <code>name</code>.
+     * Gets the {@link Method} for the given <code>name</code>.
      *
      * @param name the case-insensitive HTTP method name {@link String}
      *
-     * @return the {@link Method}
-     *
-     * @throws IllegalArgumentException thrown if the given <code>name</code> is invalid
+     * @return the {@link Method}, or <code>null</code> if no mapping exists
      */
-    public static Method ofName(final String name) throws IllegalArgumentException {
-        return valueOf(name.toUpperCase(ROOT));
+    public static @Nullable Method forName(final String name) {
+        try {
+            return valueOf(name.toUpperCase(ROOT));
+        } catch (final IllegalArgumentException illegalArgumentException) {
+            return null;
+        }
     }
 }
