@@ -4,6 +4,55 @@ import org.jspecify.annotations.NullMarked;
 
 /**
  * {@link Header} contains standardized HTTP header {@link String} constants.
+ * <p>
+ * <strong>HTTP headers</strong> let the client and the server pass additional information with a message in a request
+ * or response. In HTTP/1.X, a header is a case-insensitive name followed by a colon, then optional whitespace which
+ * will be ignored, and finally by its value (for example: <code>Allow: POST</code>). In HTTP/2 and above, headers are
+ * displayed in lowercase when viewed in developer tools (<code>accept: {@literal *}/{@literal *}</code>), and prefixed
+ * with a colon for a special group of
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages#pseudo-headers">pseudo-headers</a>
+ * (<code>:status: 200</code>). You can find more information on the syntax in each protocol version in the
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages">HTTP messages</a> page.
+ * <p>
+ * Custom proprietary headers have historically been used with an <code>X-</code> prefix, but this convention was
+ * deprecated in 2012 because of the inconveniences it caused when nonstandard fields became standard in
+ * <a href="https://datatracker.ietf.org/doc/html/rfc6648">RFC 6648</a>; others are listed in the
+ * <a href="https://www.iana.org/assignments/http-fields/http-fields.xhtml">IANA HTTP Field Name Registry</a>, whose
+ * original content was defined in <a href="https://datatracker.ietf.org/doc/html/rfc4229">RFC 4229</a>. The IANA
+ * registry lists headers, including
+ * <a href="https://github.com/protocol-registries/http-fields?tab=readme-ov-file#choosing-the-right-status">
+ * information about their status</a>.
+ * <p>
+ * Headers can be grouped according to their contexts:
+ * <p>
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Request_header">Request headers</a>: Contain more
+ * information about the resource to be fetched, or about the client requesting the resource.
+ * <p>
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Response_header">Response headers</a>: Hold additional
+ * information about the response, like its location or about the server providing it.
+ * <p>
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Representation_header">Representation headers</a>:
+ * Contain information about the body of the resource, like its
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types">MIME type</a>, or encoding/compression
+ * applied.
+ * <p>
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Payload_header">Payload headers</a>: Contain
+ * representation-independent information about payload data, including content length and the encoding used for
+ * transport.
+ * <p>
+ * Headers can also be grouped according to how
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Proxy_server">proxies</a> handle them:
+ * <p>
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#end-to-end_headers">
+ * End-to-end headers</a>: These headers <em>must</em> be transmitted to the final recipient of the message: the server
+ * for a request, or the client for a response. Intermediate proxies must retransmit these headers unmodified and caches
+ * must store them.
+ * <p>
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#hop-by-hop_headers">
+ * Hop-by-hop headers</a>: These headers are meaningful only for a single transport-level connection, and <em>must
+ * not</em> be retransmitted by proxies or cached. Note that only hop-by-hop headers may be set using the
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Connection"><code>Connection</code></a>
+ * header.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers">developer.mozilla.org</a>
  */
@@ -264,7 +313,8 @@ public final class Header {
     /**
      * Indicates whether the response to the request can be exposed when the credentials flag is true.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Credentials">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Credentials">
      * developer.mozilla.org</a>
      */
     public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
@@ -314,7 +364,8 @@ public final class Header {
      * Used when issuing a preflight request to let the server know which HTTP headers will be used when the actual
      * request is made.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Headers">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Headers">
      * developer.mozilla.org</a>
      */
     public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
@@ -658,7 +709,8 @@ public final class Header {
      * violation reports consist of <a href="https://developer.mozilla.org/en-US/docs/Glossary/JSON">JSON</a> documents
      * sent via an HTTP <code>POST</code> request to the specified URI.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">
      * developer.mozilla.org</a>
      */
     public static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
@@ -748,7 +800,8 @@ public final class Header {
      * <code>X-Permitted-Cross-Domain-Policies</code> header overrides such policy files so that clients still block
      * unwanted requests.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Permitted-Cross-Domain-Policies">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Permitted-Cross-Domain-Policies">
      * developer.mozilla.org</a>
      */
     public static final String X_PERMITTED_CROSS_DOMAIN_POLICIES = "X-Permitted-Cross-Domain-Policies";
@@ -830,7 +883,8 @@ public final class Header {
      * <code>NavigationPreloadManager.setHeaderValue()</code></a>, can be used to inform a server that a different
      * resource should be returned than in a normal <code>fetch()</code> operation.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Navigation-Preload">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Navigation-Preload">
      * developer.mozilla.org</a>
      */
     public static final String SERVICE_WORKER_NAVIGATION_PRELOAD = "Service-Worker-Navigation-Preload";
@@ -1039,7 +1093,8 @@ public final class Header {
      * Used to indicate that the response corresponding to the current request is eligible to take part in attribution
      * reporting, by registering either an attribution source or trigger.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Eligible">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Eligible">
      * developer.mozilla.org</a>
      */
     public static final String ATTRIBUTION_REPORTING_ELIGIBLE = "Attribution-Reporting-Eligible";
@@ -1048,7 +1103,8 @@ public final class Header {
      * Included as part of a response to a request that included an <code>Attribution-Reporting-Eligible</code> header,
      * this is used to register an attribution source.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register-Source">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register-Source">
      * developer.mozilla.org</a>
      */
     public static final String ATTRIBUTION_REPORTING_REGISTER_SOURCE = "Attribution-Reporting-Register-Source";
@@ -1193,7 +1249,8 @@ public final class Header {
     /**
      * Request header indicates the user agent's preference for reduced transparency.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Reduced-Transparency">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Reduced-Transparency">
      * developer.mozilla.org</a>
      */
     public static final String SEC_CH_PREFERS_REDUCED_TRANSPARENCY = "Sec-CH-Prefers-Reduced-Transparency";
@@ -1577,4 +1634,6 @@ public final class Header {
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
     public static final String X_ACCEL_CHARSET = "X-Accel-Charset";
+
+    private Header() {}
 }
