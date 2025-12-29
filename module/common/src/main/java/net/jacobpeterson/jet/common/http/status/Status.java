@@ -689,7 +689,7 @@ public enum Status {
      * developer.mozilla.org</a>
      */
     public static boolean isInformational(final int code) {
-        return code > 100 && code <= 199;
+        return code >= 100 && code <= 199;
     }
 
     /**
@@ -702,7 +702,7 @@ public enum Status {
      * developer.mozilla.org</a>
      */
     public static boolean isSuccessful(final int code) {
-        return code > 200 && code <= 299;
+        return code >= 200 && code <= 299;
     }
 
     /**
@@ -715,7 +715,7 @@ public enum Status {
      * developer.mozilla.org</a>
      */
     public static boolean isRedirection(final int code) {
-        return code > 300 && code <= 399;
+        return code >= 300 && code <= 399;
     }
 
     /**
@@ -728,7 +728,7 @@ public enum Status {
      * developer.mozilla.org</a>
      */
     public static boolean isClientError(final int code) {
-        return code > 400 && code <= 499;
+        return code >= 400 && code <= 499;
     }
 
     /**
@@ -741,7 +741,7 @@ public enum Status {
      * developer.mozilla.org</a>
      */
     public static boolean isServerError(final int code) {
-        return code > 500 && code <= 599;
+        return code >= 500 && code <= 599;
     }
 
     /**
