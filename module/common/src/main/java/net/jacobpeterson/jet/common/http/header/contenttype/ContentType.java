@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.http.header.contenttype;
+package net.jacobpeterson.jet.common.http.header.contenttype;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableListMultimap;
@@ -11,7 +11,7 @@ import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.jacobpeterson.jet.server.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.Header;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

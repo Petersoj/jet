@@ -1,9 +1,9 @@
-package net.jacobpeterson.jet.server.http.status.exception;
+package net.jacobpeterson.jet.server.exception;
 
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import net.jacobpeterson.jet.server.handler.Handler;
-import net.jacobpeterson.jet.server.http.status.Status;
+import net.jacobpeterson.jet.common.http.status.Status;
 import org.jspecify.annotations.NullMarked;
 
 /**

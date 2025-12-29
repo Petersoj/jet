@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.http.method;
+package net.jacobpeterson.jet.common.http.method;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;

@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.http.header;
+package net.jacobpeterson.jet.common.http.header;
 
 import org.jspecify.annotations.NullMarked;
 

@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.http.status;
+package net.jacobpeterson.jet.common.http.status;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
