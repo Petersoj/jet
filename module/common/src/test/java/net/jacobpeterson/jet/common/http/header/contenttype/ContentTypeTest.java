@@ -1,0 +1,161 @@
+package net.jacobpeterson.jet.common.http.header.contenttype;
+
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.net.MediaType;
+import org.jspecify.annotations.NullMarked;
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@NullMarked
+public class ContentTypeTest {
+
+    @Test
+    public void constructorTypeSubtype() {
+        final var contentType = new ContentType("a", "b");
+        assertEquals("a", contentType.getType());
+        assertEquals("b", contentType.getSubtype());
+        assertTrue(contentType.getParameters().isEmpty());
+        assertNull(contentType.getCharset());
+    }
+
+    @Test
+    public void constructorTypeSubtypeMapParameters() {
+        final var contentType = new ContentType("a", "b", Map.of("a", "b"));
+        assertEquals("a", contentType.getType());
+        assertEquals("b", contentType.getSubtype());
+        assertEquals(ImmutableListMultimap.of("a", "b"), contentType.getParameters());
+        assertNull(contentType.getCharset());
+    }
+
+    @Test
+    public void constructorTypeSubtypeMultimapParameters() {
+        final var contentType = new ContentType("a", "b", ImmutableListMultimap.of("a", "b"));
+        assertEquals("a", contentType.getType());
+        assertEquals("b", contentType.getSubtype());
+        assertEquals(ImmutableListMultimap.of("a", "b"), contentType.getParameters());
+        assertNull(contentType.getCharset());
+    }
+
+    @Test
+    public void constructorTypeSubtypeCharset() {
+        final var contentType = new ContentType("a", "b", UTF_8);
+        assertEquals("a", contentType.getType());
+        assertEquals("b", contentType.getSubtype());
+        assertEquals(ImmutableListMultimap.of("charset", "utf-8"), contentType.getParameters());
+        assertEquals(UTF_8, contentType.getCharset());
+    }
+
+    @Test
+    public void constant() {
+        assertEquals(new ContentType("text", "html"), ContentType.TEXT_HTML);
+    }
+
+    @Test
+    public void parse() {
+        assertEquals(ContentType.TEXT_CSV, ContentType.parse("text/csv"));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("!@#$"));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("*/a"));
+    }
+
+    @Test
+    public void forFileExtension() {
+        assertEquals(new ContentType("image", "svg+xml"), ContentType.forFileExtension("svg"));
+        assertEquals(new ContentType("image", "png"), ContentType.forFileExtension("PNG"));
+        assertEquals(new ContentType("video", "mp4"), ContentType.forFileExtension("mp4"));
+        assertNull(ContentType.forFileExtension("."));
+    }
+
+    @Test
+    public void withoutParameters() {
+        assertEquals(ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON_UTF_8.withoutParameters());
+    }
+
+    @Test
+    public void withParameter() {
+        assertEquals(new ContentType("a", "b", Map.of("a", "b")),
+                new ContentType("a", "b", Map.of("c", "d")).withParameter("a", "b"));
+    }
+
+    @Test
+    public void withParametersMap() {
+        assertEquals(new ContentType("a", "b", Map.of("a", "b")),
+                new ContentType("a", "b", Map.of("c", "d")).withParameters(Map.of("a", "b")));
+    }
+
+    @Test
+    public void withParametersMultimap() {
+        assertEquals(new ContentType("a", "b", Map.of("a", "b")),
+                new ContentType("a", "b", Map.of("c", "d")).withParameters(ImmutableMultimap.of("a", "b")));
+    }
+
+    @Test
+    public void addParameter() {
+        assertEquals(new ContentType("a", "b", Map.of("a", "b", "c", "d")),
+                new ContentType("a", "b", Map.of("c", "d")).addParameter("a", "b"));
+    }
+
+    @Test
+    public void addParametersMap() {
+        assertEquals(new ContentType("a", "b", Map.of("a", "b", "c", "d")),
+                new ContentType("a", "b", Map.of("c", "d")).addParameters(Map.of("a", "b")));
+    }
+
+    @Test
+    public void addParametersMultimap() {
+        assertEquals(new ContentType("a", "b", Map.of("a", "b", "c", "d")),
+                new ContentType("a", "b", Map.of("c", "d")).addParameters(ImmutableMultimap.of("a", "b")));
+    }
+
+    @Test
+    public void getCharset() {
+        assertEquals(UTF_8, ContentType.APPLICATION_JSON_UTF_8.getCharset());
+    }
+
+    @Test
+    public void withCharset() {
+        assertEquals(US_ASCII, ContentType.APPLICATION_JSON_UTF_8.withCharset(US_ASCII).getCharset());
+    }
+
+    @Test
+    public void isContentType() {
+        assertTrue(ContentType.APPLICATION_JSON_UTF_8.is(ContentType.APPLICATION_JSON_UTF_8));
+        assertTrue(ContentType.APPLICATION_JSON_UTF_8.is(ContentType.APPLICATION_WILDCARD));
+        assertFalse(ContentType.APPLICATION_JSON_UTF_8.is(ContentType.APPLICATION_JAVASCRIPT_UTF_8));
+    }
+
+    @Test
+    public void isMediaType() {
+        assertTrue(ContentType.APPLICATION_JSON_UTF_8.is(MediaType.JSON_UTF_8));
+        assertTrue(ContentType.APPLICATION_JSON_UTF_8.is(MediaType.ANY_APPLICATION_TYPE));
+        assertFalse(ContentType.APPLICATION_JSON_UTF_8.is(MediaType.JAVASCRIPT_UTF_8));
+    }
+
+    @Test
+    public void isXssSafeHtmlTag() {
+        assertTrue(ContentType.IMAGE_JPEG.isXssSafeHtmlTag());
+        assertFalse(ContentType.IMAGE_SVG.isXssSafeHtmlTag());
+    }
+
+    @Test
+    public void getFileExtensions() {
+        assertTrue(ContentType.APPLICATION_JSON.getFileExtensions().contains("json"));
+        assertTrue(new ContentType("a", "b").getFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void _toString() {
+        assertEquals("a/b; a=b", new ContentType("a", "b", Map.of("a", "b")).toString());
+        assertEquals("a/b; a=b; a=c",
+                new ContentType("a", "b", ImmutableListMultimap.of("a", "b", "a", "c")).toString());
+    }
+}
