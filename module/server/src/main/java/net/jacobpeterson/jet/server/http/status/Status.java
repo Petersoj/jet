@@ -646,13 +646,13 @@ public enum Status {
     }
 
     /**
-     * An unmodifiable {@link Map} of {@link #getCode()} mapped to their {@link Status}.
+     * An unmodifiable {@link Map} of {@link #getCode()} mapped to {@link Status}.
      */
     public static final Map<Integer, Status> STATUSES_OF_CODES = stream(values())
             .collect(toUnmodifiableMap(Status::getCode, identity()));
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #getDescription()} mapped to their {@link Status}.
+     * An unmodifiable {@link Map} of uppercased {@link #getDescription()} mapped to {@link Status}.
      */
     public static final Map<String, Status> STATUSES_OF_DESCRIPTIONS = stream(values())
             .collect(toUnmodifiableMap(status -> status.getDescription().toUpperCase(ROOT), identity()));

@@ -26,9 +26,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jspecify:jspecify:1.0.0")
+    api("com.google.guava:guava:33.5.0-jre")
 
-    implementation("com.google.guava:guava:33.5.0-jre")
+    implementation("org.jspecify:jspecify:1.0.0")
 
     implementation("org.slf4j:slf4j-api:2.0.17")
 

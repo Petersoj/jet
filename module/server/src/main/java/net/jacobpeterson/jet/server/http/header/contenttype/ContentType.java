@@ -1,7 +1,11 @@
 package net.jacobpeterson.jet.server.http.header.contenttype;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
@@ -17,19 +21,45 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.flatteningToMultimap;
-import static com.google.common.collect.Multimaps.forMap;
 import static com.google.common.collect.Multimaps.unmodifiableSetMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
- * {@link ContentType} is an immutable class that wraps {@link MediaType} from
- * <a href="https://github.com/google/guava">Google Guava</a> and adds some extra functionality.
+ * {@link ContentType} is an immutable class that represents a standardized HTTP content type (MIME type). This class
+ * wraps {@link MediaType} from <a href="https://github.com/google/guava">Google Guava</a> and adds some extra
+ * functionality.
+ * <p>
+ * The HTTP <strong><code>Content-Type</code></strong>
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Representation_header">representation header</a> is used
+ * to indicate the original
+ * <a href="https://developer.mozilla.org/en-US/docs/Glossary/MIME_type">media type</a> of a resource before any
+ * content encoding is applied. In responses, the <code>Content-Type</code> header informs the client about the media
+ * type of the returned data. In requests such as
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST"><code>POST</code></a> or
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PUT"><code>PUT</code></a>, the client
+ * uses the <code>Content-Type</code> header to specify the type of content being sent to the server. If a server
+ * implementation or configuration is strict about content type handling, a
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/415"><code>415</code></a> client error
+ * response may be returned.</p>
+ * <p>
+ * The <code>Content-Type</code> header differs from
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding">
+ * <code>Content-Encoding</code></a> in that <code>Content-Encoding</code> helps the recipient understand how to decode
+ * data to its original form.
+ * <p>
+ * This value may be ignored if browsers perform
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types#mime_sniffing">MIME sniffing</a> (or
+ * content sniffing) on responses. To prevent browsers from using MIME sniffing, set the
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options">
+ * <code>X-Content-Type-Options</code></a> header value to <code>nosniff</code>. See
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Practical_implementation_guides/MIME_types">MIME type
+ * verification</a> for more details.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">
  * developer.mozilla.org</a>
@@ -144,13 +174,14 @@ public class ContentType {
     public static final ContentType MULTIPART_FORM_DATA = new ContentType(MULTIPART_TYPE, "form-data");
 
     /**
-     * A non-exhaustive {@link Set} of common {@link ContentType}s that modern browsers can typically render through an
-     * HTML tag without the need for any extra plugins and has a very low likelihood of being vulnerable to XSS attacks
-     * if the content is used with the proper HTML tag or directly rendered in a browser tab. The content type of
-     * untrusted content (e.g. user-submitted files) should be checked against this {@link Set} before setting the
-     * {@link Header#CONTENT_TYPE} response header to the value from {@link #forFileExtension(String)}.
+     * A non-exhaustive, unmodifiable {@link Set} of common parameter-less {@link ContentType}s that modern browsers can
+     * typically render through an HTML tag without the need for any extra plugins and have a very low likelihood of
+     * being vulnerable to XSS attacks if the content is used with the proper HTML tag or directly rendered in a browser
+     * tab. The content type of untrusted content (e.g. user-submitted files) should be checked against this
+     * {@link Set} before setting the {@link Header#CONTENT_TYPE} response header to the value from
+     * {@link #forFileExtension(String)}.
      */
-    public static final Set<ContentType> LIKELY_XSS_SAFE_HTML_TAG_CONTENT_TYPES = Set.of(
+    public static final Set<ContentType> XSS_SAFE_HTML_TAG_CONTENT_TYPES = Set.of(
             IMAGE_BMP, IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIF,
             IMAGE_HEIC,
             AUDIO_MP4, AUDIO_MPEG, AUDIO_OGG, AUDIO_WEBM, AUDIO_BASIC, AUDIO_AAC, AUDIO_VORBIS, AUDIO_VND_WAVE,
@@ -158,7 +189,8 @@ public class ContentType {
             APPLICATION_PDF);
 
     /**
-     * A non-exhaustive {@link Set} of common {@link ContentType}s for typically intrinsically compressed file types.
+     * A non-exhaustive, unmodifiable {@link Set} of common {@link ContentType}s for typically intrinsically
+     * compressed file types.
      */
     public static final Set<ContentType> COMPRESSED_CONTENT_TYPES = Set.of(
             IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIF, IMAGE_HEIC,
@@ -185,8 +217,8 @@ public class ContentType {
             new ContentType(APPLICATION_TYPE, "x-7z-compressed"));
 
     /**
-     * A {@link SetMultimap} of {@link ContentType}s mapped to their dot-less file extensions (e.g.
-     * <code>text/plain</code> -> <code>txt</code>).
+     * A non-exhaustive, unmodifiable {@link SetMultimap} of {@link ContentType}s mapped to their dot-less file
+     * extensions (e.g. <code>text/plain</code> -> <code>txt</code>).
      */
     public static final SetMultimap<ContentType, String> FILE_EXTENSIONS_OF_CONTENT_TYPES;
 
@@ -198,11 +230,12 @@ public class ContentType {
     static {
         final byte[] tsvBytes;
         try (final var inputStream = ContentType.class.getResourceAsStream("file-extensions-of-mime-types.tsv")) {
-            tsvBytes = checkNotNull(inputStream).readAllBytes();
+            tsvBytes = requireNonNull(inputStream).readAllBytes();
         } catch (final IOException ioException) {
             throw new RuntimeException(ioException);
         }
         FILE_EXTENSIONS_OF_CONTENT_TYPES = unmodifiableSetMultimap(stream(new String(tsvBytes, UTF_8).split("\n"))
+                .map(String::trim)
                 .filter(line -> !line.isBlank() && !line.startsWith("#"))
                 .map(line -> line.split("\t"))
                 .collect(flatteningToMultimap(tsv -> parse(tsv[0]), tsv -> stream(tsv[1].split(" ")),
@@ -239,29 +272,19 @@ public class ContentType {
     MediaType mediaType;
 
     /**
-     * Instantiates a new {@link ContentType}.
-     *
-     * @param type    the type
-     * @param subtype the subtype
-     *
-     * @throws IllegalArgumentException thrown for invalid arguments
+     * Calls {@link #ContentType(String, String, Map)} with <code>parameters</code> set to <code>null</code>.
      */
     public ContentType(final String type, final String subtype) throws IllegalArgumentException {
         this(type, subtype, (Map<String, String>) null);
     }
 
     /**
-     * Instantiates a new {@link ContentType}.
-     *
-     * @param type       the type
-     * @param subtype    the subtype
-     * @param parameters the parameters {@link Map}, or <code>null</code> for no parameters
-     *
-     * @throws IllegalArgumentException thrown for invalid arguments
+     * Calls {@link #ContentType(String, String, Multimap)} with <code>parameters</code> set to the given
+     * <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)} if non-<code>null</code>.
      */
     public ContentType(final String type, final String subtype, final @Nullable Map<String, String> parameters)
             throws IllegalArgumentException {
-        this(type, subtype, parameters == null ? null : forMap(parameters));
+        this(type, subtype, parameters == null ? null : Multimaps.forMap(parameters));
     }
 
     /**
@@ -276,7 +299,7 @@ public class ContentType {
     public ContentType(final String type, final String subtype, final @Nullable Multimap<String, String> parameters)
             throws IllegalArgumentException {
         final var mediaType = MediaType.create(type, subtype);
-        this.mediaType = parameters == null ? mediaType : mediaType.withParameters(parameters);
+        this(parameters == null ? mediaType : mediaType.withParameters(parameters));
     }
 
     /**
@@ -289,7 +312,7 @@ public class ContentType {
      * @throws IllegalArgumentException thrown for invalid arguments
      */
     public ContentType(final String type, final String subtype, final Charset charset) throws IllegalArgumentException {
-        mediaType = MediaType.create(type, subtype).withCharset(charset);
+        this(MediaType.create(type, subtype).withCharset(charset));
     }
 
     /**
@@ -302,23 +325,131 @@ public class ContentType {
     }
 
     /**
-     * Checks if this {@link ContentType} is in {@link #LIKELY_XSS_SAFE_HTML_TAG_CONTENT_TYPES}.
+     * @return {@link MediaType#type()}
      */
-    public boolean isLikelyXssSafeHtmlTag() {
-        return LIKELY_XSS_SAFE_HTML_TAG_CONTENT_TYPES.contains(new ContentType(mediaType.withoutParameters()));
+    public String getType() {
+        return mediaType.type();
+    }
+
+    /**
+     * @return {@link MediaType#subtype()}
+     */
+    public String getSubtype() {
+        return mediaType.subtype();
+    }
+
+    /**
+     * @return {@link MediaType#parameters()}
+     */
+    public ImmutableListMultimap<String, String> getParameters() {
+        return mediaType.parameters();
+    }
+
+    /**
+     * @return {@link MediaType#withoutParameters()}
+     */
+    public ContentType withoutParameters() {
+        final var withoutParameters = mediaType.withoutParameters();
+        return withoutParameters == mediaType ? this : new ContentType(withoutParameters);
+    }
+
+    /**
+     * Calls {@link #withParameters(Map)} with <code>parameters</code> set to {@link Map#of(Object, Object)} with the
+     * given arguments respectively.
+     */
+    public ContentType withParameter(final String attribute, final String value) {
+        return withParameters(Map.of(attribute, value));
+    }
+
+    /**
+     * Calls {@link #withParameters(Multimap)} with <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)}.
+     */
+    public ContentType withParameters(final Map<String, String> parameters) {
+        return withParameters(Multimaps.forMap(parameters));
+    }
+
+    /**
+     * @return {@link MediaType#withParameters(Multimap)}
+     */
+    public ContentType withParameters(final Multimap<String, String> parameters) {
+        return new ContentType(mediaType.withParameters(parameters));
+    }
+
+    /**
+     * Calls {@link #addParameters(Map)} with <code>parameters</code> set to {@link Map#of(Object, Object)} with the
+     * given arguments respectively.
+     */
+    public ContentType addParameter(final String attribute, final String value) {
+        return addParameters(Map.of(attribute, value));
+    }
+
+    /**
+     * Calls {@link #addParameters(Multimap)} with <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)}.
+     */
+    public ContentType addParameters(final Map<String, String> parameters) {
+        return addParameters(Multimaps.forMap(parameters));
+    }
+
+    /**
+     * @return {@link MediaType#withParameters(Multimap)} with a {@link Multimap} of contents combined from
+     * {@link #getParameters()} and the given <code>parameters</code>
+     */
+    public ContentType addParameters(final Multimap<String, String> parameters) {
+        final var existingParameters = getParameters();
+        final var combinedParameters = MultimapBuilder
+                .hashKeys(existingParameters.keySet().size() + parameters.keySet().size())
+                .arrayListValues(1)
+                .build(existingParameters);
+        combinedParameters.putAll(parameters);
+        return new ContentType(mediaType.withParameters(combinedParameters));
+    }
+
+    /**
+     * @return {@link MediaType#charset()} {@link Optional#orNull()}
+     */
+    public @Nullable Charset getCharset() {
+        return mediaType.charset().orNull();
+    }
+
+    /**
+     * @return {@link MediaType#withCharset(Charset)}
+     */
+    public ContentType withCharset(final Charset charset) {
+        return new ContentType(mediaType.withCharset(charset));
+    }
+
+    /**
+     * Calls {@link #is(MediaType)} with the given {@link ContentType#getMediaType()}.
+     */
+    public boolean is(final ContentType contentType) {
+        return is(contentType.getMediaType());
+    }
+
+    /**
+     * @return {@link MediaType#is(MediaType)}
+     */
+    public boolean is(final MediaType mediaType) {
+        return this.mediaType.is(mediaType);
+    }
+
+    /**
+     * Checks if this {@link #withoutParameters()} is in {@link #XSS_SAFE_HTML_TAG_CONTENT_TYPES}.
+     */
+    public boolean isXssSafeHtmlTag() {
+        return XSS_SAFE_HTML_TAG_CONTENT_TYPES.contains(withoutParameters());
     }
 
     /**
      * Gets the dot-less file extensions for this {@link ContentType} from {@link #FILE_EXTENSIONS_OF_CONTENT_TYPES}.
      *
-     * @return the {@link String} {@link Set}
+     * @return the unmodifiable {@link String} {@link Set}
      */
     public Set<String> getFileExtensions() {
         return FILE_EXTENSIONS_OF_CONTENT_TYPES.get(this);
     }
 
     /**
-     * @see MediaType#toString()
+     * @return {@link MediaType#toString()}
      */
     @Override
     public String toString() {
