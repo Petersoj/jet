@@ -640,6 +640,9 @@ public enum Status {
         return isError(code);
     }
 
+    /**
+     * @return concatenation of {@link #getCode()}, space, and {@link #getDescription()}
+     */
     @Override
     public String toString() {
         return code + " " + description;
@@ -677,6 +680,31 @@ public enum Status {
      */
     public static @Nullable Status forDescription(final String description) {
         return STATUSES_OF_DESCRIPTIONS.get(description.toUpperCase(ROOT));
+    }
+
+    /**
+     * Gets the {@link Status} for the given {@link String}.
+     *
+     * @param string the case-insensitive HTTP status {@link String} (e.g. a code, a description, or a code and a
+     *               description)
+     *
+     * @return the {@link Status}, or <code>null</code> if no mapping exists
+     */
+    public static @Nullable Status forString(final String string) {
+        final var spaceIndex = string.indexOf(' ');
+        if (spaceIndex == -1) {
+            try {
+                return forCode(Integer.parseInt(string));
+            } catch (final NumberFormatException numberFormatException) {
+                return forDescription(string);
+            }
+        } else {
+            try {
+                return forCode(Integer.parseInt(string.substring(0, spaceIndex)));
+            } catch (final NumberFormatException numberFormatException) {
+                return forDescription(string);
+            }
+        }
     }
 
     /**

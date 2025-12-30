@@ -67,6 +67,23 @@ public class StatusTest {
     }
 
     @Test
+    public void forString() {
+        assertEquals(Status.OK_200, Status.forString("200"));
+        assertEquals(Status.OK_200, Status.forString("OK"));
+        assertEquals(Status.OK_200, Status.forString("200 OK"));
+        assertEquals(Status.INTERNAL_SERVER_ERROR_500, Status.forString("500"));
+        assertEquals(Status.INTERNAL_SERVER_ERROR_500, Status.forString("INTERNAL SERVER ERROR"));
+        assertEquals(Status.INTERNAL_SERVER_ERROR_500, Status.forString("internal server error"));
+        assertEquals(Status.INTERNAL_SERVER_ERROR_500, Status.forString("500 Internal Server Error"));
+        assertNull(Status.forString("a"));
+        assertNull(Status.forString("a b"));
+        assertNull(Status.forString("a b c"));
+        assertNull(Status.forString("0 a"));
+        assertNull(Status.forString("0 a b"));
+        assertNull(Status.forString("a 0"));
+    }
+
+    @Test
     public void staticIsInformational() {
         assertTrue(Status.isInformational(100));
         assertTrue(Status.isInformational(199));
