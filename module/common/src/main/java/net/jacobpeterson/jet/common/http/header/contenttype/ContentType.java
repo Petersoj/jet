@@ -16,7 +16,10 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,6 +27,7 @@ import java.util.Set;
 import static com.google.common.collect.Multimaps.flatteningToMultimap;
 import static com.google.common.collect.Multimaps.unmodifiableSetMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.readAllLines;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
@@ -455,14 +459,14 @@ public class ContentType {
     public static final Map<String, ContentType> CONTENT_TYPE_OF_FILE_EXTENSIONS;
 
     static {
-        final byte[] tsvBytes;
-        try (final var inputStream = ContentType.class.getResourceAsStream("file-extensions-of-mime-types.tsv")) {
-            tsvBytes = requireNonNull(inputStream).readAllBytes();
-        } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+        final List<String> tsvLines;
+        try {
+            tsvLines = readAllLines(Path.of(requireNonNull(
+                    ContentType.class.getResource("file-extensions-of-mime-types.tsv")).toURI()), UTF_8);
+        } catch (final IOException | URISyntaxException exception) {
+            throw new RuntimeException(exception);
         }
-        FILE_EXTENSIONS_OF_CONTENT_TYPES = unmodifiableSetMultimap(stream(new String(tsvBytes, UTF_8).split("\n"))
-                .map(String::trim)
+        FILE_EXTENSIONS_OF_CONTENT_TYPES = unmodifiableSetMultimap(tsvLines.stream()
                 .filter(line -> !line.isBlank() && !line.startsWith("#"))
                 .map(line -> line.split("\t"))
                 .collect(flatteningToMultimap(tsv -> parse(tsv[0]), tsv -> stream(tsv[1].split(" ")),
@@ -509,8 +513,7 @@ public class ContentType {
      * Calls {@link #ContentType(String, String, Multimap)} with <code>parameters</code> set to the given
      * <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)} if non-<code>null</code>.
      */
-    public ContentType(final String type, final String subtype, final @Nullable Map<String, String> parameters)
-            throws IllegalArgumentException {
+    public ContentType(final String type, final String subtype, final @Nullable Map<String, String> parameters) {
         this(type, subtype, parameters == null ? null : Multimaps.forMap(parameters));
     }
 
@@ -522,6 +525,8 @@ public class ContentType {
      * @param parameters the parameters {@link Multimap}, or <code>null</code> for no parameters
      *
      * @throws IllegalArgumentException thrown for invalid arguments
+     *
+     * @see MediaType#create(String, String)
      */
     public ContentType(final String type, final String subtype, final @Nullable Multimap<String, String> parameters)
             throws IllegalArgumentException {
@@ -537,6 +542,9 @@ public class ContentType {
      * @param charset the {@link Charset}
      *
      * @throws IllegalArgumentException thrown for invalid arguments
+     *
+     * @see MediaType#create(String, String)
+     * @see MediaType#withCharset(Charset)
      */
     public ContentType(final String type, final String subtype, final Charset charset) throws IllegalArgumentException {
         this(MediaType.create(type, subtype).withCharset(charset));
@@ -575,6 +583,7 @@ public class ContentType {
     /**
      * @return {@link MediaType#withoutParameters()}
      */
+    @SuppressWarnings("ReferenceEquality")
     public ContentType withoutParameters() {
         final var withoutParameters = mediaType.withoutParameters();
         return withoutParameters == mediaType ? this : new ContentType(withoutParameters);
@@ -597,8 +606,10 @@ public class ContentType {
 
     /**
      * @return {@link MediaType#withParameters(Multimap)}
+     *
+     * @throws IllegalArgumentException thrown for invalid arguments
      */
-    public ContentType withParameters(final Multimap<String, String> parameters) {
+    public ContentType withParameters(final Multimap<String, String> parameters) throws IllegalArgumentException {
         return new ContentType(mediaType.withParameters(parameters));
     }
 
@@ -620,8 +631,10 @@ public class ContentType {
     /**
      * @return {@link MediaType#withParameters(Multimap)} with a {@link Multimap} of contents combined from
      * {@link #getParameters()} and the given <code>parameters</code>
+     *
+     * @throws IllegalArgumentException thrown for invalid arguments
      */
-    public ContentType addParameters(final Multimap<String, String> parameters) {
+    public ContentType addParameters(final Multimap<String, String> parameters) throws IllegalArgumentException {
         final var existingParameters = getParameters();
         final var combinedParameters = MultimapBuilder
                 .hashKeys(existingParameters.keySet().size() + parameters.keySet().size())
