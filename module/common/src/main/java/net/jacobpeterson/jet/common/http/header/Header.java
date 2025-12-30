@@ -1,9 +1,19 @@
 package net.jacobpeterson.jet.common.http.header;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
+
+import static java.util.Arrays.stream;
+import static java.util.Locale.ROOT;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
- * {@link Header} contains standardized HTTP header {@link String} constants.
+ * {@link Header} is an enum that represents a standardized HTTP header.
  * <p>
  * <strong>HTTP headers</strong> let the client and the server pass additional information with a message in a request
  * or response. In HTTP/1.X, a header is a case-insensitive name followed by a colon, then optional whitespace which
@@ -57,7 +67,8 @@ import org.jspecify.annotations.NullMarked;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers">developer.mozilla.org</a>
  */
 @NullMarked
-public final class Header {
+@RequiredArgsConstructor
+public enum Header {
 
     /**
      * Defines the authentication method that should be used to access a resource.
@@ -65,7 +76,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/WWW-Authenticate">
      * developer.mozilla.org</a>
      */
-    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+    WWW_AUTHENTICATE("WWW-Authenticate"),
 
     /**
      * Contains the credentials to authenticate a user-agent with a server.
@@ -73,7 +84,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Authorization">
      * developer.mozilla.org</a>
      */
-    public static final String AUTHORIZATION = "Authorization";
+    AUTHORIZATION("Authorization"),
 
     /**
      * Defines the authentication method that should be used to access a resource behind a proxy server.
@@ -81,7 +92,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Proxy-Authenticate">
      * developer.mozilla.org</a>
      */
-    public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
+    PROXY_AUTHENTICATE("Proxy-Authenticate"),
 
     /**
      * Contains the credentials to authenticate a user agent with a proxy server.
@@ -89,7 +100,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Proxy-Authorization">
      * developer.mozilla.org</a>
      */
-    public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
+    PROXY_AUTHORIZATION("Proxy-Authorization"),
 
     /**
      * The time, in seconds, that the object has been in a proxy cache.
@@ -97,7 +108,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Age">
      * developer.mozilla.org</a>
      */
-    public static final String AGE = "Age";
+    AGE("Age"),
 
     /**
      * Directives for caching mechanisms in both requests and responses.
@@ -105,7 +116,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control">
      * developer.mozilla.org</a>
      */
-    public static final String CACHE_CONTROL = "Cache-Control";
+    CACHE_CONTROL("Cache-Control"),
 
     /**
      * Clears browsing data (e.g., cookies, storage, cache) associated with the requesting website.
@@ -113,7 +124,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Clear-Site-Data">
      * developer.mozilla.org</a>
      */
-    public static final String CLEAR_SITE_DATA = "Clear-Site-Data";
+    CLEAR_SITE_DATA("Clear-Site-Data"),
 
     /**
      * The date/time after which the response is considered stale.
@@ -121,7 +132,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expires">
      * developer.mozilla.org</a>
      */
-    public static final String EXPIRES = "Expires";
+    EXPIRES("Expires"),
 
     /**
      * Specifies a set of rules that define how a URL's query parameters will affect cache matching. These rules dictate
@@ -130,7 +141,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/No-Vary-Search">
      * developer.mozilla.org</a>
      */
-    public static final String NO_VARY_SEARCH = "No-Vary-Search";
+    NO_VARY_SEARCH("No-Vary-Search"),
 
     /**
      * The last modification date of the resource, used to compare several versions of the same resource. It is less
@@ -145,7 +156,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Last-Modified">
      * developer.mozilla.org</a>
      */
-    public static final String LAST_MODIFIED = "Last-Modified";
+    LAST_MODIFIED("Last-Modified"),
 
     /**
      * A unique string identifying the version of the resource. Conditional requests using
@@ -156,7 +167,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag">
      * developer.mozilla.org</a>
      */
-    public static final String ETAG = "ETag";
+    ETAG("ETag"),
 
     /**
      * Makes the request conditional, and applies the method only if the stored resource matches one of the given
@@ -165,7 +176,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match">
      * developer.mozilla.org</a>
      */
-    public static final String IF_MATCH = "If-Match";
+    IF_MATCH("If-Match"),
 
     /**
      * Makes the request conditional, and applies the method only if the stored resource <em>doesn't</em> match any of
@@ -175,7 +186,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match">
      * developer.mozilla.org</a>
      */
-    public static final String IF_NONE_MATCH = "If-None-Match";
+    IF_NONE_MATCH("If-None-Match"),
 
     /**
      * Makes the request conditional, and expects the resource to be transmitted only if it has been modified after the
@@ -184,7 +195,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Modified-Since">
      * developer.mozilla.org</a>
      */
-    public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+    IF_MODIFIED_SINCE("If-Modified-Since"),
 
     /**
      * Makes the request conditional, and expects the resource to be transmitted only if it has not been modified after
@@ -194,7 +205,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Unmodified-Since">
      * developer.mozilla.org</a>
      */
-    public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+    IF_UNMODIFIED_SINCE("If-Unmodified-Since"),
 
     /**
      * Determines how to match request headers to decide whether a cached response can be used rather than requesting a
@@ -203,7 +214,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Vary">
      * developer.mozilla.org</a>
      */
-    public static final String VARY = "Vary";
+    VARY("Vary"),
 
     /**
      * Controls whether the network connection stays open after the current transaction finishes.
@@ -211,7 +222,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Connection">
      * developer.mozilla.org</a>
      */
-    public static final String CONNECTION = "Connection";
+    CONNECTION("Connection"),
 
     /**
      * Controls how long a persistent connection should stay open.
@@ -219,7 +230,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive">
      * developer.mozilla.org</a>
      */
-    public static final String KEEP_ALIVE = "Keep-Alive";
+    KEEP_ALIVE("Keep-Alive"),
 
     /**
      * Informs the server about the <a href="https://developer.mozilla.org/en-US/docs/Glossary/MIME_type">types</a> of
@@ -228,7 +239,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT = "Accept";
+    ACCEPT("Accept"),
 
     /**
      * The encoding algorithm, usually a
@@ -238,7 +249,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Encoding">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_ENCODING = "Accept-Encoding";
+    ACCEPT_ENCODING("Accept-Encoding"),
 
     /**
      * Informs the server about the human language the server is expected to send back. This is a hint and is not
@@ -248,7 +259,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Language">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_LANGUAGE = "Accept-Language";
+    ACCEPT_LANGUAGE("Accept-Language"),
 
     /**
      * A <em>request content negotiation</em> response header that advertises which
@@ -260,7 +271,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Patch">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_PATCH = "Accept-Patch";
+    ACCEPT_PATCH("Accept-Patch"),
 
     /**
      * A <em>request content negotiation</em> response header that advertises which
@@ -271,7 +282,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Post">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_POST = "Accept-Post";
+    ACCEPT_POST("Accept-Post"),
 
     /**
      * Indicates expectations that need to be fulfilled by the server to properly handle the request.
@@ -279,7 +290,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expect">
      * developer.mozilla.org</a>
      */
-    public static final String EXPECT = "Expect";
+    EXPECT("Expect"),
 
     /**
      * When using
@@ -289,7 +300,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Max-Forwards">
      * developer.mozilla.org</a>
      */
-    public static final String MAX_FORWARDS = "Max-Forwards";
+    MAX_FORWARDS("Max-Forwards"),
 
     /**
      * Contains stored <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies">HTTP cookies</a>
@@ -300,7 +311,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cookie">
      * developer.mozilla.org</a>
      */
-    public static final String COOKIE = "Cookie";
+    COOKIE("Cookie"),
 
     /**
      * Send cookies from the server to the user-agent.
@@ -308,7 +319,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie">
      * developer.mozilla.org</a>
      */
-    public static final String SET_COOKIE = "Set-Cookie";
+    SET_COOKIE("Set-Cookie"),
 
     /**
      * Indicates whether the response to the request can be exposed when the credentials flag is true.
@@ -317,7 +328,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Credentials">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+    ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials"),
 
     /**
      * Used in response to a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request">preflight
@@ -326,7 +337,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Headers">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+    ACCESS_CONTROL_ALLOW_HEADERS("Access-Control-Allow-Headers"),
 
     /**
      * Specifies the methods allowed when accessing the resource in response to a preflight request.
@@ -334,7 +345,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+    ACCESS_CONTROL_ALLOW_METHODS("Access-Control-Allow-Methods"),
 
     /**
      * Indicates whether the response can be shared.
@@ -342,7 +353,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Origin">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
 
     /**
      * Indicates which headers can be exposed as part of the response by listing their names.
@@ -350,7 +361,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Expose-Headers">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+    ACCESS_CONTROL_EXPOSE_HEADERS("Access-Control-Expose-Headers"),
 
     /**
      * Indicates how long the results of a preflight request can be cached.
@@ -358,7 +369,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Max-Age">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
+    ACCESS_CONTROL_MAX_AGE("Access-Control-Max-Age"),
 
     /**
      * Used when issuing a preflight request to let the server know which HTTP headers will be used when the actual
@@ -368,7 +379,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Headers">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
+    ACCESS_CONTROL_REQUEST_HEADERS("Access-Control-Request-Headers"),
 
     /**
      * Used when issuing a preflight request to let the server know which
@@ -378,7 +389,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Method">
      * developer.mozilla.org</a>
      */
-    public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
+    ACCESS_CONTROL_REQUEST_METHOD("Access-Control-Request-Method"),
 
     /**
      * Indicates where a fetch originates from.
@@ -386,7 +397,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin">
      * developer.mozilla.org</a>
      */
-    public static final String ORIGIN = "Origin";
+    ORIGIN("Origin"),
 
     /**
      * Specifies origins that are allowed to see values of attributes retrieved via features of the
@@ -396,7 +407,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Timing-Allow-Origin">
      * developer.mozilla.org</a>
      */
-    public static final String TIMING_ALLOW_ORIGIN = "Timing-Allow-Origin";
+    TIMING_ALLOW_ORIGIN("Timing-Allow-Origin"),
 
     /**
      * Indicates if the resource transmitted should be displayed inline (default behavior without the header), or if it
@@ -405,7 +416,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Disposition">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_DISPOSITION = "Content-Disposition";
+    CONTENT_DISPOSITION("Content-Disposition"),
 
     /**
      * Provides a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Hash_function">digest</a> of the stream of
@@ -418,7 +429,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Digest">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_DIGEST = "Content-Digest";
+    CONTENT_DIGEST("Content-Digest"),
 
     /**
      * Provides a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Hash_function">digest</a> of the selected
@@ -434,7 +445,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Repr-Digest">
      * developer.mozilla.org</a>
      */
-    public static final String REPR_DIGEST = "Repr-Digest";
+    REPR_DIGEST("Repr-Digest"),
 
     /**
      * States the wish for a
@@ -446,7 +457,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Want-Content-Digest">
      * developer.mozilla.org</a>
      */
-    public static final String WANT_CONTENT_DIGEST = "Want-Content-Digest";
+    WANT_CONTENT_DIGEST("Want-Content-Digest"),
 
     /**
      * States the wish for a
@@ -458,7 +469,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Want-Repr-Digest">
      * developer.mozilla.org</a>
      */
-    public static final String WANT_REPR_DIGEST = "Want-Repr-Digest";
+    WANT_REPR_DIGEST("Want-Repr-Digest"),
 
     /**
      * Ensures that all resources the user agent loads (of a certain type) have
@@ -468,7 +479,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Integrity-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String INTEGRITY_POLICY = "Integrity-Policy";
+    INTEGRITY_POLICY("Integrity-Policy"),
 
     /**
      * Reports on resources that the user agent loads that would violate
@@ -478,7 +489,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Integrity-Policy-Report-Only">
      * developer.mozilla.org</a>
      */
-    public static final String INTEGRITY_POLICY_REPORT_ONLY = "Integrity-Policy-Report-Only";
+    INTEGRITY_POLICY_REPORT_ONLY("Integrity-Policy-Report-Only"),
 
     /**
      * The size of the resource, in decimal number of bytes.
@@ -486,7 +497,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Length">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_LENGTH = "Content-Length";
+    CONTENT_LENGTH("Content-Length"),
 
     /**
      * Indicates the media type of the resource.
@@ -494,7 +505,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_TYPE = "Content-Type";
+    CONTENT_TYPE("Content-Type"),
 
     /**
      * Used to specify the compression algorithm.
@@ -502,7 +513,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_ENCODING = "Content-Encoding";
+    CONTENT_ENCODING("Content-Encoding"),
 
     /**
      * Describes the human language(s) intended for the audience, so that it allows a user to differentiate according to
@@ -511,7 +522,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Language">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_LANGUAGE = "Content-Language";
+    CONTENT_LANGUAGE("Content-Language"),
 
     /**
      * Indicates an alternate location for the returned data.
@@ -519,7 +530,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Location">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_LOCATION = "Content-Location";
+    CONTENT_LOCATION("Content-Location"),
 
     /**
      * Indicates preferences for specific server behaviors during request processing. For example, it can request
@@ -529,7 +540,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Prefer">
      * developer.mozilla.org</a>
      */
-    public static final String PREFER = "Prefer";
+    PREFER("Prefer"),
 
     /**
      * Informs the client which preferences specified in the <code>Prefer</code> header were applied by the server. It
@@ -538,7 +549,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Preference-Applied">
      * developer.mozilla.org</a>
      */
-    public static final String PREFERENCE_APPLIED = "Preference-Applied";
+    PREFERENCE_APPLIED("Preference-Applied"),
 
     /**
      * Contains information from the client-facing side of proxy servers that is altered or lost when a proxy is
@@ -547,7 +558,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Forwarded">
      * developer.mozilla.org</a>
      */
-    public static final String FORWARDED = "Forwarded";
+    FORWARDED("Forwarded"),
 
     /**
      * Added by proxies, both forward and reverse proxies, and can appear in the request headers and the response
@@ -556,7 +567,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Via">
      * developer.mozilla.org</a>
      */
-    public static final String VIA = "Via";
+    VIA("Via"),
 
     /**
      * Indicates if the server supports range requests, and if so in which unit the range can be expressed.
@@ -564,7 +575,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Ranges">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_RANGES = "Accept-Ranges";
+    ACCEPT_RANGES("Accept-Ranges"),
 
     /**
      * Indicates the part of a document that the server should return.
@@ -572,7 +583,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range">
      * developer.mozilla.org</a>
      */
-    public static final String RANGE = "Range";
+    RANGE("Range"),
 
     /**
      * Creates a conditional range request that is only fulfilled if the given etag or date matches the remote resource.
@@ -581,7 +592,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Range">
      * developer.mozilla.org</a>
      */
-    public static final String IF_RANGE = "If-Range";
+    IF_RANGE("If-Range"),
 
     /**
      * Indicates where in a full body message a partial message belongs.
@@ -589,7 +600,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_RANGE = "Content-Range";
+    CONTENT_RANGE("Content-Range"),
 
     /**
      * Indicates the URL to redirect a page to.
@@ -597,7 +608,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location">
      * developer.mozilla.org</a>
      */
-    public static final String LOCATION = "Location";
+    LOCATION("Location"),
 
     /**
      * Directs the browser to reload the page or redirect to another. Takes the same value as the <code>meta</code>
@@ -608,7 +619,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Refresh">
      * developer.mozilla.org</a>
      */
-    public static final String REFRESH = "Refresh";
+    REFRESH("Refresh"),
 
     /**
      * Contains an Internet email address for a human user who controls the requesting user agent.
@@ -616,7 +627,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/From">
      * developer.mozilla.org</a>
      */
-    public static final String FROM = "From";
+    FROM("From"),
 
     /**
      * Specifies the domain name of the server (for virtual hosting), and (optionally) the TCP port number on which the
@@ -625,7 +636,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host">
      * developer.mozilla.org</a>
      */
-    public static final String HOST = "Host";
+    HOST("Host"),
 
     /**
      * The address of the previous web page from which a link to the currently requested page was followed.
@@ -633,7 +644,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referer">
      * developer.mozilla.org</a>
      */
-    public static final String REFERER = "Referer";
+    REFERER("Referer"),
 
     /**
      * Governs which referrer information sent in the
@@ -643,7 +654,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String REFERRER_POLICY = "Referrer-Policy";
+    REFERRER_POLICY("Referrer-Policy"),
 
     /**
      * Contains a characteristic string that allows the network protocol peers to identify the application type,
@@ -652,7 +663,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent">
      * developer.mozilla.org</a>
      */
-    public static final String USER_AGENT = "User-Agent";
+    USER_AGENT("User-Agent"),
 
     /**
      * Lists the set of HTTP request methods supported by a resource.
@@ -660,7 +671,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow">
      * developer.mozilla.org</a>
      */
-    public static final String ALLOW = "Allow";
+    ALLOW("Allow"),
 
     /**
      * Contains information about the software used by the origin server to handle the request.
@@ -668,7 +679,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server">
      * developer.mozilla.org</a>
      */
-    public static final String SERVER = "Server";
+    SERVER("Server"),
 
     /**
      * Allows a server to declare an embedder policy for a given document.
@@ -676,7 +687,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String CROSS_ORIGIN_EMBEDDER_POLICY = "Cross-Origin-Embedder-Policy";
+    CROSS_ORIGIN_EMBEDDER_POLICY("Cross-Origin-Embedder-Policy"),
 
     /**
      * Prevents other domains from opening/controlling a window.
@@ -684,7 +695,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String CROSS_ORIGIN_OPENER_POLICY = "Cross-Origin-Opener-Policy";
+    CROSS_ORIGIN_OPENER_POLICY("Cross-Origin-Opener-Policy"),
 
     /**
      * Prevents other domains from reading the response of the resources to which this header is applied. See also
@@ -694,7 +705,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Resource-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String CROSS_ORIGIN_RESOURCE_POLICY = "Cross-Origin-Resource-Policy";
+    CROSS_ORIGIN_RESOURCE_POLICY("Cross-Origin-Resource-Policy"),
 
     /**
      * Controls resources the user agent is allowed to load for a given page.
@@ -702,7 +713,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
+    CONTENT_SECURITY_POLICY("Content-Security-Policy"),
 
     /**
      * Allows web developers to experiment with policies by monitoring, but not enforcing, their effects. These
@@ -713,7 +724,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
+    CONTENT_SECURITY_POLICY_REPORT_ONLY("Content-Security-Policy-Report-Only"),
 
     /**
      * Lets sites opt in to reporting and enforcement of
@@ -723,7 +734,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expect-CT">
      * developer.mozilla.org</a>
      */
-    public static final String EXPECT_CT = "Expect-CT";
+    EXPECT_CT("Expect-CT"),
 
     /**
      * Provides a mechanism to allow and deny the use of browser features in a website's own frame, and in
@@ -733,7 +744,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy">
      * developer.mozilla.org</a>
      */
-    public static final String PERMISSIONS_POLICY = "Permissions-Policy";
+    PERMISSIONS_POLICY("Permissions-Policy"),
 
     /**
      * Response header that allows website owners to specify one or more endpoints used to receive errors such as CSP
@@ -746,7 +757,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Reporting-Endpoints">
      * developer.mozilla.org</a>
      */
-    public static final String REPORTING_ENDPOINTS = "Reporting-Endpoints";
+    REPORTING_ENDPOINTS("Reporting-Endpoints"),
 
     /**
      * Force communication using HTTPS instead of HTTP.
@@ -754,7 +765,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">
      * developer.mozilla.org</a>
      */
-    public static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
+    STRICT_TRANSPORT_SECURITY("Strict-Transport-Security"),
 
     /**
      * Sends a signal to the server expressing the client's preference for an encrypted and authenticated response, and
@@ -765,7 +776,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Upgrade-Insecure-Requests">
      * developer.mozilla.org</a>
      */
-    public static final String UPGRADE_INSECURE_REQUESTS = "Upgrade-Insecure-Requests";
+    UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
 
     /**
      * Disables MIME sniffing and forces browser to use the type given in
@@ -775,7 +786,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options">
      * developer.mozilla.org</a>
      */
-    public static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
+    X_CONTENT_TYPE_OPTIONS("X-Content-Type-Options"),
 
     /**
      * Indicates whether a browser should be allowed to render a page in a
@@ -791,7 +802,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options">
      * developer.mozilla.org</a>
      */
-    public static final String X_FRAME_OPTIONS = "X-Frame-Options";
+    X_FRAME_OPTIONS("X-Frame-Options"),
 
     /**
      * A cross-domain policy file may grant clients, such as Adobe Acrobat or Apache Flex (among others), permission to
@@ -804,7 +815,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Permitted-Cross-Domain-Policies">
      * developer.mozilla.org</a>
      */
-    public static final String X_PERMITTED_CROSS_DOMAIN_POLICIES = "X-Permitted-Cross-Domain-Policies";
+    X_PERMITTED_CROSS_DOMAIN_POLICIES("X-Permitted-Cross-Domain-Policies"),
 
     /**
      * May be set by hosting environments or other frameworks and contains information about them while not providing
@@ -814,7 +825,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Powered-By">
      * developer.mozilla.org</a>
      */
-    public static final String X_POWERED_BY = "X-Powered-By";
+    X_POWERED_BY("X-Powered-By"),
 
     /**
      * Enables cross-site scripting filtering.
@@ -822,7 +833,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection">
      * developer.mozilla.org</a>
      */
-    public static final String X_XSS_PROTECTION = "X-XSS-Protection";
+    X_XSS_PROTECTION("X-XSS-Protection"),
 
     /**
      * Indicates the relationship between a request initiator's origin and its target's origin. It is a Structured
@@ -832,7 +843,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Site">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_FETCH_SITE = "Sec-Fetch-Site";
+    SEC_FETCH_SITE("Sec-Fetch-Site"),
 
     /**
      * Indicates the request's mode to a server. It is a Structured Header whose value is a token with possible values
@@ -842,7 +853,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Mode">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_FETCH_MODE = "Sec-Fetch-Mode";
+    SEC_FETCH_MODE("Sec-Fetch-Mode"),
 
     /**
      * Indicates whether or not a navigation request was triggered by user activation. It is a Structured Header whose
@@ -851,7 +862,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-User">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_FETCH_USER = "Sec-Fetch-User";
+    SEC_FETCH_USER("Sec-Fetch-User"),
 
     /**
      * Indicates the request's destination. It is a Structured Header whose value is a token with possible values
@@ -863,7 +874,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Dest">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_FETCH_DEST = "Sec-Fetch-Dest";
+    SEC_FETCH_DEST("Sec-Fetch-Dest"),
 
     /**
      * Indicates the purpose of the request, when the purpose is something other than immediate use by the user-agent.
@@ -873,7 +884,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Purpose">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_PURPOSE = "Sec-Purpose";
+    SEC_PURPOSE("Sec-Purpose"),
 
     /**
      * A request header sent in preemptive request to
@@ -887,7 +898,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Navigation-Preload">
      * developer.mozilla.org</a>
      */
-    public static final String SERVICE_WORKER_NAVIGATION_PRELOAD = "Service-Worker-Navigation-Preload";
+    SERVICE_WORKER_NAVIGATION_PRELOAD("Service-Worker-Navigation-Preload"),
 
     /**
      * Indicates the "storage access status" for the current fetch context, which will be one of <code>none</code>,
@@ -898,7 +909,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Storage-Access">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_FETCH_STORAGE_ACCESS = "Sec-Fetch-Storage-Access";
+    SEC_FETCH_STORAGE_ACCESS("Sec-Fetch-Storage-Access"),
 
     /**
      * Used in response to <code>Sec-Fetch-Storage-Access</code> to indicate that the browser can activate an existing
@@ -908,7 +919,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Activate-Storage-Access">
      * developer.mozilla.org</a>
      */
-    public static final String ACTIVATE_STORAGE_ACCESS = "Activate-Storage-Access";
+    ACTIVATE_STORAGE_ACCESS("Activate-Storage-Access"),
 
     /**
      * Response header used to specify server endpoints where the browser should send warning and error reports when
@@ -917,7 +928,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Report-To">
      * developer.mozilla.org</a>
      */
-    public static final String REPORT_TO = "Report-To";
+    REPORT_TO("Report-To"),
 
     /**
      * Specifies the form of encoding used to safely transfer the resource to the user.
@@ -925,7 +936,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Transfer-Encoding">
      * developer.mozilla.org</a>
      */
-    public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+    TRANSFER_ENCODING("Transfer-Encoding"),
 
     /**
      * Specifies the transfer encodings the user agent is willing to accept.
@@ -933,7 +944,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/TE">
      * developer.mozilla.org</a>
      */
-    public static final String TE = "TE";
+    TE("TE"),
 
     /**
      * Allows the sender to include additional fields at the end of chunked message.
@@ -941,7 +952,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Trailer">
      * developer.mozilla.org</a>
      */
-    public static final String TRAILER = "Trailer";
+    TRAILER("Trailer"),
 
     /**
      * Response header that indicates that the server is willing to upgrade to a WebSocket connection.
@@ -949,7 +960,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Accept">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
+    SEC_WEBSOCKET_ACCEPT("Sec-WebSocket-Accept"),
 
     /**
      * In requests, this header indicates the WebSocket extensions supported by the client in preferred order. In
@@ -958,7 +969,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Extensions">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_WEBSOCKET_EXTENSIONS = "Sec-WebSocket-Extensions";
+    SEC_WEBSOCKET_EXTENSIONS("Sec-WebSocket-Extensions"),
 
     /**
      * Request header containing a key that verifies that the client explicitly intends to open a
@@ -967,7 +978,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Key">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
+    SEC_WEBSOCKET_KEY("Sec-WebSocket-Key"),
 
     /**
      * In requests, this header indicates the sub-protocols supported by the client in preferred order. In responses, it
@@ -976,7 +987,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Protocol">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+    SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol"),
 
     /**
      * In requests, this header indicates the version of the WebSocket protocol used by the client. In responses, it is
@@ -986,7 +997,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Version">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
+    SEC_WEBSOCKET_VERSION("Sec-WebSocket-Version"),
 
     /**
      * Used to list alternate ways to reach this service.
@@ -994,7 +1005,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Alt-Svc">
      * developer.mozilla.org</a>
      */
-    public static final String ALT_SVC = "Alt-Svc";
+    ALT_SVC("Alt-Svc"),
 
     /**
      * Used to identify the alternative service in use.
@@ -1002,7 +1013,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Alt-Used">
      * developer.mozilla.org</a>
      */
-    public static final String ALT_USED = "Alt-Used";
+    ALT_USED("Alt-Used"),
 
     /**
      * Contains the date and time at which the message was originated.
@@ -1010,7 +1021,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Date">
      * developer.mozilla.org</a>
      */
-    public static final String DATE = "Date";
+    DATE("Date"),
 
     /**
      * This entity-header field provides a means for serializing one or more links in HTTP headers. It is semantically
@@ -1021,7 +1032,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Link">
      * developer.mozilla.org</a>
      */
-    public static final String LINK = "Link";
+    LINK("Link"),
 
     /**
      * Indicates how long the user agent should wait before making a follow-up request.
@@ -1029,7 +1040,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After">
      * developer.mozilla.org</a>
      */
-    public static final String RETRY_AFTER = "Retry-After";
+    RETRY_AFTER("Retry-After"),
 
     /**
      * Communicates one or more metrics and descriptions for the given request-response cycle.
@@ -1037,7 +1048,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server-Timing">
      * developer.mozilla.org</a>
      */
-    public static final String SERVER_TIMING = "Server-Timing";
+    SERVER_TIMING("Server-Timing"),
 
     /**
      * Included in fetches for a service worker's script resource. This header helps administrators log service worker
@@ -1046,7 +1057,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker">
      * developer.mozilla.org</a>
      */
-    public static final String SERVICE_WORKER = "Service-Worker";
+    SERVICE_WORKER("Service-Worker"),
 
     /**
      * Used to remove the
@@ -1058,7 +1069,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Allowed">
      * developer.mozilla.org</a>
      */
-    public static final String SERVICE_WORKER_ALLOWED = "Service-Worker-Allowed";
+    SERVICE_WORKER_ALLOWED("Service-Worker-Allowed"),
 
     /**
      * Links to a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Source_map">source map</a> so that
@@ -1067,7 +1078,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/SourceMap">
      * developer.mozilla.org</a>
      */
-    public static final String SOURCEMAP = "SourceMap";
+    SOURCEMAP("SourceMap"),
 
     /**
      * This HTTP/1.1 (only) header can be used to upgrade an already established client/server connection to a different
@@ -1077,7 +1088,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Upgrade">
      * developer.mozilla.org</a>
      */
-    public static final String UPGRADE = "Upgrade";
+    UPGRADE("Upgrade"),
 
     /**
      * Provides a hint from about the priority of a particular resource request on a particular connection. The value
@@ -1087,7 +1098,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Priority">
      * developer.mozilla.org</a>
      */
-    public static final String PRIORITY = "Priority";
+    PRIORITY("Priority"),
 
     /**
      * Used to indicate that the response corresponding to the current request is eligible to take part in attribution
@@ -1097,7 +1108,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Eligible">
      * developer.mozilla.org</a>
      */
-    public static final String ATTRIBUTION_REPORTING_ELIGIBLE = "Attribution-Reporting-Eligible";
+    ATTRIBUTION_REPORTING_ELIGIBLE("Attribution-Reporting-Eligible"),
 
     /**
      * Included as part of a response to a request that included an <code>Attribution-Reporting-Eligible</code> header,
@@ -1107,7 +1118,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register-Source">
      * developer.mozilla.org</a>
      */
-    public static final String ATTRIBUTION_REPORTING_REGISTER_SOURCE = "Attribution-Reporting-Register-Source";
+    ATTRIBUTION_REPORTING_REGISTER_SOURCE("Attribution-Reporting-Register-Source"),
 
     /**
      * Included as part of a response to a request that included an <code>Attribution-Reporting-Eligible</code> header,
@@ -1117,7 +1128,7 @@ public final class Header {
      * -Trigger">
      * developer.mozilla.org</a>
      */
-    public static final String ATTRIBUTION_REPORTING_REGISTER_TRIGGER = "Attribution-Reporting-Register-Trigger";
+    ATTRIBUTION_REPORTING_REGISTER_TRIGGER("Attribution-Reporting-Register-Trigger"),
 
     /**
      * Servers can advertise support for Client Hints using the <code>Accept-CH</code> header field or an equivalent
@@ -1128,7 +1139,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-CH">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_CH = "Accept-CH";
+    ACCEPT_CH("Accept-CH"),
 
     /**
      * Servers use <code>Critical-CH</code> along with
@@ -1140,7 +1151,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Critical-CH">
      * developer.mozilla.org</a>
      */
-    public static final String CRITICAL_CH = "Critical-CH";
+    CRITICAL_CH("Critical-CH"),
 
     /**
      * User agent's branding and version.
@@ -1148,7 +1159,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA = "Sec-CH-UA";
+    SEC_CH_UA("Sec-CH-UA"),
 
     /**
      * User agent's underlying platform architecture.
@@ -1156,7 +1167,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Arch">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_ARCH = "Sec-CH-UA-Arch";
+    SEC_CH_UA_ARCH("Sec-CH-UA-Arch"),
 
     /**
      * User agent's underlying CPU architecture bitness (for example "64" bit).
@@ -1164,7 +1175,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Bitness">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_BITNESS = "Sec-CH-UA-Bitness";
+    SEC_CH_UA_BITNESS("Sec-CH-UA-Bitness"),
 
     /**
      * User agent's form-factors, describing how the user interacts with the user-agent.
@@ -1172,7 +1183,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Form-Factors">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_FORM_FACTORS = "Sec-CH-UA-Form-Factors";
+    SEC_CH_UA_FORM_FACTORS("Sec-CH-UA-Form-Factors"),
 
     /**
      * User agent's full version string.
@@ -1180,7 +1191,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Full-Version">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_FULL_VERSION = "Sec-CH-UA-Full-Version";
+    SEC_CH_UA_FULL_VERSION("Sec-CH-UA-Full-Version"),
 
     /**
      * Full version for each brand in the user agent's brand list.
@@ -1188,7 +1199,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Full-Version-List">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_FULL_VERSION_LIST = "Sec-CH-UA-Full-Version-List";
+    SEC_CH_UA_FULL_VERSION_LIST("Sec-CH-UA-Full-Version-List"),
 
     /**
      * User agent is running on a mobile device or, more generally, prefers a "mobile" user experience.
@@ -1196,7 +1207,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Mobile">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_MOBILE = "Sec-CH-UA-Mobile";
+    SEC_CH_UA_MOBILE("Sec-CH-UA-Mobile"),
 
     /**
      * User agent's device model.
@@ -1204,7 +1215,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Model">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_MODEL = "Sec-CH-UA-Model";
+    SEC_CH_UA_MODEL("Sec-CH-UA-Model"),
 
     /**
      * User agent's underlying operation system/platform.
@@ -1212,7 +1223,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Platform">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_PLATFORM = "Sec-CH-UA-Platform";
+    SEC_CH_UA_PLATFORM("Sec-CH-UA-Platform"),
 
     /**
      * User agent's underlying operation system version.
@@ -1220,7 +1231,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Platform-Version">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_PLATFORM_VERSION = "Sec-CH-UA-Platform-Version";
+    SEC_CH_UA_PLATFORM_VERSION("Sec-CH-UA-Platform-Version"),
 
     /**
      * Whether or not the user agent binary is running in 32-bit mode on 64-bit Windows.
@@ -1228,7 +1239,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-WoW64">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_UA_WOW64 = "Sec-CH-UA-WoW64";
+    SEC_CH_UA_WOW64("Sec-CH-UA-WoW64"),
 
     /**
      * User's preference of dark or light color scheme.
@@ -1236,7 +1247,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Color-Scheme">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_PREFERS_COLOR_SCHEME = "Sec-CH-Prefers-Color-Scheme";
+    SEC_CH_PREFERS_COLOR_SCHEME("Sec-CH-Prefers-Color-Scheme"),
 
     /**
      * User's preference to see fewer animations and content layout shifts.
@@ -1244,7 +1255,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Reduced-Motion">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_PREFERS_REDUCED_MOTION = "Sec-CH-Prefers-Reduced-Motion";
+    SEC_CH_PREFERS_REDUCED_MOTION("Sec-CH-Prefers-Reduced-Motion"),
 
     /**
      * Request header indicates the user agent's preference for reduced transparency.
@@ -1253,7 +1264,7 @@ public final class Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Reduced-Transparency">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_CH_PREFERS_REDUCED_TRANSPARENCY = "Sec-CH-Prefers-Reduced-Transparency";
+    SEC_CH_PREFERS_REDUCED_TRANSPARENCY("Sec-CH-Prefers-Reduced-Transparency"),
 
     /**
      * Response header used to confirm the image device to pixel ratio (DPR) in requests where the screen
@@ -1263,7 +1274,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-DPR">
      * developer.mozilla.org</a>
      */
-    public static final String CONTENT_DPR = "Content-DPR";
+    CONTENT_DPR("Content-DPR"),
 
     /**
      * Approximate amount of available client RAM memory. This is part of the
@@ -1272,7 +1283,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Device-Memory">
      * developer.mozilla.org</a>
      */
-    public static final String DEVICE_MEMORY = "Device-Memory";
+    DEVICE_MEMORY("Device-Memory"),
 
     /**
      * Request header that provides the client device pixel ratio (the number of physical
@@ -1282,7 +1293,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/DPR">
      * developer.mozilla.org</a>
      */
-    public static final String DPR = "DPR";
+    DPR("DPR"),
 
     /**
      * Request header provides the client's layout viewport width in
@@ -1291,7 +1302,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Viewport-Width">
      * developer.mozilla.org</a>
      */
-    public static final String VIEWPORT_WIDTH = "Viewport-Width";
+    VIEWPORT_WIDTH("Viewport-Width"),
 
     /**
      * Request header indicates the desired resource width in physical pixels (the intrinsic size of an image).
@@ -1299,7 +1310,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Width">
      * developer.mozilla.org</a>
      */
-    public static final String WIDTH = "Width";
+    WIDTH("Width"),
 
     /**
      * Approximate bandwidth of the client's connection to the server, in Mbps. This is part of the
@@ -1308,7 +1319,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Downlink">
      * developer.mozilla.org</a>
      */
-    public static final String DOWNLINK = "Downlink";
+    DOWNLINK("Downlink"),
 
     /**
      * The <a href="https://developer.mozilla.org/en-US/docs/Glossary/Effective_connection_type">effective connection
@@ -1318,7 +1329,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ECT">
      * developer.mozilla.org</a>
      */
-    public static final String ECT = "ECT";
+    ECT("ECT"),
 
     /**
      * Application layer round trip time (RTT) in milliseconds, which includes the server processing time. This is part
@@ -1328,7 +1339,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/RTT">
      * developer.mozilla.org</a>
      */
-    public static final String RTT = "RTT";
+    RTT("RTT"),
 
     /**
      * A string <code>on</code> that indicates the user agent's preference for reduced data usage.
@@ -1336,7 +1347,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Save-Data">
      * developer.mozilla.org</a>
      */
-    public static final String SAVE_DATA = "Save-Data";
+    SAVE_DATA("Save-Data"),
 
     /**
      * A browser can use this request header to indicate the best dictionary it has available for the server to use for
@@ -1345,7 +1356,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Available-Dictionary">
      * developer.mozilla.org</a>
      */
-    public static final String AVAILABLE_DICTIONARY = "Available-Dictionary";
+    AVAILABLE_DICTIONARY("Available-Dictionary"),
 
     /**
      * Used when a browser already has a dictionary available for a resource and the server provided an <code>id</code>
@@ -1356,7 +1367,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Dictionary-ID">
      * developer.mozilla.org</a>
      */
-    public static final String DICTIONARY_ID = "Dictionary-ID";
+    DICTIONARY_ID("Dictionary-ID"),
 
     /**
      * Lists the matching criteria that the dictionary can be used for in future requests.
@@ -1364,7 +1375,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Use-As-Dictionary">
      * developer.mozilla.org</a>
      */
-    public static final String USE_AS_DICTIONARY = "Use-As-Dictionary";
+    USE_AS_DICTIONARY("Use-As-Dictionary"),
 
     /**
      * Request header that indicates the user's tracking preference (Do Not Track). Deprecated in favor of Global
@@ -1377,7 +1388,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/DNT">
      * developer.mozilla.org</a>
      */
-    public static final String DNT = "DNT";
+    DNT("DNT"),
 
     /**
      * Response header that indicates the tracking status that applied to the corresponding request. Used in conjunction
@@ -1386,7 +1397,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Tk">
      * developer.mozilla.org</a>
      */
-    public static final String TK = "Tk";
+    TK("Tk"),
 
     /**
      * Indicates whether the user consents to a website or service selling or sharing their personal information with
@@ -1395,7 +1406,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-GPC">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_GPC = "Sec-GPC";
+    SEC_GPC("Sec-GPC"),
 
     /**
      * Response header used to indicate that the associated
@@ -1407,7 +1418,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin-Agent-Cluster">
      * developer.mozilla.org</a>
      */
-    public static final String ORIGIN_AGENT_CLUSTER = "Origin-Agent-Cluster";
+    ORIGIN_AGENT_CLUSTER("Origin-Agent-Cluster"),
 
     /**
      * Defines a mechanism that enables developers to declare a network error reporting policy.
@@ -1415,7 +1426,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/NEL">
      * developer.mozilla.org</a>
      */
-    public static final String NEL = "NEL";
+    NEL("NEL"),
 
     /**
      * Response header used to mark topics of interest inferred from a calling site's URL as observed in the response to
@@ -1426,7 +1437,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Observe-Browsing-Topics">
      * developer.mozilla.org</a>
      */
-    public static final String OBSERVE_BROWSING_TOPICS = "Observe-Browsing-Topics";
+    OBSERVE_BROWSING_TOPICS("Observe-Browsing-Topics"),
 
     /**
      * Request header that sends the selected topics for the current user along with the associated request, which are
@@ -1435,7 +1446,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Browsing-Topics">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_BROWSING_TOPICS = "Sec-Browsing-Topics";
+    SEC_BROWSING_TOPICS("Sec-Browsing-Topics"),
 
     /**
      * A client can send the
@@ -1446,7 +1457,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Signature">
      * developer.mozilla.org</a>
      */
-    public static final String ACCEPT_SIGNATURE = "Accept-Signature";
+    ACCEPT_SIGNATURE("Accept-Signature"),
 
     /**
      * Indicates that the request has been conveyed in TLS early data.
@@ -1454,7 +1465,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Early-Data">
      * developer.mozilla.org</a>
      */
-    public static final String EARLY_DATA = "Early-Data";
+    EARLY_DATA("Early-Data"),
 
     /**
      * Provides a unique key for <code>POST</code> and <code>PATCH</code> requests, allowing them to be made
@@ -1463,7 +1474,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Idempotency-Key">
      * developer.mozilla.org</a>
      */
-    public static final String IDEMPOTENCY_KEY = "Idempotency-Key";
+    IDEMPOTENCY_KEY("Idempotency-Key"),
 
     /**
      * Response header sent by a federated identity provider (IdP) to set its login status, meaning whether any users
@@ -1473,7 +1484,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Login">
      * developer.mozilla.org</a>
      */
-    public static final String SET_LOGIN = "Set-Login";
+    SET_LOGIN("Set-Login"),
 
     /**
      * The
@@ -1484,7 +1495,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Signature">
      * developer.mozilla.org</a>
      */
-    public static final String SIGNATURE = "Signature";
+    SIGNATURE("Signature"),
 
     /**
      * The
@@ -1495,7 +1506,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Signed-Headers">
      * developer.mozilla.org</a>
      */
-    public static final String SIGNED_HEADERS = "Signed-Headers";
+    SIGNED_HEADERS("Signed-Headers"),
 
     /**
      * Provides a list of URLs pointing to text resources containing
@@ -1506,7 +1517,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Speculation-Rules">
      * developer.mozilla.org</a>
      */
-    public static final String SPECULATION_RULES = "Speculation-Rules";
+    SPECULATION_RULES("Speculation-Rules"),
 
     /**
      * Contains one or more tag values from the speculation rules that resulted in the speculation so a server can
@@ -1515,7 +1526,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Speculation-Tags">
      * developer.mozilla.org</a>
      */
-    public static final String SEC_SPECULATION_TAGS = "Sec-Speculation-Tags";
+    SEC_SPECULATION_TAGS("Sec-Speculation-Tags"),
 
     /**
      * Set by a navigation target to opt-in to using various higher-risk loading modes. For example, cross-origin,
@@ -1526,7 +1537,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Supports-Loading-Mode">
      * developer.mozilla.org</a>
      */
-    public static final String SUPPORTS_LOADING_MODE = "Supports-Loading-Mode";
+    SUPPORTS_LOADING_MODE("Supports-Loading-Mode"),
 
     /**
      * Identifies the originating IP addresses of a client connecting to a web server through an HTTP proxy or a load
@@ -1535,7 +1546,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For">
      * developer.mozilla.org</a>
      */
-    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    X_FORWARDED_FOR("X-Forwarded-For"),
 
     /**
      * Identifies the original host requested that a client used to connect to your proxy or load balancer.
@@ -1543,7 +1554,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Host">
      * developer.mozilla.org</a>
      */
-    public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    X_FORWARDED_HOST("X-Forwarded-Host"),
 
     /**
      * Identifies the protocol (HTTP or HTTPS) that a client used to connect to your proxy or load balancer.
@@ -1551,7 +1562,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Proto">
      * developer.mozilla.org</a>
      */
-    public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    X_FORWARDED_PROTO("X-Forwarded-Proto"),
 
     /**
      * Controls DNS prefetching, a feature by which browsers proactively perform domain name resolution on both links
@@ -1561,7 +1572,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-DNS-Prefetch-Control">
      * developer.mozilla.org</a>
      */
-    public static final String X_DNS_PREFETCH_CONTROL = "X-DNS-Prefetch-Control";
+    X_DNS_PREFETCH_CONTROL("X-DNS-Prefetch-Control"),
 
     /**
      * The
@@ -1574,7 +1585,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Robots-Tag">
      * developer.mozilla.org</a>
      */
-    public static final String X_ROBOTS_TAG = "X-Robots-Tag";
+    X_ROBOTS_TAG("X-Robots-Tag"),
 
     /**
      * Implementation-specific header that may have various effects anywhere along the request-response chain. Used for
@@ -1583,7 +1594,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Pragma">
      * developer.mozilla.org</a>
      */
-    public static final String PRAGMA = "Pragma";
+    PRAGMA("Pragma"),
 
     /**
      * General warning information about possible problems.
@@ -1591,7 +1602,7 @@ public final class Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Warning">
      * developer.mozilla.org</a>
      */
-    public static final String WARNING = "Warning";
+    WARNING("Warning"),
 
     /**
      * For Nginx proxy module: set the parameters of response
@@ -1599,7 +1610,7 @@ public final class Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    public static final String X_ACCEL_EXPIRES = "X-Accel-Expires";
+    X_ACCEL_EXPIRES("X-Accel-Expires"),
 
     /**
      * For Nginx proxy module: performs an
@@ -1608,7 +1619,7 @@ public final class Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    public static final String X_ACCEL_REDIRECT = "X-Accel-Redirect";
+    X_ACCEL_REDIRECT("X-Accel-Redirect"),
 
     /**
      * For Nginx proxy module: sets the
@@ -1617,7 +1628,7 @@ public final class Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    public static final String X_ACCEL_LIMIT_RATE = "X-Accel-Limit-Rate";
+    X_ACCEL_LIMIT_RATE("X-Accel-Limit-Rate"),
 
     /**
      * For Nginx proxy module: enables or disables
@@ -1625,7 +1636,7 @@ public final class Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    public static final String X_ACCEL_BUFFERING = "X-Accel-Buffering";
+    X_ACCEL_BUFFERING("X-Accel-Buffering"),
 
     /**
      * For Nginx proxy module: sets the desired
@@ -1633,7 +1644,24 @@ public final class Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    public static final String X_ACCEL_CHARSET = "X-Accel-Charset";
+    X_ACCEL_CHARSET("X-Accel-Charset");
 
-    private Header() {}
+    private final @Getter String name;
+
+    /**
+     * An unmodifiable {@link Map} of uppercased {@link #getName()} mapped to {@link Header}.
+     */
+    public static final Map<String, Header> HEADERS_OF_UPPERCASED_NAMES = stream(values())
+            .collect(toUnmodifiableMap(header -> header.getName().toUpperCase(ROOT), identity()));
+
+    /**
+     * Gets the {@link Header} for the given <code>name</code>.
+     *
+     * @param name the case-insensitive {@link #getName()}
+     *
+     * @return the {@link Header}, or <code>null</code> if no mapping exists
+     */
+    public static @Nullable Header forName(final String name) {
+        return HEADERS_OF_UPPERCASED_NAMES.get(name.toUpperCase(ROOT));
+    }
 }

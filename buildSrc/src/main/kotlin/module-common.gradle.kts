@@ -1,6 +1,7 @@
 import net.ltgt.gradle.errorprone.CheckSeverity.WARN
 import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.JavaVersion.VERSION_25
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     `java-library`
@@ -81,7 +82,8 @@ tasks.javadoc.configure {
 tasks.test {
     useJUnitPlatform()
     testLogging {
-        events("passed", "skipped", "failed")
+        events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        showStandardStreams = true
     }
     finalizedBy(tasks.jacocoTestReport)
 }

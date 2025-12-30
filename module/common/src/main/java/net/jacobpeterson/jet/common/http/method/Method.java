@@ -132,7 +132,7 @@ public enum Method {
     /**
      * Gets the {@link Method} for the given <code>name</code>.
      *
-     * @param name the case-insensitive HTTP method name {@link String}
+     * @param name the case-insensitive {@link #name()}
      *
      * @return the {@link Method}, or <code>null</code> if no mapping exists
      */

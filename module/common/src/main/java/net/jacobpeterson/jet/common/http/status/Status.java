@@ -641,7 +641,7 @@ public enum Status {
     }
 
     /**
-     * @return concatenation of {@link #getCode()}, space, and {@link #getDescription()}
+     * @return the concatenation of {@link #getCode()}, space, and {@link #getDescription()}
      */
     @Override
     public String toString() {
@@ -657,13 +657,13 @@ public enum Status {
     /**
      * An unmodifiable {@link Map} of uppercased {@link #getDescription()} mapped to {@link Status}.
      */
-    public static final Map<String, Status> STATUSES_OF_DESCRIPTIONS = stream(values())
+    public static final Map<String, Status> STATUSES_OF_UPPERCASED_DESCRIPTIONS = stream(values())
             .collect(toUnmodifiableMap(status -> status.getDescription().toUpperCase(ROOT), identity()));
 
     /**
      * Gets the {@link Status} for the given <code>code</code>.
      *
-     * @param code the HTTP status code <code>int</code>
+     * @param code the {@link #getCode()}
      *
      * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
@@ -674,12 +674,12 @@ public enum Status {
     /**
      * Gets the {@link Status} for the given <code>description</code>.
      *
-     * @param description the case-insensitive HTTP status description {@link String}
+     * @param description the case-insensitive {@link #getDescription()}
      *
      * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Status forDescription(final String description) {
-        return STATUSES_OF_DESCRIPTIONS.get(description.toUpperCase(ROOT));
+        return STATUSES_OF_UPPERCASED_DESCRIPTIONS.get(description.toUpperCase(ROOT));
     }
 
     /**
