@@ -35,9 +35,9 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
- * {@link ContentType} is an immutable class that represents a standardized HTTP content type (MIME type). This class
- * wraps {@link MediaType} from <a href="https://github.com/google/guava">Google Guava</a> and adds some extra
- * functionality.
+ * {@link ContentType} is an immutable class that represents a standardized HTTP content type (aka MIME type).
+ * Internally, this class wraps {@link MediaType} from <a href="https://github.com/google/guava">Google Guava</a> and
+ * adds some extra functionality.
  * <p>
  * The HTTP <strong><code>Content-Type</code></strong>
  * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Representation_header">representation header</a> is used
@@ -67,8 +67,6 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">
  * developer.mozilla.org</a>
- * @see Header#CONTENT_TYPE
- * @see MediaType
  */
 @NullMarked
 @Immutable
@@ -527,6 +525,7 @@ public class ContentType {
      * @throws IllegalArgumentException thrown for invalid arguments
      *
      * @see MediaType#create(String, String)
+     * @see MediaType#withParameters(Multimap)
      */
     public ContentType(final String type, final String subtype, final @Nullable Multimap<String, String> parameters)
             throws IllegalArgumentException {

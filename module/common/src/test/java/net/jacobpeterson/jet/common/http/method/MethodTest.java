@@ -30,9 +30,9 @@ public class MethodTest {
     }
 
     @Test
-    public void forName() {
-        assertEquals(Method.GET, Method.forName("GET"));
-        assertEquals(Method.GET, Method.forName("get"));
-        assertNull(Method.forName("a"));
+    public void forString() {
+        assertEquals(Method.GET, Method.forString("GET"));
+        assertEquals(Method.GET, Method.forString("get"));
+        assertNull(Method.forString("a"));
     }
 }

@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class HeaderTest {
 
     @Test
-    public void forName() {
-        assertEquals(Header.CONTENT_TYPE, Header.forName("Content-Type"));
-        assertEquals(Header.CONTENT_TYPE, Header.forName("CONTENT-TYPE"));
-        assertEquals(Header.CONTENT_TYPE, Header.forName("content-type"));
-        assertNull(Header.forName("content type"));
+    public void forString() {
+        assertEquals(Header.CONTENT_TYPE, Header.forString("Content-Type"));
+        assertEquals(Header.CONTENT_TYPE, Header.forString("CONTENT-TYPE"));
+        assertEquals(Header.CONTENT_TYPE, Header.forString("content-type"));
+        assertNull(Header.forString("content type"));
     }
 }

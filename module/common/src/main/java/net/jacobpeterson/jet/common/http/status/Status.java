@@ -15,8 +15,9 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 /**
  * {@link Status} is an enum that represents a standardized HTTP response status.
  * <p>
- * HTTP response status codes indicate whether a specific <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">
- * HTTP</a> request has been successfully completed. Responses are grouped in five classes:
+ * HTTP response status codes indicate whether a specific
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">HTTP</a> request has been successfully completed.
+ * Responses are grouped in five classes:
  * <ol>
  * <li>{@link #isInformational()}</li>
  * <li>{@link #isSuccessful()}</li>
@@ -651,14 +652,14 @@ public enum Status {
     /**
      * An unmodifiable {@link Map} of {@link #getCode()} mapped to {@link Status}.
      */
-    public static final Map<Integer, Status> STATUSES_OF_CODES = stream(values())
+    public static final Map<Integer, Status> VALUES_OF_CODES = stream(values())
             .collect(toUnmodifiableMap(Status::getCode, identity()));
 
     /**
      * An unmodifiable {@link Map} of uppercased {@link #getDescription()} mapped to {@link Status}.
      */
-    public static final Map<String, Status> STATUSES_OF_UPPERCASED_DESCRIPTIONS = stream(values())
-            .collect(toUnmodifiableMap(status -> status.getDescription().toUpperCase(ROOT), identity()));
+    public static final Map<String, Status> VALUES_OF_UPPERCASED_DESCRIPTIONS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.getDescription().toUpperCase(ROOT), identity()));
 
     /**
      * Gets the {@link Status} for the given <code>code</code>.
@@ -668,7 +669,7 @@ public enum Status {
      * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Status forCode(final int code) {
-        return STATUSES_OF_CODES.get(code);
+        return VALUES_OF_CODES.get(code);
     }
 
     /**
@@ -679,11 +680,11 @@ public enum Status {
      * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Status forDescription(final String description) {
-        return STATUSES_OF_UPPERCASED_DESCRIPTIONS.get(description.toUpperCase(ROOT));
+        return VALUES_OF_UPPERCASED_DESCRIPTIONS.get(description.toUpperCase(ROOT));
     }
 
     /**
-     * Gets the {@link Status} for the given {@link String}.
+     * Gets the {@link Status} for the given <code>string</code>.
      *
      * @param string the case-insensitive HTTP status {@link String} (e.g. a code, a description, or a code and a
      *               description)
@@ -691,18 +692,19 @@ public enum Status {
      * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Status forString(final String string) {
-        final var spaceIndex = string.indexOf(' ');
+        final var trimmed = string.trim();
+        final var spaceIndex = trimmed.indexOf(' ');
         if (spaceIndex == -1) {
             try {
-                return forCode(Integer.parseInt(string));
+                return forCode(Integer.parseInt(trimmed));
             } catch (final NumberFormatException numberFormatException) {
-                return forDescription(string);
+                return forDescription(trimmed);
             }
         } else {
             try {
-                return forCode(Integer.parseInt(string.substring(0, spaceIndex)));
+                return forCode(Integer.parseInt(trimmed.substring(0, spaceIndex)));
             } catch (final NumberFormatException numberFormatException) {
-                return forDescription(string);
+                return forDescription(trimmed);
             }
         }
     }

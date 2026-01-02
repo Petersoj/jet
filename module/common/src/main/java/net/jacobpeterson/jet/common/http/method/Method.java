@@ -13,7 +13,7 @@ import static java.util.Locale.ROOT;
  * request method has its own semantics, but some characteristics are shared across multiple methods, specifically
  * request methods can be {@link #isSafe()}, {@link #isIdempotent()}, or {@link #isCacheable()}.
  *
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods>developer.mozilla.org</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods">developer.mozilla.org</a>
  */
 @NullMarked
 public enum Method {
@@ -130,15 +130,15 @@ public enum Method {
     }
 
     /**
-     * Gets the {@link Method} for the given <code>name</code>.
+     * Gets the {@link Method} for the given <code>string</code>.
      *
-     * @param name the case-insensitive {@link #name()}
+     * @param string the case-insensitive {@link #toString()}
      *
      * @return the {@link Method}, or <code>null</code> if no mapping exists
      */
-    public static @Nullable Method forName(final String name) {
+    public static @Nullable Method forString(final String string) {
         try {
-            return valueOf(name.toUpperCase(ROOT));
+            return valueOf(string.toUpperCase(ROOT));
         } catch (final IllegalArgumentException illegalArgumentException) {
             return null;
         }

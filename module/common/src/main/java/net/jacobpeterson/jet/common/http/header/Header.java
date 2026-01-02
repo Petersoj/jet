@@ -1,6 +1,5 @@
 package net.jacobpeterson.jet.common.http.header;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -1646,22 +1645,27 @@ public enum Header {
      */
     X_ACCEL_CHARSET("X-Accel-Charset");
 
-    private final @Getter String name;
+    private final String string;
+
+    @Override
+    public String toString() {
+        return string;
+    }
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #getName()} mapped to {@link Header}.
+     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link Header}.
      */
-    public static final Map<String, Header> HEADERS_OF_UPPERCASED_NAMES = stream(values())
-            .collect(toUnmodifiableMap(header -> header.getName().toUpperCase(ROOT), identity()));
+    public static final Map<String, Header> VALUES_OF_UPPERCASED_STRINGS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
 
     /**
-     * Gets the {@link Header} for the given <code>name</code>.
+     * Gets the {@link Header} for the given <code>string</code>.
      *
-     * @param name the case-insensitive {@link #getName()}
+     * @param string the case-insensitive {@link #toString()}
      *
      * @return the {@link Header}, or <code>null</code> if no mapping exists
      */
-    public static @Nullable Header forName(final String name) {
-        return HEADERS_OF_UPPERCASED_NAMES.get(name.toUpperCase(ROOT));
+    public static @Nullable Header forString(final String string) {
+        return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
     }
 }

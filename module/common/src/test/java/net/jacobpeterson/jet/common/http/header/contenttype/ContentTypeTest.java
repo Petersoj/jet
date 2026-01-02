@@ -20,6 +20,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ContentTypeTest {
 
     @Test
+    public void constant() {
+        assertEquals(new ContentType("text", "html"), ContentType.TEXT_HTML);
+    }
+
+    @Test
+    public void parse() {
+        assertEquals(ContentType.TEXT_CSV, ContentType.parse("text/csv"));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("!@#$"));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("*/a"));
+    }
+
+    @Test
+    public void forFileExtension() {
+        assertEquals(new ContentType("image", "svg+xml"), ContentType.forFileExtension("svg"));
+        assertEquals(new ContentType("image", "png"), ContentType.forFileExtension("PNG"));
+        assertEquals(new ContentType("video", "mp4"), ContentType.forFileExtension("mp4"));
+        assertNull(ContentType.forFileExtension("."));
+    }
+
+    @Test
     public void constructorTypeSubtype() {
         final var contentType = new ContentType("a", "b");
         assertEquals("a", contentType.getType());
@@ -53,26 +73,6 @@ public class ContentTypeTest {
         assertEquals("b", contentType.getSubtype());
         assertEquals(ImmutableListMultimap.of("charset", "utf-8"), contentType.getParameters());
         assertEquals(UTF_8, contentType.getCharset());
-    }
-
-    @Test
-    public void constant() {
-        assertEquals(new ContentType("text", "html"), ContentType.TEXT_HTML);
-    }
-
-    @Test
-    public void parse() {
-        assertEquals(ContentType.TEXT_CSV, ContentType.parse("text/csv"));
-        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("!@#$"));
-        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("*/a"));
-    }
-
-    @Test
-    public void forFileExtension() {
-        assertEquals(new ContentType("image", "svg+xml"), ContentType.forFileExtension("svg"));
-        assertEquals(new ContentType("image", "png"), ContentType.forFileExtension("PNG"));
-        assertEquals(new ContentType("video", "mp4"), ContentType.forFileExtension("mp4"));
-        assertNull(ContentType.forFileExtension("."));
     }
 
     @Test
