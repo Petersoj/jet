@@ -523,7 +523,6 @@ public class ContentType {
      * @param parameters the parameters {@link Multimap}, or <code>null</code> for no parameters
      *
      * @throws IllegalArgumentException thrown for invalid arguments
-     *
      * @see MediaType#create(String, String)
      * @see MediaType#withParameters(Multimap)
      */
@@ -541,7 +540,6 @@ public class ContentType {
      * @param charset the {@link Charset}
      *
      * @throws IllegalArgumentException thrown for invalid arguments
-     *
      * @see MediaType#create(String, String)
      * @see MediaType#withCharset(Charset)
      */
