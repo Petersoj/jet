@@ -37,8 +37,8 @@ public class CookieTest {
     }
 
     @Test
-    public void fromJavaCookie() {
-        assertEquals("a=b", Cookie.fromJavaCookie(new HttpCookie("a", "b")).toString());
+    public void fromJava() {
+        assertEquals("a=b", Cookie.fromJava(new HttpCookie("a", "b")).toString());
     }
 
     @Test
@@ -276,10 +276,10 @@ public class CookieTest {
     }
 
     @Test
-    public void toJavaCookie() {
+    public void toJava() {
         assertEquals(HttpCookie.parse("a=b; Path=/a").getFirst(), Cookie.builder("a", "b")
                 .path("/a")
-                .build().toJavaCookie());
+                .build().toJava());
     }
 
     @Test

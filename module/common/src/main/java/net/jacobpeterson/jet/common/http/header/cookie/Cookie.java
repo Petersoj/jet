@@ -112,7 +112,7 @@ public final class Cookie {
      *
      * @return the {@link Cookie}
      */
-    public static Cookie fromJavaCookie(final java.net.HttpCookie javaCookie) {
+    public static Cookie fromJava(final java.net.HttpCookie javaCookie) {
         return new Cookie(HttpCookie.from(javaCookie));
     }
 
@@ -385,7 +385,7 @@ public final class Cookie {
      *
      * @throws IllegalArgumentException thrown for invalid {@link Cookie} values during the conversion process
      */
-    public java.net.HttpCookie toJavaCookie() throws IllegalArgumentException {
+    public java.net.HttpCookie toJava() throws IllegalArgumentException {
         return asJavaNetHttpCookie(httpCookie);
     }
 
