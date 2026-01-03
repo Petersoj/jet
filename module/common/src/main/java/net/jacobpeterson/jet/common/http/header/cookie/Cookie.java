@@ -258,7 +258,7 @@ public final class Cookie {
     private final HttpCookie httpCookie;
 
     /**
-     * For internal use only.
+     * <strong>FOR INTERNAL USE ONLY</strong>
      */
     public Cookie(final HttpCookie httpCookie) {
         this.httpCookie = httpCookie;
@@ -432,7 +432,7 @@ public final class Cookie {
     }
 
     /**
-     * For internal use only.
+     * <strong>FOR INTERNAL USE ONLY</strong>
      */
     public HttpCookie internal() {
         return httpCookie;

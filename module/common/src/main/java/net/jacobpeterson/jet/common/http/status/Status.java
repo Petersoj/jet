@@ -78,21 +78,21 @@ public enum Status {
      * The request succeeded. The result and meaning of "success" depends on the HTTP method:
      * <ul>
      * <li>
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/GET"><code>GET</code></a>:
-     * The resource has been fetched and transmitted in the message body.
+     *     <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/GET"><code>GET</code></a>:
+     *     The resource has been fetched and transmitted in the message body.
      * </li>
      * <li>
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/HEAD"><code>HEAD</code></a>:
-     * Representation headers are included in the response without any message body.
+     *     <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/HEAD"><code>HEAD</code></a>:
+     *     Representation headers are included in the response without any message body.
      * </li>
      * <li>
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PUT"><code>PUT</code></a> or
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST"><code>POST</code></a>:
-     * The resource describing the result of the action is transmitted in the message body.
+     *     <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PUT"><code>PUT</code></a> or
+     *     <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST"><code>POST</code></a>:
+     *     The resource describing the result of the action is transmitted in the message body.
      * </li>
      * <li>
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/TRACE"><code>TRACE</code></a>:
-     * The message body contains the request as received by the server.
+     *     <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/TRACE"><code>TRACE</code></a>:
+     *     The message body contains the request as received by the server.
      * </li>
      * </ul>
      *
