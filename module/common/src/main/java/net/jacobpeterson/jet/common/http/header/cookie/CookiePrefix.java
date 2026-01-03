@@ -85,9 +85,13 @@ public enum CookiePrefix {
     public static final Map<String, CookiePrefix> VALUES_OF_UPPERCASED_STRINGS = stream(values())
             .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
 
-    private static final Map<CookiePrefix, String> UPPERCASED_STRINGS_OF_VALUES =
+    /**
+     * The inverse of {@link #VALUES_OF_UPPERCASED_STRINGS}.
+     */
+    public static final Map<CookiePrefix, String> UPPERCASED_STRINGS_OF_VALUES =
             VALUES_OF_UPPERCASED_STRINGS.entrySet().stream()
                     .collect(toUnmodifiableMap(Entry::getValue, Entry::getKey));
+
     private static final List<CookiePrefix> FROM_COOKIE_NAME_SEARCH_LIST =
             List.of(HOST_HTTP, SECURE, HOST, HTTP); // From longest to shortest
 

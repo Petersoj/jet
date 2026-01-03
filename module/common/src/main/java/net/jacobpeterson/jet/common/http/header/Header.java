@@ -1123,8 +1123,8 @@ public enum Header {
      * Included as part of a response to a request that included an <code>Attribution-Reporting-Eligible</code> header,
      * this is used to register an attribution trigger.
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register
-     * -Trigger">
+     * @see
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register-Trigger">
      * developer.mozilla.org</a>
      */
     ATTRIBUTION_REPORTING_REGISTER_TRIGGER("Attribution-Reporting-Register-Trigger"),

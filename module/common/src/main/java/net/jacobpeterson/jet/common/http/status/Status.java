@@ -309,9 +309,8 @@ public enum Status {
     METHOD_NOT_ALLOWED_405(405, "Method Not Allowed"),
 
     /**
-     * This response is sent when the web server, after performing <a
-     * href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Content_negotiation#server
-     * -driven_content_negotiation"> server-driven content negotiation</a>, doesn't find any content that conforms to
+     * This response is sent when the web server, after performing
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Content_negotiation#server-driven_content_negotiation"> server-driven content negotiation</a>, doesn't find any content that conforms to
      * the criteria given by the user agent.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/406">developer.mozilla.org</a>
@@ -482,8 +481,8 @@ public enum Status {
     PRECONDITION_REQUIRED_428(428, "Precondition Required"),
 
     /**
-     * The user has sent too many requests in a given amount of time (<a
-     * href="https://developer.mozilla.org/en-US/docs/Glossary/Rate_limit">rate limiting</a>).
+     * The user has sent too many requests in a given amount of time
+     * (<a href="https://developer.mozilla.org/en-US/docs/Glossary/Rate_limit">rate limiting</a>).
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429">developer.mozilla.org</a>
      */

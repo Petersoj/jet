@@ -322,7 +322,7 @@ public final class Cookie {
     }
 
     /**
-     * @return <code>true</code> if this {@link Cookie} is expired (<code>{@link #getMaxAge()} <= 0</code> or
+     * @return <code>true</code> if this {@link Cookie} is expired (<code>{@link #getMaxAge()} &lt;= 0</code> or
      * {@link #getExpires()} {@link ZonedDateTime#isAfter(ChronoZonedDateTime)} {@link ZonedDateTime#now()}),
      * <code>false</code> otherwise
      */

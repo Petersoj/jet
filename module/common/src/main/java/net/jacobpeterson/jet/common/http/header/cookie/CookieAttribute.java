@@ -129,7 +129,7 @@ public enum CookieAttribute {
     /**
      * <p>Indicates that the cookie is sent to the server only when a request is made with the <code>https:</code>
      * scheme (except on localhost), and therefore, is more resistant to
-     * <a href="https://developer.mozilla.org/en-US/docs/Glossary/MitM">man-in-the-middle</a> attacks.</p>
+     * <a href="https://developer.mozilla.org/en-US/docs/Glossary/MitM">man-in-the-middle</a> attacks.
      * <p>
      * <strong>Note:</strong> Do not assume that <code>Secure</code> prevents all access to sensitive information in
      * cookies (session keys, login details, etc.). Cookies with this attribute can still be read/modified either with
@@ -147,7 +147,7 @@ public enum CookieAttribute {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#secure">
      * <code>Secure</code> directive</a> must also be set. See
      * <a href="https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/Privacy_sandbox/Partitioned_cookies">
-     * Cookies Having Independent Partitioned State (CHIPS)</a> for more details.</p>
+     * Cookies Having Independent Partitioned State (CHIPS)</a> for more details.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#partitioned">
      * developer.mozilla.org</a>
