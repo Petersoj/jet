@@ -113,6 +113,8 @@ public final class Cookie {
      * @param javaCookie the Java {@link java.net.HttpCookie}
      *
      * @return the {@link Cookie}
+     *
+     * @see #toJava()
      */
     public static Cookie fromJava(final java.net.HttpCookie javaCookie) {
         return new Cookie(HttpCookie.from(javaCookie));
@@ -383,9 +385,10 @@ public final class Cookie {
     }
 
     /**
-     * @return this {@link Cookie} converted to a Java {@link java.net.HttpCookie}
+     * @return a Java {@link java.net.HttpCookie} created from this {@link Cookie}
      *
      * @throws IllegalArgumentException thrown for invalid {@link Cookie} values during the conversion process
+     * @see #fromJava(java.net.HttpCookie)
      */
     public java.net.HttpCookie toJava() throws IllegalArgumentException {
         return asJavaNetHttpCookie(httpCookie);

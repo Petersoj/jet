@@ -76,6 +76,7 @@ tasks.javadoc.configure {
         (this as CoreJavadocOptions).addBooleanOption("Xdoclint:none", true)
         addStringOption("link",
                 "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/")
+        addStringOption("link", "https://guava.dev/releases/snapshot-jre/api/docs/")
     }
 }
 
