@@ -306,10 +306,4 @@ public class CookieTest {
     public void _toString() {
         assertEquals("a=b", Cookie.builder("a", "b").build().toString());
     }
-
-    @Test
-    public void internal() {
-        final var jettyCookie = org.eclipse.jetty.http.HttpCookie.build("a", "b").build();
-        assertEquals(jettyCookie, new Cookie(jettyCookie).internal());
-    }
 }

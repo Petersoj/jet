@@ -3,14 +3,13 @@ package net.jacobpeterson.jet.common.http.header.cookie;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
 import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.uri.Uri;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpDateTime;
 import org.eclipse.jetty.http.SetCookieParser;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
@@ -94,7 +93,7 @@ public final class Cookie {
      *
      * @return the {@link Cookie}
      *
-     * @throws IllegalArgumentException thrown upon parsing failure of the given <code>headerValue</code> argument
+     * @throws IllegalArgumentException thrown upon parsing failure
      * @see #toResponseString()
      */
     public static Cookie parseResponseCookie(final String headerValue) throws IllegalArgumentException {
@@ -106,9 +105,9 @@ public final class Cookie {
     }
 
     /**
-     * Creates a {@link Cookie} from the given {@link java.net.HttpCookie}.
+     * Creates a {@link Cookie} from the given Java {@link java.net.HttpCookie}.
      *
-     * @param javaCookie the {@link java.net.HttpCookie}
+     * @param javaCookie the Java {@link java.net.HttpCookie}
      *
      * @return the {@link Cookie}
      */
@@ -127,7 +126,7 @@ public final class Cookie {
     /**
      * Creates a {@link Cookie} {@link Builder} instance.
      * <p>
-     * Use {@link URLEncoder#encode(String, Charset)} to encode
+     * Use {@link Uri#urlEncode(String)} to encode
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie-namecookie-value">
      * illegal cookie characters</a>.
      *
@@ -141,7 +140,7 @@ public final class Cookie {
     }
 
     /**
-     * {@link Builder} is a builder class for {@link Cookie}.
+     * {@link Builder} is a non-reusable builder class for {@link Cookie}.
      *
      * @see #builder(CookiePrefix, String, String)
      * @see #builder(String, String)
@@ -249,6 +248,9 @@ public final class Cookie {
             return this;
         }
 
+        /**
+         * @return the built {@link Cookie} instance
+         */
         public Cookie build() {
             return new Cookie(httpCookieBuilder.build());
         }
@@ -257,10 +259,7 @@ public final class Cookie {
     @SuppressWarnings("Immutable")
     private final HttpCookie httpCookie;
 
-    /**
-     * <strong>FOR INTERNAL USE ONLY</strong>
-     */
-    public Cookie(final HttpCookie httpCookie) {
+    private Cookie(final HttpCookie httpCookie) {
         this.httpCookie = httpCookie;
     }
 
@@ -381,7 +380,7 @@ public final class Cookie {
     }
 
     /**
-     * @return this {@link Cookie} converted to a {@link java.net.HttpCookie}
+     * @return this {@link Cookie} converted to a Java {@link java.net.HttpCookie}
      *
      * @throws IllegalArgumentException thrown for invalid {@link Cookie} values during the conversion process
      */
@@ -429,12 +428,5 @@ public final class Cookie {
     @Override
     public String toString() {
         return toResponseString();
-    }
-
-    /**
-     * <strong>FOR INTERNAL USE ONLY</strong>
-     */
-    public HttpCookie internal() {
-        return httpCookie;
     }
 }
