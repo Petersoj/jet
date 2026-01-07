@@ -80,6 +80,9 @@ public final class Cookie {
         }
         final var cookies = new ArrayList<Cookie>();
         for (final var semicolonSplit : headerValue.split(";", -1)) {
+            if (semicolonSplit.isBlank()) {
+                continue;
+            }
             final var equalsSplit = semicolonSplit.trim().split("=", 2);
             cookies.add(builder(equalsSplit[0].trim(), equalsSplit.length > 1 ? equalsSplit[1].trim() : "").build());
         }
@@ -140,7 +143,7 @@ public final class Cookie {
     }
 
     /**
-     * {@link Builder} is a non-reusable builder class for {@link Cookie}.
+     * {@link Builder} is a nonreusable builder class for {@link Cookie}.
      *
      * @see #builder(CookiePrefix, String, String)
      * @see #builder(String, String)
