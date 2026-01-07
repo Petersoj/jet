@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.common.http.header.contenttype;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -28,7 +29,6 @@ import static com.google.common.collect.Multimaps.flatteningToMultimap;
 import static com.google.common.collect.Multimaps.unmodifiableSetMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllLines;
-import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toUnmodifiableMap;
@@ -456,8 +456,9 @@ public class ContentType {
         }
         FILE_EXTENSIONS_OF_CONTENT_TYPES = unmodifiableSetMultimap(tsvLines.stream()
                 .filter(line -> !line.isBlank() && !line.startsWith("#"))
-                .map(line -> line.split("\t"))
-                .collect(flatteningToMultimap(tsv -> parse(tsv[0]), tsv -> stream(tsv[1].split(" ")),
+                .map(line -> Splitter.on('\t').limit(2).splitToList(line))
+                .collect(flatteningToMultimap(
+                        tsv -> parse(tsv.getFirst()), tsv -> Splitter.on(' ').splitToStream(tsv.get(1)),
                         () -> SetMultimapBuilder.linkedHashKeys().hashSetValues().build())));
         CONTENT_TYPE_OF_FILE_EXTENSIONS = FILE_EXTENSIONS_OF_CONTENT_TYPES.entries().stream()
                 .collect(toUnmodifiableMap(Entry::getValue, Entry::getKey, (first, _) -> first));

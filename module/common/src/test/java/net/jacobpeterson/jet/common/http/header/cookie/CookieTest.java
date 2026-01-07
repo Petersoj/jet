@@ -26,6 +26,7 @@ public class CookieTest {
         assertEquals("[a=, c=d]", Cookie.parseRequestCookies("a; c=d; ").toString());
         assertEquals("[a=, c=d]", Cookie.parseRequestCookies("a; c=d ;").toString());
         assertEquals("[]", Cookie.parseRequestCookies("").toString());
+        assertEquals("[]", Cookie.parseRequestCookies(" ").toString());
         assertEquals("[]", Cookie.parseRequestCookies(";").toString());
         assertEquals("[]", Cookie.parseRequestCookies(";;").toString());
         assertEquals("[]", Cookie.parseRequestCookies("; ; ").toString());

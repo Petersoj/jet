@@ -1,9 +1,10 @@
 package net.jacobpeterson.jet.common.http.header.cookie;
 
+import com.google.common.base.Splitter;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
 import net.jacobpeterson.jet.common.http.header.Header;
-import net.jacobpeterson.jet.common.http.uri.Uri;
+import net.jacobpeterson.jet.common.http.url.Url;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpDateTime;
 import org.eclipse.jetty.http.SetCookieParser;
@@ -79,12 +80,13 @@ public final class Cookie {
             return List.of();
         }
         final var cookies = new ArrayList<Cookie>();
-        for (final var semicolonSplit : headerValue.split(";", -1)) {
+        for (final var semicolonSplit : Splitter.on(';').split(headerValue)) {
             if (semicolonSplit.isBlank()) {
                 continue;
             }
-            final var equalsSplit = semicolonSplit.trim().split("=", 2);
-            cookies.add(builder(equalsSplit[0].trim(), equalsSplit.length > 1 ? equalsSplit[1].trim() : "").build());
+            final var equalsSplit = Splitter.on('=').limit(2).trimResults().splitToList(semicolonSplit);
+            cookies.add(builder(equalsSplit.getFirst(),
+                    equalsSplit.size() > 1 ? equalsSplit.get(1).trim() : "").build());
         }
         return cookies;
     }
@@ -131,7 +133,7 @@ public final class Cookie {
     /**
      * Creates a {@link Cookie} {@link Builder} instance.
      * <p>
-     * Use {@link Uri#urlEncode(String)} to encode
+     * Use {@link Url#encode(String)} to encode
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie-namecookie-value">
      * illegal cookie characters</a>.
      *
