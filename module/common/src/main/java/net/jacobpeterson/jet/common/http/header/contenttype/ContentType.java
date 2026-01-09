@@ -5,7 +5,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.net.MediaType;
@@ -25,8 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.google.common.collect.Multimaps.flatteningToMultimap;
-import static com.google.common.collect.Multimaps.unmodifiableSetMultimap;
+import static com.google.common.collect.ImmutableSetMultimap.flatteningToImmutableSetMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllLines;
 import static java.util.Locale.ROOT;
@@ -454,12 +452,11 @@ public class ContentType {
         } catch (final IOException | URISyntaxException exception) {
             throw new RuntimeException(exception);
         }
-        FILE_EXTENSIONS_OF_CONTENT_TYPES = unmodifiableSetMultimap(tsvLines.stream()
+        FILE_EXTENSIONS_OF_CONTENT_TYPES = tsvLines.stream()
                 .filter(line -> !line.isBlank() && !line.startsWith("#"))
                 .map(line -> Splitter.on('\t').limit(2).splitToList(line))
-                .collect(flatteningToMultimap(
-                        tsv -> parse(tsv.getFirst()), tsv -> Splitter.on(' ').splitToStream(tsv.get(1)),
-                        () -> SetMultimapBuilder.linkedHashKeys().hashSetValues().build())));
+                .collect(flatteningToImmutableSetMultimap(tsv -> parse(tsv.getFirst()),
+                        tsv -> Splitter.on(' ').splitToStream(tsv.get(1))));
         CONTENT_TYPE_OF_FILE_EXTENSIONS = FILE_EXTENSIONS_OF_CONTENT_TYPES.entries().stream()
                 .collect(toUnmodifiableMap(Entry::getValue, Entry::getKey, (first, _) -> first));
     }
