@@ -131,9 +131,9 @@ public final class Cookie {
     }
 
     /**
-     * Creates a {@link Cookie} {@link Builder} instance.
+     * Creates a {@link Cookie} {@link Builder}.
      * <p>
-     * Use {@link Url#encode(String)} to encode
+     * Use {@link Url#encode(String)}/{@link Url#decode(String)} to encode/decode
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie-namecookie-value">
      * illegal cookie characters</a>.
      *
@@ -256,7 +256,7 @@ public final class Cookie {
         }
 
         /**
-         * @return the built {@link Cookie} instance
+         * @return the built {@link Cookie}
          */
         public Cookie build() {
             return new Cookie(httpCookieBuilder.build());
@@ -397,7 +397,7 @@ public final class Cookie {
     }
 
     /**
-     * @return copies this {@link Cookie} into a {@link Builder} instance
+     * @return copies this {@link Cookie} into a {@link Builder}
      */
     public Builder toBuilder() {
         return new Builder(HttpCookie.build(httpCookie));

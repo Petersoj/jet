@@ -120,6 +120,7 @@ public enum CookieAttribute {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#pathpath-value">
      * developer.mozilla.org</a>
      */
+    @SuppressWarnings("JavadocLinkAsPlainText")
     PATH(HttpCookie.PATH_ATTRIBUTE),
 
     /**
