@@ -72,6 +72,13 @@ public class ContentTypeTest {
     }
 
     @Test
+    public void createMediaType() {
+        final var contentType = ContentType.create(MediaType.ANY_TYPE);
+        assertEquals("*", contentType.getType());
+        assertEquals("*", contentType.getSubtype());
+    }
+
+    @Test
     public void withoutParameters() {
         assertEquals(ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON_UTF_8.withoutParameters());
     }

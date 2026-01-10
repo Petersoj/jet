@@ -10,7 +10,6 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 import net.jacobpeterson.jet.common.http.header.Header;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -68,8 +67,8 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  */
 @NullMarked
 @Immutable
-@Value @EqualsAndHashCode(cacheStrategy = LAZY)
-public class ContentType {
+@EqualsAndHashCode(cacheStrategy = LAZY)
+public final class ContentType {
 
     // The below public constants are commonly used content types. The constants are defined as `String` and
     // `ContentType` types. The `String` types are provided so they can be used within annotations.
@@ -462,7 +461,7 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #create(MediaType)} with {@link MediaType#parse(String)}.
+     * @return {@link #create(MediaType)} {@link MediaType#parse(String)}
      */
     public static ContentType parse(final String contentType) {
         return create(MediaType.parse(contentType));
@@ -481,15 +480,15 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #create(String, String, Map)} with <code>parameters</code> set to <code>null</code>.
+     * @return {@link #create(String, String, Map)} with <code>parameters</code> set to <code>null</code>
      */
     public static ContentType create(final String type, final String subtype) {
         return create(type, subtype, (Map<String, String>) null);
     }
 
     /**
-     * Calls {@link #create(String, String, Multimap)} with <code>parameters</code> set to the given
-     * <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)} if non-<code>null</code>.
+     * @return {@link #create(String, String, Multimap)} with <code>parameters</code> set to the given
+     * <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)} if non-<code>null</code>
      */
     public static ContentType create(final String type, final String subtype,
             final @Nullable Map<String, String> parameters) {
@@ -497,8 +496,8 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #create(MediaType)} with {@link MediaType#create(String, String)} and
-     * {@link MediaType#withParameters(Multimap)}.
+     * @return {@link #create(MediaType)} with {@link MediaType#create(String, String)} and
+     * {@link MediaType#withParameters(Multimap)}
      */
     public static ContentType create(final String type, final String subtype,
             final @Nullable Multimap<String, String> parameters) {
@@ -507,8 +506,8 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #create(MediaType)} with {@link MediaType#create(String, String)} and
-     * {@link MediaType#withCharset(Charset)}.
+     * @return {@link #create(MediaType)} with {@link MediaType#create(String, String)} and
+     * {@link MediaType#withCharset(Charset)}
      */
     public static ContentType create(final String type, final String subtype, final Charset charset) {
         return create(MediaType.create(type, subtype).withCharset(charset));
@@ -523,7 +522,7 @@ public class ContentType {
         return new ContentType(mediaType);
     }
 
-    MediaType mediaType;
+    private final MediaType mediaType;
 
     private ContentType(final MediaType mediaType) {
         this.mediaType = mediaType;
@@ -560,15 +559,14 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #withParameters(Map)} with <code>parameters</code> set to {@link Map#of(Object, Object)} with the
-     * given arguments respectively.
+     * @return {@link #withParameters(Map)} {@link Map#of(Object, Object)}
      */
     public ContentType withParameter(final String attribute, final String value) {
         return withParameters(Map.of(attribute, value));
     }
 
     /**
-     * Calls {@link #withParameters(Multimap)} with <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)}.
+     * @return {@link #withParameters(Multimap)} {@link Multimaps#forMap(Map)}
      */
     public ContentType withParameters(final Map<String, String> parameters) {
         return withParameters(Multimaps.forMap(parameters));
@@ -584,15 +582,14 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #addParameters(Map)} with <code>parameters</code> set to {@link Map#of(Object, Object)} with the
-     * given arguments respectively.
+     * @return {@link #addParameters(Map)} {@link Map#of(Object, Object)}
      */
     public ContentType addParameter(final String attribute, final String value) {
         return addParameters(Map.of(attribute, value));
     }
 
     /**
-     * Calls {@link #addParameters(Multimap)} with <code>parameters</code> wrapped with {@link Multimaps#forMap(Map)}.
+     * @return {@link #addParameters(Multimap)} {@link Multimaps#forMap(Map)}
      */
     public ContentType addParameters(final Map<String, String> parameters) {
         return addParameters(Multimaps.forMap(parameters));
@@ -629,10 +626,10 @@ public class ContentType {
     }
 
     /**
-     * Calls {@link #is(MediaType)} with the given {@link ContentType#getMediaType()}.
+     * @return {@link #is(MediaType)} {@link ContentType#unwrap()}
      */
     public boolean is(final ContentType contentType) {
-        return is(contentType.getMediaType());
+        return is(contentType.unwrap());
     }
 
     /**
@@ -656,6 +653,13 @@ public class ContentType {
      */
     public Set<String> getFileExtensions() {
         return FILE_EXTENSIONS_OF_CONTENT_TYPES.get(this);
+    }
+
+    /**
+     * @return the wrapped {@link MediaType}
+     */
+    public MediaType unwrap() {
+        return mediaType;
     }
 
     /**
