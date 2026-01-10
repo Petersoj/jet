@@ -59,97 +59,100 @@ public class CookieTest {
                 .build().toString());
     }
 
-    @Test
-    public void builderAttributes() {
-        assertEquals("a=b; c=d", Cookie.builder("a", "b")
-                .attributes(Map.of("c", "d"))
-                .build().toString());
-    }
+    public static class BuilderTest {
 
-    @Test
-    public void builderAttributeCookieAttribute() {
-        assertEquals("a=b; Path=/a", Cookie.builder("a", "b")
-                .attribute(CookieAttribute.PATH, "/a")
-                .build().toString());
-    }
+        @Test
+        public void attributes() {
+            assertEquals("a=b; c=d", Cookie.builder("a", "b")
+                    .attributes(Map.of("c", "d"))
+                    .build().toString());
+        }
 
-    @Test
-    public void builderAttributeString() {
-        assertEquals("a=b; c=d", Cookie.builder("a", "b")
-                .attribute("c", "d")
-                .build().toString());
-    }
+        @Test
+        public void attributeCookieAttribute() {
+            assertEquals("a=b; Path=/a", Cookie.builder("a", "b")
+                    .attribute(CookieAttribute.PATH, "/a")
+                    .build().toString());
+        }
 
-    @Test
-    public void builderDomain() {
-        assertEquals("a=b; Domain=example.com", Cookie.builder("a", "b")
-                .domain("example.com")
-                .build().toString());
-    }
+        @Test
+        public void attributeString() {
+            assertEquals("a=b; c=d", Cookie.builder("a", "b")
+                    .attribute("c", "d")
+                    .build().toString());
+        }
 
-    @Test
-    public void builderHttpOnly() {
-        assertEquals("a=b; HttpOnly", Cookie.builder("a", "b")
-                .httpOnly(true)
-                .build().toString());
-    }
+        @Test
+        public void domain() {
+            assertEquals("a=b; Domain=example.com", Cookie.builder("a", "b")
+                    .domain("example.com")
+                    .build().toString());
+        }
 
-    @Test
-    public void builderMaxAgeDuration() {
-        assertTrue(Cookie.builder("a", "b")
-                .maxAge(Duration.ofSeconds(1))
-                .build().toString()
-                .contains("Max-Age=1"));
-    }
+        @Test
+        public void httpOnly() {
+            assertEquals("a=b; HttpOnly", Cookie.builder("a", "b")
+                    .httpOnly(true)
+                    .build().toString());
+        }
 
-    @Test
-    public void builderMaxAgeLong() {
-        assertTrue(Cookie.builder("a", "b")
-                .maxAge(1)
-                .build().toString()
-                .contains("Max-Age=1"));
-    }
+        @Test
+        public void maxAgeDuration() {
+            assertTrue(Cookie.builder("a", "b")
+                    .maxAge(Duration.ofSeconds(1))
+                    .build().toString()
+                    .contains("Max-Age=1"));
+        }
 
-    @Test
-    public void builderPath() {
-        assertEquals("a=b; Path=/", Cookie.builder("a", "b")
-                .path("/")
-                .build().toString());
-    }
+        @Test
+        public void maxAgeLong() {
+            assertTrue(Cookie.builder("a", "b")
+                    .maxAge(1)
+                    .build().toString()
+                    .contains("Max-Age=1"));
+        }
 
-    @Test
-    public void builderSameSiteStrict() {
-        assertEquals("a=b; SameSite=Strict", Cookie.builder("a", "b")
-                .sameSite(SameSite.STRICT)
-                .build().toString());
-    }
+        @Test
+        public void path() {
+            assertEquals("a=b; Path=/", Cookie.builder("a", "b")
+                    .path("/")
+                    .build().toString());
+        }
 
-    @Test
-    public void builderSameSiteLax() {
-        assertEquals("a=b; SameSite=Lax", Cookie.builder("a", "b")
-                .sameSite(SameSite.LAX)
-                .build().toString());
-    }
+        @Test
+        public void sameSiteStrict() {
+            assertEquals("a=b; SameSite=Strict", Cookie.builder("a", "b")
+                    .sameSite(SameSite.STRICT)
+                    .build().toString());
+        }
 
-    @Test
-    public void builderSameSiteNone() {
-        assertEquals("a=b; SameSite=None", Cookie.builder("a", "b")
-                .sameSite(SameSite.NONE)
-                .build().toString());
-    }
+        @Test
+        public void sameSiteLax() {
+            assertEquals("a=b; SameSite=Lax", Cookie.builder("a", "b")
+                    .sameSite(SameSite.LAX)
+                    .build().toString());
+        }
 
-    @Test
-    public void builderSecure() {
-        assertEquals("a=b; Secure", Cookie.builder("a", "b")
-                .secure(true)
-                .build().toString());
-    }
+        @Test
+        public void sameSiteNone() {
+            assertEquals("a=b; SameSite=None", Cookie.builder("a", "b")
+                    .sameSite(SameSite.NONE)
+                    .build().toString());
+        }
 
-    @Test
-    public void builderPartitioned() {
-        assertEquals("a=b; Partitioned", Cookie.builder("a", "b")
-                .partitioned(true)
-                .build().toString());
+        @Test
+        public void secure() {
+            assertEquals("a=b; Secure", Cookie.builder("a", "b")
+                    .secure(true)
+                    .build().toString());
+        }
+
+        @Test
+        public void partitioned() {
+            assertEquals("a=b; Partitioned", Cookie.builder("a", "b")
+                    .partitioned(true)
+                    .build().toString());
+        }
     }
 
     @Test

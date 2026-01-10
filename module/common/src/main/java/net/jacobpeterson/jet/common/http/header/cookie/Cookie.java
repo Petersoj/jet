@@ -123,8 +123,8 @@ public final class Cookie {
     }
 
     /**
-     * Calls {@link #builder(String, String)} with <code>name</code> set to the concatenation of
-     * {@link CookiePrefix#toString()} and the given <code>name</code>.
+     * @return {@link #builder(String, String)} with the concatenation of {@link CookiePrefix#toString()} and the given
+     * <code>name</code>
      */
     public static Builder builder(final CookiePrefix prefix, final String name, final String value) {
         return builder(prefix + name, value);
@@ -263,8 +263,7 @@ public final class Cookie {
         }
     }
 
-    @SuppressWarnings("Immutable")
-    private final HttpCookie httpCookie;
+    private final @SuppressWarnings("Immutable") HttpCookie httpCookie;
 
     private Cookie(final HttpCookie httpCookie) {
         this.httpCookie = httpCookie;
@@ -278,14 +277,14 @@ public final class Cookie {
     }
 
     /**
-     * Calls {@link #getAttribute(String)} with the given {@link CookieAttribute#toString()}.
+     * @return {@link #getAttribute(String)} {@link CookieAttribute#toString()}
      */
     public @Nullable String getAttribute(final CookieAttribute cookieAttribute) {
         return getAttribute(cookieAttribute.toString());
     }
 
     /**
-     * Calls {@link Map#get(Object)} on {@link #getAttributes()} with the given <code>attribute</code>.
+     * @return {@link #getAttributes()} {@link Map#get(Object)}
      */
     public @Nullable String getAttribute(final String attribute) {
         return getAttributes().get(attribute);
