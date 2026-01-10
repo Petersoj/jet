@@ -3,8 +3,8 @@ package net.jacobpeterson.jet.common.http.header.contenttype;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.net.MediaType;
@@ -603,12 +603,12 @@ public final class ContentType {
      */
     public ContentType addParameters(final Multimap<String, String> parameters) throws IllegalArgumentException {
         final var existingParameters = getParameters();
-        final var combinedParameters = MultimapBuilder
-                .hashKeys(existingParameters.keySet().size() + parameters.keySet().size())
-                .arrayListValues(1)
-                .build(existingParameters);
-        combinedParameters.putAll(parameters);
-        return create(mediaType.withParameters(combinedParameters));
+        return create(mediaType.withParameters(ImmutableSetMultimap.<String, String>builderWithExpectedKeys(
+                        existingParameters.keySet().size() + parameters.keySet().size())
+                .expectedValuesPerKey(1)
+                .putAll(existingParameters)
+                .putAll(parameters)
+                .build()));
     }
 
     /**
