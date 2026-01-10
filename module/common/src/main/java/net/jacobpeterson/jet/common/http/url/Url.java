@@ -9,8 +9,6 @@ import com.google.common.collect.Multiset;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.google.errorprone.annotations.Immutable;
-import org.eclipse.jetty.http.HttpURI;
-import org.eclipse.jetty.http.UriCompliance.Violation;
 import org.eclipse.jetty.util.URIUtil;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -23,7 +21,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -31,11 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Map.entry;
-import static org.eclipse.jetty.http.UriCompliance.Violation.BAD_PERCENT_ENCODING;
-import static org.eclipse.jetty.http.UriCompliance.Violation.BAD_UTF8_ENCODING;
-import static org.eclipse.jetty.http.UriCompliance.Violation.ILLEGAL_PATH_CHARACTERS;
-import static org.eclipse.jetty.http.UriCompliance.Violation.SUSPICIOUS_PATH_CHARACTERS;
-import static org.eclipse.jetty.http.UriCompliance.Violation.TRUNCATED_UTF8_ENCODING;
 
 /**
  * {@link Url} is an immutable class that represents a standardized Uniform Resource Locator (URL), the most common
@@ -135,19 +127,12 @@ public final class Url {
      */
     public static final String FRAGMENT_DELIMITER = "#";
 
-    private static final Set<Violation> ERROR_VIOLATIONS = Set.of(
-            BAD_UTF8_ENCODING,
-            TRUNCATED_UTF8_ENCODING,
-            BAD_PERCENT_ENCODING,
-            SUSPICIOUS_PATH_CHARACTERS,
-            ILLEGAL_PATH_CHARACTERS);
-
     /**
-     * Calls {@link URLEncoder#encode(String, Charset)} with the given <code>decoded</code> and
-     * {@link StandardCharsets#UTF_8}.
+     * @return {@link URLEncoder#encode(String, Charset)} with <code>decoded</code> and {@link StandardCharsets#UTF_8}
+     * (<code>+</code> is replaced with <code>%20</code> to conform with URL percent encoding standards)
      */
     public static String encode(final String decoded) {
-        return URLEncoder.encode(decoded, UTF_8);
+        return URLEncoder.encode(decoded, UTF_8).replace("+", "%20");
     }
 
     /**
@@ -158,8 +143,16 @@ public final class Url {
     }
 
     /**
-     * Calls {@link URLDecoder#decode(String, Charset)} with the given <code>encoded</code> and
-     * {@link StandardCharsets#UTF_8}.
+     * @param path the encoded or decoded path
+     *
+     * @return same as {@link #encodePath(String)}, but does not re-encode existing percent encodings
+     */
+    public static String encodePathAsNeeded(final String path) {
+        return URIUtil.encodePathSafeEncoding(path);
+    }
+
+    /**
+     * @return {@link URLDecoder#decode(String, Charset)} with <code>encoded</code> and {@link StandardCharsets#UTF_8}
      */
     public static String decode(final String encoded) {
         return URLDecoder.decode(encoded, UTF_8);
@@ -234,12 +227,20 @@ public final class Url {
     }
 
     /**
-     * Normalizes the given <code>encodedPath</code> by resolving relative paths (e.g. <code>/a/b/..</code> to
-     * <code>/a</code>), collapsing sequential {@link #PATH_SEGMENT_DELIMITER}s to one
-     * {@link #PATH_SEGMENT_DELIMITER} (e.g. <code>/a//</code> to <code>/a</code>), and
-     * {@link #pathTrimTrailing(String)}.
-     *
-     * @param encodedPath the encoded path
+     * Normalizes the given <code>encodedPath</code> by:
+     * <ul>
+     *     <li>Resolving relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
+     *     <li>
+     *         Removing empty path segments by:
+     *         <ul>
+     *             <li>Collapsing sequential {@link #PATH_SEGMENT_DELIMITER}s to one {@link #PATH_SEGMENT_DELIMITER}
+     *             (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
+     *             <li>{@link #pathTrimTrailing(String)}</li>
+     *         </ul>
+     *     </li>
+     * </ul>
+     * <p>
+     *  @param encodedPath the encoded path
      *
      * @return the normalized path
      */
@@ -286,7 +287,7 @@ public final class Url {
     }
 
     /**
-     * Concatenates the given arguments using the appropriate delimiters: {@link #SCHEME_DELIMITER},
+     * Concatenates the given URL components using the appropriate delimiters: {@link #SCHEME_DELIMITER},
      * {@link #AUTHORITY_DELIMITER}, {@link #USER_INFO_DELIMITER}, {@link #PORT_DELIMITER},
      * {@link #PATH_SEGMENT_DELIMITER}, {@link #QUERY_DELIMITER}, and {@link #FRAGMENT_DELIMITER}.
      *
@@ -300,7 +301,7 @@ public final class Url {
      *
      * @return the concatenated {@link String}
      */
-    public static String concatStringComponents(final String scheme, final @Nullable String userInfo, final String host,
+    public static String concatComponents(final String scheme, final @Nullable String userInfo, final String host,
             final @Nullable Integer port, final String path, final @Nullable String query,
             final @Nullable String fragment) {
         final var string = new StringBuilder();
@@ -329,24 +330,32 @@ public final class Url {
     }
 
     /**
-     * Parses the given <code>encodedUrl</code> into a {@link Url}.
+     * Parses the given <code>url</code> into a {@link Url}.
      *
-     * @param encodedUrl the encoded URL {@link String}
+     * @param url the URL {@link String} which is typically percent encoded (although, after parsing, the user info,
+     *            path, query, and fragment are call with {@link #encodePathAsNeeded(String)} to ensure percent
+     *            encoding)
      *
      * @return the {@link Url}
      *
      * @throws IllegalArgumentException thrown upon parsing failure
      * @see #toString()
      */
-    public static Url parse(final String encodedUrl) throws IllegalArgumentException {
-        return new Url(encodedUrl);
+    public static Url parse(final String url) throws IllegalArgumentException {
+        return new Url(URI.create(url));
     }
 
     /**
-     * @return {@link #parse(String)} {@link URI#toASCIIString()}
+     * Creates a {@link Url} from the given Java {@link URI}.
+     *
+     * @param javaUri the Java {@link URI}
+     *
+     * @return the {@link Url}
+     *
+     * @throws IllegalArgumentException thrown upon invalid {@link URI} values during the conversion process
      */
-    public static Url fromJava(final URI javaUri) {
-        return parse(javaUri.toASCIIString());
+    public static Url fromJava(final URI javaUri) throws IllegalArgumentException {
+        return new Url(javaUri);
     }
 
     /**
@@ -364,28 +373,28 @@ public final class Url {
     public static final class Builder {
 
         private String scheme;
-        private @Nullable String userInfo;
+        private @Nullable String encodedUserInfo;
         private String host;
         private @Nullable Integer port;
-        private StringBuilder path;
-        private @Nullable StringBuilder query;
-        private @Nullable String fragment;
+        private StringBuilder encodedPath;
+        private @Nullable StringBuilder encodedQuery;
+        private @Nullable String encodedFragment;
 
         private Builder() {
             scheme = "";
             host = "";
-            path = new StringBuilder(PATH_SEGMENT_DELIMITER);
+            encodedPath = new StringBuilder(PATH_SEGMENT_DELIMITER);
         }
 
         private Builder(final Url url) {
             scheme = url.getScheme();
-            userInfo = url.getUserInfo();
+            encodedUserInfo = url.getEncodedUserInfo();
             host = url.getHost();
             port = url.getPort();
-            path = new StringBuilder(url.getPath());
-            final var urlQuery = url.getQuery();
-            query = urlQuery == null ? null : new StringBuilder(urlQuery);
-            fragment = url.getFragment();
+            encodedPath = new StringBuilder(url.getEncodedPath());
+            final var urlEncodedQuery = url.getEncodedQuery();
+            encodedQuery = urlEncodedQuery == null ? null : new StringBuilder(urlEncodedQuery);
+            encodedFragment = url.getEncodedFragment();
         }
 
         /**
@@ -406,18 +415,18 @@ public final class Url {
         }
 
         /**
+         * @see #getEncodedUserInfo()
+         */
+        public Builder encodedUserInfo(final @Nullable String encodedUserInfo) {
+            this.encodedUserInfo = encodedUserInfo;
+            return this;
+        }
+
+        /**
          * @return {@link #encodedUserInfo(String)} {@link #encode(String)}
          */
         public Builder userInfo(final @Nullable String userInfo) {
             return encodedUserInfo(userInfo == null ? null : encode(userInfo));
-        }
-
-        /**
-         * @see #getUserInfo()
-         */
-        public Builder encodedUserInfo(final @Nullable String encodedUserInfo) {
-            userInfo = encodedUserInfo;
-            return this;
         }
 
         /**
@@ -437,17 +446,30 @@ public final class Url {
         }
 
         /**
-         * @return {@link #encodedPath(String)} {@link #encode(String)}
+         * @see #getEncodedPath()
          */
-        public Builder path(final String path) {
-            return encodedPath(encode(path));
+        public Builder encodedPath(final String encodedPath) {
+            this.encodedPath = new StringBuilder(encodedPath);
+            return this;
         }
 
         /**
-         * @see #getPath()
+         * @return {@link #encodedPath(String)} {@link #encodePath(String)}
          */
-        public Builder encodedPath(final String encodedPath) {
-            path = new StringBuilder(encodedPath);
+        public Builder path(final String path) {
+            return encodedPath(encodePath(path));
+        }
+
+        /**
+         * Appends the given <code>encodedPathSegment</code> to the existing {@link #encodedPath(String)}. A
+         * {@link #PATH_SEGMENT_DELIMITER} is prefixed if the existing {@link #encodedPath(String)} doesn't end with
+         * {@link #PATH_SEGMENT_DELIMITER}.
+         */
+        public Builder addEncodedPathSegment(final String encodedPathSegment) {
+            if (encodedPath.charAt(encodedPath.length() - 1) != PATH_SEGMENT_DELIMITER_CHAR) {
+                encodedPath.append(PATH_SEGMENT_DELIMITER_CHAR);
+            }
+            encodedPath.append(encodedPathSegment);
             return this;
         }
 
@@ -459,28 +481,6 @@ public final class Url {
         }
 
         /**
-         * Appends the given <code>encodedPathSegment</code> to the existing {@link #path(String)}. A
-         * {@link #PATH_SEGMENT_DELIMITER} is prefixed if the existing {@link #path(String)} doesn't end with
-         * {@link #PATH_SEGMENT_DELIMITER}.
-         */
-        public Builder addEncodedPathSegment(final String encodedPathSegment) {
-            if (path.charAt(path.length() - 1) != PATH_SEGMENT_DELIMITER_CHAR) {
-                path.append(PATH_SEGMENT_DELIMITER_CHAR);
-            }
-            path.append(encodedPathSegment);
-            return this;
-        }
-
-        /**
-         * @param pathSegments the path segments (without a leading or trailing {@link #PATH_SEGMENT_DELIMITER})
-         *
-         * @return {@link #addEncodedPathSegments(String)} {@link Url#encodePath(String)}
-         */
-        public Builder addPathSegments(final String pathSegments) {
-            return addEncodedPathSegments(Url.encodePath(pathSegments));
-        }
-
-        /**
          * @see #addEncodedPathSegment(String)
          */
         public Builder addEncodedPathSegments(final String encodedPathSegments) {
@@ -488,10 +488,27 @@ public final class Url {
         }
 
         /**
+         * @param pathSegments the path segments (leading and trailing {@link #PATH_SEGMENT_DELIMITER}s are unnecessary)
+         *
+         * @return {@link #addEncodedPathSegments(String)} {@link #encodePath(String)}
+         */
+        public Builder addPathSegments(final String pathSegments) {
+            return addEncodedPathSegments(encodePath(pathSegments));
+        }
+
+        /**
          * @see #normalizePath(String)
          */
         public Builder normalizePath() {
-            path = new StringBuilder(Url.normalizePath(path.toString()));
+            encodedPath = new StringBuilder(Url.normalizePath(encodedPath.toString()));
+            return this;
+        }
+
+        /**
+         * @see #getEncodedQuery()
+         */
+        public Builder encodedQuery(final @Nullable String encodedQuery) {
+            this.encodedQuery = encodedQuery == null ? null : new StringBuilder(encodedQuery);
             return this;
         }
 
@@ -503,10 +520,18 @@ public final class Url {
         }
 
         /**
-         * @see #getQuery()
+         * Appends the concatenation of the given <code>encodedKey</code>, {@link #QUERY_KEY_VALUE_DELIMITER}, and the
+         * given <code>encodedValue</code> to the existing {@link #query(String)}. A
+         * {@link #QUERY_PARAMETER_DELIMITER} is prefixed if there is an existing {@link #query(String)}.
          */
-        public Builder encodedQuery(final @Nullable String encodedQuery) {
-            query = encodedQuery == null ? null : new StringBuilder(encodedQuery);
+        public Builder addEncodedQueryParameter(final String encodedKey, final String encodedValue) {
+            if (encodedQuery == null) {
+                encodedQuery = new StringBuilder();
+            }
+            if (!encodedQuery.isEmpty()) {
+                encodedQuery.append(QUERY_PARAMETER_DELIMITER);
+            }
+            encodedQuery.append(encodedKey).append(QUERY_KEY_VALUE_DELIMITER).append(encodedValue);
             return this;
         }
 
@@ -518,19 +543,10 @@ public final class Url {
         }
 
         /**
-         * Appends the concatenation of the given <code>encodedKey</code>, {@link #QUERY_KEY_VALUE_DELIMITER}, and the
-         * given <code>encodedValue</code> to the existing {@link #query(String)}. A
-         * {@link #QUERY_PARAMETER_DELIMITER} is prefixed if there is an existing {@link #query(String)}.
+         * @return {@link #addEncodedQueryParameters(Multimap)} {@link Multimaps#forMap(Map)}
          */
-        public Builder addEncodedQueryParameter(final String encodedKey, final String encodedValue) {
-            if (query == null) {
-                query = new StringBuilder();
-            }
-            if (!query.isEmpty()) {
-                query.append(QUERY_PARAMETER_DELIMITER);
-            }
-            query.append(encodedKey).append(QUERY_KEY_VALUE_DELIMITER).append(encodedValue);
-            return this;
+        public Builder addEncodedQueryParameters(final Map<String, String> encodedQueryParameters) {
+            return addEncodedQueryParameters(Multimaps.forMap(encodedQueryParameters));
         }
 
         /**
@@ -541,10 +557,11 @@ public final class Url {
         }
 
         /**
-         * @return {@link #addEncodedQueryParameters(Multimap)} {@link Multimaps#forMap(Map)}
+         * {@link Multimap#forEach(BiConsumer)} with {@link #addEncodedQueryParameter(String, String)}.
          */
-        public Builder addEncodedQueryParameters(final Map<String, String> encodedQueryParameters) {
-            return addEncodedQueryParameters(Multimaps.forMap(encodedQueryParameters));
+        public Builder addEncodedQueryParameters(final Multimap<String, String> encodedQueryParameters) {
+            encodedQueryParameters.forEach(this::addEncodedQueryParameter);
+            return this;
         }
 
         /**
@@ -557,10 +574,10 @@ public final class Url {
         }
 
         /**
-         * Calls {@link Multimap#forEach(BiConsumer)} with {@link #addEncodedQueryParameter(String, String)}.
+         * @see #getEncodedFragment()
          */
-        public Builder addEncodedQueryParameters(final Multimap<String, String> encodedQueryParameters) {
-            encodedQueryParameters.forEach(this::addEncodedQueryParameter);
+        public Builder encodedFragment(final @Nullable String encodedFragment) {
+            this.encodedFragment = encodedFragment;
             return this;
         }
 
@@ -572,58 +589,58 @@ public final class Url {
         }
 
         /**
-         * @see #getFragment()
-         */
-        public Builder encodedFragment(final @Nullable String encodedFragment) {
-            this.fragment = encodedFragment;
-            return this;
-        }
-
-        /**
          * @return the built {@link Url}
          *
          * @throws IllegalArgumentException thrown upon parsing failure
          */
         public Url build() throws IllegalArgumentException {
-            return parse(concatStringComponents(scheme, userInfo, host, port,
-                    path.toString(), query == null ? null : query.toString(), fragment));
+            return parse(concatComponents(scheme, encodedUserInfo, host, port,
+                    encodedPath.toString(), encodedQuery == null ? null : encodedQuery.toString(), encodedFragment));
         }
     }
 
     private final String scheme;
-    private final @Nullable String userInfo;
+    private final @Nullable String encodedUserInfo;
     private final String host;
     private final @Nullable Integer port;
-    private final String path;
-    private final @Nullable String query;
-    private final @Nullable String fragment;
-    private final boolean ambiguous;
-    private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> queryParameters;
+    private final String encodedPath;
+    private final @Nullable String encodedQuery;
+    private final @Nullable String encodedFragment;
+    private @SuppressWarnings("Immutable") @Nullable String decodedUserInfo;
+    private @SuppressWarnings("Immutable") @Nullable String decodedPath;
+    private @SuppressWarnings("Immutable") @Nullable String decodedQuery;
+    private @SuppressWarnings("Immutable") @Nullable String decodedFragment;
+    private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> encodedQueryParameters;
     private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> decodedQueryParameters;
-    private @SuppressWarnings("Immutable") @Nullable String toString;
+    private @SuppressWarnings("Immutable") @Nullable String toEncodedString;
+    private @SuppressWarnings("Immutable") @Nullable String toDecodedString;
 
-    private Url(final String encodedUrl) throws IllegalArgumentException {
-        final var httpUri = HttpURI.build(encodedUrl);
-        for (final var violation : ERROR_VIOLATIONS) {
-            if (httpUri.hasViolation(violation)) {
-                throw new IllegalArgumentException(violation.getDescription());
-            }
-        }
-        final var httpUriScheme = httpUri.getScheme();
-        checkArgument(httpUriScheme != null, "Invalid scheme");
-        scheme = httpUriScheme;
-        userInfo = httpUri.getUser();
-        final var httpUriHost = httpUri.getHost();
-        checkArgument(httpUriHost != null, "Invalid host");
-        host = httpUriHost;
-        final var httpUriPort = httpUri.getPort();
-        port = httpUriPort > 0 ? httpUriPort : null;
-        final var httpUriPath = httpUri.getPath();
-        path = httpUriPath == null ? PATH_SEGMENT_DELIMITER :
-                !httpUriPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER + httpUriPath : httpUriPath;
-        query = httpUri.getQuery();
-        fragment = httpUri.getFragment();
-        ambiguous = httpUri.isAmbiguous();
+    // Use Java's `URI` instead of Jetty's `HttpURI` as it's more standardized.
+    // `URI` allows all components to be `null` and allows unencoded UTF-8 characters in the path.
+    private Url(final URI uri) throws IllegalArgumentException {
+        final var uriScheme = uri.getScheme();
+        checkArgument(uriScheme != null && !uriScheme.isBlank(), "Invalid scheme");
+        scheme = uriScheme;
+
+        final var uriRawUserInfo = uri.getRawUserInfo();
+        encodedUserInfo = uriRawUserInfo == null ? null : encodePathAsNeeded(uriRawUserInfo);
+
+        final var uriHost = uri.getHost();
+        checkArgument(uriHost != null && !uriHost.isBlank(), "Invalid host");
+        host = uriHost;
+
+        final var uriPort = uri.getPort();
+        port = uriPort > 0 ? uriPort : null;
+
+        final var uriPath = uri.getRawPath();
+        encodedPath = uriPath == null ? PATH_SEGMENT_DELIMITER : encodePathAsNeeded(
+                !uriPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER + uriPath : uriPath);
+
+        final var uriRawQuery = uri.getRawQuery();
+        encodedQuery = uriRawQuery == null ? null : encodePathAsNeeded(uriRawQuery);
+
+        final var uriRawFragment = uri.getRawFragment();
+        encodedFragment = uriRawFragment == null ? null : encodePathAsNeeded(uriRawFragment);
     }
 
     /**
@@ -643,20 +660,25 @@ public final class Url {
     }
 
     /**
-     * @return the user info
+     * @return the encoded user info
      *
      * @see #USER_INFO_DELIMITER
      */
-    public @Nullable String getUserInfo() {
-        return userInfo;
+    public @Nullable String getEncodedUserInfo() {
+        return encodedUserInfo;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getUserInfo()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedUserInfo()}
      */
-    public @Nullable String getDecodedUserInfo() {
-        final var userInfo = getUserInfo();
-        return userInfo == null ? null : decode(userInfo);
+    public @Nullable String getUserInfo() {
+        if (decodedUserInfo == null) {
+            final var encodedUserInfo = getEncodedUserInfo();
+            if (encodedUserInfo != null) {
+                decodedUserInfo = decode(encodedUserInfo);
+            }
+        }
+        return decodedUserInfo;
     }
 
     /**
@@ -724,16 +746,16 @@ public final class Url {
     }
 
     /**
-     * @return the authority (the concatenation of {@link #getUserInfo()}, {@link #USER_INFO_DELIMITER},
+     * @return the authority (the concatenation of {@link #getEncodedUserInfo()}, {@link #USER_INFO_DELIMITER},
      * {@link #getHost()}, {@link #PORT_DELIMITER}, {@link #getPort()})
      *
      * @see #AUTHORITY_DELIMITER
      */
-    public String getAuthority() {
+    public String getEncodedAuthority() {
         final var authority = new StringBuilder();
-        final var userInfo = getUserInfo();
-        if (userInfo != null) {
-            authority.append(userInfo).append(USER_INFO_DELIMITER);
+        final var encodedUserInfo = getEncodedUserInfo();
+        if (encodedUserInfo != null) {
+            authority.append(encodedUserInfo).append(USER_INFO_DELIMITER);
         }
         authority.append(getHost());
         final var port = getPort();
@@ -744,108 +766,123 @@ public final class Url {
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getAuthority()}
+     * @return {@link #decode(String)} {@link #getEncodedAuthority()}
      */
-    public String getDecodedAuthority() {
-        return decode(getAuthority());
+    public String getAuthority() {
+        return decode(getEncodedAuthority());
     }
 
     /**
-     * @return the path
+     * @return the encoded path
      *
      * @see #PATH_SEGMENT_DELIMITER
      */
-    public String getPath() {
-        return path;
+    public String getEncodedPath() {
+        return encodedPath;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getPath()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedPath()}
      */
-    public String getDecodedPath() {
-        return decode(getPath());
+    public String getPath() {
+        if (decodedPath == null) {
+            decodedPath = decode(getEncodedPath());
+        }
+        return decodedPath;
     }
 
     /**
-     * @return {@link #pathSegmentsToList(String)} {@link #getPath()}
+     * @return {@link #pathSegmentsToList(String)} {@link #getEncodedPath()}
+     */
+    public List<String> getEncodedPathSegments() {
+        return pathSegmentsToList(getEncodedPath());
+    }
+
+    /**
+     * @return {@link #decodePathSegmentsToList(String)} {@link #getEncodedPath()}
      */
     public List<String> getPathSegments() {
-        return pathSegmentsToList(getPath());
+        return decodePathSegmentsToList(getEncodedPath());
     }
 
     /**
-     * @return {@link #decodePathSegmentsToList(String)} {@link #getPath()}
+     * @return {@link #normalizePath(String)} {@link #getEncodedPath()}
      */
-    public List<String> getDecodedPathSegments() {
-        return decodePathSegmentsToList(getPath());
+    public String getEncodedNormalizedPath() {
+        return normalizePath(getEncodedPath());
     }
 
     /**
-     * @return {@link #normalizePath(String)} {@link #getPath()}
+     * @return {@link #decode(String)} {@link #getEncodedNormalizedPath()}
      */
     public String getNormalizedPath() {
-        return normalizePath(getPath());
+        return decode(getEncodedNormalizedPath());
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getNormalizedPath()}
+     * @return {@link #pathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
-    public String getDecodedNormalizedPath() {
-        return decode(getNormalizedPath());
+    public List<String> getEncodedNormalizedPathSegments() {
+        return pathSegmentsToList(getEncodedNormalizedPath());
     }
 
     /**
-     * @return {@link #pathSegmentsToList(String)} {@link #getNormalizedPath()}
+     * @return {@link #decodePathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
     public List<String> getNormalizedPathSegments() {
-        return pathSegmentsToList(getNormalizedPath());
+        return decodePathSegmentsToList(getEncodedNormalizedPath());
     }
 
     /**
-     * @return {@link #decodePathSegmentsToList(String)} {@link #getNormalizedPath()}
-     */
-    public List<String> getDecodedNormalizedPathSegments() {
-        return decodePathSegmentsToList(getNormalizedPath());
-    }
-
-    /**
-     * @return the query
+     * @return the encoded query
      *
      * @see #QUERY_DELIMITER
      */
-    public @Nullable String getQuery() {
-        return query;
+    public @Nullable String getEncodedQuery() {
+        return encodedQuery;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getQuery()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedQuery()}
      */
-    public @Nullable String getDecodedQuery() {
-        final var query = getQuery();
-        return query == null ? null : decode(query);
+    public @Nullable String getQuery() {
+        if (decodedQuery == null) {
+            final var encodedQuery = getEncodedQuery();
+            if (encodedQuery != null) {
+                decodedQuery = decode(encodedQuery);
+            }
+        }
+        return decodedQuery;
     }
 
     /**
-     * @return internally-cached {@link #parseQueryParameters(String)} {@link #getQuery()}
+     * @return internally-cached {@link #parseQueryParameters(String)} {@link #getEncodedQuery()}
      *
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
-    public ListMultimap<String, String> getQueryParameters() {
-        if (queryParameters == null) {
-            queryParameters = parseQueryParameters(getQuery());
+    public ListMultimap<String, String> getEncodedQueryParameters() {
+        if (encodedQueryParameters == null) {
+            encodedQueryParameters = parseQueryParameters(getEncodedQuery());
         }
-        return queryParameters;
+        return encodedQueryParameters;
     }
 
     /**
-     * @return internally-cached {@link #decodeParsedQueryParameters(ListMultimap)} {@link #getQueryParameters()}
+     * @return internally-cached {@link #decodeParsedQueryParameters(ListMultimap)} {@link #getEncodedQueryParameters()}
      */
-    public ListMultimap<String, String> getDecodedQueryParameters() {
+    public ListMultimap<String, String> getQueryParameters() {
         if (decodedQueryParameters == null) {
-            decodedQueryParameters = decodeParsedQueryParameters(getQueryParameters());
+            decodedQueryParameters = decodeParsedQueryParameters(getEncodedQueryParameters());
         }
         return decodedQueryParameters;
+    }
+
+    /**
+     * @return {@link #getEncodedQueryParameters()} {@link ListMultimap#keys()}
+     */
+    public Multiset<String> getEncodedQueryKeys() {
+        return getEncodedQueryParameters().keys();
     }
 
     /**
@@ -856,10 +893,12 @@ public final class Url {
     }
 
     /**
-     * @return {@link #getDecodedQueryParameters()} {@link ListMultimap#keys()}
+     * @param key the key
+     *
+     * @return {@link #getEncodedQueryParameters()} {@link ListMultimap#get(Object)}
      */
-    public Multiset<String> getDecodedQueryKeys() {
-        return getDecodedQueryParameters().keys();
+    public List<String> getEncodedQueryValues(final String key) {
+        return getEncodedQueryParameters().get(key);
     }
 
     /**
@@ -874,10 +913,11 @@ public final class Url {
     /**
      * @param key the key
      *
-     * @return {@link #getDecodedQueryParameters()} {@link ListMultimap#get(Object)}
+     * @return {@link #getEncodedQueryValues(String)} {@link List#getFirst()}, or <code>null</code>
      */
-    public List<String> getDecodedQueryValues(final String key) {
-        return getDecodedQueryParameters().get(key);
+    public @Nullable String getEncodedQueryValue(final String key) {
+        final var encodedValues = getEncodedQueryValues(key);
+        return encodedValues.isEmpty() ? null : encodedValues.getFirst();
     }
 
     /**
@@ -891,84 +931,68 @@ public final class Url {
     }
 
     /**
-     * @param key the key
-     *
-     * @return {@link #getDecodedQueryValues(String)} {@link List#getFirst()}, or <code>null</code>
-     */
-    public @Nullable String getDecodedQueryValue(final String key) {
-        final var values = getDecodedQueryValues(key);
-        return values.isEmpty() ? null : values.getFirst();
-    }
-
-    /**
-     * @return the fragment
+     * @return the encoded fragment
      *
      * @see #FRAGMENT_DELIMITER
      */
+    public @Nullable String getEncodedFragment() {
+        return encodedFragment;
+    }
+
+    /**
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedFragment()}
+     */
     public @Nullable String getFragment() {
-        return fragment;
-    }
-
-    /**
-     * @return {@link #decode(String)} {@link #getFragment()}
-     */
-    public @Nullable String getDecodedFragment() {
-        final var fragment = getFragment();
-        return fragment == null ? null : decode(fragment);
-    }
-
-    /**
-     * @return the concatenation of {@link #getPath()}, {@link #QUERY_DELIMITER}, and {@link #getQuery()}
-     */
-    public String getPathQuery() {
-        final var pathQuery = new StringBuilder(getPath());
-        final var query = getQuery();
-        if (query != null) {
-            pathQuery.append(QUERY_DELIMITER).append(query);
+        if (decodedFragment == null) {
+            final var encodedFragment = getEncodedFragment();
+            if (encodedFragment != null) {
+                decodedFragment = decode(encodedFragment);
+            }
         }
-        return pathQuery.toString();
+        return decodedFragment;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getPathQuery()}
+     * @return the concatenation of {@link #getEncodedPath()}, {@link #QUERY_DELIMITER}, and {@link #getEncodedQuery()}
+     */
+    public String getEncodedPathQuery() {
+        final var encodedPathQuery = new StringBuilder(getEncodedPath());
+        final var encodedQuery = getEncodedQuery();
+        if (encodedQuery != null) {
+            encodedPathQuery.append(QUERY_DELIMITER).append(encodedQuery);
+        }
+        return encodedPathQuery.toString();
+    }
+
+    /**
+     * @return {@link #decode(String)} {@link #getEncodedPathQuery()}
      */
     public String getDecodedPathQuery() {
-        return decode(getPathQuery());
+        return decode(getEncodedPathQuery());
     }
 
     /**
-     * @return the concatenation of {@link #getPath()}, {@link #QUERY_DELIMITER}, {@link #getQuery()},
-     * {@link #FRAGMENT_DELIMITER}, and {@link #getFragment()}
+     * @return the concatenation of {@link #getEncodedPath()}, {@link #QUERY_DELIMITER}, {@link #getEncodedQuery()},
+     * {@link #FRAGMENT_DELIMITER}, and {@link #getEncodedFragment()}
+     */
+    public String getEncodedPathQueryFragment() {
+        final var encodedPathQueryFragment = new StringBuilder(getEncodedPath());
+        final var encodedQuery = getEncodedQuery();
+        if (encodedQuery != null) {
+            encodedPathQueryFragment.append(QUERY_DELIMITER).append(encodedQuery);
+        }
+        final var encodedFragment = getEncodedFragment();
+        if (encodedFragment != null) {
+            encodedPathQueryFragment.append(FRAGMENT_DELIMITER).append(encodedFragment);
+        }
+        return encodedPathQueryFragment.toString();
+    }
+
+    /**
+     * @return {@link #decode(String)} {@link #getEncodedPathQueryFragment()}
      */
     public String getPathQueryFragment() {
-        final var pathQueryFragment = new StringBuilder(getPath());
-        final var query = getQuery();
-        if (query != null) {
-            pathQueryFragment.append(QUERY_DELIMITER).append(query);
-        }
-        final var fragment = getFragment();
-        if (fragment != null) {
-            pathQueryFragment.append(FRAGMENT_DELIMITER).append(fragment);
-        }
-        return pathQueryFragment.toString();
-    }
-
-    /**
-     * @return {@link #decode(String)} {@link #getPathQueryFragment()}
-     */
-    public String getDecodedPathQueryFragment() {
-        return decode(getPathQueryFragment());
-    }
-
-    /**
-     * @return <code>true</code> if this {@link Url} contains ambiguity upon decoding (e.g.
-     * <code>http://example.com/%2F/%25</code> is ambiguous because <code>%2F</code> decodes to
-     * {@link #PATH_SEGMENT_DELIMITER} and <code>%25</code> decodes to <code>%</code>, and
-     * {@link #PATH_SEGMENT_DELIMITER} and <code>%</code> are special URI characters), <code>false</code> otherwise
-     */
-    @SuppressWarnings("JavadocLinkAsPlainText")
-    public boolean isAmbiguous() {
-        return ambiguous;
+        return decode(getEncodedPathQueryFragment());
     }
 
     /**
@@ -996,24 +1020,34 @@ public final class Url {
 
     /**
      * @return internally-cached
-     * {@link #concatStringComponents(String, String, String, Integer, String, String, String)} with
-     * {@link #getScheme()}, {@link #getUserInfo()}, {@link #getHost()}, {@link #getCustomPort()},
-     * {@link #getNormalizedPath()}, {@link #getQuery()}, and {@link #getFragment()}
+     * {@link #concatComponents(String, String, String, Integer, String, String, String)} with
+     * {@link #getScheme()}, {@link #getEncodedUserInfo()}, {@link #getHost()}, {@link #getCustomPort()},
+     * {@link #getEncodedNormalizedPath()}, {@link #getEncodedQuery()}, and {@link #getEncodedFragment()}
      */
-    @Override
-    public String toString() {
-        if (toString == null) {
-            toString = concatStringComponents(getScheme(), getUserInfo(), getHost(), getCustomPort(),
-                    getNormalizedPath(), getQuery(), getFragment());
+    public String toEncodedString() {
+        if (toEncodedString == null) {
+            toEncodedString = concatComponents(getScheme(), getEncodedUserInfo(), getHost(), getCustomPort(),
+                    getEncodedNormalizedPath(), getEncodedQuery(), getEncodedFragment());
         }
-        return toString;
+        return toEncodedString;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #toString()}
+     * @return internally-cached {@link #decode(String)} {@link #toEncodedString()}
      */
     public String toDecodedString() {
-        return decode(toString());
+        if (toDecodedString == null) {
+            toDecodedString = decode(toEncodedString());
+        }
+        return toDecodedString;
+    }
+
+    /**
+     * @see #toEncodedString()
+     */
+    @Override
+    public String toString() {
+        return toEncodedString();
     }
 
     @Override
