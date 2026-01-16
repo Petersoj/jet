@@ -33,15 +33,15 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:2.0.17")
 
-    errorprone("com.google.errorprone:error_prone_core:2.45.0")
+    errorprone("com.google.errorprone:error_prone_core:2.46.0")
     errorprone("com.uber.nullaway:nullaway:0.12.15")
-    errorprone("net.jacobpeterson:final-coat:1.1.0")
+    errorprone("net.jacobpeterson:final-coat:1.2.0")
 
-    testImplementation(platform("org.junit:junit-bom:6.0.1"))
+    testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.22")
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.24")
 }
 
 tasks.withType(JavaCompile::class) {

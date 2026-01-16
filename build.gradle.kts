@@ -3,13 +3,15 @@ import org.jreleaser.model.Active.NEVER
 
 plugins {
     base
-    id("org.jreleaser") version "1.20.0"
+    id("org.jreleaser") version "1.22.0"
 }
 
 jreleaser {
     signing {
-        active = ALWAYS
-        armored = true
+        pgp {
+            active = ALWAYS
+            armored = true
+        }
     }
     deploy {
         maven {
