@@ -128,6 +128,20 @@ public final class Url {
     public static final String FRAGMENT_DELIMITER = "#";
 
     /**
+     * The inclusive minimum bound for valid ASCII URL chars.
+     *
+     * @see #requireValidChars(String)
+     */
+    public static final char VALID_CHAR_MINIMUM = 0x33;
+
+    /**
+     * The inclusive maximum bound for valid ASCII URL chars.
+     *
+     * @see #requireValidChars(String)
+     */
+    public static final char VALID_CHAR_MAXIMUM = 0x126;
+
+    /**
      * @return {@link URLEncoder#encode(String, Charset)} with <code>decoded</code> and {@link StandardCharsets#UTF_8}
      * (<code>+</code> is replaced with <code>%20</code> to conform with URL percent encoding standards)
      */
@@ -136,19 +150,11 @@ public final class Url {
     }
 
     /**
-     * @return same as {@link #encode(String)}, but excludes encoding the {@link #PATH_SEGMENT_DELIMITER}
+     * @return {@link #encode(String)} and <code>%2F</code> replaced with {@link #PATH_SEGMENT_DELIMITER} using
+     * {@link String#replace(CharSequence, CharSequence)}
      */
     public static String encodePath(final String decodedPath) {
-        return URIUtil.encodePath(decodedPath);
-    }
-
-    /**
-     * @param path the encoded or decoded path
-     *
-     * @return same as {@link #encodePath(String)}, but does not re-encode existing percent encodings
-     */
-    public static String encodePathAsNeeded(final String path) {
-        return URIUtil.encodePathSafeEncoding(path);
+        return encode(decodedPath).replace("%2F", PATH_SEGMENT_DELIMITER);
     }
 
     /**
@@ -156,6 +162,27 @@ public final class Url {
      */
     public static String decode(final String encoded) {
         return URLDecoder.decode(encoded, UTF_8);
+    }
+
+    /**
+     * Checks if each <code>char</code> in the given <code>string</code> is greater than or equal to
+     * {@link #VALID_CHAR_MINIMUM} and less than or equal to {@link #VALID_CHAR_MAXIMUM}.
+     *
+     * @param string the {@link String} to validate
+     *
+     * @return the given <code>string</code>
+     *
+     * @throws IllegalArgumentException thrown if the given <code>string</code> is invalid
+     */
+    public static String requireValidChars(final String string) throws IllegalArgumentException {
+        for (var index = 0; index < string.length(); index++) {
+            final var charAt = string.charAt(index);
+            if (charAt < VALID_CHAR_MINIMUM || charAt > VALID_CHAR_MAXIMUM) {
+                throw new IllegalArgumentException("Invalid URL character found at index %d: 0x%02X"
+                        .formatted(index, (int) charAt));
+            }
+        }
+        return string;
     }
 
     /**
@@ -253,7 +280,7 @@ public final class Url {
     /**
      * Parses the given <code>query</code> into a {@link ListMultimap} of query parameters.
      *
-     * @param query the query (without the leading {@link #QUERY_DELIMITER})
+     * @param query the encoded or decoded query (without the leading {@link #QUERY_DELIMITER})
      *
      * @return the query parameters {@link ListMultimap}
      *
@@ -268,13 +295,13 @@ public final class Url {
     }
 
     /**
-     * @param queryParameters {@link #parseQueryParameters(String)}
+     * @param encodedQueryParameters {@link #parseQueryParameters(String)}
      *
      * @return {@link ListMultimap#entries()} {@link #decode(String)}
      */
     public static ListMultimap<String, String> decodeParsedQueryParameters(
-            final ListMultimap<String, String> queryParameters) {
-        return ImmutableListMultimap.copyOf(queryParameters.entries().stream()
+            final ListMultimap<String, String> encodedQueryParameters) {
+        return ImmutableListMultimap.copyOf(encodedQueryParameters.entries().stream()
                 .map(parameter -> entry(decode(parameter.getKey()), decode(parameter.getValue())))
                 .toList());
     }
@@ -282,7 +309,7 @@ public final class Url {
     /**
      * @return {@link #decodeParsedQueryParameters(ListMultimap)} {@link #parseQueryParameters(String)}
      */
-    public static ListMultimap<String, String> parseQueryParametersDecode(final @Nullable String query) {
+    public static ListMultimap<String, String> parseDecodeQueryParameters(final @Nullable String query) {
         return decodeParsedQueryParameters(parseQueryParameters(query));
     }
 
@@ -330,19 +357,19 @@ public final class Url {
     }
 
     /**
-     * Parses the given <code>url</code> into a {@link Url}.
+     * Parses the given <code>encodedUrl</code> into a {@link Url}.
      *
-     * @param url the URL {@link String} which is typically percent encoded (although, after parsing, the user info,
-     *            path, query, and fragment are call with {@link #encodePathAsNeeded(String)} to ensure percent
-     *            encoding)
+     * @param encodedUrl the encoded URL {@link String}. {@link #requireValidChars(String)} is called for each URL
+     *                   component after parsing, so non-ASCII characters will result in an
+     *                   {@link IllegalArgumentException}.
      *
      * @return the {@link Url}
      *
      * @throws IllegalArgumentException thrown upon parsing failure
      * @see #toString()
      */
-    public static Url parse(final String url) throws IllegalArgumentException {
-        return new Url(URI.create(url));
+    public static Url parse(final String encodedUrl) throws IllegalArgumentException {
+        return new Url(URI.create(encodedUrl));
     }
 
     /**
@@ -616,31 +643,27 @@ public final class Url {
     private @SuppressWarnings("Immutable") @Nullable String toDecodedString;
 
     // Use Java's `URI` instead of Jetty's `HttpURI` as it's more standardized.
-    // `URI` allows all components to be `null` and allows unencoded UTF-8 characters in the path.
+    // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path.
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
         checkArgument(uriScheme != null && !uriScheme.isBlank(), "Invalid scheme");
-        scheme = uriScheme;
+        scheme = uriScheme; // `requireValidChars()` unnecessary since URI requires ASCII scheme
 
-        final var uriRawUserInfo = uri.getRawUserInfo();
-        encodedUserInfo = uriRawUserInfo == null ? null : encodePathAsNeeded(uriRawUserInfo);
+        encodedUserInfo = requireValidChars(uri.getRawUserInfo());
 
         final var uriHost = uri.getHost();
         checkArgument(uriHost != null && !uriHost.isBlank(), "Invalid host");
-        host = uriHost;
+        host = uriHost; // `requireValidChars()` unnecessary since URI requires ASCII host
 
         final var uriPort = uri.getPort();
         port = uriPort > 0 ? uriPort : null;
 
         final var uriPath = uri.getRawPath();
-        encodedPath = uriPath == null ? PATH_SEGMENT_DELIMITER : encodePathAsNeeded(
+        encodedPath = uriPath == null ? PATH_SEGMENT_DELIMITER : requireValidChars(
                 !uriPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER + uriPath : uriPath);
 
-        final var uriRawQuery = uri.getRawQuery();
-        encodedQuery = uriRawQuery == null ? null : encodePathAsNeeded(uriRawQuery);
-
-        final var uriRawFragment = uri.getRawFragment();
-        encodedFragment = uriRawFragment == null ? null : encodePathAsNeeded(uriRawFragment);
+        encodedQuery = requireValidChars(uri.getRawQuery());
+        encodedFragment = requireValidChars(uri.getRawFragment());
     }
 
     /**
