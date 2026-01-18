@@ -183,71 +183,66 @@ public final class Url {
     }
 
     /**
-     * Removes all prepended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>path</code>.
+     * Removes all prepended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>encodedPath</code>.
      *
-     * @param path the path
+     * @param encodedPath the encoded path
      *
-     * @return the trimmed path
+     * @return the trimmed encoded path
      */
-    public static String pathTrimLeading(final String path) {
+    public static String encodedPathTrimLeading(final String encodedPath) {
         var startIndex = 0;
-        final var endIndex = path.length() - 1;
-        while (startIndex <= endIndex && path.charAt(startIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
+        final var endIndex = encodedPath.length() - 1;
+        while (startIndex <= endIndex && encodedPath.charAt(startIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
             startIndex++;
         }
-        return path.substring(startIndex, endIndex + 1);
+        return encodedPath.substring(startIndex, endIndex + 1);
     }
 
     /**
-     * Removes all appended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>path</code>.
+     * Removes all appended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>encodedPath</code>.
      *
-     * @param path the path
+     * @param encodedPath the encoded path
      *
-     * @return the trimmed path
+     * @return the trimmed encoded path
      */
-    public static String pathTrimTrailing(final String path) {
+    public static String encodedPathTrimTrailing(final String encodedPath) {
         final var startIndex = 0;
-        var endIndex = path.length() - 1;
-        while (endIndex >= startIndex && path.charAt(endIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
+        var endIndex = encodedPath.length() - 1;
+        while (endIndex >= startIndex && encodedPath.charAt(endIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
             endIndex--;
         }
-        return path.substring(startIndex, endIndex + 1);
+        return encodedPath.substring(startIndex, endIndex + 1);
     }
 
     /**
-     * @return {@link #pathTrimLeading(String)} {@link #pathTrimTrailing(String)}
+     * @return {@link #encodedPathTrimLeading(String)} {@link #encodedPathTrimTrailing(String)}
      */
-    public static String pathTrim(final String path) {
-        return pathTrimLeading(pathTrimTrailing(path));
+    public static String encodedPathTrim(final String encodedPath) {
+        return encodedPathTrimLeading(encodedPathTrimTrailing(encodedPath));
     }
 
     /**
+     * @param encodedPath the encoded path
+     *
      * @return {@link Splitter#on(String)} {@link #PATH_SEGMENT_DELIMITER} {@link Splitter#omitEmptyStrings()}
      * {@link Splitter#splitToStream(CharSequence)}
      */
-    public static Stream<String> pathSegmentsToStream(final String path) {
-        return Splitter.on(PATH_SEGMENT_DELIMITER).omitEmptyStrings().splitToStream(path);
+    public static Stream<String> encodedPathSegmentsToStream(final String encodedPath) {
+        return Splitter.on(PATH_SEGMENT_DELIMITER).omitEmptyStrings().splitToStream(encodedPath);
     }
 
     /**
-     * @return {@link #pathSegmentsToStream(String)} {@link Stream#toList()}
+     * @return {@link #encodedPathSegmentsToStream(String)} {@link Stream#toList()}
      */
-    public static List<String> pathSegmentsToList(final String path) {
-        return pathSegmentsToStream(path).toList();
+    public static List<String> encodedPathSegmentsToList(final String encodedPath) {
+        return encodedPathSegmentsToStream(encodedPath).toList();
     }
 
     /**
-     * @return {@link #pathSegmentsToStream(String)} {@link #decode(String)} {@link Stream#toList()}
+     * @return {@link #encodedPathSegmentsToStream(String)} {@link #decode(String)} {@link Stream#toList()}
      */
-    public static List<String> decodePathSegmentsToList(final String encodedPath) {
-        return pathSegmentsToStream(encodedPath).map(Url::decode).toList();
-    }
-
-    /**
-     * @return {@link #pathSegmentsToStream(String)} {@link #encode(String)} {@link Stream#toList()}
-     */
-    public static List<String> encodePathSegmentsToList(final String decodedPath) {
-        return pathSegmentsToStream(decodedPath).map(Url::encode).toList();
+    public static List<String> decodeEncodedPathSegmentsToList(final String encodedPath) {
+        return encodedPathSegmentsToStream(encodedPath).map(Url::decode).toList();
     }
 
     /**
@@ -256,16 +251,16 @@ public final class Url {
      *     <li>Collapse sequential {@link #PATH_SEGMENT_DELIMITER}s
      *     (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
      *     <li>Resolve relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
-     *     <li>{@link #pathTrimTrailing(String)}</li>
+     *     <li>{@link #encodedPathTrimTrailing(String)}</li>
      * </ol>
      *
      * @param encodedPath the encoded path
      *
-     * @return the normalized path
+     * @return the normalized encoded path
      */
-    public static String normalizePath(final String encodedPath) {
+    public static String normalizeEncodedPath(final String encodedPath) {
         final var normalized = URIUtil.normalizePathQuery(URIUtil.compactPath(encodedPath));
-        return normalized != null ? pathTrimTrailing(normalized) :
+        return normalized != null ? encodedPathTrimTrailing(normalized) :
                 encodedPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : "";
     }
 
@@ -274,25 +269,26 @@ public final class Url {
      *
      * @param encodedQuery the encoded query (without the leading {@link #QUERY_DELIMITER})
      *
-     * @return the query parameters {@link ListMultimap}
+     * @return the query parameters {@link ListMultimap}. Query parameters with an empty key are omitted.
      *
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
-    public static ListMultimap<String, String> parseQueryParameters(final @Nullable String encodedQuery) {
+    public static ListMultimap<String, String> parseEncodedQueryParameters(final @Nullable String encodedQuery) {
         return encodedQuery == null ? ImmutableListMultimap.of() :
                 Splitter.on(QUERY_PARAMETER_DELIMITER).splitToStream(encodedQuery)
                         .map(parameter -> Splitter.on(QUERY_KEY_VALUE_DELIMITER).limit(2).splitToList(parameter))
+                        .filter(keyValue -> !keyValue.getFirst().isEmpty())
                         .collect(toImmutableListMultimap(List::getFirst,
                                 keyValue -> keyValue.size() == 1 ? "" : keyValue.get(1)));
     }
 
     /**
-     * @param encodedQueryParameters {@link #parseQueryParameters(String)}
+     * @param encodedQueryParameters {@link #parseEncodedQueryParameters(String)}
      *
      * @return {@link ListMultimap#entries()} {@link #decode(String)}
      */
-    public static ListMultimap<String, String> decodeParsedQueryParameters(
+    public static ListMultimap<String, String> decodeParsedEncodedQueryParameters(
             final ListMultimap<String, String> encodedQueryParameters) {
         return ImmutableListMultimap.copyOf(encodedQueryParameters.entries().stream()
                 .map(parameter -> entry(decode(parameter.getKey()), decode(parameter.getValue())))
@@ -300,10 +296,10 @@ public final class Url {
     }
 
     /**
-     * @return {@link #decodeParsedQueryParameters(ListMultimap)} {@link #parseQueryParameters(String)}
+     * @return {@link #decodeParsedEncodedQueryParameters(ListMultimap)} {@link #parseEncodedQueryParameters(String)}
      */
-    public static ListMultimap<String, String> parseDecodeQueryParameters(final @Nullable String encodedQuery) {
-        return decodeParsedQueryParameters(parseQueryParameters(encodedQuery));
+    public static ListMultimap<String, String> parseDecodeEncodedQueryParameters(final @Nullable String encodedQuery) {
+        return decodeParsedEncodedQueryParameters(parseEncodedQueryParameters(encodedQuery));
     }
 
     /**
@@ -517,10 +513,10 @@ public final class Url {
         }
 
         /**
-         * @see #normalizePath(String)
+         * @see #normalizeEncodedPath(String)
          */
         public Builder normalizePath() {
-            encodedPath = new StringBuilder(Url.normalizePath(encodedPath.toString()));
+            encodedPath = new StringBuilder(Url.normalizeEncodedPath(encodedPath.toString()));
             return this;
         }
 
@@ -824,24 +820,24 @@ public final class Url {
     }
 
     /**
-     * @return {@link #pathSegmentsToList(String)} {@link #getEncodedPath()}
+     * @return {@link #encodedPathSegmentsToList(String)} {@link #getEncodedPath()}
      */
     public List<String> getEncodedPathSegments() {
-        return pathSegmentsToList(getEncodedPath());
+        return encodedPathSegmentsToList(getEncodedPath());
     }
 
     /**
-     * @return {@link #decodePathSegmentsToList(String)} {@link #getEncodedPath()}
+     * @return {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedPath()}
      */
     public List<String> getPathSegments() {
-        return decodePathSegmentsToList(getEncodedPath());
+        return decodeEncodedPathSegmentsToList(getEncodedPath());
     }
 
     /**
-     * @return {@link #normalizePath(String)} {@link #getEncodedPath()}
+     * @return {@link #normalizeEncodedPath(String)} {@link #getEncodedPath()}
      */
     public String getEncodedNormalizedPath() {
-        return normalizePath(getEncodedPath());
+        return normalizeEncodedPath(getEncodedPath());
     }
 
     /**
@@ -852,17 +848,17 @@ public final class Url {
     }
 
     /**
-     * @return {@link #pathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
+     * @return {@link #encodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
     public List<String> getEncodedNormalizedPathSegments() {
-        return pathSegmentsToList(getEncodedNormalizedPath());
+        return encodedPathSegmentsToList(getEncodedNormalizedPath());
     }
 
     /**
-     * @return {@link #decodePathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
+     * @return {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
     public List<String> getNormalizedPathSegments() {
-        return decodePathSegmentsToList(getEncodedNormalizedPath());
+        return decodeEncodedPathSegmentsToList(getEncodedNormalizedPath());
     }
 
     /**
@@ -888,24 +884,25 @@ public final class Url {
     }
 
     /**
-     * @return internally-cached {@link #parseQueryParameters(String)} {@link #getEncodedQuery()}
+     * @return internally-cached {@link #parseEncodedQueryParameters(String)} {@link #getEncodedQuery()}
      *
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
     public ListMultimap<String, String> getEncodedQueryParameters() {
         if (encodedQueryParameters == null) {
-            encodedQueryParameters = parseQueryParameters(getEncodedQuery());
+            encodedQueryParameters = parseEncodedQueryParameters(getEncodedQuery());
         }
         return encodedQueryParameters;
     }
 
     /**
-     * @return internally-cached {@link #decodeParsedQueryParameters(ListMultimap)} {@link #getEncodedQueryParameters()}
+     * @return internally-cached {@link #decodeParsedEncodedQueryParameters(ListMultimap)}
+     * {@link #getEncodedQueryParameters()}
      */
     public ListMultimap<String, String> getQueryParameters() {
         if (decodedQueryParameters == null) {
-            decodedQueryParameters = decodeParsedQueryParameters(getEncodedQueryParameters());
+            decodedQueryParameters = decodeParsedEncodedQueryParameters(getEncodedQueryParameters());
         }
         return decodedQueryParameters;
     }
