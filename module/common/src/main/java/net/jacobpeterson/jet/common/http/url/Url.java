@@ -566,18 +566,18 @@ public final class Url {
         }
 
         /**
-         * @return {@link #addQueryParameters(Multimap)} {@link Multimaps#forMap(Map)}
-         */
-        public Builder addQueryParameters(final Map<String, String> queryParameters) {
-            return addQueryParameters(Multimaps.forMap(queryParameters));
-        }
-
-        /**
          * {@link Multimap#forEach(BiConsumer)} with {@link #addEncodedQueryParameter(String, String)}.
          */
         public Builder addEncodedQueryParameters(final Multimap<String, String> encodedQueryParameters) {
             encodedQueryParameters.forEach(this::addEncodedQueryParameter);
             return this;
+        }
+
+        /**
+         * @return {@link #addQueryParameters(Multimap)} {@link Multimaps#forMap(Map)}
+         */
+        public Builder addQueryParameters(final Map<String, String> queryParameters) {
+            return addQueryParameters(Multimaps.forMap(queryParameters));
         }
 
         /**
@@ -622,8 +622,16 @@ public final class Url {
     private final String encodedPath;
     private final @Nullable String encodedQuery;
     private final @Nullable String encodedFragment;
+    private @SuppressWarnings("Immutable") @Nullable String encodedAuthority;
+    private @SuppressWarnings("Immutable") @Nullable String decodedAuthority;
     private @SuppressWarnings("Immutable") @Nullable String decodedUserInfo;
     private @SuppressWarnings("Immutable") @Nullable String decodedPath;
+    private @SuppressWarnings("Immutable") @Nullable List<String> encodedPathSegments;
+    private @SuppressWarnings("Immutable") @Nullable List<String> pathSegments;
+    private @SuppressWarnings("Immutable") @Nullable String encodedNormalizedPath;
+    private @SuppressWarnings("Immutable") @Nullable String normalizedPath;
+    private @SuppressWarnings("Immutable") @Nullable List<String> encodedNormalizedPathSegments;
+    private @SuppressWarnings("Immutable") @Nullable List<String> normalizedPathSegments;
     private @SuppressWarnings("Immutable") @Nullable String decodedQuery;
     private @SuppressWarnings("Immutable") @Nullable String decodedFragment;
     private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> encodedQueryParameters;
@@ -780,24 +788,30 @@ public final class Url {
      * @see #AUTHORITY_DELIMITER
      */
     public String getEncodedAuthority() {
-        final var authority = new StringBuilder();
-        final var encodedUserInfo = getEncodedUserInfo();
-        if (encodedUserInfo != null) {
-            authority.append(encodedUserInfo).append(USER_INFO_DELIMITER);
+        if (encodedAuthority == null) {
+            final var encodedAuthority = new StringBuilder();
+            final var encodedUserInfo = getEncodedUserInfo();
+            if (encodedUserInfo != null) {
+                encodedAuthority.append(encodedUserInfo).append(USER_INFO_DELIMITER);
+            }
+            encodedAuthority.append(getHost());
+            final var port = getPort();
+            if (port != null) {
+                encodedAuthority.append(PORT_DELIMITER).append(port);
+            }
+            this.encodedAuthority = encodedAuthority.toString();
         }
-        authority.append(getHost());
-        final var port = getPort();
-        if (port != null) {
-            authority.append(PORT_DELIMITER).append(port);
-        }
-        return authority.toString();
+        return encodedAuthority;
     }
 
     /**
      * @return {@link #decode(String)} {@link #getEncodedAuthority()}
      */
     public String getAuthority() {
-        return decode(getEncodedAuthority());
+        if (decodedAuthority == null) {
+            decodedAuthority = decode(getEncodedAuthority());
+        }
+        return decodedAuthority;
     }
 
     /**
@@ -820,45 +834,63 @@ public final class Url {
     }
 
     /**
-     * @return {@link #encodedPathSegmentsToList(String)} {@link #getEncodedPath()}
+     * @return internally-cached {@link #encodedPathSegmentsToList(String)} {@link #getEncodedPath()}
      */
     public List<String> getEncodedPathSegments() {
-        return encodedPathSegmentsToList(getEncodedPath());
+        if (encodedPathSegments == null) {
+            encodedPathSegments = encodedPathSegmentsToList(getEncodedPath());
+        }
+        return encodedPathSegments;
     }
 
     /**
-     * @return {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedPath()}
+     * @return internally-cached {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedPath()}
      */
     public List<String> getPathSegments() {
-        return decodeEncodedPathSegmentsToList(getEncodedPath());
+        if (pathSegments == null) {
+            pathSegments = decodeEncodedPathSegmentsToList(getEncodedPath());
+        }
+        return pathSegments;
     }
 
     /**
-     * @return {@link #normalizeEncodedPath(String)} {@link #getEncodedPath()}
+     * @return internally-cached {@link #normalizeEncodedPath(String)} {@link #getEncodedPath()}
      */
     public String getEncodedNormalizedPath() {
-        return normalizeEncodedPath(getEncodedPath());
+        if (encodedNormalizedPath == null) {
+            encodedNormalizedPath = normalizeEncodedPath(getEncodedPath());
+        }
+        return encodedNormalizedPath;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getEncodedNormalizedPath()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedNormalizedPath()}
      */
     public String getNormalizedPath() {
-        return decode(getEncodedNormalizedPath());
+        if (normalizedPath == null) {
+            normalizedPath = decode(getEncodedNormalizedPath());
+        }
+        return normalizedPath;
     }
 
     /**
-     * @return {@link #encodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
+     * @return internally-cached {@link #encodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
     public List<String> getEncodedNormalizedPathSegments() {
-        return encodedPathSegmentsToList(getEncodedNormalizedPath());
+        if (encodedNormalizedPathSegments == null) {
+            encodedNormalizedPathSegments = encodedPathSegmentsToList(getEncodedNormalizedPath());
+        }
+        return encodedNormalizedPathSegments;
     }
 
     /**
-     * @return {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
+     * @return internally-cached {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
     public List<String> getNormalizedPathSegments() {
-        return decodeEncodedPathSegmentsToList(getEncodedNormalizedPath());
+        if (normalizedPathSegments == null) {
+            normalizedPathSegments = decodeEncodedPathSegmentsToList(getEncodedNormalizedPath());
+        }
+        return normalizedPathSegments;
     }
 
     /**
@@ -996,7 +1028,7 @@ public final class Url {
     /**
      * @return {@link #decode(String)} {@link #getEncodedPathQuery()}
      */
-    public String getDecodedPathQuery() {
+    public String getPathQuery() {
         return decode(getEncodedPathQuery());
     }
 
