@@ -22,7 +22,9 @@ public class ContentTypeTest {
     @Test
     public void parse() {
         assertEquals(ContentType.TEXT_CSV, ContentType.parse("text/csv"));
-        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("!@#$"));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse(""));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("a"));
+        assertThrows(IllegalArgumentException.class, () -> ContentType.parse("!@/#$"));
         assertThrows(IllegalArgumentException.class, () -> ContentType.parse("*/a"));
     }
 
