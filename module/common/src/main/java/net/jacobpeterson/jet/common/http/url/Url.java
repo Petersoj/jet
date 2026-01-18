@@ -130,16 +130,16 @@ public final class Url {
     /**
      * The inclusive minimum bound for valid ASCII URL chars.
      *
-     * @see #requireValidChars(String)
+     * @see #checkCharsValid(String)
      */
-    public static final char VALID_CHAR_MINIMUM = 0x33;
+    public static final char VALID_CHAR_MINIMUM = 0x21;
 
     /**
      * The inclusive maximum bound for valid ASCII URL chars.
      *
-     * @see #requireValidChars(String)
+     * @see #checkCharsValid(String)
      */
-    public static final char VALID_CHAR_MAXIMUM = 0x126;
+    public static final char VALID_CHAR_MAXIMUM = 0x7E;
 
     /**
      * @return {@link URLEncoder#encode(String, Charset)} with <code>decoded</code> and {@link StandardCharsets#UTF_8}
@@ -170,11 +170,9 @@ public final class Url {
      *
      * @param string the {@link String} to validate
      *
-     * @return the given <code>string</code>
-     *
      * @throws IllegalArgumentException thrown if the given <code>string</code> is invalid
      */
-    public static String requireValidChars(final String string) throws IllegalArgumentException {
+    public static void checkCharsValid(final String string) throws IllegalArgumentException {
         for (var index = 0; index < string.length(); index++) {
             final var charAt = string.charAt(index);
             if (charAt < VALID_CHAR_MINIMUM || charAt > VALID_CHAR_MAXIMUM) {
@@ -182,7 +180,6 @@ public final class Url {
                         .formatted(index, (int) charAt));
             }
         }
-        return string;
     }
 
     /**
@@ -355,7 +352,7 @@ public final class Url {
     /**
      * Parses the given <code>encodedUrl</code> into a {@link Url}.
      *
-     * @param encodedUrl the encoded URL {@link String}. {@link #requireValidChars(String)} is called for each URL
+     * @param encodedUrl the encoded URL {@link String}. {@link #checkCharsValid(String)} is called for each URL
      *                   component after parsing, so non-ASCII characters will result in an
      *                   {@link IllegalArgumentException}.
      *
@@ -642,24 +639,40 @@ public final class Url {
     // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path.
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
-        checkArgument(uriScheme != null && !uriScheme.isBlank(), "Invalid scheme");
+        checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme");
         scheme = uriScheme; // `requireValidChars()` unnecessary since URI requires ASCII scheme
 
-        encodedUserInfo = requireValidChars(uri.getRawUserInfo());
+        final var uriUserInfo = uri.getRawUserInfo();
+        if (uriUserInfo != null) {
+            checkCharsValid(uriUserInfo);
+        }
+        encodedUserInfo = uriUserInfo;
 
         final var uriHost = uri.getHost();
-        checkArgument(uriHost != null && !uriHost.isBlank(), "Invalid host");
+        checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host");
         host = uriHost; // `requireValidChars()` unnecessary since URI requires ASCII host
 
         final var uriPort = uri.getPort();
         port = uriPort > 0 ? uriPort : null;
 
         final var uriPath = uri.getRawPath();
-        encodedPath = uriPath == null ? PATH_SEGMENT_DELIMITER : requireValidChars(
-                !uriPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER + uriPath : uriPath);
+        if (uriPath != null) {
+            checkCharsValid(uriPath);
+        }
+        encodedPath = uriPath == null ? PATH_SEGMENT_DELIMITER :
+                !uriPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER + uriPath : uriPath;
 
-        encodedQuery = requireValidChars(uri.getRawQuery());
-        encodedFragment = requireValidChars(uri.getRawFragment());
+        final var uriQuery = uri.getRawQuery();
+        if (uriQuery != null) {
+            checkCharsValid(uriQuery);
+        }
+        encodedQuery = uriQuery;
+
+        final var uriFragment = uri.getRawFragment();
+        if (uriFragment != null) {
+            checkCharsValid(uriFragment);
+        }
+        encodedFragment = uriFragment;
     }
 
     /**
