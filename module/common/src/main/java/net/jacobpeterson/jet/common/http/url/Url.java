@@ -329,7 +329,7 @@ public final class Url {
         if (port != null) {
             string.append(PORT_DELIMITER).append(port);
         }
-        if (!path.equals(PATH_SEGMENT_DELIMITER) || query != null || fragment != null) {
+        if ((!path.equals(PATH_SEGMENT_DELIMITER) && !path.isEmpty()) || query != null || fragment != null) {
             if (path.startsWith(PATH_SEGMENT_DELIMITER)) {
                 string.append(path);
             } else {
