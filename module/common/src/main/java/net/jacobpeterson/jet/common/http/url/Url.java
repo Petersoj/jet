@@ -513,14 +513,6 @@ public final class Url {
         }
 
         /**
-         * @see #normalizeEncodedPath(String)
-         */
-        public Builder normalizePath() {
-            encodedPath = new StringBuilder(Url.normalizeEncodedPath(encodedPath.toString()));
-            return this;
-        }
-
-        /**
          * @see #getEncodedQuery()
          */
         public Builder encodedQuery(final @Nullable String encodedQuery) {
