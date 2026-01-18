@@ -254,44 +254,40 @@ public final class Url {
     }
 
     /**
-     * Normalizes the given <code>encodedPath</code> by:
-     * <ul>
-     *     <li>Resolving relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
-     *     <li>
-     *         Removing empty path segments by:
-     *         <ul>
-     *             <li>Collapsing sequential {@link #PATH_SEGMENT_DELIMITER}s to one {@link #PATH_SEGMENT_DELIMITER}
-     *             (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
-     *             <li>{@link #pathTrimTrailing(String)}</li>
-     *         </ul>
-     *     </li>
-     * </ul>
-     * <p>
-     *  @param encodedPath the encoded path
+     * Normalizes the given <code>encodedPath</code> with the following process:
+     * <ol>
+     *     <li>Collapse sequential {@link #PATH_SEGMENT_DELIMITER}s
+     *     (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
+     *     <li>Resolve relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
+     *     <li>{@link #pathTrimTrailing(String)}</li>
+     * </ol>
+     *
+     * @param encodedPath the encoded path
      *
      * @return the normalized path
      */
     public static String normalizePath(final String encodedPath) {
-        final var normalized = URIUtil.normalizePathQuery(encodedPath);
-        return normalized != null ? pathTrimTrailing(URIUtil.compactPath(normalized)) :
+        final var normalized = URIUtil.normalizePathQuery(URIUtil.compactPath(encodedPath));
+        return normalized != null ? pathTrimTrailing(normalized) :
                 encodedPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : "";
     }
 
     /**
-     * Parses the given <code>query</code> into a {@link ListMultimap} of query parameters.
+     * Parses the given <code>encodedQuery</code> into a {@link ListMultimap} of query parameters.
      *
-     * @param query the encoded or decoded query (without the leading {@link #QUERY_DELIMITER})
+     * @param encodedQuery the encoded query (without the leading {@link #QUERY_DELIMITER})
      *
      * @return the query parameters {@link ListMultimap}
      *
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
-    public static ListMultimap<String, String> parseQueryParameters(final @Nullable String query) {
-        return query == null ? ImmutableListMultimap.of() : Splitter.on(QUERY_PARAMETER_DELIMITER).splitToStream(query)
-                .map(parameter -> Splitter.on(QUERY_KEY_VALUE_DELIMITER).limit(2).splitToList(parameter))
-                .collect(toImmutableListMultimap(List::getFirst,
-                        keyValue -> keyValue.size() == 1 ? "" : keyValue.get(1)));
+    public static ListMultimap<String, String> parseQueryParameters(final @Nullable String encodedQuery) {
+        return encodedQuery == null ? ImmutableListMultimap.of() :
+                Splitter.on(QUERY_PARAMETER_DELIMITER).splitToStream(encodedQuery)
+                        .map(parameter -> Splitter.on(QUERY_KEY_VALUE_DELIMITER).limit(2).splitToList(parameter))
+                        .collect(toImmutableListMultimap(List::getFirst,
+                                keyValue -> keyValue.size() == 1 ? "" : keyValue.get(1)));
     }
 
     /**
@@ -309,8 +305,8 @@ public final class Url {
     /**
      * @return {@link #decodeParsedQueryParameters(ListMultimap)} {@link #parseQueryParameters(String)}
      */
-    public static ListMultimap<String, String> parseDecodeQueryParameters(final @Nullable String query) {
-        return decodeParsedQueryParameters(parseQueryParameters(query));
+    public static ListMultimap<String, String> parseDecodeQueryParameters(final @Nullable String encodedQuery) {
+        return decodeParsedQueryParameters(parseQueryParameters(encodedQuery));
     }
 
     /**
