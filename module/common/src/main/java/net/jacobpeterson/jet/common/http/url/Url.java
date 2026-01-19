@@ -246,7 +246,7 @@ public final class Url {
     /**
      * @return {@link #encodedPathSegmentsToStream(String)} {@link #decode(String)} {@link Stream#toList()}
      */
-    public static List<String> decodeEncodedPathSegmentsToList(final String encodedPath) {
+    public static List<String> encodedPathSegmentsToDecodedList(final String encodedPath) {
         return encodedPathSegmentsToStream(encodedPath).map(Url::decode).toList();
     }
 
@@ -694,6 +694,7 @@ public final class Url {
      *
      * @see #SCHEME_DELIMITER
      */
+    @EqualsAndHashCode.Include
     public String getScheme() {
         return scheme;
     }
@@ -720,6 +721,7 @@ public final class Url {
     /**
      * @return internally-cached {@link #decode(String)} {@link #getEncodedUserInfo()}
      */
+    @EqualsAndHashCode.Include
     public @Nullable String getUserInfo() {
         if (decodedUserInfo == null) {
             final var encodedUserInfo = getEncodedUserInfo();
@@ -733,6 +735,7 @@ public final class Url {
     /**
      * @return the host
      */
+    @EqualsAndHashCode.Include
     public String getHost() {
         return host;
     }
@@ -799,6 +802,7 @@ public final class Url {
      * <code>{@link #getPort()} == {@link Scheme#getDefaultPort()}</code>,
      * {@link #getPort()} otherwise
      */
+    @EqualsAndHashCode.Include
     public @Nullable Integer getCustomPort() {
         if (customPort == null) {
             final var port = getPort();
@@ -806,8 +810,8 @@ public final class Url {
                 customPort = Optional.empty();
             } else {
                 final var schemeEnum = getSchemeEnum();
-                customPort = Optional.ofNullable(schemeEnum != null &&
-                        port.equals(schemeEnum.getDefaultPort()) ? null : port);
+                customPort = Optional.ofNullable(
+                        schemeEnum != null && port.equals(schemeEnum.getDefaultPort()) ? null : port);
             }
         }
         return customPort.orElse(null);
@@ -876,11 +880,11 @@ public final class Url {
     }
 
     /**
-     * @return internally-cached {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedPath()}
+     * @return internally-cached {@link #encodedPathSegmentsToDecodedList(String)} {@link #getEncodedPath()}
      */
     public List<String> getPathSegments() {
         if (pathSegments == null) {
-            pathSegments = decodeEncodedPathSegmentsToList(getEncodedPath());
+            pathSegments = encodedPathSegmentsToDecodedList(getEncodedPath());
         }
         return pathSegments;
     }
@@ -916,11 +920,12 @@ public final class Url {
     }
 
     /**
-     * @return internally-cached {@link #decodeEncodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
+     * @return internally-cached {@link #encodedPathSegmentsToDecodedList(String)} {@link #getEncodedNormalizedPath()}
      */
+    @EqualsAndHashCode.Include
     public List<String> getNormalizedPathSegments() {
         if (normalizedPathSegments == null) {
-            normalizedPathSegments = decodeEncodedPathSegmentsToList(getEncodedNormalizedPath());
+            normalizedPathSegments = encodedPathSegmentsToDecodedList(getEncodedNormalizedPath());
         }
         return normalizedPathSegments;
     }
@@ -964,6 +969,7 @@ public final class Url {
      * @return internally-cached {@link #decodeParsedEncodedQueryParameters(ListMultimap)}
      * {@link #getEncodedQueryParameters()}
      */
+    @EqualsAndHashCode.Include
     public ListMultimap<String, String> getQueryParameters() {
         if (decodedQueryParameters == null) {
             decodedQueryParameters = decodeParsedEncodedQueryParameters(getEncodedQueryParameters());
@@ -1035,6 +1041,7 @@ public final class Url {
     /**
      * @return internally-cached {@link #decode(String)} {@link #getEncodedFragment()}
      */
+    @EqualsAndHashCode.Include
     public @Nullable String getFragment() {
         if (decodedFragment == null) {
             final var encodedFragment = getEncodedFragment();
@@ -1144,7 +1151,6 @@ public final class Url {
     /**
      * @see #toEncodedString()
      */
-    @EqualsAndHashCode.Include
     @Override
     public String toString() {
         return toEncodedString();
