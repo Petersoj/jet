@@ -252,7 +252,8 @@ public final class Url {
      *     <li>Collapse sequential {@link #PATH_SEGMENT_DELIMITER}s
      *     (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
      *     <li>Resolve relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
-     *     <li>{@link #encodedPathTrimTrailing(String)}</li>
+     *     <li>{@link #encodedPathTrimTrailing(String)} (unless the previous steps result in
+     *     {@link #PATH_SEGMENT_DELIMITER})</li>
      * </ol>
      *
      * @param encodedPath the encoded path
@@ -261,8 +262,10 @@ public final class Url {
      */
     public static String normalizeEncodedPath(final String encodedPath) {
         final var normalized = URIUtil.normalizePathQuery(URIUtil.compactPath(encodedPath));
-        return normalized != null ? encodedPathTrimTrailing(normalized) :
-                encodedPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : "";
+        if (normalized == null) {
+            return encodedPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : "";
+        }
+        return normalized.equals(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : encodedPathTrimTrailing(normalized);
     }
 
     /**
