@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -482,7 +483,8 @@ public final class Url {
          * {@link #PATH_SEGMENT_DELIMITER}.
          */
         public Builder addEncodedPathSegment(final String encodedPathSegment) {
-            if (encodedPath.charAt(encodedPath.length() - 1) != PATH_SEGMENT_DELIMITER_CHAR) {
+            if (!encodedPathSegment.startsWith(PATH_SEGMENT_DELIMITER) &&
+                    encodedPath.charAt(encodedPath.length() - 1) != PATH_SEGMENT_DELIMITER_CHAR) {
                 encodedPath.append(PATH_SEGMENT_DELIMITER_CHAR);
             }
             encodedPath.append(encodedPathSegment);
