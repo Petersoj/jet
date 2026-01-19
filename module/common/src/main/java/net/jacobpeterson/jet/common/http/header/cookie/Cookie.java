@@ -61,7 +61,7 @@ import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
  */
 @NullMarked
 @Immutable
-@EqualsAndHashCode(cacheStrategy = LAZY)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
 public final class Cookie {
 
     private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
@@ -272,6 +272,7 @@ public final class Cookie {
     /**
      * @return the attributes {@link Map}
      */
+    @EqualsAndHashCode.Include
     public Map<String, String> getAttributes() {
         return httpCookie.getAttributes();
     }
@@ -293,6 +294,7 @@ public final class Cookie {
     /**
      * @return the name
      */
+    @EqualsAndHashCode.Include
     public String getName() {
         return httpCookie.getName();
     }
@@ -307,6 +309,7 @@ public final class Cookie {
     /**
      * @return the value
      */
+    @EqualsAndHashCode.Include
     public String getValue() {
         return httpCookie.getValue();
     }

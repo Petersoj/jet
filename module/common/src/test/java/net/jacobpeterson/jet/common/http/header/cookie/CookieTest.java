@@ -12,6 +12,7 @@ import java.util.Map;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -315,5 +316,12 @@ public class CookieTest {
     @Test
     public void _toString() {
         assertEquals("a=b", Cookie.builder("a", "b").build().toString());
+    }
+
+    @Test
+    public void _equals() {
+        assertEquals(Cookie.builder("a", "b").build(), Cookie.builder("a", "b").build());
+        assertEquals(Cookie.builder("a", "b").secure(true).build(), Cookie.builder("a", "b").secure(true).build());
+        assertNotEquals(Cookie.builder("a", "b").secure(true).build(), Cookie.builder("a", "b").build());
     }
 }
