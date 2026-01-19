@@ -82,7 +82,8 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @NullMarked
 @Immutable
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
-@SuppressWarnings("LombokGetterMayBeUsed")
+@SuppressWarnings({"LombokGetterMayBeUsed", "Immutable",
+        "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Url {
 
     /**
@@ -622,22 +623,31 @@ public final class Url {
     private final String encodedPath;
     private final @Nullable String encodedQuery;
     private final @Nullable String encodedFragment;
-    private @SuppressWarnings("Immutable") @Nullable String decodedUserInfo;
-    private @SuppressWarnings("Immutable") @Nullable String encodedAuthority;
-    private @SuppressWarnings("Immutable") @Nullable String decodedAuthority;
-    private @SuppressWarnings("Immutable") @Nullable String decodedPath;
-    private @SuppressWarnings("Immutable") @Nullable List<String> encodedPathSegments;
-    private @SuppressWarnings("Immutable") @Nullable List<String> pathSegments;
-    private @SuppressWarnings("Immutable") @Nullable String encodedNormalizedPath;
-    private @SuppressWarnings("Immutable") @Nullable String normalizedPath;
-    private @SuppressWarnings("Immutable") @Nullable List<String> encodedNormalizedPathSegments;
-    private @SuppressWarnings("Immutable") @Nullable List<String> normalizedPathSegments;
-    private @SuppressWarnings("Immutable") @Nullable String decodedQuery;
-    private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> encodedQueryParameters;
-    private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> decodedQueryParameters;
-    private @SuppressWarnings("Immutable") @Nullable String decodedFragment;
-    private @SuppressWarnings("Immutable") @Nullable String toEncodedString;
-    private @SuppressWarnings("Immutable") @Nullable String toDecodedString;
+    private @Nullable Optional<Scheme> schemeEnum;
+    private @Nullable String decodedUserInfo;
+    private @Nullable Optional<InetAddress> hostAsInetAddress;
+    private @Nullable Optional<InternetDomainName> hostAsDomainName;
+    private @Nullable Optional<Integer> portOrDefault;
+    private @Nullable Optional<Integer> customPort;
+    private @Nullable String encodedAuthority;
+    private @Nullable String decodedAuthority;
+    private @Nullable String decodedPath;
+    private @Nullable List<String> encodedPathSegments;
+    private @Nullable List<String> pathSegments;
+    private @Nullable String encodedNormalizedPath;
+    private @Nullable String normalizedPath;
+    private @Nullable List<String> encodedNormalizedPathSegments;
+    private @Nullable List<String> normalizedPathSegments;
+    private @Nullable String decodedQuery;
+    private @Nullable ListMultimap<String, String> encodedQueryParameters;
+    private @Nullable ListMultimap<String, String> decodedQueryParameters;
+    private @Nullable String decodedFragment;
+    private @Nullable String encodedPathQuery;
+    private @Nullable String decodedPathQuery;
+    private @Nullable String encodedPathQueryFragment;
+    private @Nullable String decodedPathQueryFragment;
+    private @Nullable String toEncodedString;
+    private @Nullable String toDecodedString;
 
     // Use Java's `URI` instead of Jetty's `HttpURI` as it's more standardized.
     // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path.
@@ -689,10 +699,13 @@ public final class Url {
     }
 
     /**
-     * @return {@link Scheme#forString(String)} {@link #getScheme()}
+     * @return internally-cached {@link Scheme#forString(String)} {@link #getScheme()}
      */
     public @Nullable Scheme getSchemeEnum() {
-        return Scheme.forString(getScheme());
+        if (schemeEnum == null) {
+            schemeEnum = Optional.ofNullable(Scheme.forString(getScheme()));
+        }
+        return schemeEnum.orElse(null);
     }
 
     /**
@@ -725,27 +738,33 @@ public final class Url {
     }
 
     /**
-     * @return {@link InetAddresses#forUriString(String)} {@link #getHost()}, or <code>null</code> upon
-     * {@link IllegalArgumentException}
+     * @return internally-cached {@link InetAddresses#forUriString(String)} {@link #getHost()}, or <code>null</code>
+     * upon {@link IllegalArgumentException}
      */
     public @Nullable InetAddress getHostAsInetAddress() {
-        try {
-            return InetAddresses.forUriString(getHost());
-        } catch (final IllegalArgumentException illegalArgumentException) {
-            return null;
+        if (hostAsInetAddress == null) {
+            try {
+                hostAsInetAddress = Optional.of(InetAddresses.forUriString(getHost()));
+            } catch (final IllegalArgumentException illegalArgumentException) {
+                hostAsInetAddress = Optional.empty();
+            }
         }
+        return hostAsInetAddress.orElse(null);
     }
 
     /**
-     * @return {@link InternetDomainName#from(String)} {@link #getHost()}, or <code>null</code> upon
+     * @return internally-cached {@link InternetDomainName#from(String)} {@link #getHost()}, or <code>null</code> upon
      * {@link IllegalArgumentException}
      */
     public @Nullable InternetDomainName getHostAsDomainName() {
-        try {
-            return InternetDomainName.from(getHost());
-        } catch (final IllegalArgumentException illegalArgumentException) {
-            return null;
+        if (hostAsDomainName == null) {
+            try {
+                hostAsDomainName = Optional.of(InternetDomainName.from(getHost()));
+            } catch (final IllegalArgumentException illegalArgumentException) {
+                hostAsDomainName = Optional.empty();
+            }
         }
+        return hostAsDomainName.orElse(null);
     }
 
     /**
@@ -758,35 +777,45 @@ public final class Url {
     }
 
     /**
-     * @return {@link #getPort()} if non-<code>null</code>, or {@link #getSchemeEnum()} {@link Scheme#getDefaultPort()}
+     * @return internally-cached {@link #getPort()} if non-<code>null</code>, or {@link #getSchemeEnum()}
+     * {@link Scheme#getDefaultPort()}
      */
     public @Nullable Integer getPortOrDefault() {
-        final var port = getPort();
-        if (port != null) {
-            return port;
+        if (portOrDefault == null) {
+            final var port = getPort();
+            if (port != null) {
+                portOrDefault = Optional.of(port);
+            } else {
+                final var schemeEnum = getSchemeEnum();
+                portOrDefault = Optional.ofNullable(schemeEnum == null ? null : schemeEnum.getDefaultPort());
+            }
         }
-        final var schemeEnum = getSchemeEnum();
-        return schemeEnum == null ? null : schemeEnum.getDefaultPort();
+        return portOrDefault.orElse(null);
     }
 
     /**
-     * @return <code>null</code> if <code>{@link #getPort()} == null</code> or if
+     * @return internally-cached <code>null</code> if <code>{@link #getPort()} == null</code> or if
      * <code>{@link #getSchemeEnum()} != null</code> and
      * <code>{@link #getPort()} == {@link Scheme#getDefaultPort()}</code>,
      * {@link #getPort()} otherwise
      */
     public @Nullable Integer getCustomPort() {
-        final var port = getPort();
-        if (port == null) {
-            return null;
+        if (customPort == null) {
+            final var port = getPort();
+            if (port == null) {
+                customPort = Optional.empty();
+            } else {
+                final var schemeEnum = getSchemeEnum();
+                customPort = Optional.ofNullable(schemeEnum != null &&
+                        port.equals(schemeEnum.getDefaultPort()) ? null : port);
+            }
         }
-        final var schemeEnum = getSchemeEnum();
-        return schemeEnum != null && port.equals(schemeEnum.getDefaultPort()) ? null : port;
+        return customPort.orElse(null);
     }
 
     /**
-     * @return the authority (the concatenation of {@link #getEncodedUserInfo()}, {@link #USER_INFO_DELIMITER},
-     * {@link #getHost()}, {@link #PORT_DELIMITER}, {@link #getPort()})
+     * @return internally-cached concatenation of {@link #getEncodedUserInfo()}, {@link #USER_INFO_DELIMITER},
+     * {@link #getHost()}, {@link #PORT_DELIMITER}, {@link #getPort()}
      *
      * @see #AUTHORITY_DELIMITER
      */
@@ -808,7 +837,7 @@ public final class Url {
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getEncodedAuthority()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedAuthority()}
      */
     public String getAuthority() {
         if (decodedAuthority == null) {
@@ -1017,46 +1046,59 @@ public final class Url {
     }
 
     /**
-     * @return the concatenation of {@link #getEncodedPath()}, {@link #QUERY_DELIMITER}, and {@link #getEncodedQuery()}
+     * @return internally-cached concatenation of {@link #getEncodedPath()}, {@link #QUERY_DELIMITER}, and
+     * {@link #getEncodedQuery()}
      */
     public String getEncodedPathQuery() {
-        final var encodedPathQuery = new StringBuilder(getEncodedPath());
-        final var encodedQuery = getEncodedQuery();
-        if (encodedQuery != null) {
-            encodedPathQuery.append(QUERY_DELIMITER).append(encodedQuery);
+        if (encodedPathQuery == null) {
+            final var encodedPathQuery = new StringBuilder(getEncodedPath());
+            final var encodedQuery = getEncodedQuery();
+            if (encodedQuery != null) {
+                encodedPathQuery.append(QUERY_DELIMITER).append(encodedQuery);
+            }
+            this.encodedPathQuery = encodedPathQuery.toString();
         }
-        return encodedPathQuery.toString();
+        return encodedPathQuery;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getEncodedPathQuery()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedPathQuery()}
      */
     public String getPathQuery() {
-        return decode(getEncodedPathQuery());
+        if (decodedPathQuery == null) {
+            decodedPathQuery = decode(getEncodedPathQuery());
+        }
+        return decodedPathQuery;
     }
 
     /**
-     * @return the concatenation of {@link #getEncodedPath()}, {@link #QUERY_DELIMITER}, {@link #getEncodedQuery()},
-     * {@link #FRAGMENT_DELIMITER}, and {@link #getEncodedFragment()}
+     * @return internally-cached concatenation of {@link #getEncodedPath()}, {@link #QUERY_DELIMITER},
+     * {@link #getEncodedQuery()}, {@link #FRAGMENT_DELIMITER}, and {@link #getEncodedFragment()}
      */
     public String getEncodedPathQueryFragment() {
-        final var encodedPathQueryFragment = new StringBuilder(getEncodedPath());
-        final var encodedQuery = getEncodedQuery();
-        if (encodedQuery != null) {
-            encodedPathQueryFragment.append(QUERY_DELIMITER).append(encodedQuery);
+        if (encodedPathQueryFragment == null) {
+            final var encodedPathQueryFragment = new StringBuilder(getEncodedPath());
+            final var encodedQuery = getEncodedQuery();
+            if (encodedQuery != null) {
+                encodedPathQueryFragment.append(QUERY_DELIMITER).append(encodedQuery);
+            }
+            final var encodedFragment = getEncodedFragment();
+            if (encodedFragment != null) {
+                encodedPathQueryFragment.append(FRAGMENT_DELIMITER).append(encodedFragment);
+            }
+            this.encodedPathQueryFragment = encodedPathQueryFragment.toString();
         }
-        final var encodedFragment = getEncodedFragment();
-        if (encodedFragment != null) {
-            encodedPathQueryFragment.append(FRAGMENT_DELIMITER).append(encodedFragment);
-        }
-        return encodedPathQueryFragment.toString();
+        return encodedPathQueryFragment;
     }
 
     /**
-     * @return {@link #decode(String)} {@link #getEncodedPathQueryFragment()}
+     * @return internally-cached {@link #decode(String)} {@link #getEncodedPathQueryFragment()}
      */
     public String getPathQueryFragment() {
-        return decode(getEncodedPathQueryFragment());
+        if (decodedPathQueryFragment == null) {
+            decodedPathQueryFragment = decode(getEncodedPathQueryFragment());
+        }
+        return decodedPathQueryFragment;
     }
 
     /**
