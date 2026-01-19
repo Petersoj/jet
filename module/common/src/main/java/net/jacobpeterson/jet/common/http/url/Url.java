@@ -1102,13 +1102,6 @@ public final class Url {
     }
 
     /**
-     * @return {@link #parse(String)} {@link #toString()}
-     */
-    public Url normalize() {
-        return parse(toString());
-    }
-
-    /**
      * @return {@link URI#create(String)} {@link #toString()}
      *
      * @see #fromJava(URI)
