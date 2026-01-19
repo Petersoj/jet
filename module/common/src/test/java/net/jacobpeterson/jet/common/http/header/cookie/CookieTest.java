@@ -157,27 +157,6 @@ public class CookieTest {
     }
 
     @Test
-    public void getAttributes() {
-        assertEquals(Map.of("c", "d"), Cookie.builder("a", "b")
-                .attributes(Map.of("c", "d"))
-                .build().getAttributes());
-    }
-
-    @Test
-    public void getAttributeCookieAttribute() {
-        assertEquals("/a", Cookie.builder("a", "b")
-                .attribute(CookieAttribute.PATH, "/a")
-                .build().getAttribute(CookieAttribute.PATH));
-    }
-
-    @Test
-    public void getAttributeString() {
-        assertEquals("d", Cookie.builder("a", "b")
-                .attribute("c", "d")
-                .build().getAttribute("c"));
-    }
-
-    @Test
     public void getName() {
         assertEquals("a", Cookie.builder("a", "b")
                 .build().getName());
@@ -199,6 +178,27 @@ public class CookieTest {
     public void getValue() {
         assertEquals("b", Cookie.builder("a", "b")
                 .build().getValue());
+    }
+
+    @Test
+    public void getAttributes() {
+        assertEquals(Map.of("c", "d"), Cookie.builder("a", "b")
+                .attributes(Map.of("c", "d"))
+                .build().getAttributes());
+    }
+
+    @Test
+    public void getAttributeCookieAttribute() {
+        assertEquals("/a", Cookie.builder("a", "b")
+                .attribute(CookieAttribute.PATH, "/a")
+                .build().getAttribute(CookieAttribute.PATH));
+    }
+
+    @Test
+    public void getAttributeString() {
+        assertEquals("d", Cookie.builder("a", "b")
+                .attribute("c", "d")
+                .build().getAttribute("c"));
     }
 
     @Test

@@ -270,28 +270,6 @@ public final class Cookie {
     }
 
     /**
-     * @return the attributes {@link Map}
-     */
-    @EqualsAndHashCode.Include
-    public Map<String, String> getAttributes() {
-        return httpCookie.getAttributes();
-    }
-
-    /**
-     * @return {@link #getAttribute(String)} {@link CookieAttribute#toString()}
-     */
-    public @Nullable String getAttribute(final CookieAttribute cookieAttribute) {
-        return getAttribute(cookieAttribute.toString());
-    }
-
-    /**
-     * @return {@link #getAttributes()} {@link Map#get(Object)}
-     */
-    public @Nullable String getAttribute(final String attribute) {
-        return getAttributes().get(attribute);
-    }
-
-    /**
      * @return the name
      */
     @EqualsAndHashCode.Include
@@ -312,6 +290,28 @@ public final class Cookie {
     @EqualsAndHashCode.Include
     public String getValue() {
         return httpCookie.getValue();
+    }
+
+    /**
+     * @return the attributes {@link Map}
+     */
+    @EqualsAndHashCode.Include
+    public Map<String, String> getAttributes() {
+        return httpCookie.getAttributes();
+    }
+
+    /**
+     * @return {@link #getAttribute(String)} {@link CookieAttribute#toString()}
+     */
+    public @Nullable String getAttribute(final CookieAttribute cookieAttribute) {
+        return getAttribute(cookieAttribute.toString());
+    }
+
+    /**
+     * @return {@link #getAttributes()} {@link Map#get(Object)}
+     */
+    public @Nullable String getAttribute(final String attribute) {
+        return getAttributes().get(attribute);
     }
 
     /**

@@ -9,6 +9,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.google.errorprone.annotations.Immutable;
+import lombok.EqualsAndHashCode;
 import org.eclipse.jetty.util.URIUtil;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +30,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Map.entry;
+import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
  * {@link Url} is an immutable class that represents a standardized Uniform Resource Locator (URL), the most common
@@ -79,6 +81,7 @@ import static java.util.Map.entry;
  */
 @NullMarked
 @Immutable
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
 @SuppressWarnings("LombokGetterMayBeUsed")
 public final class Url {
 
@@ -1106,24 +1109,9 @@ public final class Url {
     /**
      * @see #toEncodedString()
      */
+    @EqualsAndHashCode.Include
     @Override
     public String toString() {
         return toEncodedString();
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof final Url url)) {
-            return false;
-        }
-        return toString().equals(url.toString());
-    }
-
-    @Override
-    public int hashCode() {
-        return toString().hashCode();
     }
 }
