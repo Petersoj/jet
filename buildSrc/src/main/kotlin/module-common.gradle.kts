@@ -51,6 +51,7 @@ tasks.withType(JavaCompile::class) {
         disableWarningsInGeneratedCode = true
 
         disable("MissingSummary")
+        disable("NullableOptional")
         check("Varifier", WARN)
         check("IdentifierName", WARN)
         check("MissingBraces", WARN)
