@@ -614,9 +614,9 @@ public final class Url {
     private final String encodedPath;
     private final @Nullable String encodedQuery;
     private final @Nullable String encodedFragment;
+    private @SuppressWarnings("Immutable") @Nullable String decodedUserInfo;
     private @SuppressWarnings("Immutable") @Nullable String encodedAuthority;
     private @SuppressWarnings("Immutable") @Nullable String decodedAuthority;
-    private @SuppressWarnings("Immutable") @Nullable String decodedUserInfo;
     private @SuppressWarnings("Immutable") @Nullable String decodedPath;
     private @SuppressWarnings("Immutable") @Nullable List<String> encodedPathSegments;
     private @SuppressWarnings("Immutable") @Nullable List<String> pathSegments;
@@ -625,9 +625,9 @@ public final class Url {
     private @SuppressWarnings("Immutable") @Nullable List<String> encodedNormalizedPathSegments;
     private @SuppressWarnings("Immutable") @Nullable List<String> normalizedPathSegments;
     private @SuppressWarnings("Immutable") @Nullable String decodedQuery;
-    private @SuppressWarnings("Immutable") @Nullable String decodedFragment;
     private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> encodedQueryParameters;
     private @SuppressWarnings("Immutable") @Nullable ListMultimap<String, String> decodedQueryParameters;
+    private @SuppressWarnings("Immutable") @Nullable String decodedFragment;
     private @SuppressWarnings("Immutable") @Nullable String toEncodedString;
     private @SuppressWarnings("Immutable") @Nullable String toDecodedString;
 
@@ -757,20 +757,23 @@ public final class Url {
         if (port != null) {
             return port;
         }
-        final var scheme = getSchemeEnum();
-        return scheme == null ? null : scheme.getDefaultPort();
+        final var schemeEnum = getSchemeEnum();
+        return schemeEnum == null ? null : schemeEnum.getDefaultPort();
     }
 
     /**
-     * @return <code>null</code> if <code>{@link #getPort()} == null</code> or if {@link Scheme#forDefaultPort(int)} is
-     * non-<code>null</code>, {@link #getPort()} otherwise
+     * @return <code>null</code> if <code>{@link #getPort()} == null</code> or if
+     * <code>{@link #getSchemeEnum()} != null</code> and
+     * <code>{@link #getPort()} == {@link Scheme#getDefaultPort()}</code>,
+     * {@link #getPort()} otherwise
      */
     public @Nullable Integer getCustomPort() {
         final var port = getPort();
         if (port == null) {
             return null;
         }
-        return Scheme.forDefaultPort(port) != null ? null : port;
+        final var schemeEnum = getSchemeEnum();
+        return schemeEnum != null && port.equals(schemeEnum.getDefaultPort()) ? null : port;
     }
 
     /**
