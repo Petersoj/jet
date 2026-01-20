@@ -16,6 +16,10 @@ import static java.lang.Math.min;
  * given {@link InputStream}. This is useful for reading {@link InputStream}s of an unknown length, such as a chunked
  * file upload from a web client or a chunked file download from a web server. {@link BoundedInputStream} can also be
  * used to count the number of bytes read instead of imposing a bound.
+ *
+ * @see
+ * <a href="https://github.com/apache/commons-io/blob/5e39dd4778d58bf0c6314eae3da3781b809f5285/src/main/java/org/apache/commons/io/input/BoundedInputStream.java">
+ * github.com/apache/commons-io/.../BoundedInputStream.java</a>
  */
 @NullMarked
 public final class BoundedInputStream extends FilterInputStream {

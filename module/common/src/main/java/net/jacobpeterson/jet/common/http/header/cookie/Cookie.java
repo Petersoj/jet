@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.Long.parseLong;
+import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.DOMAIN;
@@ -229,12 +230,12 @@ public final class Cookie {
         }
 
         /**
-         * @param maxAge set to <code>0</code> to expire immediately. A negative number will set this to <code>0</code>.
+         * @param maxAge giving a value less than zero will set this to zero and expire the cookie immediately
          *
          * @see Cookie#getMaxAge()
          */
         public Builder maxAge(final long maxAge) {
-            httpCookieBuilder.maxAge(maxAge < 0 ? 0 : maxAge);
+            httpCookieBuilder.maxAge(max(0, maxAge));
             return this;
         }
 
