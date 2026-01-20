@@ -1,0 +1,19 @@
+package net.jacobpeterson.jet.common.io.bounded;
+
+import java.io.IOException;
+
+/**
+ * {@link BoundException} is an {@link IOException} for {@link OnBoundCount#THROW}.
+ */
+public class BoundException extends IOException {
+
+    /**
+     * Instantiates a new {@link BoundException}.
+     *
+     * @param boundedInputStream the {@link BoundedInputStream}
+     */
+    public BoundException(final BoundedInputStream boundedInputStream) {
+        final var boundCount = boundedInputStream.getBoundCount();
+        super(boundCount == null ? "Unbound" : "Exceeded bound count of %d bytes".formatted(boundCount));
+    }
+}
