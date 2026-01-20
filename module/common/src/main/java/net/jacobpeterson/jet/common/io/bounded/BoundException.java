@@ -1,10 +1,13 @@
 package net.jacobpeterson.jet.common.io.bounded;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.io.IOException;
 
 /**
  * {@link BoundException} is an {@link IOException} for {@link OnBoundCount#THROW}.
  */
+@NullMarked
 public class BoundException extends IOException {
 
     /**

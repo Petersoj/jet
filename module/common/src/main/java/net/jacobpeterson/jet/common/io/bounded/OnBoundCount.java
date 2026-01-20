@@ -1,11 +1,14 @@
 package net.jacobpeterson.jet.common.io.bounded;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.io.IOException;
 
 /**
  * {@link OnBoundCount} is a {@link FunctionalInterface} for {@link BoundedInputStream} to call when
  * {@link BoundedInputStream#isBound()} occurs.
  */
+@NullMarked
 @FunctionalInterface
 public interface OnBoundCount {
 
