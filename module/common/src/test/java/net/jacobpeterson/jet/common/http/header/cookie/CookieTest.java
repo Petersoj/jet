@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.net.HttpCookie;
 import java.time.Duration;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -210,7 +210,7 @@ public class CookieTest {
 
     @Test
     public void getExpires() {
-        assertEquals(ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
+        assertEquals(ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, UTC),
                 Cookie.parseResponseCookie("a=b; Expires=Thu, 01 Jan 2026 00:00:00 GMT").getExpires());
         assertNull(Cookie.builder("a", "b").build().getExpires());
     }
@@ -229,7 +229,7 @@ public class CookieTest {
         assertFalse(Cookie.builder("a", "b").build().isExpired());
         assertTrue(Cookie.parseResponseCookie("a=b; Expires=Thu, 01 Jan 2026 00:00:00 GMT").isExpired());
         assertFalse(Cookie.parseResponseCookie("a=b; Expires=" +
-                ZonedDateTime.now(ZoneOffset.UTC).plusDays(1).format(RFC_1123_DATE_TIME)).isExpired());
+                ZonedDateTime.now(UTC).plusDays(1).format(RFC_1123_DATE_TIME)).isExpired());
     }
 
     @Test
@@ -237,6 +237,10 @@ public class CookieTest {
         assertTrue(Cookie.builder("a", "b")
                 .httpOnly(true)
                 .build().isHttpOnly());
+        assertTrue(Cookie.parseResponseCookie("a=b; HttpOnly;").isHttpOnly());
+        assertTrue(Cookie.parseResponseCookie("a=b; HttpOnly=true;").isHttpOnly());
+        assertFalse(Cookie.parseResponseCookie("a=b; HTTPONLY=false;").isHttpOnly());
+        assertFalse(Cookie.parseResponseCookie("a=b; httponly=FALSE;").isHttpOnly());
         assertFalse(Cookie.builder("a", "b").build().isHttpOnly());
     }
 
@@ -275,6 +279,10 @@ public class CookieTest {
         assertTrue(Cookie.builder("a", "b")
                 .secure(true)
                 .build().isSecure());
+        assertTrue(Cookie.parseResponseCookie("a=b; Secure;").isSecure());
+        assertTrue(Cookie.parseResponseCookie("a=b; Secure=true;").isSecure());
+        assertFalse(Cookie.parseResponseCookie("a=b; SECURE=false;").isSecure());
+        assertFalse(Cookie.parseResponseCookie("a=b; secure=FALSE;").isSecure());
         assertFalse(Cookie.builder("a", "b").build().isSecure());
     }
 
@@ -283,6 +291,10 @@ public class CookieTest {
         assertTrue(Cookie.builder("a", "b")
                 .partitioned(true)
                 .build().isPartitioned());
+        assertTrue(Cookie.parseResponseCookie("a=b; Partitioned;").isPartitioned());
+        assertTrue(Cookie.parseResponseCookie("a=b; Partitioned=true;").isPartitioned());
+        assertFalse(Cookie.parseResponseCookie("a=b; PARTITIONED=false;").isPartitioned());
+        assertFalse(Cookie.parseResponseCookie("a=b; partitioned=FALSE;").isPartitioned());
         assertFalse(Cookie.builder("a", "b").build().isPartitioned());
     }
 

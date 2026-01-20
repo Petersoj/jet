@@ -17,11 +17,19 @@ import java.time.chrono.ChronoZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.lang.Long.parseLong;
 import static java.time.ZoneOffset.UTC;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.DOMAIN;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.EXPIRES;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.HTTP_ONLY;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.MAX_AGE;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.PARTITIONED;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.PATH;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.SAME_SITE;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.SECURE;
 import static org.eclipse.jetty.http.HttpCookie.asJavaNetHttpCookie;
 import static org.eclipse.jetty.http.Syntax.requireValidRFC2616Token;
 import static org.eclipse.jetty.http.Syntax.requireValidRFC6265CookieValue;
@@ -62,6 +70,7 @@ import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
 @NullMarked
 @Immutable
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
+@SuppressWarnings({"Immutable", "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Cookie {
 
     private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
@@ -107,6 +116,16 @@ public final class Cookie {
             throw new IllegalArgumentException();
         }
         return new Cookie(httpCookie);
+    }
+
+    /**
+     * @param value the attribute value
+     *
+     * @return <code>true</code> if <code>value</code> is not case-insensitive equal to <code>"false"</code>,
+     * <code>false</code> otherwise
+     */
+    public static boolean isAttributeNotSetToFalse(final String value) {
+        return !value.equalsIgnoreCase("false");
     }
 
     /**
@@ -263,7 +282,15 @@ public final class Cookie {
         }
     }
 
-    private final @SuppressWarnings("Immutable") HttpCookie httpCookie;
+    private final HttpCookie httpCookie;
+    private @Nullable Optional<CookiePrefix> prefix;
+    private @Nullable Optional<ZonedDateTime> expires;
+    private @Nullable Boolean expired;
+    private @Nullable Boolean httpOnly;
+    private @Nullable Optional<Long> maxAge;
+    private @Nullable Optional<SameSite> sameSite;
+    private @Nullable Boolean secure;
+    private @Nullable Boolean partitioned;
 
     private Cookie(final HttpCookie httpCookie) {
         this.httpCookie = httpCookie;
@@ -278,10 +305,13 @@ public final class Cookie {
     }
 
     /**
-     * @return {@link CookiePrefix#fromCookieName(String)} {@link #getName()}
+     * @return internally-cached {@link CookiePrefix#fromCookieName(String)} {@link #getName()}
      */
     public @Nullable CookiePrefix getPrefix() {
-        return CookiePrefix.fromCookieName(getName());
+        if (prefix == null) {
+            prefix = Optional.ofNullable(CookiePrefix.fromCookieName(getName()));
+        }
+        return prefix.orElse(null);
     }
 
     /**
@@ -318,74 +348,112 @@ public final class Cookie {
      * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#DOMAIN}
      */
     public @Nullable String getDomain() {
-        return httpCookie.getDomain();
+        return getAttribute(DOMAIN);
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#EXPIRES} parsed into {@link ZonedDateTime}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#EXPIRES} parsed into
+     * {@link ZonedDateTime}
      */
     public @Nullable ZonedDateTime getExpires() {
-        final var string = getAttribute(EXPIRES);
-        return string == null ? null : HttpDateTime.parse(string);
+        if (expires == null) {
+            final var expires = getAttribute(EXPIRES);
+            this.expires = Optional.ofNullable(expires == null ? null : HttpDateTime.parse(expires));
+        }
+        return expires.orElse(null);
     }
 
     /**
-     * @return <code>true</code> if this {@link Cookie} is expired (<code>{@link #getMaxAge()} &lt;= 0</code> or
-     * {@link #getExpires()} {@link ZonedDateTime#isAfter(ChronoZonedDateTime)} {@link ZonedDateTime#now()}),
-     * <code>false</code> otherwise
+     * @return internally-cached <code>true</code> if this {@link Cookie} is expired (<code>{@link #getMaxAge()}
+     * &lt;= 0</code> or {@link #getExpires()} {@link ZonedDateTime#isAfter(ChronoZonedDateTime)}
+     * {@link ZonedDateTime#now()}), <code>false</code> otherwise
      */
     public boolean isExpired() {
-        final var maxAge = getMaxAge();
-        if (maxAge != null && maxAge <= 0) {
-            return true;
+        if (expired == null) {
+            final var maxAge = getMaxAge();
+            if (maxAge != null && maxAge <= 0) {
+                expired = true;
+            } else {
+                final var expires = getExpires();
+                expired = expires != null && ZonedDateTime.now(UTC).isAfter(expires);
+            }
         }
-        final var expires = getExpires();
-        return expires != null && ZonedDateTime.now(UTC).isAfter(expires);
+        return expired;
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#HTTP_ONLY} parsed into <code>boolean</code>
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#HTTP_ONLY} parsed into
+     * <code>boolean</code>
      */
     public boolean isHttpOnly() {
-        return httpCookie.isHttpOnly();
+        if (httpOnly == null) {
+            final var httpOnly = getAttribute(HTTP_ONLY);
+            this.httpOnly = httpOnly != null && isAttributeNotSetToFalse(httpOnly);
+        }
+        return httpOnly;
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#MAX_AGE} parsed into {@link Long}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#MAX_AGE} parsed into
+     * {@link Long}
      */
     public @Nullable Long getMaxAge() {
-        final var value = httpCookie.getMaxAge();
-        return value == -1 ? null : value;
+        if (maxAge == null) {
+            final var maxAge = getAttribute(MAX_AGE);
+            if (maxAge == null) {
+                this.maxAge = Optional.empty();
+            } else {
+                try {
+                    this.maxAge = Optional.of(parseLong(maxAge));
+                } catch (final NumberFormatException numberFormatException) {
+                    this.maxAge = Optional.empty();
+                }
+            }
+        }
+        return maxAge.orElse(null);
     }
 
     /**
      * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#PATH}
      */
     public @Nullable String getPath() {
-        return httpCookie.getPath();
+        return getAttribute(PATH);
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#SAME_SITE} parsed into {@link SameSite}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#SAME_SITE} parsed into
+     * {@link SameSite}
      */
     public @Nullable SameSite getSameSite() {
-        final var string = getAttribute(SAME_SITE);
-        return string == null ? null : SameSite.forString(string);
+        if (sameSite == null) {
+            final var sameSite = getAttribute(SAME_SITE);
+            this.sameSite = Optional.ofNullable(sameSite == null ? null : SameSite.forString(sameSite));
+        }
+        return sameSite.orElse(null);
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#SECURE} parsed into <code>boolean</code>
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#SECURE} parsed into
+     * <code>boolean</code>
      */
     public boolean isSecure() {
-        return httpCookie.isSecure();
+        if (secure == null) {
+            final var secure = getAttribute(SECURE);
+            this.secure = secure != null && isAttributeNotSetToFalse(secure);
+        }
+        return secure;
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#PARTITIONED} parsed into
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#PARTITIONED} parsed into
      * <code>boolean</code>
      */
     public boolean isPartitioned() {
-        return httpCookie.isPartitioned();
+        if (partitioned == null) {
+            final var partitioned = getAttribute(PARTITIONED);
+            this.partitioned = partitioned != null && isAttributeNotSetToFalse(partitioned);
+        }
+        return partitioned;
     }
 
     /**
