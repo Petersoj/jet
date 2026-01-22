@@ -1,31 +1,29 @@
 package net.jacobpeterson.jet.common.io.replacing;
 
-import lombok.Generated;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.copyOf;
-import static java.util.Objects.checkFromIndexSize;
 
 /**
- * {@link ReplacingInputStream} is a {@link FilterInputStream} for finding and replacing bytes as an
- * {@link InputStream} is read from. This class does not use an internal buffer, which helps performance and reduces
- * memory usage, but the find and replace logic is only implemented in the single-byte {@link #read()} method, meaning
- * the byte-array {@link #read(byte[], int, int)} method uses the single-byte {@link #read()}, method which may decrease
- * performance.
+ * {@link ReplacingInputStream} is an {@link InputStream} for finding and replacing bytes in an {@link InputStream} as
+ * it is read from.
  */
 @NullMarked
-public class ReplacingInputStream extends FilterInputStream {
+@SuppressWarnings("InputStreamSlowMultibyteRead")
+public class ReplacingInputStream extends InputStream {
 
     /**
      * @return {@link #forStrings(InputStream, List)} with {@link ArrayList#ArrayList(Collection)}
@@ -47,7 +45,7 @@ public class ReplacingInputStream extends FilterInputStream {
      */
     public static ReplacingInputStream forStrings(final InputStream inputStream,
             final List<Entry<String, String>> replacementsOfFinds) {
-        return forStringsOrByteArrays(inputStream, replacementsOfFinds, false);
+        return forStringsOrByteArrays(inputStream, replacementsOfFinds, true);
     }
 
     /**
@@ -69,7 +67,7 @@ public class ReplacingInputStream extends FilterInputStream {
      */
     public static ReplacingInputStream forByteArrays(final InputStream inputStream,
             final List<Entry<byte[], byte[]>> replacementsOfFinds) {
-        return forStringsOrByteArrays(inputStream, replacementsOfFinds, true);
+        return forStringsOrByteArrays(inputStream, replacementsOfFinds, false);
     }
 
     private static ReplacingInputStream forStringsOrByteArrays(final InputStream inputStream,
@@ -86,15 +84,13 @@ public class ReplacingInputStream extends FilterInputStream {
         return (ReplacingInputStream) composition;
     }
 
+    private final InputStream inputStream;
     private final byte[] find;
     private final int find0;
     private final byte[] replace;
     private final int replace0;
+    private final @Nullable Deque<Integer> buffer;
     private int replaceIndex;
-    private int findFalseIndex;
-    private int findFalseLastIndex;
-    private int findFalseLastRead;
-    private boolean findFalseLastReadEqualsFind0;
 
     /**
      * Calls {@link #ReplacingInputStream(InputStream, byte[], byte[])} with {@link String#getBytes()}
@@ -112,34 +108,34 @@ public class ReplacingInputStream extends FilterInputStream {
      * @param replace     the replacement bytes
      */
     public ReplacingInputStream(final InputStream inputStream, final byte[] find, final byte[] replace) {
-        super(inputStream);
-        this.find = copyOf(find, find.length);
+        this.inputStream = inputStream;
+        this.find = Arrays.copyOf(find, find.length);
         find0 = this.find.length == 0 ? -1 : Byte.toUnsignedInt(find[0]);
-        this.replace = copyOf(replace, replace.length);
+        this.replace = Arrays.copyOf(replace, replace.length);
         replace0 = this.replace.length == 0 ? -1 : Byte.toUnsignedInt(replace[0]);
+        buffer = this.find.length > 1 ? new ArrayDeque<>(this.find.length) : null;
         replaceIndex = -1;
-        findFalseIndex = -1;
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+    @SuppressWarnings({"NullAway", "StatementWithEmptyBody", "DataFlowIssue"})
     @Override
     public int read() throws IOException {
         if (find.length == 0) {
-            return super.read();
+            return inputStream.read();
         }
         if (replaceIndex != -1) {
-            final var replacement = replace[replaceIndex++];
+            final var replacement = Byte.toUnsignedInt(replace[replaceIndex++]);
             if (replaceIndex == replace.length) {
                 replaceIndex = -1;
             }
-            return Byte.toUnsignedInt(replacement);
+            return replacement;
         }
         if (find.length == 1) {
-            final var read = super.read();
+            final var read = inputStream.read();
             if (read == find0) {
                 if (replace.length == 0) {
                     int removeRead;
-                    while ((removeRead = super.read()) == find0) {}
+                    while ((removeRead = inputStream.read()) == find0) {}
                     return removeRead;
                 }
                 if (replace.length > 1) {
@@ -149,47 +145,13 @@ public class ReplacingInputStream extends FilterInputStream {
             }
             return read;
         }
-        if (findFalseIndex != -1) {
-            if (findFalseLastReadEqualsFind0) {
-                final var findFalseIndexValue = Byte.toUnsignedInt(find[findFalseIndex++]);
-                if (findFalseIndex == findFalseLastIndex - 1) {
-                    findFalseIndex = -1;
-                }
-                return findFalseIndexValue;
-            } else {
-                if (findFalseIndex < findFalseLastIndex) {
-                    return Byte.toUnsignedInt(find[findFalseIndex++]);
-                }
-                findFalseIndex = -1;
-                return findFalseLastRead;
-            }
+        if (!find()) {
+            return eofOrRemoveFirst();
         }
-        if (!find(findFalseLastReadEqualsFind0 ? 1 : 0)) {
-            if (findFalseLastReadEqualsFind0) {
-                if (findFalseLastIndex > 1) {
-                    findFalseIndex = 1;
-                }
-                return findFalseLastIndex == 0 ? findFalseLastRead : find0;
-            } else {
-                if (findFalseLastIndex > 0) {
-                    findFalseIndex = 1;
-                }
-                return findFalseLastIndex == 0 ? findFalseLastRead : find0;
-            }
-        }
+        buffer.clear();
         if (replace.length == 0) {
-            while (find(0)) {}
-            if (findFalseLastReadEqualsFind0) {
-                if (findFalseLastIndex > 1) {
-                    findFalseIndex = 1;
-                }
-                return findFalseLastIndex == 0 ? findFalseLastRead : find0;
-            } else {
-                if (findFalseLastIndex > 0) {
-                    findFalseIndex = 1;
-                }
-                return findFalseLastIndex == 0 ? findFalseLastRead : find0;
-            }
+            while (find()) { buffer.clear(); }
+            return eofOrRemoveFirst();
         }
         if (replace.length > 1) {
             replaceIndex = 1;
@@ -197,64 +159,33 @@ public class ReplacingInputStream extends FilterInputStream {
         return replace0;
     }
 
-    private boolean find(final int startIndex) throws IOException {
-        for (var index = startIndex; index < find.length; index++) {
-            final var read = super.read();
-            if (read != Byte.toUnsignedInt(find[index])) {
-                findFalseLastIndex = index;
-                findFalseLastRead = read;
-                findFalseLastReadEqualsFind0 = read == find0;
+    @SuppressWarnings({"NullAway", "DataFlowIssue"})
+    private boolean find() throws IOException {
+        int read;
+        while (buffer.size() < find.length && (read = inputStream.read()) != -1) {
+            buffer.add(read);
+        }
+        if (buffer.size() != find.length) {
+            return false;
+        }
+        if (buffer.getFirst() != find0) {
+            return false;
+        }
+        var index = 0;
+        for (final var bufferRead : buffer) { // TODO https://bugs.openjdk.org/browse/JDK-8356821
+            if (index == 0) {
+                index = 1;
+                continue;
+            }
+            if (bufferRead != Byte.toUnsignedInt(find[index++])) {
                 return false;
             }
         }
         return true;
     }
 
-    // This method is copied directly from `InputStream.read(byte[], int, int)` because the `read()` method of this
-    // class must be used instead of the `read()` method of the underlying `InputStream`s class.
-    @SuppressWarnings("all")
-    @Generated
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        checkFromIndexSize(off, len, b.length);
-        if (len == 0) {
-            return 0;
-        }
-        int c = read();
-        if (c == -1) {
-            return -1;
-        }
-        b[off] = (byte) c;
-        int i = 1;
-        try {
-            for (; i < len; i++) {
-                c = read();
-                if (c == -1) {
-                    break;
-                }
-                b[off + i] = (byte) c;
-            }
-        } catch (IOException ee) {}
-        return i;
-    }
-
-    @Override
-    public long skip(final long n) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void mark(final int readlimit) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void reset() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean markSupported() {
-        return false;
+    @SuppressWarnings({"NullAway", "DataFlowIssue"})
+    private int eofOrRemoveFirst() {
+        return buffer.isEmpty() ? -1 : buffer.removeFirst();
     }
 }

@@ -148,7 +148,7 @@ public enum Version {
     }
 
     /**
-     * Calls {@link #forInteger(int)} with the given <code>decimal * 10</code>.
+     * @return {@link #forInteger(int)} with the given <code>decimal * 10</code>
      */
     public static @Nullable Version forDecimal(final double decimal) {
         return forInteger((int) (decimal * 10));
