@@ -64,6 +64,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">
  * developer.mozilla.org</a>
+ * @see Header#CONTENT_TYPE
  */
 @NullMarked
 @Immutable

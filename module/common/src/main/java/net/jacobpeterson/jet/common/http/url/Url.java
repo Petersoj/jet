@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Locale.ROOT;
 import static java.util.Map.entry;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
@@ -253,11 +254,10 @@ public final class Url {
     /**
      * Normalizes the given <code>encodedPath</code> with the following process:
      * <ol>
-     *     <li>Collapse sequential {@link #PATH_SEGMENT_DELIMITER}s
-     *     (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
-     *     <li>Resolve relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
-     *     <li>{@link #encodedPathTrimTrailing(String)} (unless the previous steps result in
-     *     {@link #PATH_SEGMENT_DELIMITER})</li>
+     * <li>Collapse sequential {@link #PATH_SEGMENT_DELIMITER}s (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
+     * <li>Resolve relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
+     * <li>{@link #encodedPathTrimTrailing(String)} (unless the previous steps result in
+     * {@link #PATH_SEGMENT_DELIMITER})</li>
      * </ol>
      *
      * @param encodedPath the encoded path
@@ -654,7 +654,8 @@ public final class Url {
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
         checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme");
-        scheme = uriScheme; // `requireValidChars()` unnecessary since URI requires ASCII scheme
+        // `checkCharsValid()` unnecessary since URI requires ASCII scheme
+        scheme = uriScheme.toLowerCase(ROOT);
 
         final var uriUserInfo = uri.getRawUserInfo();
         if (uriUserInfo != null) {
@@ -664,7 +665,8 @@ public final class Url {
 
         final var uriHost = uri.getHost();
         checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host");
-        host = uriHost; // `requireValidChars()` unnecessary since URI requires ASCII host
+        // `checkCharsValid()` unnecessary since URI requires ASCII host
+        host = uriHost.toLowerCase(ROOT);
 
         final var uriPort = uri.getPort();
         port = uriPort > 0 ? uriPort : null;

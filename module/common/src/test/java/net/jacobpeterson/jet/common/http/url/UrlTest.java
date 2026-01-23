@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1767,7 +1768,24 @@ public class UrlTest {
                 .scheme("a")
                 .host("a.com")
                 .build());
+        assertEquals(Url.parse("A://a.com"), Url.builder()
+                .scheme("a")
+                .host("a.com")
+                .build());
+        assertEquals(Url.parse("a://A.COM"), Url.builder()
+                .scheme("A")
+                .host("a.com")
+                .build());
+        assertEquals(Url.parse("a://a.com"), Url.builder()
+                .scheme("a")
+                .host("a.COM")
+                .build());
         assertEquals(Url.parse("https://a.com/a"), Url.builder()
+                .scheme(Scheme.HTTPS)
+                .host("a.com")
+                .addPathSegment("a")
+                .build());
+        assertNotEquals(Url.parse("https://A.COM/A"), Url.builder()
                 .scheme(Scheme.HTTPS)
                 .host("a.com")
                 .addPathSegment("a")
