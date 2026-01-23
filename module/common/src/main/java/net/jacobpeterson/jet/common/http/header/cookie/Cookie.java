@@ -37,9 +37,9 @@ import static org.eclipse.jetty.http.Syntax.requireValidRFC6265CookieValue;
 import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
 
 /**
- * {@link Cookie} is an immutable class that represents a standardized HTTP cookie. Internally, this class wraps
- * <code>org.eclipse.jetty.http.HttpCookie</code> from <a href="https://jetty.org">Jetty</a> and adds some extra
- * functionality.
+ * {@link Cookie} is an immutable class that represents a standardized HTTP {@link Header#SET_COOKIE}. Internally, this
+ * class wraps <code>org.eclipse.jetty.http.HttpCookie</code> from <a href="https://jetty.org">Jetty</a> and adds some
+ * extra functionality.
  * <p>
  * A <strong>cookie</strong> (also known as a web cookie or browser cookie) is a small piece of data a server sends to a
  * user's web browser. The browser may store cookies, create new cookies, modify existing ones, and send them back to

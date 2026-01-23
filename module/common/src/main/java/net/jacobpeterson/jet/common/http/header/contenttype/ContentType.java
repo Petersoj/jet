@@ -32,9 +32,9 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
- * {@link ContentType} is an immutable class that represents a standardized HTTP content type (aka MIME type).
- * Internally, this class wraps {@link MediaType} from <a href="https://github.com/google/guava">Google Guava</a> and
- * adds some extra functionality.
+ * {@link ContentType} is an immutable class that represents a standardized HTTP {@link Header#CONTENT_TYPE} (aka MIME
+ * type). Internally, this class wraps {@link MediaType} from <a href="https://github.com/google/guava">Google Guava</a>
+ * and adds some extra functionality.
  * <p>
  * The HTTP <strong><code>Content-Type</code></strong>
  * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Representation_header">representation header</a> is used

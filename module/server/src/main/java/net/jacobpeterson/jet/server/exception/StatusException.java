@@ -2,8 +2,8 @@ package net.jacobpeterson.jet.server.exception;
 
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import net.jacobpeterson.jet.server.handler.Handler;
 import net.jacobpeterson.jet.common.http.status.Status;
+import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -29,7 +29,7 @@ public class StatusException extends RuntimeException {
      * Instantiates a new {@link StatusException}.
      *
      * @param status  the {@link Status}
-     * @param message see {@link RuntimeException#RuntimeException(String)}
+     * @param message see {@link #getMessage()}
      */
     public StatusException(final Status status, final String message) {
         super(message);
