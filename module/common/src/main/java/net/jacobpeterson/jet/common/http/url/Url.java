@@ -134,18 +134,18 @@ public final class Url {
     public static final String FRAGMENT_DELIMITER = "#";
 
     /**
-     * The inclusive minimum bound for valid ASCII URL chars.
+     * The inclusive minimum bound for visible ASCII characters.
      *
-     * @see #checkCharsValid(String)
+     * @see #requireVisibleAsciiChars(String)
      */
-    public static final char VALID_CHAR_MINIMUM = 0x21;
+    public static final char VISIBLE_ASCII_MINIMUM = 0x21;
 
     /**
-     * The inclusive maximum bound for valid ASCII URL chars.
+     * The inclusive maximum bound for visible ASCII characters.
      *
-     * @see #checkCharsValid(String)
+     * @see #requireVisibleAsciiChars(String)
      */
-    public static final char VALID_CHAR_MAXIMUM = 0x7E;
+    public static final char VISIBLE_ASCII_MAXIMUM = 0x7E;
 
     /**
      * @return {@link URLEncoder#encode(String, Charset)} with <code>decoded</code> and {@link StandardCharsets#UTF_8}
@@ -171,17 +171,17 @@ public final class Url {
     }
 
     /**
-     * Checks if each <code>char</code> in the given <code>string</code> is greater than or equal to
-     * {@link #VALID_CHAR_MINIMUM} and less than or equal to {@link #VALID_CHAR_MAXIMUM}.
+     * Validates that each <code>char</code> in the given <code>string</code> is greater than or equal to
+     * {@link #VISIBLE_ASCII_MINIMUM} and less than or equal to {@link #VISIBLE_ASCII_MAXIMUM}.
      *
      * @param string the {@link String} to validate
      *
      * @throws IllegalArgumentException thrown if the given <code>string</code> is invalid
      */
-    public static void checkCharsValid(final String string) throws IllegalArgumentException {
+    public static void requireVisibleAsciiChars(final String string) throws IllegalArgumentException {
         for (var index = 0; index < string.length(); index++) {
             final var charAt = string.charAt(index);
-            if (charAt < VALID_CHAR_MINIMUM || charAt > VALID_CHAR_MAXIMUM) {
+            if (charAt < VISIBLE_ASCII_MINIMUM || charAt > VISIBLE_ASCII_MAXIMUM) {
                 throw new IllegalArgumentException("Invalid URL character found at index %d: 0x%02X"
                         .formatted(index, (int) charAt));
             }
@@ -356,9 +356,9 @@ public final class Url {
     /**
      * Parses the given <code>encodedUrl</code> into a {@link Url}.
      *
-     * @param encodedUrl the encoded URL {@link String}. {@link #checkCharsValid(String)} is called for each URL
-     *                   component after parsing, so non-ASCII characters will result in an
-     *                   {@link IllegalArgumentException}.
+     * @param encodedUrl the encoded URL {@link String}. Note: {@link #requireVisibleAsciiChars(String)} is called
+     *                   for each
+     *                   URL component after parsing.
      *
      * @return the {@link Url}
      *
@@ -654,18 +654,18 @@ public final class Url {
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
         checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme");
-        // `checkCharsValid()` unnecessary since URI requires ASCII scheme
+        // `requireVisibleAsciiChars()` unnecessary since URI requires visible ASCII scheme
         scheme = uriScheme.toLowerCase(ROOT);
 
         final var uriUserInfo = uri.getRawUserInfo();
         if (uriUserInfo != null) {
-            checkCharsValid(uriUserInfo);
+            requireVisibleAsciiChars(uriUserInfo);
         }
         encodedUserInfo = uriUserInfo;
 
         final var uriHost = uri.getHost();
         checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host");
-        // `checkCharsValid()` unnecessary since URI requires ASCII host
+        // `requireVisibleAsciiChars()` unnecessary since URI requires visible ASCII host
         host = uriHost.toLowerCase(ROOT);
 
         final var uriPort = uri.getPort();
@@ -673,20 +673,20 @@ public final class Url {
 
         final var uriPath = uri.getRawPath();
         if (uriPath != null) {
-            checkCharsValid(uriPath);
+            requireVisibleAsciiChars(uriPath);
         }
         encodedPath = uriPath == null ? PATH_SEGMENT_DELIMITER :
                 !uriPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER + uriPath : uriPath;
 
         final var uriQuery = uri.getRawQuery();
         if (uriQuery != null) {
-            checkCharsValid(uriQuery);
+            requireVisibleAsciiChars(uriQuery);
         }
         encodedQuery = uriQuery;
 
         final var uriFragment = uri.getRawFragment();
         if (uriFragment != null) {
-            checkCharsValid(uriFragment);
+            requireVisibleAsciiChars(uriFragment);
         }
         encodedFragment = uriFragment;
     }

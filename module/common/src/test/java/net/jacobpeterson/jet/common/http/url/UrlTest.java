@@ -50,12 +50,12 @@ public class UrlTest {
     }
 
     @Test
-    public void checkCharsValid() {
-        assertDoesNotThrow(() -> Url.checkCharsValid(""));
-        assertDoesNotThrow(() -> Url.checkCharsValid("a"));
-        assertThrows(IllegalArgumentException.class, () -> Url.checkCharsValid("\u0000"));
-        assertThrows(IllegalArgumentException.class, () -> Url.checkCharsValid("a•"));
-        assertThrows(IllegalArgumentException.class, () -> Url.checkCharsValid("👍"));
+    public void requireVisibleAsciiChars() {
+        assertDoesNotThrow(() -> Url.requireVisibleAsciiChars(""));
+        assertDoesNotThrow(() -> Url.requireVisibleAsciiChars("a"));
+        assertThrows(IllegalArgumentException.class, () -> Url.requireVisibleAsciiChars("\u0000"));
+        assertThrows(IllegalArgumentException.class, () -> Url.requireVisibleAsciiChars("a•"));
+        assertThrows(IllegalArgumentException.class, () -> Url.requireVisibleAsciiChars("👍"));
     }
 
     @Test

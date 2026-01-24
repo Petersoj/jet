@@ -1603,6 +1603,8 @@ public enum Header {
      */
     WARNING("Warning"),
 
+    // BEGIN https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+
     /**
      * For Nginx proxy module: set the parameters of response
      * <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_valid">caching</a>.
@@ -1644,6 +1646,8 @@ public enum Header {
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
     X_ACCEL_CHARSET("X-Accel-Charset");
+
+    // END https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
 
     private final String string;
 
