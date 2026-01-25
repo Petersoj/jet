@@ -273,11 +273,12 @@ public final class Url {
     }
 
     /**
-     * Parses the given <code>encodedQuery</code> into a {@link ListMultimap} of query parameters.
+     * Parses the given <code>encodedQuery</code> into a {@link ListMultimap} of query parameters. Query parameters with
+     * an empty key are omitted.
      *
      * @param encodedQuery the encoded query (without the leading {@link #QUERY_DELIMITER})
      *
-     * @return the query parameters {@link ListMultimap}. Query parameters with an empty key are omitted.
+     * @return the query parameters {@link ListMultimap}
      *
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
@@ -392,7 +393,9 @@ public final class Url {
     }
 
     /**
-     * {@link Builder} is a reusable builder class for {@link Url}.
+     * {@link Builder} is a builder class for {@link Url}.
+     *
+     * @see #builder()
      */
     public static final class Builder {
 
@@ -472,16 +475,16 @@ public final class Url {
         /**
          * @see #getEncodedPath()
          */
-        public Builder encodedPath(final String encodedPath) {
-            this.encodedPath = new StringBuilder(encodedPath);
+        public Builder encodedPath(final @Nullable String encodedPath) {
+            this.encodedPath = new StringBuilder(encodedPath == null ? PATH_SEGMENT_DELIMITER : encodedPath);
             return this;
         }
 
         /**
          * @return {@link #encodedPath(String)} {@link #encodePath(String)}
          */
-        public Builder path(final String path) {
-            return encodedPath(encodePath(path));
+        public Builder path(final @Nullable String path) {
+            return encodedPath(path == null ? null : encodePath(path));
         }
 
         /**
@@ -608,7 +611,7 @@ public final class Url {
         /**
          * @return the built {@link Url}
          *
-         * @throws IllegalArgumentException thrown upon parsing failure
+         * @throws IllegalArgumentException thrown upon building failure
          */
         public Url build() throws IllegalArgumentException {
             return parse(concatComponents(scheme, encodedUserInfo, host, port,

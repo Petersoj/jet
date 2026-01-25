@@ -448,6 +448,12 @@ public class UrlTest {
                     .host("a.com")
                     .encodedPath("/a")
                     .build().toString());
+            assertEquals("a://a.com", Url.builder()
+                    .scheme("a")
+                    .host("a.com")
+                    .encodedPath("/a")
+                    .encodedPath(null)
+                    .build().toString());
             assertEquals("a://a.com/a", Url.builder()
                     .scheme("a")
                     .host("a.com")
@@ -492,6 +498,12 @@ public class UrlTest {
                     .scheme("a")
                     .host("a.com")
                     .path("/a")
+                    .build().toString());
+            assertEquals("a://a.com", Url.builder()
+                    .scheme("a")
+                    .host("a.com")
+                    .path("/a")
+                    .path(null)
                     .build().toString());
             assertEquals("a://a.com/a", Url.builder()
                     .scheme("a")

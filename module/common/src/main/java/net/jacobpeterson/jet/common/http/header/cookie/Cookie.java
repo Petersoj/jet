@@ -167,7 +167,7 @@ public final class Cookie {
     }
 
     /**
-     * {@link Builder} is a nonreusable builder class for {@link Cookie}.
+     * {@link Builder} is a builder class for {@link Cookie}.
      *
      * @see #builder(CookiePrefix, String, String)
      * @see #builder(String, String)
