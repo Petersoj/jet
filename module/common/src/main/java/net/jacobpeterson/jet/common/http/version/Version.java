@@ -103,12 +103,6 @@ public enum Version {
             .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toStringNoPrefix()} mapped to {@link Version}.
-     */
-    public static final Map<String, Version> VALUES_OF_UPPERCASED_STRING_NO_PREFIX = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toStringNoPrefix().toUpperCase(ROOT), identity()));
-
-    /**
      * An unmodifiable {@link Map} of {@link #getInteger()} mapped to {@link Version}.
      */
     public static final Map<Integer, Version> VALUES_OF_INTEGERS = stream(values())
@@ -126,14 +120,12 @@ public enum Version {
     }
 
     /**
-     * Gets the {@link Version} for the given <code>stringNoPrefix</code>.
+     * @return {@link #forString(String)} with <code>stringNoPrefix</code> prepended with {@link #PREFIX}
      *
-     * @param stringNoPrefix the case-insensitive {@link #toStringNoPrefix()}
-     *
-     * @return the {@link Version}, or <code>null</code> if no mapping exists
+     * @see #toStringNoPrefix()
      */
     public static @Nullable Version forStringNoPrefix(final String stringNoPrefix) {
-        return VALUES_OF_UPPERCASED_STRING_NO_PREFIX.get(stringNoPrefix.toUpperCase(ROOT));
+        return forString(PREFIX + stringNoPrefix.toUpperCase(ROOT));
     }
 
     /**
@@ -149,6 +141,8 @@ public enum Version {
 
     /**
      * @return {@link #forInteger(int)} with the given <code>decimal * 10</code>
+     *
+     * @see #toDecimal()
      */
     public static @Nullable Version forDecimal(final double decimal) {
         return forInteger((int) (decimal * 10));
