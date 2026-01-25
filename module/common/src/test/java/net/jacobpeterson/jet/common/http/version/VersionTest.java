@@ -14,8 +14,8 @@ public class VersionTest {
     }
 
     @Test
-    public void toDecimal() {
-        assertEquals(1.1, Version.HTTP_1_1.toDecimal());
+    public void getDecimal() {
+        assertEquals(1.1, Version.HTTP_1_1.getDecimal());
     }
 
     @Test

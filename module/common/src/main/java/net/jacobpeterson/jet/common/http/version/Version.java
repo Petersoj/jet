@@ -87,7 +87,7 @@ public enum Version {
     /**
      * @return <code>{@link #getInteger()} / 10</code>
      */
-    public double toDecimal() {
+    public double getDecimal() {
         return integer / 10.0;
     }
 
@@ -142,7 +142,7 @@ public enum Version {
     /**
      * @return {@link #forInteger(int)} with the given <code>decimal * 10</code>
      *
-     * @see #toDecimal()
+     * @see #getDecimal()
      */
     public static @Nullable Version forDecimal(final double decimal) {
         return forInteger((int) (decimal * 10));
