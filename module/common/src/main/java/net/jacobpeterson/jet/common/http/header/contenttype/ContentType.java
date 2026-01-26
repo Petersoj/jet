@@ -10,6 +10,7 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +30,7 @@ import static java.nio.file.Files.readAllLines;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toUnmodifiableMap;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
@@ -68,7 +70,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  */
 @NullMarked
 @Immutable
-@EqualsAndHashCode(cacheStrategy = LAZY)
+@RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(cacheStrategy = LAZY)
 public final class ContentType {
 
     // The below public constants are commonly used content types. The constants are defined as `String` and
@@ -524,10 +526,6 @@ public final class ContentType {
     }
 
     private final MediaType mediaType;
-
-    private ContentType(final MediaType mediaType) {
-        this.mediaType = mediaType;
-    }
 
     /**
      * @return {@link MediaType#type()}

@@ -3,6 +3,7 @@ package net.jacobpeterson.jet.common.http.header.cookie;
 import com.google.common.base.Splitter;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.url.Url;
 import org.eclipse.jetty.http.HttpCookie;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.DOMAIN;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.EXPIRES;
@@ -70,7 +72,7 @@ import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
  */
 @NullMarked
 @Immutable
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
+@RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
 @SuppressWarnings({"Immutable", "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Cookie {
 
@@ -292,10 +294,6 @@ public final class Cookie {
     private @Nullable Optional<CookieSameSite> sameSite;
     private @Nullable Boolean secure;
     private @Nullable Boolean partitioned;
-
-    private Cookie(final HttpCookie httpCookie) {
-        this.httpCookie = httpCookie;
-    }
 
     /**
      * @return the name
