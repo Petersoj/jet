@@ -250,8 +250,8 @@ public final class Cookie {
         /**
          * @see Cookie#getSameSite()
          */
-        public Builder sameSite(final SameSite sameSite) {
-            httpCookieBuilder.sameSite(switch (sameSite) {
+        public Builder sameSite(final CookieSameSite cookieSameSite) {
+            httpCookieBuilder.sameSite(switch (cookieSameSite) {
                 case STRICT -> HttpCookie.SameSite.STRICT;
                 case LAX -> HttpCookie.SameSite.LAX;
                 case NONE -> HttpCookie.SameSite.NONE;
@@ -289,7 +289,7 @@ public final class Cookie {
     private @Nullable Boolean expired;
     private @Nullable Boolean httpOnly;
     private @Nullable Optional<Long> maxAge;
-    private @Nullable Optional<SameSite> sameSite;
+    private @Nullable Optional<CookieSameSite> sameSite;
     private @Nullable Boolean secure;
     private @Nullable Boolean partitioned;
 
@@ -423,12 +423,12 @@ public final class Cookie {
 
     /**
      * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#SAME_SITE} parsed into
-     * {@link SameSite}
+     * {@link CookieSameSite}
      */
-    public @Nullable SameSite getSameSite() {
+    public @Nullable CookieSameSite getSameSite() {
         if (sameSite == null) {
             final var sameSite = getAttribute(SAME_SITE);
-            this.sameSite = Optional.ofNullable(sameSite == null ? null : SameSite.forString(sameSite));
+            this.sameSite = Optional.ofNullable(sameSite == null ? null : CookieSameSite.forString(sameSite));
         }
         return sameSite.orElse(null);
     }

@@ -47,7 +47,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  * uses the <code>Content-Type</code> header to specify the type of content being sent to the server. If a server
  * implementation or configuration is strict about content type handling, a
  * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/415"><code>415</code></a> client error
- * response may be returned.</p>
+ * response may be returned.
  * <p>
  * The <code>Content-Type</code> header differs from
  * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding">

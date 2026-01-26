@@ -12,7 +12,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
- * {@link SameSite} is an enum that represents the <code>SameSite</code> attribute on a {@link Cookie}.
+ * {@link CookieSameSite} is an enum for the {@link CookieAttribute#SAME_SITE} value.
  * <p>
  * Controls whether or not a cookie is sent with cross-site requests: that is, requests originating from a different
  * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Site">site</a>, including the scheme, from the site that
@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
  */
 @NullMarked
 @RequiredArgsConstructor
-public enum SameSite {
+public enum CookieSameSite {
 
     /**
      * Send the cookie only for requests originating from the same
@@ -94,19 +94,19 @@ public enum SameSite {
     }
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link SameSite}.
+     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link CookieSameSite}.
      */
-    public static final Map<String, SameSite> VALUES_OF_UPPERCASED_STRINGS = stream(values())
+    public static final Map<String, CookieSameSite> VALUES_OF_UPPERCASED_STRINGS = stream(values())
             .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
 
     /**
-     * Gets the {@link SameSite} for the given <code>string</code>.
+     * Gets the {@link CookieSameSite} for the given <code>string</code>.
      *
      * @param string the case-insensitive {@link #toString()}
      *
-     * @return the {@link SameSite}, or <code>null</code> if no mapping exists
+     * @return the {@link CookieSameSite}, or <code>null</code> if no mapping exists
      */
-    public static @Nullable SameSite forString(final String string) {
+    public static @Nullable CookieSameSite forString(final String string) {
         return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
     }
 }

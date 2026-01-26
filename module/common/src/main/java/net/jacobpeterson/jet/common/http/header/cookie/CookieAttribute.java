@@ -124,7 +124,7 @@ public enum CookieAttribute {
     PATH(HttpCookie.PATH_ATTRIBUTE),
 
     /**
-     * @see SameSite
+     * @see CookieSameSite
      * @see
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value">
      * developer.mozilla.org</a>

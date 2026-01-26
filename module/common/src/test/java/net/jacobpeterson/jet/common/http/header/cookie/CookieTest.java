@@ -123,21 +123,21 @@ public class CookieTest {
         @Test
         public void sameSiteStrict() {
             assertEquals("a=b; SameSite=Strict", Cookie.builder("a", "b")
-                    .sameSite(SameSite.STRICT)
+                    .sameSite(CookieSameSite.STRICT)
                     .build().toString());
         }
 
         @Test
         public void sameSiteLax() {
             assertEquals("a=b; SameSite=Lax", Cookie.builder("a", "b")
-                    .sameSite(SameSite.LAX)
+                    .sameSite(CookieSameSite.LAX)
                     .build().toString());
         }
 
         @Test
         public void sameSiteNone() {
             assertEquals("a=b; SameSite=None", Cookie.builder("a", "b")
-                    .sameSite(SameSite.NONE)
+                    .sameSite(CookieSameSite.NONE)
                     .build().toString());
         }
 
@@ -267,10 +267,10 @@ public class CookieTest {
 
     @Test
     public void getSameSite() {
-        assertEquals(SameSite.STRICT, Cookie.builder("a", "b")
-                .sameSite(SameSite.STRICT)
+        assertEquals(CookieSameSite.STRICT, Cookie.builder("a", "b")
+                .sameSite(CookieSameSite.STRICT)
                 .build().getSameSite());
-        assertEquals(SameSite.STRICT, Cookie.parseResponseCookie("a=b; SAMESITE=STRICT").getSameSite());
+        assertEquals(CookieSameSite.STRICT, Cookie.parseResponseCookie("a=b; SAMESITE=STRICT").getSameSite());
         assertNull(Cookie.builder("a", "b").build().getSameSite());
     }
 

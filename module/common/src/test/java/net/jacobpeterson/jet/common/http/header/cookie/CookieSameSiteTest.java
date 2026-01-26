@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class SameSiteTest {
+public class CookieSameSiteTest {
 
     @Test
     public void forString() {
-        assertEquals(SameSite.STRICT, SameSite.forString("Strict"));
-        assertEquals(SameSite.STRICT, SameSite.forString("STRICT"));
-        assertNull(SameSite.forString("a"));
+        assertEquals(CookieSameSite.STRICT, CookieSameSite.forString("Strict"));
+        assertEquals(CookieSameSite.STRICT, CookieSameSite.forString("STRICT"));
+        assertNull(CookieSameSite.forString("a"));
     }
 }
