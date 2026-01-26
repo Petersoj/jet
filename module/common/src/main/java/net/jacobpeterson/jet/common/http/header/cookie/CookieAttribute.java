@@ -167,10 +167,10 @@ public enum CookieAttribute {
     }
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link CookieAttribute}.
+     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link CookieAttribute}.
      */
-    public static final Map<String, CookieAttribute> VALUES_OF_UPPERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
+    public static final Map<String, CookieAttribute> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link CookieAttribute} for the given <code>string</code>.
@@ -180,6 +180,6 @@ public enum CookieAttribute {
      * @return the {@link CookieAttribute}, or <code>null</code> if no mapping exists
      */
     public static @Nullable CookieAttribute forString(final String string) {
-        return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
+        return VALUES_OF_LOWERCASED_STRINGS.get(string.toLowerCase(ROOT));
     }
 }

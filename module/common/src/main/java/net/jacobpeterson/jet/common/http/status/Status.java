@@ -655,10 +655,10 @@ public enum Status {
             .collect(toUnmodifiableMap(Status::getCode, identity()));
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #getDescription()} mapped to {@link Status}.
+     * An unmodifiable {@link Map} of lowercased {@link #getDescription()} mapped to {@link Status}.
      */
-    public static final Map<String, Status> VALUES_OF_UPPERCASED_DESCRIPTIONS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.getDescription().toUpperCase(ROOT), identity()));
+    public static final Map<String, Status> VALUES_OF_LOWERCASED_DESCRIPTIONS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.getDescription().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link Status} for the given <code>code</code>.
@@ -679,7 +679,7 @@ public enum Status {
      * @return the {@link Status}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Status forDescription(final String description) {
-        return VALUES_OF_UPPERCASED_DESCRIPTIONS.get(description.toUpperCase(ROOT));
+        return VALUES_OF_LOWERCASED_DESCRIPTIONS.get(description.toLowerCase(ROOT));
     }
 
     /**
@@ -693,18 +693,10 @@ public enum Status {
     public static @Nullable Status forString(final String string) {
         final var trimmed = string.trim();
         final var spaceIndex = trimmed.indexOf(' ');
-        if (spaceIndex == -1) {
-            try {
-                return forCode(Integer.parseInt(trimmed));
-            } catch (final NumberFormatException numberFormatException) {
-                return forDescription(trimmed);
-            }
-        } else {
-            try {
-                return forCode(Integer.parseInt(trimmed.substring(0, spaceIndex)));
-            } catch (final NumberFormatException numberFormatException) {
-                return forDescription(trimmed);
-            }
+        try {
+            return forCode(Integer.parseInt(spaceIndex == -1 ? trimmed : trimmed.substring(0, spaceIndex)));
+        } catch (final NumberFormatException numberFormatException) {
+            return forDescription(trimmed);
         }
     }
 

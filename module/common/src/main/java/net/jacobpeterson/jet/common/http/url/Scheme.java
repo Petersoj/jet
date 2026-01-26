@@ -137,10 +137,10 @@ public enum Scheme {
     }
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link Scheme}.
+     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link Scheme}.
      */
-    public static final Map<String, Scheme> VALUES_OF_UPPERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
+    public static final Map<String, Scheme> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * An unmodifiable {@link Map} of {@link #getDefaultPort()} mapped to {@link Scheme}.
@@ -157,7 +157,7 @@ public enum Scheme {
      * @return the {@link Scheme}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Scheme forString(final String string) {
-        return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
+        return VALUES_OF_LOWERCASED_STRINGS.get(string.toLowerCase(ROOT));
     }
 
     /**

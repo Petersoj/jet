@@ -120,12 +120,12 @@ public enum Version {
     }
 
     /**
-     * @return {@link #forString(String)} with <code>stringNoPrefix</code> prepended with {@link #PREFIX}
+     * @return {@link #forString(String)} with the given <code>stringNoPrefix</code> prepended with {@link #PREFIX}
      *
      * @see #toStringNoPrefix()
      */
     public static @Nullable Version forStringNoPrefix(final String stringNoPrefix) {
-        return forString(PREFIX + stringNoPrefix.toUpperCase(ROOT));
+        return forString(PREFIX + stringNoPrefix);
     }
 
     /**

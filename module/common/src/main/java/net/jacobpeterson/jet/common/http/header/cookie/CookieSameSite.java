@@ -94,10 +94,10 @@ public enum CookieSameSite {
     }
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link CookieSameSite}.
+     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link CookieSameSite}.
      */
-    public static final Map<String, CookieSameSite> VALUES_OF_UPPERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
+    public static final Map<String, CookieSameSite> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link CookieSameSite} for the given <code>string</code>.
@@ -107,6 +107,6 @@ public enum CookieSameSite {
      * @return the {@link CookieSameSite}, or <code>null</code> if no mapping exists
      */
     public static @Nullable CookieSameSite forString(final String string) {
-        return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
+        return VALUES_OF_LOWERCASED_STRINGS.get(string.toLowerCase(ROOT));
     }
 }

@@ -80,16 +80,16 @@ public enum CookiePrefix {
     public static final String SUFFIX_TOKEN = "-";
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link CookiePrefix}.
+     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link CookiePrefix}.
      */
-    public static final Map<String, CookiePrefix> VALUES_OF_UPPERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
+    public static final Map<String, CookiePrefix> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
-     * The inverse of {@link #VALUES_OF_UPPERCASED_STRINGS}.
+     * The inverse of {@link #VALUES_OF_LOWERCASED_STRINGS}.
      */
-    public static final Map<CookiePrefix, String> UPPERCASED_STRINGS_OF_VALUES =
-            VALUES_OF_UPPERCASED_STRINGS.entrySet().stream()
+    public static final Map<CookiePrefix, String> LOWERCASED_STRINGS_OF_VALUES =
+            VALUES_OF_LOWERCASED_STRINGS.entrySet().stream()
                     .collect(toUnmodifiableMap(Entry::getValue, Entry::getKey));
 
     private static final List<CookiePrefix> FROM_COOKIE_NAME_SEARCH_LIST =
@@ -103,7 +103,7 @@ public enum CookiePrefix {
      * @return the {@link CookiePrefix}, or <code>null</code> if no mapping exists
      */
     public static @Nullable CookiePrefix forString(final String string) {
-        return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
+        return VALUES_OF_LOWERCASED_STRINGS.get(string.toLowerCase(ROOT));
     }
 
     /**
@@ -117,10 +117,10 @@ public enum CookiePrefix {
         if (!cookieName.startsWith(PREFIX_TOKEN)) {
             return null;
         }
-        final var uppercasedCookieName = cookieName.toUpperCase(ROOT);
+        final var lowercasedCookieName = cookieName.toLowerCase(ROOT);
         // Brute force search for only 4 possibilities is fine.
         for (final var cookiePrefix : FROM_COOKIE_NAME_SEARCH_LIST) {
-            if (uppercasedCookieName.startsWith(UPPERCASED_STRINGS_OF_VALUES.get(cookiePrefix))) {
+            if (lowercasedCookieName.startsWith(LOWERCASED_STRINGS_OF_VALUES.get(cookiePrefix))) {
                 return cookiePrefix;
             }
         }
