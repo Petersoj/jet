@@ -9,6 +9,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.google.errorprone.annotations.Immutable;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.EqualsAndHashCode;
 import org.eclipse.jetty.util.URIUtil;
 import org.jspecify.annotations.NullMarked;
@@ -191,7 +192,7 @@ public final class Url {
         for (var index = 0; index < string.length(); index++) {
             final var charAt = string.charAt(index);
             checkArgument(charAt >= VISIBLE_ASCII_MINIMUM && charAt <= VISIBLE_ASCII_MAXIMUM,
-                    "Invalid URL character found at index %d: 0x%02X".formatted(index, (int) charAt));
+                    "Non-visible ASCII char found at index: %s", index);
         }
     }
 
@@ -632,37 +633,37 @@ public final class Url {
     private final String encodedPath;
     private final @Nullable String encodedQuery;
     private final @Nullable String encodedFragment;
-    private @Nullable Optional<Scheme> schemeEnum;
-    private @Nullable String decodedUserInfo;
-    private @Nullable Optional<InetAddress> hostAsInetAddress;
-    private @Nullable Optional<InternetDomainName> hostAsDomainName;
-    private @Nullable Optional<Integer> portOrDefault;
-    private @Nullable Optional<Integer> customPort;
-    private @Nullable String encodedAuthority;
-    private @Nullable String decodedAuthority;
-    private @Nullable String decodedPath;
-    private @Nullable List<String> encodedPathSegments;
-    private @Nullable List<String> pathSegments;
-    private @Nullable String encodedNormalizedPath;
-    private @Nullable String normalizedPath;
-    private @Nullable List<String> encodedNormalizedPathSegments;
-    private @Nullable List<String> normalizedPathSegments;
-    private @Nullable String decodedQuery;
-    private @Nullable ListMultimap<String, String> encodedQueryParameters;
-    private @Nullable ListMultimap<String, String> decodedQueryParameters;
-    private @Nullable String decodedFragment;
-    private @Nullable String encodedPathQuery;
-    private @Nullable String decodedPathQuery;
-    private @Nullable String encodedPathQueryFragment;
-    private @Nullable String decodedPathQueryFragment;
-    private @Nullable String toEncodedString;
-    private @Nullable String toDecodedString;
+    private @LazyInit @Nullable Optional<Scheme> schemeEnum;
+    private @LazyInit @Nullable String decodedUserInfo;
+    private @LazyInit @Nullable Optional<InetAddress> hostAsInetAddress;
+    private @LazyInit @Nullable Optional<InternetDomainName> hostAsDomainName;
+    private @LazyInit @Nullable Optional<Integer> portOrDefault;
+    private @LazyInit @Nullable Optional<Integer> customPort;
+    private @LazyInit @Nullable String encodedAuthority;
+    private @LazyInit @Nullable String decodedAuthority;
+    private @LazyInit @Nullable String decodedPath;
+    private @LazyInit @Nullable List<String> encodedPathSegments;
+    private @LazyInit @Nullable List<String> pathSegments;
+    private @LazyInit @Nullable String encodedNormalizedPath;
+    private @LazyInit @Nullable String normalizedPath;
+    private @LazyInit @Nullable List<String> encodedNormalizedPathSegments;
+    private @LazyInit @Nullable List<String> normalizedPathSegments;
+    private @LazyInit @Nullable String decodedQuery;
+    private @LazyInit @Nullable ListMultimap<String, String> encodedQueryParameters;
+    private @LazyInit @Nullable ListMultimap<String, String> decodedQueryParameters;
+    private @LazyInit @Nullable String decodedFragment;
+    private @LazyInit @Nullable String encodedPathQuery;
+    private @LazyInit @Nullable String decodedPathQuery;
+    private @LazyInit @Nullable String encodedPathQueryFragment;
+    private @LazyInit @Nullable String decodedPathQueryFragment;
+    private @LazyInit @Nullable String toEncodedString;
+    private @LazyInit @Nullable String toDecodedString;
 
     // Use Java's `URI` instead of Jetty's `HttpURI` as it's more standardized.
     // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path.
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
-        checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme: " + uriScheme);
+        checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme: %s", uriScheme);
         // `requireVisibleAsciiChars()` unnecessary since URI requires visible ASCII scheme
         scheme = uriScheme.toLowerCase(ROOT);
 
@@ -673,7 +674,7 @@ public final class Url {
         encodedUserInfo = uriUserInfo;
 
         final var uriHost = uri.getHost();
-        checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host: " + uriHost);
+        checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host: %s", uriHost);
         // `requireVisibleAsciiChars()` unnecessary since URI requires visible ASCII host
         host = uriHost.toLowerCase(ROOT);
 

@@ -464,10 +464,10 @@ public final class ContentType {
     }
 
     /**
-     * @return {@link #create(MediaType)} {@link MediaType#parse(String)}
+     * @return {@link #wrap(MediaType)} {@link MediaType#parse(String)}
      */
     public static ContentType parse(final String contentType) {
-        return create(MediaType.parse(contentType));
+        return wrap(MediaType.parse(contentType));
     }
 
     /**
@@ -499,33 +499,40 @@ public final class ContentType {
     }
 
     /**
-     * @return {@link #create(MediaType)} with {@link MediaType#create(String, String)} and
+     * @return {@link #wrap(MediaType)} with {@link MediaType#create(String, String)} and
      * {@link MediaType#withParameters(Multimap)}
      */
     public static ContentType create(final String type, final String subtype,
             final @Nullable Multimap<String, String> parameters) {
         final var mediaType = MediaType.create(type, subtype);
-        return create(parameters == null ? mediaType : mediaType.withParameters(parameters));
+        return wrap(parameters == null ? mediaType : mediaType.withParameters(parameters));
     }
 
     /**
-     * @return {@link #create(MediaType)} with {@link MediaType#create(String, String)} and
+     * @return {@link #wrap(MediaType)} with {@link MediaType#create(String, String)} and
      * {@link MediaType#withCharset(Charset)}
      */
     public static ContentType create(final String type, final String subtype, final Charset charset) {
-        return create(MediaType.create(type, subtype).withCharset(charset));
+        return wrap(MediaType.create(type, subtype).withCharset(charset));
     }
 
     /**
-     * Creates a new {@link ContentType}.
+     * Wraps the given {@link MediaType} in a {@link ContentType}.
      *
      * @param mediaType the {@link MediaType}
      */
-    public static ContentType create(final MediaType mediaType) {
+    public static ContentType wrap(final MediaType mediaType) {
         return new ContentType(mediaType);
     }
 
     private final MediaType mediaType;
+
+    /**
+     * @return the wrapped {@link MediaType}
+     */
+    public MediaType unwrap() {
+        return mediaType;
+    }
 
     /**
      * @return {@link MediaType#type()}
@@ -554,7 +561,7 @@ public final class ContentType {
     @SuppressWarnings("ReferenceEquality")
     public ContentType withoutParameters() {
         final var withoutParameters = mediaType.withoutParameters();
-        return withoutParameters == mediaType ? this : create(withoutParameters);
+        return withoutParameters == mediaType ? this : wrap(withoutParameters);
     }
 
     /**
@@ -577,7 +584,7 @@ public final class ContentType {
      * @throws IllegalArgumentException thrown for invalid arguments
      */
     public ContentType withParameters(final Multimap<String, String> parameters) throws IllegalArgumentException {
-        return create(mediaType.withParameters(parameters));
+        return wrap(mediaType.withParameters(parameters));
     }
 
     /**
@@ -602,7 +609,7 @@ public final class ContentType {
      */
     public ContentType addParameters(final Multimap<String, String> parameters) throws IllegalArgumentException {
         final var existingParameters = getParameters();
-        return create(mediaType.withParameters(ImmutableSetMultimap.<String, String>builderWithExpectedKeys(
+        return wrap(mediaType.withParameters(ImmutableSetMultimap.<String, String>builderWithExpectedKeys(
                         existingParameters.keySet().size() + parameters.keySet().size())
                 .expectedValuesPerKey(1)
                 .putAll(existingParameters)
@@ -621,7 +628,7 @@ public final class ContentType {
      * @return {@link MediaType#withCharset(Charset)}
      */
     public ContentType withCharset(final Charset charset) {
-        return create(mediaType.withCharset(charset));
+        return wrap(mediaType.withCharset(charset));
     }
 
     /**
@@ -652,13 +659,6 @@ public final class ContentType {
      */
     public Set<String> getFileExtensions() {
         return FILE_EXTENSIONS_OF_CONTENT_TYPES.get(this);
-    }
-
-    /**
-     * @return the wrapped {@link MediaType}
-     */
-    public MediaType unwrap() {
-        return mediaType;
     }
 
     /**

@@ -2,6 +2,7 @@ package net.jacobpeterson.jet.common.http.header.cookie;
 
 import com.google.common.base.Splitter;
 import com.google.errorprone.annotations.Immutable;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
@@ -84,39 +85,39 @@ public final class Cookie {
             Splitter.on('=').limit(2).trimResults();
 
     /**
-     * Parses the given {@link Header#COOKIE} value into a {@link List} of {@link Cookie}s.
+     * Parses the given {@link Header#COOKIE} value {@link String} into a {@link List} of {@link Cookie}s.
      *
-     * @param headerValue the {@link Header#COOKIE} value
+     * @param requestCookies the {@link Header#COOKIE} value {@link String}
      *
      * @return the {@link Cookie} {@link List}
      *
      * @see #toRequestString()
      */
-    public static List<Cookie> parseRequestCookies(final String headerValue) {
-        if (headerValue.isBlank()) {
+    public static List<Cookie> parseRequestCookies(final String requestCookies) {
+        if (requestCookies.isBlank()) {
             return List.of();
         }
         final var cookies = new ArrayList<Cookie>();
-        for (final var semicolonSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(headerValue)) {
+        for (final var semicolonSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(requestCookies)) {
             final var equalsSplit = PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER.splitToList(semicolonSplit);
-            cookies.add(builder(equalsSplit.getFirst(), equalsSplit.size() > 1 ? equalsSplit.get(1) : "").build());
+            cookies.add(builder(equalsSplit.getFirst(), equalsSplit.size() == 1 ? "" : equalsSplit.get(1)).build());
         }
         return cookies;
     }
 
     /**
-     * Parses the given {@link Header#SET_COOKIE} value into a {@link Cookie}.
+     * Parses the given {@link Header#SET_COOKIE} value {@link String} into a {@link Cookie}.
      *
-     * @param headerValue the {@link Header#SET_COOKIE} value
+     * @param responseCookie the {@link Header#SET_COOKIE} value {@link String}
      *
      * @return the {@link Cookie}
      *
      * @throws IllegalArgumentException thrown upon parsing failure
      * @see #toResponseString()
      */
-    public static Cookie parseResponseCookie(final String headerValue) throws IllegalArgumentException {
-        final var httpCookie = SET_COOKIE_PARSER.parse(headerValue);
-        checkArgument(httpCookie != null, "Invalid response cookie: " + headerValue);
+    public static Cookie parseResponseCookie(final String responseCookie) throws IllegalArgumentException {
+        final var httpCookie = SET_COOKIE_PARSER.parse(responseCookie);
+        checkArgument(httpCookie != null, "Invalid response cookie: %s", responseCookie);
         return new Cookie(httpCookie);
     }
 
@@ -285,14 +286,14 @@ public final class Cookie {
     }
 
     private final HttpCookie httpCookie;
-    private @Nullable Optional<CookiePrefix> prefix;
-    private @Nullable Optional<ZonedDateTime> expires;
-    private @Nullable Boolean expired;
-    private @Nullable Boolean httpOnly;
-    private @Nullable Optional<Long> maxAge;
-    private @Nullable Optional<CookieSameSite> sameSite;
-    private @Nullable Boolean secure;
-    private @Nullable Boolean partitioned;
+    private @LazyInit @Nullable Optional<CookiePrefix> prefix;
+    private @LazyInit @Nullable Optional<ZonedDateTime> expires;
+    private @LazyInit @Nullable Boolean expired;
+    private @LazyInit @Nullable Boolean httpOnly;
+    private @LazyInit @Nullable Optional<Long> maxAge;
+    private @LazyInit @Nullable Optional<CookieSameSite> sameSite;
+    private @LazyInit @Nullable Boolean secure;
+    private @LazyInit @Nullable Boolean partitioned;
 
     /**
      * @return the name

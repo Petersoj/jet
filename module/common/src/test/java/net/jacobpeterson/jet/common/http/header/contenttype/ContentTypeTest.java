@@ -74,10 +74,12 @@ public class ContentTypeTest {
     }
 
     @Test
-    public void createMediaType() {
-        final var contentType = ContentType.create(MediaType.ANY_TYPE);
-        assertEquals("*", contentType.getType());
-        assertEquals("*", contentType.getSubtype());
+    public void wrap() {
+        final var mediaType = MediaType.ANY_TYPE;
+        final var contentType = ContentType.wrap(mediaType);
+        assertEquals(mediaType.type(), contentType.getType());
+        assertEquals(mediaType.subtype(), contentType.getSubtype());
+        assertEquals(mediaType, contentType.unwrap());
     }
 
     @Test
