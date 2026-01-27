@@ -77,6 +77,10 @@ import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
 public final class Cookie {
 
     private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
+    private static final Splitter PARSE_REQUEST_COOKIES_COOKIE_SPLITTER =
+            Splitter.on(';').trimResults().omitEmptyStrings();
+    private static final Splitter PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER =
+            Splitter.on('=').limit(2).trimResults();
 
     /**
      * Parses the given {@link Header#COOKIE} value into a {@link List} of {@link Cookie}s.
@@ -92,13 +96,9 @@ public final class Cookie {
             return List.of();
         }
         final var cookies = new ArrayList<Cookie>();
-        for (final var semicolonSplit : Splitter.on(';').split(headerValue)) {
-            if (semicolonSplit.isBlank()) {
-                continue;
-            }
-            final var equalsSplit = Splitter.on('=').limit(2).trimResults().splitToList(semicolonSplit);
-            cookies.add(builder(equalsSplit.getFirst(),
-                    equalsSplit.size() > 1 ? equalsSplit.get(1).trim() : "").build());
+        for (final var semicolonSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(headerValue)) {
+            final var equalsSplit = PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER.splitToList(semicolonSplit);
+            cookies.add(builder(equalsSplit.getFirst(), equalsSplit.size() > 1 ? equalsSplit.get(1) : "").build());
         }
         return cookies;
     }

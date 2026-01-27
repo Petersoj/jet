@@ -122,11 +122,13 @@ public final class Url {
      * The delimiter for a query parameter of a {@link Url}.
      */
     public static final String QUERY_PARAMETER_DELIMITER = "&";
+    private static final char QUERY_PARAMETER_DELIMITER_CHAR = QUERY_PARAMETER_DELIMITER.charAt(0);
 
     /**
      * The delimiter for a query key-value of a {@link Url}.
      */
     public static final String QUERY_KEY_VALUE_DELIMITER = "=";
+    public static final char QUERY_KEY_VALUE_DELIMITER_CHAR = QUERY_KEY_VALUE_DELIMITER.charAt(0);
 
     /**
      * The delimiter for the fragment of a {@link Url}.
@@ -146,6 +148,13 @@ public final class Url {
      * @see #requireVisibleAsciiChars(String)
      */
     public static final char VISIBLE_ASCII_MAXIMUM = 0x7E;
+
+    private static final Splitter ENCODED_PATH_SEGMENTS_TO_STREAM_SPLITTER =
+            Splitter.on(PATH_SEGMENT_DELIMITER_CHAR).omitEmptyStrings();
+    private static final Splitter PARSE_ENCODED_QUERY_PARAMETERS_PARAMETER_SPLITTER =
+            Splitter.on(QUERY_PARAMETER_DELIMITER_CHAR);
+    private static final Splitter PARSE_ENCODED_QUERY_PARAMETERS_KEY_VALUE_SPLITTER =
+            Splitter.on(QUERY_KEY_VALUE_DELIMITER_CHAR).limit(2);
 
     /**
      * @return {@link URLEncoder#encode(String, Charset)} with <code>decoded</code> and {@link StandardCharsets#UTF_8}
@@ -234,7 +243,7 @@ public final class Url {
      * {@link Splitter#splitToStream(CharSequence)}
      */
     public static Stream<String> encodedPathSegmentsToStream(final String encodedPath) {
-        return Splitter.on(PATH_SEGMENT_DELIMITER).omitEmptyStrings().splitToStream(encodedPath);
+        return ENCODED_PATH_SEGMENTS_TO_STREAM_SPLITTER.splitToStream(encodedPath);
     }
 
     /**
@@ -284,12 +293,12 @@ public final class Url {
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
     public static ListMultimap<String, String> parseEncodedQueryParameters(final @Nullable String encodedQuery) {
-        return encodedQuery == null ? ImmutableListMultimap.of() :
-                Splitter.on(QUERY_PARAMETER_DELIMITER).splitToStream(encodedQuery)
-                        .map(parameter -> Splitter.on(QUERY_KEY_VALUE_DELIMITER).limit(2).splitToList(parameter))
-                        .filter(keyValue -> !keyValue.getFirst().isEmpty())
-                        .collect(toImmutableListMultimap(List::getFirst,
-                                keyValue -> keyValue.size() == 1 ? "" : keyValue.get(1)));
+        return encodedQuery == null ? ImmutableListMultimap.of() : PARSE_ENCODED_QUERY_PARAMETERS_PARAMETER_SPLITTER
+                .splitToStream(encodedQuery)
+                .map(PARSE_ENCODED_QUERY_PARAMETERS_KEY_VALUE_SPLITTER::splitToList)
+                .filter(keyValue -> !keyValue.getFirst().isEmpty())
+                .collect(toImmutableListMultimap(List::getFirst,
+                        keyValue -> keyValue.size() == 1 ? "" : keyValue.get(1)));
     }
 
     /**
@@ -358,8 +367,7 @@ public final class Url {
      * Parses the given <code>encodedUrl</code> into a {@link Url}.
      *
      * @param encodedUrl the encoded URL {@link String}. Note: {@link #requireVisibleAsciiChars(String)} is called
-     *                   for each
-     *                   URL component after parsing.
+     *                   for each URL component after parsing.
      *
      * @return the {@link Url}
      *
