@@ -190,10 +190,8 @@ public final class Url {
     public static void requireVisibleAsciiChars(final String string) throws IllegalArgumentException {
         for (var index = 0; index < string.length(); index++) {
             final var charAt = string.charAt(index);
-            if (charAt < VISIBLE_ASCII_MINIMUM || charAt > VISIBLE_ASCII_MAXIMUM) {
-                throw new IllegalArgumentException("Invalid URL character found at index %d: 0x%02X"
-                        .formatted(index, (int) charAt));
-            }
+            checkArgument(charAt >= VISIBLE_ASCII_MINIMUM && charAt <= VISIBLE_ASCII_MAXIMUM,
+                    "Invalid URL character found at index %d: 0x%02X".formatted(index, (int) charAt));
         }
     }
 
@@ -664,7 +662,7 @@ public final class Url {
     // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path.
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
-        checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme");
+        checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme: " + uriScheme);
         // `requireVisibleAsciiChars()` unnecessary since URI requires visible ASCII scheme
         scheme = uriScheme.toLowerCase(ROOT);
 
@@ -675,7 +673,7 @@ public final class Url {
         encodedUserInfo = uriUserInfo;
 
         final var uriHost = uri.getHost();
-        checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host");
+        checkArgument(uriHost != null && !uriHost.isEmpty(), "Invalid host: " + uriHost);
         // `requireVisibleAsciiChars()` unnecessary since URI requires visible ASCII host
         host = uriHost.toLowerCase(ROOT);
 

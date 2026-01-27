@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
@@ -115,9 +116,7 @@ public final class Cookie {
      */
     public static Cookie parseResponseCookie(final String headerValue) throws IllegalArgumentException {
         final var httpCookie = SET_COOKIE_PARSER.parse(headerValue);
-        if (httpCookie == null) {
-            throw new IllegalArgumentException();
-        }
+        checkArgument(httpCookie != null, "Invalid response cookie: " + headerValue);
         return new Cookie(httpCookie);
     }
 
