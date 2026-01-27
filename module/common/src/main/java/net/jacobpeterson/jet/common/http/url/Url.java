@@ -1,11 +1,12 @@
 package net.jacobpeterson.jet.common.http.url;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Multiset;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.google.errorprone.annotations.Immutable;
@@ -25,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Locale.ROOT;
@@ -84,8 +85,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @NullMarked
 @Immutable
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
-@SuppressWarnings({"LombokGetterMayBeUsed", "Immutable",
-        "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
+@SuppressWarnings({"LombokGetterMayBeUsed", "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Url {
 
     /**
@@ -239,24 +239,21 @@ public final class Url {
      * @param encodedPath the encoded path
      *
      * @return {@link Splitter#on(String)} {@link #PATH_SEGMENT_DELIMITER} {@link Splitter#omitEmptyStrings()}
-     * {@link Splitter#splitToStream(CharSequence)}
      */
-    public static Stream<String> encodedPathSegmentsToStream(final String encodedPath) {
-        return ENCODED_PATH_SEGMENTS_TO_STREAM_SPLITTER.splitToStream(encodedPath);
+    public static ImmutableList<String> encodedPathSegmentsToList(final String encodedPath) {
+        return ENCODED_PATH_SEGMENTS_TO_STREAM_SPLITTER.splitToStream(encodedPath).collect(toImmutableList());
     }
 
     /**
-     * @return {@link #encodedPathSegmentsToStream(String)} {@link Stream#toList()}
+     * @param encodedPath the encoded path
+     *
+     * @return {@link Splitter#on(String)} {@link #PATH_SEGMENT_DELIMITER} {@link Splitter#omitEmptyStrings()}
+     * {@link #decode(String)}
      */
-    public static List<String> encodedPathSegmentsToList(final String encodedPath) {
-        return encodedPathSegmentsToStream(encodedPath).toList();
-    }
-
-    /**
-     * @return {@link #encodedPathSegmentsToStream(String)} {@link #decode(String)} {@link Stream#toList()}
-     */
-    public static List<String> encodedPathSegmentsToDecodedList(final String encodedPath) {
-        return encodedPathSegmentsToStream(encodedPath).map(Url::decode).toList();
+    public static ImmutableList<String> encodedPathSegmentsToDecodedList(final String encodedPath) {
+        return ENCODED_PATH_SEGMENTS_TO_STREAM_SPLITTER.splitToStream(encodedPath)
+                .map(Url::decode)
+                .collect(toImmutableList());
     }
 
     /**
@@ -281,17 +278,18 @@ public final class Url {
     }
 
     /**
-     * Parses the given <code>encodedQuery</code> into a {@link ListMultimap} of query parameters. Query parameters with
-     * an empty key are omitted.
+     * Parses the given <code>encodedQuery</code> into an {@link ImmutableListMultimap} of query parameters. Query
+     * parameters with an empty key are omitted.
      *
      * @param encodedQuery the encoded query (without the leading {@link #QUERY_DELIMITER})
      *
-     * @return the query parameters {@link ListMultimap}
+     * @return the query parameters {@link ImmutableListMultimap}
      *
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
-    public static ListMultimap<String, String> parseEncodedQueryParameters(final @Nullable String encodedQuery) {
+    public static ImmutableListMultimap<String, String> parseEncodedQueryParameters(
+            final @Nullable String encodedQuery) {
         return encodedQuery == null ? ImmutableListMultimap.of() : PARSE_ENCODED_QUERY_PARAMETERS_PARAMETER_SPLITTER
                 .splitToStream(encodedQuery)
                 .map(PARSE_ENCODED_QUERY_PARAMETERS_KEY_VALUE_SPLITTER::splitToList)
@@ -305,7 +303,7 @@ public final class Url {
      *
      * @return {@link ListMultimap#entries()} {@link #decode(String)}
      */
-    public static ListMultimap<String, String> decodeParsedEncodedQueryParameters(
+    public static ImmutableListMultimap<String, String> decodeParsedEncodedQueryParameters(
             final ListMultimap<String, String> encodedQueryParameters) {
         return ImmutableListMultimap.copyOf(encodedQueryParameters.entries().stream()
                 .map(parameter -> entry(decode(parameter.getKey()), decode(parameter.getValue())))
@@ -315,7 +313,8 @@ public final class Url {
     /**
      * @return {@link #decodeParsedEncodedQueryParameters(ListMultimap)} {@link #parseEncodedQueryParameters(String)}
      */
-    public static ListMultimap<String, String> parseDecodeEncodedQueryParameters(final @Nullable String encodedQuery) {
+    public static ImmutableListMultimap<String, String> parseDecodeEncodedQueryParameters(
+            final @Nullable String encodedQuery) {
         return decodeParsedEncodedQueryParameters(parseEncodedQueryParameters(encodedQuery));
     }
 
@@ -642,15 +641,15 @@ public final class Url {
     private @LazyInit @Nullable String encodedAuthority;
     private @LazyInit @Nullable String decodedAuthority;
     private @LazyInit @Nullable String decodedPath;
-    private @LazyInit @Nullable List<String> encodedPathSegments;
-    private @LazyInit @Nullable List<String> pathSegments;
+    private @LazyInit @Nullable ImmutableList<String> encodedPathSegments;
+    private @LazyInit @Nullable ImmutableList<String> pathSegments;
     private @LazyInit @Nullable String encodedNormalizedPath;
     private @LazyInit @Nullable String normalizedPath;
-    private @LazyInit @Nullable List<String> encodedNormalizedPathSegments;
-    private @LazyInit @Nullable List<String> normalizedPathSegments;
+    private @LazyInit @Nullable ImmutableList<String> encodedNormalizedPathSegments;
+    private @LazyInit @Nullable ImmutableList<String> normalizedPathSegments;
     private @LazyInit @Nullable String decodedQuery;
-    private @LazyInit @Nullable ListMultimap<String, String> encodedQueryParameters;
-    private @LazyInit @Nullable ListMultimap<String, String> decodedQueryParameters;
+    private @LazyInit @Nullable ImmutableListMultimap<String, String> encodedQueryParameters;
+    private @LazyInit @Nullable ImmutableListMultimap<String, String> decodedQueryParameters;
     private @LazyInit @Nullable String decodedFragment;
     private @LazyInit @Nullable String encodedPathQuery;
     private @LazyInit @Nullable String decodedPathQuery;
@@ -884,7 +883,7 @@ public final class Url {
     /**
      * @return internally-cached {@link #encodedPathSegmentsToList(String)} {@link #getEncodedPath()}
      */
-    public List<String> getEncodedPathSegments() {
+    public ImmutableList<String> getEncodedPathSegments() {
         if (encodedPathSegments == null) {
             encodedPathSegments = encodedPathSegmentsToList(getEncodedPath());
         }
@@ -894,7 +893,7 @@ public final class Url {
     /**
      * @return internally-cached {@link #encodedPathSegmentsToDecodedList(String)} {@link #getEncodedPath()}
      */
-    public List<String> getPathSegments() {
+    public ImmutableList<String> getPathSegments() {
         if (pathSegments == null) {
             pathSegments = encodedPathSegmentsToDecodedList(getEncodedPath());
         }
@@ -924,7 +923,7 @@ public final class Url {
     /**
      * @return internally-cached {@link #encodedPathSegmentsToList(String)} {@link #getEncodedNormalizedPath()}
      */
-    public List<String> getEncodedNormalizedPathSegments() {
+    public ImmutableList<String> getEncodedNormalizedPathSegments() {
         if (encodedNormalizedPathSegments == null) {
             encodedNormalizedPathSegments = encodedPathSegmentsToList(getEncodedNormalizedPath());
         }
@@ -935,7 +934,7 @@ public final class Url {
      * @return internally-cached {@link #encodedPathSegmentsToDecodedList(String)} {@link #getEncodedNormalizedPath()}
      */
     @EqualsAndHashCode.Include
-    public List<String> getNormalizedPathSegments() {
+    public ImmutableList<String> getNormalizedPathSegments() {
         if (normalizedPathSegments == null) {
             normalizedPathSegments = encodedPathSegmentsToDecodedList(getEncodedNormalizedPath());
         }
@@ -970,7 +969,7 @@ public final class Url {
      * @see #QUERY_PARAMETER_DELIMITER
      * @see #QUERY_KEY_VALUE_DELIMITER
      */
-    public ListMultimap<String, String> getEncodedQueryParameters() {
+    public ImmutableListMultimap<String, String> getEncodedQueryParameters() {
         if (encodedQueryParameters == null) {
             encodedQueryParameters = parseEncodedQueryParameters(getEncodedQuery());
         }
@@ -982,7 +981,7 @@ public final class Url {
      * {@link #getEncodedQueryParameters()}
      */
     @EqualsAndHashCode.Include
-    public ListMultimap<String, String> getQueryParameters() {
+    public ImmutableListMultimap<String, String> getQueryParameters() {
         if (decodedQueryParameters == null) {
             decodedQueryParameters = decodeParsedEncodedQueryParameters(getEncodedQueryParameters());
         }
@@ -992,14 +991,14 @@ public final class Url {
     /**
      * @return {@link #getEncodedQueryParameters()} {@link ListMultimap#keys()}
      */
-    public Multiset<String> getEncodedQueryKeys() {
+    public ImmutableMultiset<String> getEncodedQueryKeys() {
         return getEncodedQueryParameters().keys();
     }
 
     /**
      * @return {@link #getQueryParameters()} {@link ListMultimap#keys()}
      */
-    public Multiset<String> getQueryKeys() {
+    public ImmutableMultiset<String> getQueryKeys() {
         return getQueryParameters().keys();
     }
 
@@ -1008,7 +1007,7 @@ public final class Url {
      *
      * @return {@link #getEncodedQueryParameters()} {@link ListMultimap#get(Object)}
      */
-    public List<String> getEncodedQueryValues(final String key) {
+    public ImmutableList<String> getEncodedQueryValues(final String key) {
         return getEncodedQueryParameters().get(key);
     }
 
@@ -1017,7 +1016,7 @@ public final class Url {
      *
      * @return {@link #getQueryParameters()} {@link ListMultimap#get(Object)}
      */
-    public List<String> getQueryValues(final String key) {
+    public ImmutableList<String> getQueryValues(final String key) {
         return getQueryParameters().get(key);
     }
 

@@ -75,7 +75,7 @@ import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
 @NullMarked
 @Immutable
 @RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(onlyExplicitlyIncluded = true, cacheStrategy = LAZY)
-@SuppressWarnings({"Immutable", "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Cookie {
 
     private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
@@ -285,7 +285,7 @@ public final class Cookie {
         }
     }
 
-    private final HttpCookie httpCookie;
+    private final @SuppressWarnings("Immutable") HttpCookie httpCookie;
     private @LazyInit @Nullable Optional<CookiePrefix> prefix;
     private @LazyInit @Nullable Optional<ZonedDateTime> expires;
     private @LazyInit @Nullable Boolean expired;

@@ -107,21 +107,6 @@ public class UrlTest {
     }
 
     @Test
-    public void encodedPathSegmentsToStream() {
-        assertEquals(List.of(), Url.encodedPathSegmentsToStream("").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("a/b/c").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("/a/b/c").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("/a/b/c/").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("/a/b/c//").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("/a/b/c///").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("//a/b/c//").toList());
-        assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToStream("//a//b//c//").toList());
-        assertEquals(List.of("a", "%E2%80%A2"), Url.encodedPathSegmentsToStream("/a/%E2%80%A2").toList());
-        assertEquals(List.of("a", "%F0%9F%91%8D"), Url.encodedPathSegmentsToStream("/a/%F0%9F%91%8D").toList());
-        assertEquals(List.of("a", "%2F%25"), Url.encodedPathSegmentsToStream("/a/%2F%25").toList());
-    }
-
-    @Test
     public void encodedPathSegmentsToList() {
         assertEquals(List.of(), Url.encodedPathSegmentsToList(""));
         assertEquals(List.of("a", "b", "c"), Url.encodedPathSegmentsToList("a/b/c"));
