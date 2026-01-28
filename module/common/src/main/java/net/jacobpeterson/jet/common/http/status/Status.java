@@ -599,42 +599,42 @@ public enum Status {
     private final @Getter String description;
 
     /**
-     * @see #isInformational(int)
+     * @return {@link #isInformational(int)} {@link #getCode()}
      */
     public boolean isInformational() {
         return isInformational(code);
     }
 
     /**
-     * @see #isSuccessful(int)
+     * @return {@link #isSuccessful(int)} {@link #getCode()}
      */
     public boolean isSuccessful() {
         return isSuccessful(code);
     }
 
     /**
-     * @see #isRedirection(int)
+     * @return {@link #isRedirection(int)} {@link #getCode()}
      */
     public boolean isRedirection() {
         return isRedirection(code);
     }
 
     /**
-     * @see #isClientError(int)
+     * @return {@link #isClientError(int)} {@link #getCode()}
      */
     public boolean isClientError() {
         return isClientError(code);
     }
 
     /**
-     * @see #isServerError(int)
+     * @return {@link #isServerError(int)} {@link #getCode()}
      */
     public boolean isServerError() {
         return isServerError(code);
     }
 
     /**
-     * @see #isError(int)
+     * @return {@link #isError(int)} {@link #getCode()}
      */
     public boolean isError() {
         return isError(code);

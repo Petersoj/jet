@@ -390,7 +390,7 @@ public final class Url {
     }
 
     /**
-     * Creates a {@link Url} {@link Builder}.
+     * Creates a {@link Builder}.
      *
      * @return the {@link Builder}
      */
@@ -615,6 +615,8 @@ public final class Url {
         }
 
         /**
+         * Builds this {@link Builder} into a new {@link Url} instance.
+         *
          * @return the built {@link Url}
          *
          * @throws IllegalArgumentException thrown upon building failure
@@ -1160,7 +1162,7 @@ public final class Url {
     }
 
     /**
-     * @see #toEncodedString()
+     * @return {@link #toEncodedString()}
      */
     @Override
     public String toString() {

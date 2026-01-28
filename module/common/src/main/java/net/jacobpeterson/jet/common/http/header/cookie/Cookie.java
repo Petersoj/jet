@@ -20,11 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.DOMAIN;
@@ -174,15 +176,14 @@ public final class Cookie {
      * @see #builder(CookiePrefix, String, String)
      * @see #builder(String, String)
      */
+    @RequiredArgsConstructor(access = PRIVATE)
     public static final class Builder {
 
         private final HttpCookie.Builder httpCookieBuilder;
 
-        private Builder(final HttpCookie.Builder httpCookieBuilder) {
-            this.httpCookieBuilder = httpCookieBuilder;
-        }
-
         /**
+         * Calls {@link Map#forEach(BiConsumer)} with {@link #attribute(String, String)}.
+         *
          * @see Cookie#getAttributes()
          */
         public Builder attributes(final Map<String, String> attributes) {
@@ -204,7 +205,7 @@ public final class Cookie {
          * @see Cookie#getAttribute(String)
          */
         public Builder attribute(final String name, final String value) {
-            httpCookieBuilder.attribute(name, value);
+            httpCookieBuilder.attribute(name, requireNonNull(value));
             return this;
         }
 
@@ -212,15 +213,15 @@ public final class Cookie {
          * @see Cookie#getDomain()
          */
         public Builder domain(final String domain) {
-            httpCookieBuilder.domain(domain);
+            httpCookieBuilder.domain(requireNonNull(domain));
             return this;
         }
 
         /**
          * @see Cookie#isHttpOnly()
          */
-        public Builder httpOnly(final boolean httpOnly) {
-            httpCookieBuilder.httpOnly(httpOnly);
+        public Builder httpOnly() {
+            httpCookieBuilder.httpOnly(true);
             return this;
         }
 
@@ -245,7 +246,7 @@ public final class Cookie {
          * @see Cookie#getPath()
          */
         public Builder path(final String path) {
-            httpCookieBuilder.path(path);
+            httpCookieBuilder.path(requireNonNull(path));
             return this;
         }
 
@@ -264,20 +265,22 @@ public final class Cookie {
         /**
          * @see Cookie#isSecure()
          */
-        public Builder secure(final boolean secure) {
-            httpCookieBuilder.secure(secure);
+        public Builder secure() {
+            httpCookieBuilder.secure(true);
             return this;
         }
 
         /**
          * @see Cookie#isPartitioned()
          */
-        public Builder partitioned(final boolean partitioned) {
-            httpCookieBuilder.partitioned(partitioned);
+        public Builder partitioned() {
+            httpCookieBuilder.partitioned(true);
             return this;
         }
 
         /**
+         * Builds this {@link Builder} into a new {@link Cookie} instance.
+         *
          * @return the built {@link Cookie}
          */
         public Cookie build() {
@@ -287,13 +290,17 @@ public final class Cookie {
 
     private final @SuppressWarnings("Immutable") HttpCookie httpCookie;
     private @LazyInit @Nullable Optional<CookiePrefix> prefix;
+    private @LazyInit @Nullable Optional<String> domain;
     private @LazyInit @Nullable Optional<ZonedDateTime> expires;
     private @LazyInit @Nullable Boolean expired;
     private @LazyInit @Nullable Boolean httpOnly;
     private @LazyInit @Nullable Optional<Long> maxAge;
+    private @LazyInit @Nullable Optional<String> path;
     private @LazyInit @Nullable Optional<CookieSameSite> sameSite;
     private @LazyInit @Nullable Boolean secure;
     private @LazyInit @Nullable Boolean partitioned;
+    private @LazyInit @Nullable String requestString;
+    private @LazyInit @Nullable String responseString;
 
     /**
      * @return the name
@@ -344,10 +351,13 @@ public final class Cookie {
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#DOMAIN}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#DOMAIN}
      */
     public @Nullable String getDomain() {
-        return getAttribute(DOMAIN);
+        if (domain == null) {
+            domain = Optional.ofNullable(getAttribute(DOMAIN));
+        }
+        return domain.orElse(null);
     }
 
     /**
@@ -405,7 +415,7 @@ public final class Cookie {
                 try {
                     this.maxAge = Optional.of(parseLong(maxAge));
                 } catch (final NumberFormatException numberFormatException) {
-                    this.maxAge = Optional.empty();
+                    throw new IllegalStateException(); // `HttpCookie` always checks if `max-age` string is a number
                 }
             }
         }
@@ -413,10 +423,13 @@ public final class Cookie {
     }
 
     /**
-     * @return {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#PATH}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#PATH}
      */
     public @Nullable String getPath() {
-        return getAttribute(PATH);
+        if (path == null) {
+            path = Optional.ofNullable(getAttribute(PATH));
+        }
+        return path.orElse(null);
     }
 
     /**
@@ -473,7 +486,8 @@ public final class Cookie {
     }
 
     /**
-     * @return the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
+     * @return internally-cached
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
      * {@link Header#COOKIE} value {@link String} (the concatenation of {@link #getName()}, equals, and
      * {@link #getValue()})
      *
@@ -481,26 +495,33 @@ public final class Cookie {
      * @see #parseRequestCookies(String)
      */
     public String toRequestString() throws IllegalArgumentException {
-        final var name = getName();
-        requireValidRFC2616Token(name, "ERROR");
-        final var value = getValue();
-        requireValidRFC6265CookieValue(value);
-        return getName() + "=" + getValue();
+        if (requestString == null) {
+            final var name = getName();
+            requireValidRFC2616Token(name, "ERROR");
+            final var value = getValue();
+            requireValidRFC6265CookieValue(value);
+            requestString = name + "=" + value;
+        }
+        return requestString;
     }
 
     /**
-     * @return the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
+     * @return internally-cached
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
      * {@link Header#SET_COOKIE} value {@link String}
      *
      * @throws IllegalArgumentException thrown for invalid {@link Cookie} values during the serialization process
      * @see #parseResponseCookie(String)
      */
     public String toResponseString() throws IllegalArgumentException {
-        return getRFC6265SetCookie(httpCookie);
+        if (responseString == null) {
+            responseString = getRFC6265SetCookie(httpCookie);
+        }
+        return responseString;
     }
 
     /**
-     * @see #toResponseString()
+     * @return {@link #toResponseString()}
      */
     @Override
     public String toString() {

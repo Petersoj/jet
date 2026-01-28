@@ -93,7 +93,7 @@ public class CookieTest {
         @Test
         public void httpOnly() {
             assertEquals("a=b; HttpOnly", Cookie.builder("a", "b")
-                    .httpOnly(true)
+                    .httpOnly()
                     .build().toString());
         }
 
@@ -144,14 +144,14 @@ public class CookieTest {
         @Test
         public void secure() {
             assertEquals("a=b; Secure", Cookie.builder("a", "b")
-                    .secure(true)
+                    .secure()
                     .build().toString());
         }
 
         @Test
         public void partitioned() {
             assertEquals("a=b; Partitioned", Cookie.builder("a", "b")
-                    .partitioned(true)
+                    .partitioned()
                     .build().toString());
         }
     }
@@ -235,7 +235,7 @@ public class CookieTest {
     @Test
     public void isHttpOnly() {
         assertTrue(Cookie.builder("a", "b")
-                .httpOnly(true)
+                .httpOnly()
                 .build().isHttpOnly());
         assertTrue(Cookie.parseResponseCookie("a=b; HttpOnly;").isHttpOnly());
         assertTrue(Cookie.parseResponseCookie("a=b; HttpOnly=true;").isHttpOnly());
@@ -277,7 +277,7 @@ public class CookieTest {
     @Test
     public void isSecure() {
         assertTrue(Cookie.builder("a", "b")
-                .secure(true)
+                .secure()
                 .build().isSecure());
         assertTrue(Cookie.parseResponseCookie("a=b; Secure;").isSecure());
         assertTrue(Cookie.parseResponseCookie("a=b; Secure=true;").isSecure());
@@ -289,7 +289,7 @@ public class CookieTest {
     @Test
     public void isPartitioned() {
         assertTrue(Cookie.builder("a", "b")
-                .partitioned(true)
+                .partitioned()
                 .build().isPartitioned());
         assertTrue(Cookie.parseResponseCookie("a=b; Partitioned;").isPartitioned());
         assertTrue(Cookie.parseResponseCookie("a=b; Partitioned=true;").isPartitioned());
@@ -314,14 +314,14 @@ public class CookieTest {
     @Test
     public void toRequestString() {
         assertEquals("a=b", Cookie.builder("a", "b")
-                .secure(true)
+                .secure()
                 .build().toRequestString());
     }
 
     @Test
     public void toResponseString() {
         assertEquals("a=b; Secure", Cookie.builder("a", "b")
-                .secure(true)
+                .secure()
                 .build().toResponseString());
     }
 
@@ -333,7 +333,7 @@ public class CookieTest {
     @Test
     public void _equals() {
         assertEquals(Cookie.builder("a", "b").build(), Cookie.builder("a", "b").build());
-        assertEquals(Cookie.builder("a", "b").secure(true).build(), Cookie.builder("a", "b").secure(true).build());
-        assertNotEquals(Cookie.builder("a", "b").secure(true).build(), Cookie.builder("a", "b").build());
+        assertEquals(Cookie.builder("a", "b").secure().build(), Cookie.builder("a", "b").secure().build());
+        assertNotEquals(Cookie.builder("a", "b").secure().build(), Cookie.builder("a", "b").build());
     }
 }

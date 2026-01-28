@@ -1,6 +1,9 @@
 package net.jacobpeterson.jet.common.http.header;
 
 import lombok.RequiredArgsConstructor;
+import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSecurityPolicy;
+import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
+import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -309,6 +312,7 @@ public enum Header {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cookie">
      * developer.mozilla.org</a>
+     * @see Cookie
      */
     COOKIE("Cookie"),
 
@@ -317,6 +321,7 @@ public enum Header {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie">
      * developer.mozilla.org</a>
+     * @see Cookie
      */
     SET_COOKIE("Set-Cookie"),
 
@@ -503,6 +508,7 @@ public enum Header {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">
      * developer.mozilla.org</a>
+     * @see ContentType
      */
     CONTENT_TYPE("Content-Type"),
 
@@ -711,6 +717,7 @@ public enum Header {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">
      * developer.mozilla.org</a>
+     * @see ContentSecurityPolicy
      */
     CONTENT_SECURITY_POLICY("Content-Security-Policy"),
 
