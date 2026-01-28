@@ -450,7 +450,7 @@ public final class Url {
         /**
          * @see #getEncodedUserInfo()
          */
-        public Builder encodedUserInfo(final @Nullable String encodedUserInfo) {
+        public Builder encodedUserInfo(final String encodedUserInfo) {
             this.encodedUserInfo = encodedUserInfo;
             return this;
         }
@@ -458,8 +458,8 @@ public final class Url {
         /**
          * @return {@link #encodedUserInfo(String)} {@link #encode(String)}
          */
-        public Builder userInfo(final @Nullable String userInfo) {
-            return encodedUserInfo(userInfo == null ? null : encode(userInfo));
+        public Builder userInfo(final String userInfo) {
+            return encodedUserInfo(encode(userInfo));
         }
 
         /**
@@ -473,7 +473,7 @@ public final class Url {
         /**
          * @see #getPort()
          */
-        public Builder port(final @Nullable Integer port) {
+        public Builder port(final int port) {
             this.port = port;
             return this;
         }
@@ -481,16 +481,16 @@ public final class Url {
         /**
          * @see #getEncodedPath()
          */
-        public Builder encodedPath(final @Nullable String encodedPath) {
-            this.encodedPath = new StringBuilder(encodedPath == null ? PATH_SEGMENT_DELIMITER : encodedPath);
+        public Builder encodedPath(final String encodedPath) {
+            this.encodedPath = new StringBuilder(encodedPath);
             return this;
         }
 
         /**
          * @return {@link #encodedPath(String)} {@link #encodePath(String)}
          */
-        public Builder path(final @Nullable String path) {
-            return encodedPath(path == null ? null : encodePath(path));
+        public Builder path(final String path) {
+            return encodedPath(encodePath(path));
         }
 
         /**
@@ -533,16 +533,16 @@ public final class Url {
         /**
          * @see #getEncodedQuery()
          */
-        public Builder encodedQuery(final @Nullable String encodedQuery) {
-            this.encodedQuery = encodedQuery == null ? null : new StringBuilder(encodedQuery);
+        public Builder encodedQuery(final String encodedQuery) {
+            this.encodedQuery = new StringBuilder(encodedQuery);
             return this;
         }
 
         /**
          * @return {@link #encodedQuery(String)} {@link #encode(String)}
          */
-        public Builder query(final @Nullable String query) {
-            return encodedQuery(query == null ? null : encode(query));
+        public Builder query(final String query) {
+            return encodedQuery(encode(query));
         }
 
         /**
@@ -602,7 +602,7 @@ public final class Url {
         /**
          * @see #getEncodedFragment()
          */
-        public Builder encodedFragment(final @Nullable String encodedFragment) {
+        public Builder encodedFragment(final String encodedFragment) {
             this.encodedFragment = encodedFragment;
             return this;
         }
@@ -610,8 +610,8 @@ public final class Url {
         /**
          * @return {@link #encodedFragment(String)} {@link #encode(String)}
          */
-        public Builder fragment(final @Nullable String fragment) {
-            return encodedFragment(fragment == null ? null : encode(fragment));
+        public Builder fragment(final String fragment) {
+            return encodedFragment(encode(fragment));
         }
 
         /**
@@ -810,10 +810,9 @@ public final class Url {
     }
 
     /**
-     * @return internally-cached <code>null</code> if <code>{@link #getPort()} == null</code> or if
-     * <code>{@link #getSchemeEnum()} != null</code> and
-     * <code>{@link #getPort()} == {@link Scheme#getDefaultPort()}</code>,
-     * {@link #getPort()} otherwise
+     * @return internally-cached <code>null</code> if {@link #getPort()} is <code>null</code> or if
+     * <code>{@link #getSchemeEnum()}</code> is non-<code>null</code> and {@link #getPort()} equals
+     * {@link Scheme#getDefaultPort()}, {@link #getPort()} otherwise
      */
     @EqualsAndHashCode.Include
     public @Nullable Integer getCustomPort() {
@@ -823,8 +822,8 @@ public final class Url {
                 customPort = Optional.empty();
             } else {
                 final var schemeEnum = getSchemeEnum();
-                customPort = Optional.ofNullable(
-                        schemeEnum != null && port.equals(schemeEnum.getDefaultPort()) ? null : port);
+                customPort = Optional.ofNullable(schemeEnum != null &&
+                        port.equals(schemeEnum.getDefaultPort()) ? null : port);
             }
         }
         return customPort.orElse(null);
@@ -1131,7 +1130,7 @@ public final class Url {
     }
 
     /**
-     * @return copies this {@link Url} into a {@link Builder}
+     * @return this {@link Url} copied into a new {@link Builder} instance
      */
     public Builder toBuilder() {
         return new Builder(this);

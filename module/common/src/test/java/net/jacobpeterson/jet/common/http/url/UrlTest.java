@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -361,12 +362,6 @@ public class UrlTest {
                     .userInfo(" ")
                     .host("a.com")
                     .build().toString());
-            assertEquals("a://a.com", Url.builder()
-                    .scheme("a")
-                    .userInfo(" ")
-                    .userInfo(null)
-                    .host("a.com")
-                    .build().toString());
         }
 
         @Test
@@ -433,12 +428,6 @@ public class UrlTest {
                     .host("a.com")
                     .encodedPath("/a")
                     .build().toString());
-            assertEquals("a://a.com", Url.builder()
-                    .scheme("a")
-                    .host("a.com")
-                    .encodedPath("/a")
-                    .encodedPath(null)
-                    .build().toString());
             assertEquals("a://a.com/a", Url.builder()
                     .scheme("a")
                     .host("a.com")
@@ -483,12 +472,6 @@ public class UrlTest {
                     .scheme("a")
                     .host("a.com")
                     .path("/a")
-                    .build().toString());
-            assertEquals("a://a.com", Url.builder()
-                    .scheme("a")
-                    .host("a.com")
-                    .path("/a")
-                    .path(null)
                     .build().toString());
             assertEquals("a://a.com/a", Url.builder()
                     .scheme("a")
@@ -683,12 +666,6 @@ public class UrlTest {
                     .host("a.com")
                     .encodedQuery("")
                     .build().toString());
-            assertEquals("a://a.com", Url.builder()
-                    .scheme("a")
-                    .host("a.com")
-                    .encodedQuery("")
-                    .encodedQuery(null)
-                    .build().toString());
             assertEquals("a://a.com/?a=a", Url.builder()
                     .scheme("a")
                     .host("a.com")
@@ -723,12 +700,6 @@ public class UrlTest {
                     .scheme("a")
                     .host("a.com")
                     .query("")
-                    .build().toString());
-            assertEquals("a://a.com", Url.builder()
-                    .scheme("a")
-                    .host("a.com")
-                    .query("")
-                    .query(null)
                     .build().toString());
             assertEquals("a://a.com/?a%3Da", Url.builder()
                     .scheme("a")
@@ -1020,12 +991,6 @@ public class UrlTest {
                     .host("a.com")
                     .fragment("")
                     .build().toString());
-            assertEquals("a://a.com", Url.builder()
-                    .scheme("a")
-                    .host("a.com")
-                    .fragment("")
-                    .fragment(null)
-                    .build().toString());
             assertEquals("a://a.com/#a", Url.builder()
                     .scheme("a")
                     .host("a.com")
@@ -1174,12 +1139,12 @@ public class UrlTest {
         assertEquals(Scheme.HTTPS.getDefaultPort(), Url.builder()
                 .scheme("a")
                 .host("a.com")
-                .port(Scheme.HTTPS.getDefaultPort())
+                .port(requireNonNull(Scheme.HTTPS.getDefaultPort()))
                 .build().getCustomPort());
         assertNull(Url.builder()
                 .scheme(Scheme.HTTPS)
                 .host("a.com")
-                .port(Scheme.HTTPS.getDefaultPort())
+                .port(requireNonNull(Scheme.HTTPS.getDefaultPort()))
                 .build().getCustomPort());
     }
 

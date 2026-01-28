@@ -479,7 +479,7 @@ public final class Cookie {
     }
 
     /**
-     * @return copies this {@link Cookie} into a {@link Builder}
+     * @return this {@link Cookie} copied into a new {@link Builder} instance
      */
     public Builder toBuilder() {
         return new Builder(HttpCookie.build(httpCookie));
