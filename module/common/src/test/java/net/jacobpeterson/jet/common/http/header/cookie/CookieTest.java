@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.net.HttpCookie;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
@@ -42,6 +43,14 @@ public class CookieTest {
         assertThrows(IllegalArgumentException.class, () -> Cookie.parseResponseCookie("\u0000=b"));
         assertThrows(IllegalArgumentException.class, () -> Cookie.parseResponseCookie("a=b; SameSite=invalid"));
         assertThrows(IllegalArgumentException.class, () -> Cookie.parseResponseCookie("a=b; Max-Age=invalid"));
+    }
+
+    @Test
+    public void multipleToRequestString() {
+        assertEquals("", Cookie.multipleToRequestString(List.of()));
+        assertEquals("a=b", Cookie.multipleToRequestString(List.of(Cookie.parseResponseCookie("a=b"))));
+        assertEquals("a=b; b=c", Cookie.multipleToRequestString(List.of(Cookie.parseResponseCookie("a=b"),
+                Cookie.builder("b", "c").secure().build())));
     }
 
     @Test

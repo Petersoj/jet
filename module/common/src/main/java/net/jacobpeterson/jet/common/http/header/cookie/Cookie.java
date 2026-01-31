@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -26,6 +27,7 @@ import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.DOMAIN;
@@ -82,18 +84,18 @@ public final class Cookie {
     /**
      * The request cookies cookie delimiter: <code>;</code>
      */
-    public static final String REQUEST_COOKIES_COOKIE_DELIMITER = ";";
+    public static final String REQUEST_COOKIE_DELIMITER = ";";
 
     /**
      * The request cookies name-value delimiter: <code>=</code>
      */
-    public static final String REQUEST_COOKIES_NAME_VALUE_DELIMITER = "=";
+    public static final String REQUEST_COOKIE_NAME_VALUE_DELIMITER = "=";
 
     private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
     private static final Splitter PARSE_REQUEST_COOKIES_COOKIE_SPLITTER =
-            Splitter.on(REQUEST_COOKIES_COOKIE_DELIMITER).trimResults().omitEmptyStrings();
+            Splitter.on(REQUEST_COOKIE_DELIMITER).trimResults().omitEmptyStrings();
     private static final Splitter PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER =
-            Splitter.on(REQUEST_COOKIES_NAME_VALUE_DELIMITER).limit(2).trimResults();
+            Splitter.on(REQUEST_COOKIE_NAME_VALUE_DELIMITER).limit(2).trimResults();
 
     /**
      * Parses the given {@link Header#COOKIE} value {@link String} into a {@link ImmutableList} of {@link Cookie}s.
@@ -128,6 +130,18 @@ public final class Cookie {
         final var httpCookie = SET_COOKIE_PARSER.parse(responseCookie);
         checkArgument(httpCookie != null, "Invalid response cookie: %s", responseCookie);
         return new Cookie(httpCookie);
+    }
+
+    /**
+     * Creates a {@link Header#COOKIE} value {@link String} from the given request {@link Cookie} {@link Collection} by
+     * joining {@link Cookie#toRequestString()} with {@link #REQUEST_COOKIE_DELIMITER}.
+     *
+     * @param requestCookies the request {@link Cookie} {@link Collection}
+     *
+     * @return the {@link Header#COOKIE} value {@link String}
+     */
+    public static String multipleToRequestString(final Collection<Cookie> requestCookies) {
+        return requestCookies.stream().map(Cookie::toRequestString).collect(joining(REQUEST_COOKIE_DELIMITER + " "));
     }
 
     /**
@@ -496,7 +510,7 @@ public final class Cookie {
      * @return internally-cached
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
      * {@link Header#COOKIE} value {@link String} (the concatenation of {@link #getName()},
-     * {@link #REQUEST_COOKIES_NAME_VALUE_DELIMITER}, and {@link #getValue()})
+     * {@link #REQUEST_COOKIE_NAME_VALUE_DELIMITER}, and {@link #getValue()})
      *
      * @throws IllegalArgumentException thrown for invalid {@link Cookie} values during the serialization process
      * @see #parseRequestCookies(String)
@@ -507,7 +521,7 @@ public final class Cookie {
             requireValidRFC2616Token(name, "ERROR");
             final var value = getValue();
             requireValidRFC6265CookieValue(value);
-            requestString = name + REQUEST_COOKIES_NAME_VALUE_DELIMITER + value;
+            requestString = name + REQUEST_COOKIE_NAME_VALUE_DELIMITER + value;
         }
         return requestString;
     }
