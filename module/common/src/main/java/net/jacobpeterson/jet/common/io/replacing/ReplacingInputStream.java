@@ -117,7 +117,7 @@ public class ReplacingInputStream extends InputStream {
         replaceIndex = -1;
     }
 
-    @SuppressWarnings({"NullAway", "StatementWithEmptyBody", "DataFlowIssue"})
+    @SuppressWarnings({"NullAway", "DataFlowIssue", "StatementWithEmptyBody"})
     @Override
     public int read() throws IOException {
         if (find.length == 0) {

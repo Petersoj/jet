@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.ImmutableSetMultimap.flatteningToImmutableSetMultimap;
+import static java.lang.String.join;
 import static java.util.Locale.ROOT;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
@@ -951,7 +952,7 @@ public final class ContentSecurityPolicy {
         if (string == null) {
             string = directives.keySet().stream()
                     .map(key -> {
-                        final var value = String.join(" ", directives.get(key));
+                        final var value = join(" ", directives.get(key));
                         return !value.isEmpty() ? key + " " + value : key;
                     }).collect(joining("; "));
         }

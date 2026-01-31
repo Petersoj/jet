@@ -26,10 +26,12 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    api("com.google.guava:guava:33.5.0-jre")
+val guavaVersion = "33.5.0-jre"
 
-    implementation("org.jspecify:jspecify:1.0.0")
+dependencies {
+    api("org.jspecify:jspecify:1.0.0")
+
+    api("com.google.guava:guava:$guavaVersion")
 
     implementation("org.slf4j:slf4j-api:2.0.17")
 
@@ -74,10 +76,12 @@ tasks.withType(JavaCompile::class) {
 
 tasks.javadoc.configure {
     options {
-        (this as CoreJavadocOptions).addBooleanOption("Xdoclint:none", true)
-        addStringOption("link",
-                "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/")
-        addStringOption("link", "https://guava.dev/releases/snapshot-jre/api/docs/")
+        (this as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
+        links = listOf(
+                "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/",
+                "https://jspecify.dev/docs/api/",
+                "https://guava.dev/releases/$guavaVersion/api/docs/",
+                "https://errorprone.info/api/latest/")
     }
 }
 
@@ -104,7 +108,7 @@ publishing {
             pom {
                 name = artifactId
                 val githubRepoPath = "Petersoj/jet"
-                url = "https://github.com/${githubRepoPath}"
+                url = "https://github.com/$githubRepoPath"
                 inceptionYear = "2025"
                 licenses {
                     license {
@@ -119,8 +123,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/${githubRepoPath}.git"
-                    developerConnection = "scm:git:ssh://github.com:${githubRepoPath}.git"
+                    connection = "scm:git:git://github.com/$githubRepoPath.git"
+                    developerConnection = "scm:git:ssh://github.com:$githubRepoPath.git"
                     url = pom.url
                 }
             }
