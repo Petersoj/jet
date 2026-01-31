@@ -3,10 +3,11 @@ package net.jacobpeterson.jet.common.http.header.contenttype;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
 import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
@@ -24,12 +25,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSetMultimap.flatteningToImmutableSetMultimap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllLines;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
@@ -393,14 +394,14 @@ public final class ContentType {
     // END multipart types
 
     /**
-     * A non-exhaustive, unmodifiable {@link Set} of common parameter-less {@link ContentType}s that modern browsers can
+     * A non-exhaustive {@link ImmutableSet} of common parameter-less {@link ContentType}s that modern browsers can
      * typically render through an HTML tag without the need for any extra plugins and have a very low likelihood of
      * being vulnerable to XSS attacks if the content is used with the proper HTML tag or directly rendered in a browser
      * tab. The content type of untrusted content (e.g. user-submitted files) should be checked against this
      * {@link Set} before setting the {@link Header#CONTENT_TYPE} response header to the value from
      * {@link #forFileExtension(String)}.
      */
-    public static final Set<ContentType> XSS_SAFE_HTML_TAG_CONTENT_TYPES = Set.of(
+    public static final ImmutableSet<ContentType> XSS_SAFE_HTML_TAG_CONTENT_TYPES = ImmutableSet.of(
             IMAGE_BMP, IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIC,
             IMAGE_HEIF,
             AUDIO_MP4, AUDIO_MPEG, AUDIO_OGG, AUDIO_WEBM, AUDIO_AAC, AUDIO_VORBIS, AUDIO_VND_WAVE,
@@ -408,10 +409,10 @@ public final class ContentType {
             APPLICATION_PDF);
 
     /**
-     * A non-exhaustive, unmodifiable {@link Set} of common {@link ContentType}s for typically intrinsically
-     * compressed file types.
+     * A non-exhaustive {@link ImmutableSet} of common {@link ContentType}s for typically intrinsically compressed file
+     * types.
      */
-    public static final Set<ContentType> COMPRESSED_CONTENT_TYPES = Set.of(
+    public static final ImmutableSet<ContentType> COMPRESSED_CONTENT_TYPES = ImmutableSet.of(
             IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIF, IMAGE_HEIC,
             AUDIO_MP4, AUDIO_MPEG, AUDIO_OGG, AUDIO_WEBM, AUDIO_AAC, AUDIO_VORBIS,
             VIDEO_MP4, VIDEO_MPEG, VIDEO_OGG, VIDEO_QUICKTIME, VIDEO_WEBM,
@@ -436,15 +437,15 @@ public final class ContentType {
             create(APPLICATION_TYPE_STRING, "x-7z-compressed"));
 
     /**
-     * A non-exhaustive, unmodifiable {@link SetMultimap} of {@link ContentType}s mapped to their dot-less file
+     * A non-exhaustive {@link ImmutableSetMultimap} of {@link ContentType}s mapped to their dot-less file
      * extensions (e.g. <code>text/plain</code> -> <code>txt</code>).
      */
-    public static final SetMultimap<ContentType, String> FILE_EXTENSIONS_OF_CONTENT_TYPES;
+    public static final ImmutableSetMultimap<ContentType, String> FILE_EXTENSIONS_OF_CONTENT_TYPES;
 
     /**
      * The inverse of {@link #FILE_EXTENSIONS_OF_CONTENT_TYPES}.
      */
-    public static final Map<String, ContentType> CONTENT_TYPE_OF_FILE_EXTENSIONS;
+    public static final ImmutableMap<String, ContentType> CONTENT_TYPE_OF_FILE_EXTENSIONS;
 
     static {
         final List<String> tsvLines;
@@ -460,7 +461,7 @@ public final class ContentType {
                 .collect(flatteningToImmutableSetMultimap(tsv -> parse(tsv.getFirst()),
                         tsv -> Splitter.on(' ').splitToStream(tsv.get(1))));
         CONTENT_TYPE_OF_FILE_EXTENSIONS = FILE_EXTENSIONS_OF_CONTENT_TYPES.entries().stream()
-                .collect(toUnmodifiableMap(Entry::getValue, Entry::getKey, (first, _) -> first));
+                .collect(toImmutableMap(Entry::getValue, Entry::getKey, (first, _) -> first));
     }
 
     /**
@@ -655,9 +656,9 @@ public final class ContentType {
     /**
      * Gets the dot-less file extensions for this {@link ContentType} from {@link #FILE_EXTENSIONS_OF_CONTENT_TYPES}.
      *
-     * @return the unmodifiable {@link String} {@link Set}
+     * @return the {@link String} {@link ImmutableSet}
      */
-    public Set<String> getFileExtensions() {
+    public ImmutableSet<String> getFileExtensions() {
         return FILE_EXTENSIONS_OF_CONTENT_TYPES.get(this);
     }
 

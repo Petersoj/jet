@@ -1,16 +1,15 @@
 package net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.requiretrustedtypesfor;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key.PolicyDirectiveKey;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link RequireTrustedTypesFor} is an enum for {@link PolicyDirectiveKey#REQUIRE_TRUSTED_TYPES_FOR} values.
@@ -54,10 +53,10 @@ public enum RequireTrustedTypesFor {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link RequireTrustedTypesFor}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link RequireTrustedTypesFor}.
      */
-    public static final Map<String, RequireTrustedTypesFor> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, RequireTrustedTypesFor> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link RequireTrustedTypesFor} for the given <code>string</code>.

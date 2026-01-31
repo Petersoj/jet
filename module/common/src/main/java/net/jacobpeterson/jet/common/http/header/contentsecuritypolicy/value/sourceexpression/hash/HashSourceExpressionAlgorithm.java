@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import lombok.Getter;
@@ -8,9 +9,9 @@ import org.jspecify.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
 import java.util.function.Function;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.hash.Hashing.sha256;
 import static com.google.common.hash.Hashing.sha384;
 import static com.google.common.hash.Hashing.sha512;
@@ -18,7 +19,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link HashSourceExpressionAlgorithm} is an enum for the algorithm of {@link HashSourceExpression}.
@@ -70,10 +70,10 @@ public enum HashSourceExpressionAlgorithm {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link HashSourceExpressionAlgorithm}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link HashSourceExpressionAlgorithm}.
      */
-    public static final Map<String, HashSourceExpressionAlgorithm> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, HashSourceExpressionAlgorithm> VALUES_OF_LOWERCASED_STRINGS =
+            stream(values()).collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link HashSourceExpressionAlgorithm} for the given <code>string</code>.

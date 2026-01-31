@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.common.http.header.cookie;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.EqualsAndHashCode;
@@ -16,8 +17,6 @@ import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -80,31 +79,39 @@ import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Cookie {
 
-    private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
-    private static final Splitter PARSE_REQUEST_COOKIES_COOKIE_SPLITTER =
-            Splitter.on(';').trimResults().omitEmptyStrings();
-    private static final Splitter PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER =
-            Splitter.on('=').limit(2).trimResults();
+    /**
+     * The request cookies cookie delimiter: <code>;</code>
+     */
+    public static final String REQUEST_COOKIES_COOKIE_DELIMITER = ";";
 
     /**
-     * Parses the given {@link Header#COOKIE} value {@link String} into a {@link List} of {@link Cookie}s.
+     * The request cookies name-value delimiter: <code>=</code>
+     */
+    public static final String REQUEST_COOKIES_NAME_VALUE_DELIMITER = "=";
+
+    private static final SetCookieParser SET_COOKIE_PARSER = SetCookieParser.newInstance();
+    private static final Splitter PARSE_REQUEST_COOKIES_COOKIE_SPLITTER =
+            Splitter.on(REQUEST_COOKIES_COOKIE_DELIMITER).trimResults().omitEmptyStrings();
+    private static final Splitter PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER =
+            Splitter.on(REQUEST_COOKIES_NAME_VALUE_DELIMITER).limit(2).trimResults();
+
+    /**
+     * Parses the given {@link Header#COOKIE} value {@link String} into a {@link ImmutableList} of {@link Cookie}s.
      *
      * @param requestCookies the {@link Header#COOKIE} value {@link String}
      *
-     * @return the {@link Cookie} {@link List}
+     * @return the {@link Cookie} {@link ImmutableList}
      *
      * @see #toRequestString()
      */
-    public static List<Cookie> parseRequestCookies(final String requestCookies) {
-        if (requestCookies.isBlank()) {
-            return List.of();
+    public static ImmutableList<Cookie> parseRequestCookies(final String requestCookies) {
+        final var cookies = ImmutableList.<Cookie>builder();
+        for (final var cookieSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(requestCookies)) {
+            final var nameValueSplit = PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER.splitToList(cookieSplit);
+            cookies.add(builder(nameValueSplit.getFirst(),
+                    nameValueSplit.size() == 1 ? "" : nameValueSplit.get(1)).build());
         }
-        final var cookies = new ArrayList<Cookie>();
-        for (final var semicolonSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(requestCookies)) {
-            final var equalsSplit = PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER.splitToList(semicolonSplit);
-            cookies.add(builder(equalsSplit.getFirst(), equalsSplit.size() == 1 ? "" : equalsSplit.get(1)).build());
-        }
-        return cookies;
+        return cookies.build();
     }
 
     /**
@@ -488,8 +495,8 @@ public final class Cookie {
     /**
      * @return internally-cached
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
-     * {@link Header#COOKIE} value {@link String} (the concatenation of {@link #getName()}, equals, and
-     * {@link #getValue()})
+     * {@link Header#COOKIE} value {@link String} (the concatenation of {@link #getName()},
+     * {@link #REQUEST_COOKIES_NAME_VALUE_DELIMITER}, and {@link #getValue()})
      *
      * @throws IllegalArgumentException thrown for invalid {@link Cookie} values during the serialization process
      * @see #parseRequestCookies(String)
@@ -500,7 +507,7 @@ public final class Cookie {
             requireValidRFC2616Token(name, "ERROR");
             final var value = getValue();
             requireValidRFC6265CookieValue(value);
-            requestString = name + "=" + value;
+            requestString = name + REQUEST_COOKIES_NAME_VALUE_DELIMITER + value;
         }
         return requestString;
     }

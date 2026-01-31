@@ -1,15 +1,14 @@
 package net.jacobpeterson.jet.common.http.header.cookie;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link CookieSameSite} is an enum for the {@link CookieAttribute#SAME_SITE} value.
@@ -94,10 +93,10 @@ public enum CookieSameSite {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link CookieSameSite}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link CookieSameSite}.
      */
-    public static final Map<String, CookieSameSite> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, CookieSameSite> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link CookieSameSite} for the given <code>string</code>.

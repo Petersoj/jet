@@ -55,7 +55,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 public final class HostSourceExpression implements SourceExpression {
 
     /**
-     * The wildcard (<code>*</code>) token.
+     * The wildcard token: <code>"*"</code>
      */
     public static final String WILDCARD_TOKEN = "*";
 

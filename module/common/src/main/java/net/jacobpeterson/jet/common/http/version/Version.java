@@ -1,16 +1,15 @@
 package net.jacobpeterson.jet.common.http.version;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link Version} is an enum that represents a standardized HTTP protocol version.
@@ -92,21 +91,21 @@ public enum Version {
     }
 
     /**
-     * The <code>HTTP/</code> version prefix.
+     * The prefix: <code>"HTTP/"</code>
      */
     public static final String PREFIX = "HTTP/";
 
     /**
-     * An unmodifiable {@link Map} of uppercased {@link #toString()} mapped to {@link Version}.
+     * An {@link ImmutableMap} of uppercased {@link #toString()} mapped to {@link Version}.
      */
-    public static final Map<String, Version> VALUES_OF_UPPERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toUpperCase(ROOT), identity()));
+    public static final ImmutableMap<String, Version> VALUES_OF_UPPERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toUpperCase(ROOT), identity()));
 
     /**
-     * An unmodifiable {@link Map} of {@link #getInteger()} mapped to {@link Version}.
+     * An {@link ImmutableMap} of {@link #getInteger()} mapped to {@link Version}.
      */
-    public static final Map<Integer, Version> VALUES_OF_INTEGERS = stream(values())
-            .collect(toUnmodifiableMap(Version::getInteger, identity()));
+    public static final ImmutableMap<Integer, Version> VALUES_OF_INTEGERS = stream(values())
+            .collect(toImmutableMap(Version::getInteger, identity()));
 
     /**
      * Gets the {@link Version} for the given <code>string</code>.

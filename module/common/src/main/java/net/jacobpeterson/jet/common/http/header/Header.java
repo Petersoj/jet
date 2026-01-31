@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.common.http.header;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSecurityPolicy;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
@@ -7,12 +8,10 @@ import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link Header} is an enum that represents a standardized HTTP header.
@@ -1664,10 +1663,10 @@ public enum Header {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link Header}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link Header}.
      */
-    public static final Map<String, Header> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, Header> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link Header} for the given <code>string</code>.

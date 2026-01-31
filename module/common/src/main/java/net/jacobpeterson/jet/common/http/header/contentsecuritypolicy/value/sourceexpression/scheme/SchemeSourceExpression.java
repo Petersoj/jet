@@ -35,7 +35,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 public final class SchemeSourceExpression implements SourceExpression {
 
     /**
-     * The <code>:</code> suffix.
+     * The suffix: <code>":"</code>
      */
     public static final String SUFFIX = ":";
 

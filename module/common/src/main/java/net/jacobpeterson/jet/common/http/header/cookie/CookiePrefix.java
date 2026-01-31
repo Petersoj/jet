@@ -1,17 +1,18 @@
 package net.jacobpeterson.jet.common.http.header.cookie;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link CookiePrefix} is an enum that represents a standardized HTTP cookie prefix.
@@ -70,30 +71,29 @@ public enum CookiePrefix {
     }
 
     /**
-     * The double-underscore (<code>__</code>) prefix token.
+     * The prefix token: <code>"__"</code>
      */
     public static final String PREFIX_TOKEN = "__";
 
     /**
-     * The hyphen (<code>-</code>) suffix token.
+     * The suffix token: <code>"-"</code>
      */
     public static final String SUFFIX_TOKEN = "-";
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link CookiePrefix}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link CookiePrefix}.
      */
-    public static final Map<String, CookiePrefix> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, CookiePrefix> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * The inverse of {@link #VALUES_OF_LOWERCASED_STRINGS}.
      */
-    public static final Map<CookiePrefix, String> LOWERCASED_STRINGS_OF_VALUES =
-            VALUES_OF_LOWERCASED_STRINGS.entrySet().stream()
-                    .collect(toUnmodifiableMap(Entry::getValue, Entry::getKey));
+    public static final ImmutableMap<CookiePrefix, String> LOWERCASED_STRINGS_OF_VALUES =
+            VALUES_OF_LOWERCASED_STRINGS.entrySet().stream().collect(toImmutableMap(Entry::getValue, Entry::getKey));
 
-    private static final List<CookiePrefix> FROM_COOKIE_NAME_SEARCH_LIST =
-            List.of(HOST_HTTP, SECURE, HOST, HTTP); // From longest to shortest
+    private static final ImmutableList<CookiePrefix> FROM_COOKIE_NAME_SEARCH_LIST =
+            ImmutableList.of(HOST_HTTP, SECURE, HOST, HTTP); // From longest to shortest
 
     /**
      * Gets the {@link CookiePrefix} for the given <code>string</code>.
@@ -118,9 +118,9 @@ public enum CookiePrefix {
             return null;
         }
         final var lowercasedCookieName = cookieName.toLowerCase(ROOT);
-        // Brute force search for only 4 possibilities is fine.
+        // Brute-force search for only 4 possibilities is fine.
         for (final var cookiePrefix : FROM_COOKIE_NAME_SEARCH_LIST) {
-            if (lowercasedCookieName.startsWith(LOWERCASED_STRINGS_OF_VALUES.get(cookiePrefix))) {
+            if (lowercasedCookieName.startsWith(requireNonNull(LOWERCASED_STRINGS_OF_VALUES.get(cookiePrefix)))) {
                 return cookiePrefix;
             }
         }

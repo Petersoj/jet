@@ -1,17 +1,16 @@
 package net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSecurityPolicy;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key.PolicyDirectiveKeyType.DEPRECATED;
 import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key.PolicyDirectiveKeyType.DOCUMENT;
 import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key.PolicyDirectiveKeyType.FETCH;
@@ -423,10 +422,10 @@ public enum PolicyDirectiveKey {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link PolicyDirectiveKey}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link PolicyDirectiveKey}.
      */
-    public static final Map<String, PolicyDirectiveKey> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, PolicyDirectiveKey> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link PolicyDirectiveKey} for the given <code>string</code>.

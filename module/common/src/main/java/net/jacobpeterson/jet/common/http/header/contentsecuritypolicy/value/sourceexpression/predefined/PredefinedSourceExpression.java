@@ -1,16 +1,15 @@
 package net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.predefined;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpression;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link PredefinedSourceExpression} is an enum for predefined source expressions.
@@ -260,10 +259,10 @@ public enum PredefinedSourceExpression implements SourceExpression {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link PredefinedSourceExpression}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link PredefinedSourceExpression}.
      */
-    public static final Map<String, PredefinedSourceExpression> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, PredefinedSourceExpression> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link PredefinedSourceExpression} for the given <code>string</code>.

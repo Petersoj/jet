@@ -1,16 +1,15 @@
 package net.jacobpeterson.jet.common.http.url;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link Scheme} is an enum that represents a standardized HTTP scheme.
@@ -137,17 +136,18 @@ public enum Scheme {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link Scheme}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link Scheme}.
      */
-    public static final Map<String, Scheme> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, Scheme> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
-     * An unmodifiable {@link Map} of {@link #getDefaultPort()} mapped to {@link Scheme}.
+     * An {@link ImmutableMap} of {@link #getDefaultPort()} mapped to {@link Scheme}.
      */
-    public static final Map<Integer, Scheme> VALUES_OF_DEFAULT_PORTS = stream(values())
+    @SuppressWarnings({"NullAway", "DataFlowIssue"})
+    public static final ImmutableMap<Integer, Scheme> VALUES_OF_DEFAULT_PORTS = stream(values())
             .filter(value -> value.getDefaultPort() != null)
-            .collect(toUnmodifiableMap(Scheme::getDefaultPort, identity(), (first, _) -> first));
+            .collect(toImmutableMap(Scheme::getDefaultPort, identity(), (first, _) -> first));
 
     /**
      * Gets the {@link Scheme} for the given <code>string</code>.

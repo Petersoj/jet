@@ -55,7 +55,7 @@ import static net.jacobpeterson.jet.common.util.token.TokenUtil.generateToken;
 public final class NonceSourceExpression implements SourceExpression {
 
     /**
-     * The <code>nonce-</code> prefix.
+     * The prefix: <code>"nonce-"</code>
      */
     public static final String PREFIX = "nonce-";
 

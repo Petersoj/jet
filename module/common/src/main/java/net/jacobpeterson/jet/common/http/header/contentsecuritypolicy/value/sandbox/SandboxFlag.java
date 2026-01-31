@@ -1,16 +1,15 @@
 package net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sandbox;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key.PolicyDirectiveKey;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link SandboxFlag} is an enum for the {@link PolicyDirectiveKey#SANDBOX} flags.
@@ -213,10 +212,10 @@ public enum SandboxFlag {
     }
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #toString()} mapped to {@link SandboxFlag}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link SandboxFlag}.
      */
-    public static final Map<String, SandboxFlag> VALUES_OF_LOWERCASED_STRINGS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.toString().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, SandboxFlag> VALUES_OF_LOWERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link SandboxFlag} for the given <code>string</code>.

@@ -1,16 +1,15 @@
 package net.jacobpeterson.jet.common.http.status;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
-
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 /**
  * {@link Status} is an enum that represents a standardized HTTP response status.
@@ -649,16 +648,16 @@ public enum Status {
     }
 
     /**
-     * An unmodifiable {@link Map} of {@link #getCode()} mapped to {@link Status}.
+     * An {@link ImmutableMap} of {@link #getCode()} mapped to {@link Status}.
      */
-    public static final Map<Integer, Status> VALUES_OF_CODES = stream(values())
-            .collect(toUnmodifiableMap(Status::getCode, identity()));
+    public static final ImmutableMap<Integer, Status> VALUES_OF_CODES = stream(values())
+            .collect(toImmutableMap(Status::getCode, identity()));
 
     /**
-     * An unmodifiable {@link Map} of lowercased {@link #getDescription()} mapped to {@link Status}.
+     * An {@link ImmutableMap} of lowercased {@link #getDescription()} mapped to {@link Status}.
      */
-    public static final Map<String, Status> VALUES_OF_LOWERCASED_DESCRIPTIONS = stream(values())
-            .collect(toUnmodifiableMap(value -> value.getDescription().toLowerCase(ROOT), identity()));
+    public static final ImmutableMap<String, Status> VALUES_OF_LOWERCASED_DESCRIPTIONS = stream(values())
+            .collect(toImmutableMap(value -> value.getDescription().toLowerCase(ROOT), identity()));
 
     /**
      * Gets the {@link Status} for the given <code>code</code>.

@@ -89,50 +89,48 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 public final class Url {
 
     /**
-     * The delimiter for the scheme of a {@link Url}.
+     * The scheme delimiter: <code>":"</code>
      */
     public static final String SCHEME_DELIMITER = ":";
 
     /**
-     * The delimiter for the authority of a {@link Url}.
+     * The authority delimiter: <code>"//"</code>
      */
     public static final String AUTHORITY_DELIMITER = "//";
 
     /**
-     * The delimiter for the user of a {@link Url}.
+     * The user delimiter: <code>"@"</code>
      */
     public static final String USER_INFO_DELIMITER = "@";
 
     /**
-     * The delimiter for the port of a {@link Url}.
+     * The port delimiter: <code>":"</code>
      */
     public static final String PORT_DELIMITER = ":";
 
     /**
-     * The delimiter for a path segment of a {@link Url}.
+     * The path segment delimiter: <code>"/"</code>
      */
     public static final String PATH_SEGMENT_DELIMITER = "/";
     private static final char PATH_SEGMENT_DELIMITER_CHAR = PATH_SEGMENT_DELIMITER.charAt(0);
 
     /**
-     * The delimiter for the query of a {@link Url}.
+     * The query delimiter: <code>"?"</code>
      */
     public static final String QUERY_DELIMITER = "?";
 
     /**
-     * The delimiter for a query parameter of a {@link Url}.
+     * The query parameter delimiter: <code>"&"</code>
      */
     public static final String QUERY_PARAMETER_DELIMITER = "&";
-    private static final char QUERY_PARAMETER_DELIMITER_CHAR = QUERY_PARAMETER_DELIMITER.charAt(0);
 
     /**
-     * The delimiter for a query key-value of a {@link Url}.
+     * The query key-value delimiter: <code>"="</code>
      */
     public static final String QUERY_KEY_VALUE_DELIMITER = "=";
-    public static final char QUERY_KEY_VALUE_DELIMITER_CHAR = QUERY_KEY_VALUE_DELIMITER.charAt(0);
 
     /**
-     * The delimiter for the fragment of a {@link Url}.
+     * The fragment delimiter: <code>"#"</code>
      */
     public static final String FRAGMENT_DELIMITER = "#";
 
@@ -151,11 +149,11 @@ public final class Url {
     public static final char VISIBLE_ASCII_MAXIMUM = 0x7E;
 
     private static final Splitter ENCODED_PATH_SEGMENTS_TO_STREAM_SPLITTER =
-            Splitter.on(PATH_SEGMENT_DELIMITER_CHAR).omitEmptyStrings();
+            Splitter.on(PATH_SEGMENT_DELIMITER).omitEmptyStrings();
     private static final Splitter PARSE_ENCODED_QUERY_PARAMETERS_PARAMETER_SPLITTER =
-            Splitter.on(QUERY_PARAMETER_DELIMITER_CHAR);
+            Splitter.on(QUERY_PARAMETER_DELIMITER);
     private static final Splitter PARSE_ENCODED_QUERY_PARAMETERS_KEY_VALUE_SPLITTER =
-            Splitter.on(QUERY_KEY_VALUE_DELIMITER_CHAR).limit(2);
+            Splitter.on(QUERY_KEY_VALUE_DELIMITER).limit(2);
 
     /**
      * @return {@link URLEncoder#encode(String, Charset)} with <code>decoded</code> and {@link StandardCharsets#UTF_8}

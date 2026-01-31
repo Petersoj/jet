@@ -89,8 +89,15 @@ import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class ContentSecurityPolicy {
 
-    private static final Splitter PARSE_DIRECTIVE_SPLITTER = Splitter.on(';').trimResults().omitEmptyStrings();
-    private static final Splitter PARSE_DIRECTIVE_VALUES_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
+    /**
+     * The directive delimiter: <code>";"</code>
+     */
+    public static final String DIRECTIVE_DELIMITER = ";";
+
+    private static final Splitter PARSE_DIRECTIVE_SPLITTER =
+            Splitter.on(DIRECTIVE_DELIMITER).trimResults().omitEmptyStrings();
+    private static final Splitter PARSE_DIRECTIVE_VALUES_SPLITTER =
+            Splitter.on(' ').trimResults().omitEmptyStrings();
 
     /**
      * Parses the given {@link Header#CONTENT_SECURITY_POLICY} value {@link String} into a
@@ -944,8 +951,7 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link String} value of this {@link ContentSecurityPolicy} for
-     * {@link Header#CONTENT_SECURITY_POLICY}
+     * @return internally-cached {@link String} value for {@link Header#CONTENT_SECURITY_POLICY}
      */
     @Override
     public String toString() {
@@ -954,7 +960,7 @@ public final class ContentSecurityPolicy {
                     .map(key -> {
                         final var value = join(" ", directives.get(key));
                         return !value.isEmpty() ? key + " " + value : key;
-                    }).collect(joining("; "));
+                    }).collect(joining(DIRECTIVE_DELIMITER + " "));
         }
         return string;
     }
