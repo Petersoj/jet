@@ -7,11 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -26,52 +24,51 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ReplacingInputStream extends InputStream {
 
     /**
-     * @return {@link #forStrings(InputStream, List)} with {@link ArrayList#ArrayList(Collection)}
-     * {@link Map#entrySet()}
+     * @return {@link #forStrings(InputStream, Collection)} with {@link Map#entrySet()}
      */
     public static ReplacingInputStream forStrings(final InputStream inputStream,
             final Map<String, String> replacementsOfFinds) {
-        return forStrings(inputStream, new ArrayList<>(replacementsOfFinds.entrySet()));
+        return forStrings(inputStream, replacementsOfFinds.entrySet());
     }
 
     /**
      * Composes a {@link ReplacingInputStream} of each {@link Entry} in the given <code>replacementsOfFinds</code>.
      *
      * @param inputStream         the {@link InputStream}
-     * @param replacementsOfFinds the {@link Entry} {@link List} of {@link String}s to find and their mapped
+     * @param replacementsOfFinds the {@link Entry} {@link Collection} of {@link String}s to find and their mapped
      *                            replacements
      *
      * @return the composed {@link ReplacingInputStream}
      */
     public static ReplacingInputStream forStrings(final InputStream inputStream,
-            final List<Entry<String, String>> replacementsOfFinds) {
+            final Collection<Entry<String, String>> replacementsOfFinds) {
         return forStringsOrByteArrays(inputStream, replacementsOfFinds, true);
     }
 
     /**
-     * @return {@link #forByteArrays(InputStream, List)} with {@link ArrayList#ArrayList(Collection)}
-     * {@link Map#entrySet()}
+     * @return {@link #forByteArrays(InputStream, Collection)} with {@link Map#entrySet()}
      */
     public static ReplacingInputStream forByteArrays(final InputStream inputStream,
             final Map<byte[], byte[]> replacementsOfFinds) {
-        return forByteArrays(inputStream, new ArrayList<>(replacementsOfFinds.entrySet()));
+        return forByteArrays(inputStream, replacementsOfFinds.entrySet());
     }
 
     /**
      * Composes a {@link ReplacingInputStream} of each {@link Entry} in the given <code>replacementsOfFinds</code>.
      *
      * @param inputStream         the {@link InputStream}
-     * @param replacementsOfFinds the {@link Entry} {@link List} of byte arrays to find and their mapped replacements
+     * @param replacementsOfFinds the {@link Entry} {@link Collection} of byte arrays to find and their mapped
+     *                            replacements
      *
      * @return the composed {@link ReplacingInputStream}
      */
     public static ReplacingInputStream forByteArrays(final InputStream inputStream,
-            final List<Entry<byte[], byte[]>> replacementsOfFinds) {
+            final Collection<Entry<byte[], byte[]>> replacementsOfFinds) {
         return forStringsOrByteArrays(inputStream, replacementsOfFinds, false);
     }
 
     private static ReplacingInputStream forStringsOrByteArrays(final InputStream inputStream,
-            final List<? extends Entry<?, ?>> replacementsOfFinds, final boolean strings) {
+            final Collection<? extends Entry<?, ?>> replacementsOfFinds, final boolean strings) {
         if (replacementsOfFinds.isEmpty()) {
             return new ReplacingInputStream(inputStream, new byte[]{}, new byte[]{});
         }

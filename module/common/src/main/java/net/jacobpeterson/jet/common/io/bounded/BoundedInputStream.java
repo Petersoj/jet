@@ -22,7 +22,7 @@ import static java.lang.Math.min;
  * github.com/apache/commons-io/.../BoundedInputStream.java</a>
  */
 @NullMarked
-public final class BoundedInputStream extends FilterInputStream {
+public class BoundedInputStream extends FilterInputStream {
 
     /** The maximum number of bytes that can be read, or <code>null</code> for no bound. */
     private final @Getter @Nullable Long boundCount;
