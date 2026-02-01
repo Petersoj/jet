@@ -36,6 +36,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @NullMarked
 @Immutable
 @EqualsAndHashCode(cacheStrategy = LAZY)
+@SuppressWarnings("NullAway") // TODO remove once Null Away false positives are fixed
 public class ContentRange {
 
     /**
