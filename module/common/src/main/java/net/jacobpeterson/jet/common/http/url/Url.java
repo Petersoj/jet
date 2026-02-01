@@ -89,48 +89,48 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 public final class Url {
 
     /**
-     * The scheme delimiter: <code>":"</code>
+     * The {@link #getScheme()} delimiter: <code>":"</code>
      */
     public static final String SCHEME_DELIMITER = ":";
 
     /**
-     * The authority delimiter: <code>"//"</code>
+     * The {@link #getAuthority()} delimiter: <code>"//"</code>
      */
     public static final String AUTHORITY_DELIMITER = "//";
 
     /**
-     * The user delimiter: <code>"@"</code>
+     * The {@link #getUserInfo()} delimiter: <code>"@"</code>
      */
     public static final String USER_INFO_DELIMITER = "@";
 
     /**
-     * The port delimiter: <code>":"</code>
+     * The {@link #getPort()} delimiter: <code>":"</code>
      */
     public static final String PORT_DELIMITER = ":";
 
     /**
-     * The path segment delimiter: <code>"/"</code>
+     * The {@link #getPathSegments()} delimiter: <code>"/"</code>
      */
     public static final String PATH_SEGMENT_DELIMITER = "/";
     private static final char PATH_SEGMENT_DELIMITER_CHAR = PATH_SEGMENT_DELIMITER.charAt(0);
 
     /**
-     * The query delimiter: <code>"?"</code>
+     * The {@link #getQuery()} delimiter: <code>"?"</code>
      */
     public static final String QUERY_DELIMITER = "?";
 
     /**
-     * The query parameter delimiter: <code>"&"</code>
+     * The {@link #getQueryParameters()} delimiter: <code>"&amp;"</code>
      */
     public static final String QUERY_PARAMETER_DELIMITER = "&";
 
     /**
-     * The query key-value delimiter: <code>"="</code>
+     * The {@link #getQueryParameters()} key-value delimiter: <code>"="</code>
      */
     public static final String QUERY_KEY_VALUE_DELIMITER = "=";
 
     /**
-     * The fragment delimiter: <code>"#"</code>
+     * The {@link #getFragment()} delimiter: <code>"#"</code>
      */
     public static final String FRAGMENT_DELIMITER = "#";
 

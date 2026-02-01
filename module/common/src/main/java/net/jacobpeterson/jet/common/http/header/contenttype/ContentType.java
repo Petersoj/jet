@@ -77,49 +77,51 @@ public final class ContentType {
     // The below public constants are commonly used content types. The constants are defined as `String` and
     // `ContentType` types. The `String` types are provided so they can be used within annotations.
 
-    public static final String SEPARATOR_TOKEN = "/";
+    /** The {@link #getType()}-{@link #getSubtype()} delimiter: <code>"/"</code> */
+    public static final String TYPE_DELIMITER = "/";
+    /** The wildcard token: <code>"*"</code> */
     public static final String WILDCARD_TOKEN = "*";
-    public static final String WILDCARD_WILDCARD_STRING = WILDCARD_TOKEN + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String WILDCARD_WILDCARD_STRING = WILDCARD_TOKEN + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType WILDCARD_WILDCARD = create(WILDCARD_TOKEN, WILDCARD_TOKEN);
 
     // BEGIN text types
 
     public static final String TEXT_TYPE_STRING = "text";
-    public static final String TEXT_WILDCARD_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String TEXT_WILDCARD_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType TEXT_WILDCARD = create(TEXT_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String TEXT_CSS_SUBTYPE_STRING = "css";
-    public static final String TEXT_CSS_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_CSS_SUBTYPE_STRING;
+    public static final String TEXT_CSS_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_CSS_SUBTYPE_STRING;
     public static final ContentType TEXT_CSS = create(TEXT_TYPE_STRING, TEXT_CSS_SUBTYPE_STRING);
     public static final ContentType TEXT_CSS_UTF_8 = TEXT_CSS.withCharset(UTF_8);
 
     public static final String TEXT_CSV_SUBTYPE_STRING = "csv";
-    public static final String TEXT_CSV_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_CSV_SUBTYPE_STRING;
+    public static final String TEXT_CSV_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_CSV_SUBTYPE_STRING;
     public static final ContentType TEXT_CSV = create(TEXT_TYPE_STRING, TEXT_CSV_SUBTYPE_STRING);
     public static final ContentType TEXT_CSV_UTF_8 = TEXT_CSV.withCharset(UTF_8);
 
     public static final String TEXT_HTML_SUBTYPE_STRING = "html";
-    public static final String TEXT_HTML_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_HTML_SUBTYPE_STRING;
+    public static final String TEXT_HTML_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_HTML_SUBTYPE_STRING;
     public static final ContentType TEXT_HTML = create(TEXT_TYPE_STRING, TEXT_HTML_SUBTYPE_STRING);
     public static final ContentType TEXT_HTML_UTF_8 = TEXT_HTML.withCharset(UTF_8);
 
     public static final String TEXT_MARKDOWN_SUBTYPE_STRING = "markdown";
-    public static final String TEXT_MARKDOWN_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_MARKDOWN_SUBTYPE_STRING;
+    public static final String TEXT_MARKDOWN_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_MARKDOWN_SUBTYPE_STRING;
     public static final ContentType TEXT_MARKDOWN = create(TEXT_TYPE_STRING, TEXT_MARKDOWN_SUBTYPE_STRING);
     public static final ContentType TEXT_MARKDOWN_UTF_8 = TEXT_MARKDOWN.withCharset(UTF_8);
 
     public static final String TEXT_PLAIN_SUBTYPE_STRING = "plain";
-    public static final String TEXT_PLAIN_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_PLAIN_SUBTYPE_STRING;
+    public static final String TEXT_PLAIN_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_PLAIN_SUBTYPE_STRING;
     public static final ContentType TEXT_PLAIN = create(TEXT_TYPE_STRING, TEXT_PLAIN_SUBTYPE_STRING);
     public static final ContentType TEXT_PLAIN_UTF_8 = TEXT_PLAIN.withCharset(UTF_8);
 
     public static final String TEXT_TSV_SUBTYPE_STRING = "tab-separated-values";
-    public static final String TEXT_TSV_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_TSV_SUBTYPE_STRING;
+    public static final String TEXT_TSV_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_TSV_SUBTYPE_STRING;
     public static final ContentType TEXT_TSV = create(TEXT_TYPE_STRING, TEXT_TSV_SUBTYPE_STRING);
     public static final ContentType TEXT_TSV_UTF_8 = TEXT_TSV.withCharset(UTF_8);
 
     public static final String TEXT_XML_SUBTYPE_STRING = "xml";
-    public static final String TEXT_XML_STRING = TEXT_TYPE_STRING + SEPARATOR_TOKEN + TEXT_XML_SUBTYPE_STRING;
+    public static final String TEXT_XML_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER + TEXT_XML_SUBTYPE_STRING;
     public static final ContentType TEXT_XML = create(TEXT_TYPE_STRING, TEXT_XML_SUBTYPE_STRING);
     public static final ContentType TEXT_XML_UTF_8 = TEXT_XML.withCharset(UTF_8);
 
@@ -128,52 +130,52 @@ public final class ContentType {
     // BEGIN image types
 
     public static final String IMAGE_TYPE_STRING = "image";
-    public static final String IMAGE_WILDCARD_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String IMAGE_WILDCARD_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType IMAGE_WILDCARD = create(IMAGE_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String IMAGE_BMP_SUBTYPE_STRING = "bmp";
-    public static final String IMAGE_BMP_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_BMP_SUBTYPE_STRING;
+    public static final String IMAGE_BMP_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_BMP_SUBTYPE_STRING;
     public static final ContentType IMAGE_BMP = create(IMAGE_TYPE_STRING, IMAGE_BMP_SUBTYPE_STRING);
 
     public static final String IMAGE_GIF_SUBTYPE_STRING = "gif";
-    public static final String IMAGE_GIF_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_GIF_SUBTYPE_STRING;
+    public static final String IMAGE_GIF_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_GIF_SUBTYPE_STRING;
     public static final ContentType IMAGE_GIF = create(IMAGE_TYPE_STRING, IMAGE_GIF_SUBTYPE_STRING);
 
     public static final String IMAGE_ICO_SUBTYPE_STRING = "vnd.microsoft.icon";
-    public static final String IMAGE_ICO_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_ICO_SUBTYPE_STRING;
+    public static final String IMAGE_ICO_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_ICO_SUBTYPE_STRING;
     public static final ContentType IMAGE_ICO = create(IMAGE_TYPE_STRING, IMAGE_ICO_SUBTYPE_STRING);
 
     public static final String IMAGE_JPEG_SUBTYPE_STRING = "jpeg";
-    public static final String IMAGE_JPEG_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_JPEG_SUBTYPE_STRING;
+    public static final String IMAGE_JPEG_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_JPEG_SUBTYPE_STRING;
     public static final ContentType IMAGE_JPEG = create(IMAGE_TYPE_STRING, IMAGE_JPEG_SUBTYPE_STRING);
 
     public static final String IMAGE_PNG_SUBTYPE_STRING = "png";
-    public static final String IMAGE_PNG_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_PNG_SUBTYPE_STRING;
+    public static final String IMAGE_PNG_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_PNG_SUBTYPE_STRING;
     public static final ContentType IMAGE_PNG = create(IMAGE_TYPE_STRING, IMAGE_PNG_SUBTYPE_STRING);
 
     public static final String IMAGE_SVG_SUBTYPE_STRING = "svg+xml";
-    public static final String IMAGE_SVG_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_SVG_SUBTYPE_STRING;
+    public static final String IMAGE_SVG_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_SVG_SUBTYPE_STRING;
     public static final ContentType IMAGE_SVG = create(IMAGE_TYPE_STRING, IMAGE_SVG_SUBTYPE_STRING);
     public static final ContentType IMAGE_SVG_UTF_8 = IMAGE_SVG.withCharset(UTF_8);
 
     public static final String IMAGE_TIFF_SUBTYPE_STRING = "tiff";
-    public static final String IMAGE_TIFF_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_TIFF_SUBTYPE_STRING;
+    public static final String IMAGE_TIFF_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_TIFF_SUBTYPE_STRING;
     public static final ContentType IMAGE_TIFF = create(IMAGE_TYPE_STRING, IMAGE_TIFF_SUBTYPE_STRING);
 
     public static final String IMAGE_AVIF_SUBTYPE_STRING = "avif";
-    public static final String IMAGE_AVIF_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_AVIF_SUBTYPE_STRING;
+    public static final String IMAGE_AVIF_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_AVIF_SUBTYPE_STRING;
     public static final ContentType IMAGE_AVIF = create(IMAGE_TYPE_STRING, IMAGE_AVIF_SUBTYPE_STRING);
 
     public static final String IMAGE_WEBP_SUBTYPE_STRING = "webp";
-    public static final String IMAGE_WEBP_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_WEBP_SUBTYPE_STRING;
+    public static final String IMAGE_WEBP_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_WEBP_SUBTYPE_STRING;
     public static final ContentType IMAGE_WEBP = create(IMAGE_TYPE_STRING, IMAGE_WEBP_SUBTYPE_STRING);
 
     public static final String IMAGE_HEIC_SUBTYPE_STRING = "heic";
-    public static final String IMAGE_HEIC_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_HEIC_SUBTYPE_STRING;
+    public static final String IMAGE_HEIC_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_HEIC_SUBTYPE_STRING;
     public static final ContentType IMAGE_HEIC = create(IMAGE_TYPE_STRING, IMAGE_HEIC_SUBTYPE_STRING);
 
     public static final String IMAGE_HEIF_SUBTYPE_STRING = "heif";
-    public static final String IMAGE_HEIF_STRING = IMAGE_TYPE_STRING + SEPARATOR_TOKEN + IMAGE_HEIF_SUBTYPE_STRING;
+    public static final String IMAGE_HEIF_STRING = IMAGE_TYPE_STRING + TYPE_DELIMITER + IMAGE_HEIF_SUBTYPE_STRING;
     public static final ContentType IMAGE_HEIF = create(IMAGE_TYPE_STRING, IMAGE_HEIF_SUBTYPE_STRING);
 
     // END image types
@@ -181,41 +183,41 @@ public final class ContentType {
     // BEGIN audio types
 
     public static final String AUDIO_TYPE_STRING = "audio";
-    public static final String AUDIO_WILDCARD_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String AUDIO_WILDCARD_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType AUDIO_WILDCARD = create(AUDIO_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String AUDIO_MP4_SUBTYPE_STRING = "mp4";
-    public static final String AUDIO_MP4_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_MP4_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_MP4_SUBTYPE_STRING;
     public static final ContentType AUDIO_MP4 = create(AUDIO_TYPE_STRING, AUDIO_MP4_SUBTYPE_STRING);
 
     public static final String AUDIO_MPEG_SUBTYPE_STRING = "mpeg";
-    public static final String AUDIO_MPEG_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_MPEG_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_MPEG_SUBTYPE_STRING;
     public static final ContentType AUDIO_MPEG = create(AUDIO_TYPE_STRING, AUDIO_MPEG_SUBTYPE_STRING);
 
     public static final String AUDIO_OGG_SUBTYPE_STRING = "ogg";
-    public static final String AUDIO_OGG_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_OGG_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_OGG_SUBTYPE_STRING;
     public static final ContentType AUDIO_OGG = create(AUDIO_TYPE_STRING, AUDIO_OGG_SUBTYPE_STRING);
 
     public static final String AUDIO_WEBM_SUBTYPE_STRING = "webm";
-    public static final String AUDIO_WEBM_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_WEBM_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_WEBM_SUBTYPE_STRING;
     public static final ContentType AUDIO_WEBM = create(AUDIO_TYPE_STRING, AUDIO_WEBM_SUBTYPE_STRING);
 
     public static final String AUDIO_AAC_SUBTYPE_STRING = "aac";
-    public static final String AUDIO_AAC_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_AAC_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_AAC_SUBTYPE_STRING;
     public static final ContentType AUDIO_AAC = create(AUDIO_TYPE_STRING, AUDIO_AAC_SUBTYPE_STRING);
 
     public static final String AUDIO_VORBIS_SUBTYPE_STRING = "vorbis";
-    public static final String AUDIO_VORBIS_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_VORBIS_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_VORBIS_SUBTYPE_STRING;
     public static final ContentType AUDIO_VORBIS = create(AUDIO_TYPE_STRING, AUDIO_VORBIS_SUBTYPE_STRING);
 
     public static final String AUDIO_VND_WAVE_SUBTYPE_STRING = "vnd.wave";
-    public static final String AUDIO_VND_WAVE_STRING = AUDIO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String AUDIO_VND_WAVE_STRING = AUDIO_TYPE_STRING + TYPE_DELIMITER +
             AUDIO_VND_WAVE_SUBTYPE_STRING;
     public static final ContentType AUDIO_VND_WAVE = create(AUDIO_TYPE_STRING, AUDIO_VND_WAVE_SUBTYPE_STRING);
 
@@ -224,31 +226,31 @@ public final class ContentType {
     // BEGIN video types
 
     public static final String VIDEO_TYPE_STRING = "video";
-    public static final String VIDEO_WILDCARD_STRING = VIDEO_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String VIDEO_WILDCARD_STRING = VIDEO_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType VIDEO_WILDCARD = create(VIDEO_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String VIDEO_MP4_SUBTYPE_STRING = "mp4";
-    public static final String VIDEO_MP4_STRING = VIDEO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String VIDEO_MP4_STRING = VIDEO_TYPE_STRING + TYPE_DELIMITER +
             VIDEO_MP4_SUBTYPE_STRING;
     public static final ContentType VIDEO_MP4 = create(VIDEO_TYPE_STRING, VIDEO_MP4_SUBTYPE_STRING);
 
     public static final String VIDEO_MPEG_SUBTYPE_STRING = "mpeg";
-    public static final String VIDEO_MPEG_STRING = VIDEO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String VIDEO_MPEG_STRING = VIDEO_TYPE_STRING + TYPE_DELIMITER +
             VIDEO_MPEG_SUBTYPE_STRING;
     public static final ContentType VIDEO_MPEG = create(VIDEO_TYPE_STRING, VIDEO_MPEG_SUBTYPE_STRING);
 
     public static final String VIDEO_OGG_SUBTYPE_STRING = "ogg";
-    public static final String VIDEO_OGG_STRING = VIDEO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String VIDEO_OGG_STRING = VIDEO_TYPE_STRING + TYPE_DELIMITER +
             VIDEO_OGG_SUBTYPE_STRING;
     public static final ContentType VIDEO_OGG = create(VIDEO_TYPE_STRING, VIDEO_OGG_SUBTYPE_STRING);
 
     public static final String VIDEO_QUICKTIME_SUBTYPE_STRING = "quicktime";
-    public static final String VIDEO_QUICKTIME_STRING = VIDEO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String VIDEO_QUICKTIME_STRING = VIDEO_TYPE_STRING + TYPE_DELIMITER +
             VIDEO_QUICKTIME_SUBTYPE_STRING;
     public static final ContentType VIDEO_QUICKTIME = create(VIDEO_TYPE_STRING, VIDEO_QUICKTIME_SUBTYPE_STRING);
 
     public static final String VIDEO_WEBM_SUBTYPE_STRING = "webm";
-    public static final String VIDEO_WEBM_STRING = VIDEO_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String VIDEO_WEBM_STRING = VIDEO_TYPE_STRING + TYPE_DELIMITER +
             VIDEO_WEBM_SUBTYPE_STRING;
     public static final ContentType VIDEO_WEBM = create(VIDEO_TYPE_STRING, VIDEO_WEBM_SUBTYPE_STRING);
 
@@ -257,89 +259,89 @@ public final class ContentType {
     // BEGIN application types
 
     public static final String APPLICATION_TYPE_STRING = "application";
-    public static final String APPLICATION_WILD_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String APPLICATION_WILD_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType APPLICATION_WILDCARD = create(APPLICATION_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String APPLICATION_GZIP_SUBTYPE_STRING = "gzip";
-    public static final String APPLICATION_GZIP_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_GZIP_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_GZIP_SUBTYPE_STRING;
     public static final ContentType APPLICATION_GZIP = create(APPLICATION_TYPE_STRING,
             APPLICATION_GZIP_SUBTYPE_STRING);
 
     public static final String APPLICATION_JAVASCRIPT_SUBTYPE_STRING = "javascript";
-    public static final String APPLICATION_JAVASCRIPT_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_JAVASCRIPT_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_JAVASCRIPT_SUBTYPE_STRING;
     public static final ContentType APPLICATION_JAVASCRIPT = create(APPLICATION_TYPE_STRING,
             APPLICATION_JAVASCRIPT_SUBTYPE_STRING);
     public static final ContentType APPLICATION_JAVASCRIPT_UTF_8 = APPLICATION_JAVASCRIPT.withCharset(UTF_8);
 
     public static final String APPLICATION_JSON_SUBTYPE_STRING = "json";
-    public static final String APPLICATION_JSON_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_JSON_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_JSON_SUBTYPE_STRING;
     public static final ContentType APPLICATION_JSON = create(APPLICATION_TYPE_STRING,
             APPLICATION_JSON_SUBTYPE_STRING);
     public static final ContentType APPLICATION_JSON_UTF_8 = APPLICATION_JSON.withCharset(UTF_8);
 
     public static final String APPLICATION_JWT_SUBTYPE_STRING = "jwt";
-    public static final String APPLICATION_JWT_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_JWT_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_JWT_SUBTYPE_STRING;
     public static final ContentType APPLICATION_JWT = create(APPLICATION_TYPE_STRING,
             APPLICATION_JWT_SUBTYPE_STRING);
 
     public static final String APPLICATION_MANIFEST_JSON_SUBTYPE_STRING = "manifest+json";
-    public static final String APPLICATION_MANIFEST_JSON_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_MANIFEST_JSON_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_MANIFEST_JSON_SUBTYPE_STRING;
     public static final ContentType APPLICATION_MANIFEST_JSON = create(APPLICATION_TYPE_STRING,
             APPLICATION_MANIFEST_JSON_SUBTYPE_STRING);
     public static final ContentType APPLICATION_MANIFEST_JSON_UTF_8 = APPLICATION_MANIFEST_JSON.withCharset(UTF_8);
 
     public static final String APPLICATION_OCTET_STREAM_SUBTYPE_STRING = "octet-stream";
-    public static final String APPLICATION_OCTET_STREAM_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_OCTET_STREAM_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_OCTET_STREAM_SUBTYPE_STRING;
     public static final ContentType APPLICATION_OCTET_STREAM = create(APPLICATION_TYPE_STRING,
             APPLICATION_OCTET_STREAM_SUBTYPE_STRING);
 
     public static final String APPLICATION_PDF_SUBTYPE_STRING = "pdf";
-    public static final String APPLICATION_PDF_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_PDF_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_PDF_SUBTYPE_STRING;
     public static final ContentType APPLICATION_PDF = create(APPLICATION_TYPE_STRING,
             APPLICATION_PDF_SUBTYPE_STRING);
 
     public static final String APPLICATION_RTF_SUBTYPE_STRING = "rtf";
-    public static final String APPLICATION_RTF_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_RTF_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_RTF_SUBTYPE_STRING;
     public static final ContentType APPLICATION_RTF = create(APPLICATION_TYPE_STRING,
             APPLICATION_RTF_SUBTYPE_STRING);
     public static final ContentType APPLICATION_RTF_UTF_8 = APPLICATION_RTF.withCharset(UTF_8);
 
     public static final String APPLICATION_WASM_SUBTYPE_STRING = "wasm";
-    public static final String APPLICATION_WASM_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_WASM_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_WASM_SUBTYPE_STRING;
     public static final ContentType APPLICATION_WASM = create(APPLICATION_TYPE_STRING,
             APPLICATION_WASM_SUBTYPE_STRING);
 
     public static final String APPLICATION_FORM_URL_ENCODED_SUBTYPE_STRING = "x-www-form-urlencoded";
-    public static final String APPLICATION_FORM_URL_ENCODED_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_FORM_URL_ENCODED_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_FORM_URL_ENCODED_SUBTYPE_STRING;
     public static final ContentType APPLICATION_FORM_URL_ENCODED = create(APPLICATION_TYPE_STRING,
             APPLICATION_FORM_URL_ENCODED_SUBTYPE_STRING);
 
     public static final String APPLICATION_XHTML_SUBTYPE_STRING = "xhtml+xml";
-    public static final String APPLICATION_XHTML_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_XHTML_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_XHTML_SUBTYPE_STRING;
     public static final ContentType APPLICATION_XHTML = create(APPLICATION_TYPE_STRING,
             APPLICATION_XHTML_SUBTYPE_STRING);
     public static final ContentType APPLICATION_XHTML_UTF_8 = APPLICATION_XHTML.withCharset(UTF_8);
 
     public static final String APPLICATION_XML_SUBTYPE_STRING = "xml";
-    public static final String APPLICATION_XML_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_XML_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_XML_SUBTYPE_STRING;
     public static final ContentType APPLICATION_XML = create(APPLICATION_TYPE_STRING,
             APPLICATION_XML_SUBTYPE_STRING);
     public static final ContentType APPLICATION_XML_UTF_8 = APPLICATION_XML.withCharset(UTF_8);
 
     public static final String APPLICATION_ZIP_SUBTYPE_STRING = "zip";
-    public static final String APPLICATION_ZIP_STRING = APPLICATION_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String APPLICATION_ZIP_STRING = APPLICATION_TYPE_STRING + TYPE_DELIMITER +
             APPLICATION_ZIP_SUBTYPE_STRING;
     public static final ContentType APPLICATION_ZIP = create(APPLICATION_TYPE_STRING,
             APPLICATION_ZIP_SUBTYPE_STRING);
@@ -349,31 +351,31 @@ public final class ContentType {
     // BEGIN font types
 
     public static final String FONT_TYPE_STRING = "font";
-    public static final String FONT_WILDCARD_STRING = FONT_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String FONT_WILDCARD_STRING = FONT_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType FONT_WILDCARD = create(FONT_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String FONT_COLLECTION_SUBTYPE_STRING = "collection";
-    public static final String FONT_COLLECTION_STRING = FONT_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String FONT_COLLECTION_STRING = FONT_TYPE_STRING + TYPE_DELIMITER +
             FONT_COLLECTION_SUBTYPE_STRING;
     public static final ContentType FONT_COLLECTION = create(FONT_TYPE_STRING, FONT_COLLECTION_SUBTYPE_STRING);
 
     public static final String FONT_OTF_SUBTYPE_STRING = "otf";
-    public static final String FONT_OTF_STRING = FONT_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String FONT_OTF_STRING = FONT_TYPE_STRING + TYPE_DELIMITER +
             FONT_OTF_SUBTYPE_STRING;
     public static final ContentType FONT_OTF = create(FONT_TYPE_STRING, FONT_OTF_SUBTYPE_STRING);
 
     public static final String FONT_TTF_SUBTYPE_STRING = "ttf";
-    public static final String FONT_TTF_STRING = FONT_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String FONT_TTF_STRING = FONT_TYPE_STRING + TYPE_DELIMITER +
             FONT_TTF_SUBTYPE_STRING;
     public static final ContentType FONT_TTF = create(FONT_TYPE_STRING, FONT_TTF_SUBTYPE_STRING);
 
     public static final String FONT_WOFF_SUBTYPE_STRING = "woff";
-    public static final String FONT_WOFF_STRING = FONT_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String FONT_WOFF_STRING = FONT_TYPE_STRING + TYPE_DELIMITER +
             FONT_WOFF_SUBTYPE_STRING;
     public static final ContentType FONT_WOFF = create(FONT_TYPE_STRING, FONT_WOFF_SUBTYPE_STRING);
 
     public static final String FONT_WOFF2_SUBTYPE_STRING = "woff2";
-    public static final String FONT_WOFF2_STRING = FONT_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String FONT_WOFF2_STRING = FONT_TYPE_STRING + TYPE_DELIMITER +
             FONT_WOFF2_SUBTYPE_STRING;
     public static final ContentType FONT_WOFF2 = create(FONT_TYPE_STRING, FONT_WOFF2_SUBTYPE_STRING);
 
@@ -382,11 +384,11 @@ public final class ContentType {
     // BEGIN multipart types
 
     public static final String MULTIPART_TYPE_STRING = "multipart";
-    public static final String MULTIPART_WILDCARD_STRING = MULTIPART_TYPE_STRING + SEPARATOR_TOKEN + WILDCARD_TOKEN;
+    public static final String MULTIPART_WILDCARD_STRING = MULTIPART_TYPE_STRING + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType MULTIPART_WILDCARD = create(MULTIPART_TYPE_STRING, WILDCARD_TOKEN);
 
     public static final String MULTIPART_FORM_DATA_SUBTYPE_STRING = "form-data";
-    public static final String MULTIPART_FORM_DATA_STRING = MULTIPART_TYPE_STRING + SEPARATOR_TOKEN +
+    public static final String MULTIPART_FORM_DATA_STRING = MULTIPART_TYPE_STRING + TYPE_DELIMITER +
             MULTIPART_FORM_DATA_SUBTYPE_STRING;
     public static final ContentType MULTIPART_FORM_DATA = create(MULTIPART_TYPE_STRING,
             MULTIPART_FORM_DATA_SUBTYPE_STRING);
@@ -466,6 +468,8 @@ public final class ContentType {
 
     /**
      * @return {@link #wrap(MediaType)} {@link MediaType#parse(String)}
+     *
+     * @see #toString()
      */
     public static ContentType parse(final String contentType) {
         return wrap(MediaType.parse(contentType));

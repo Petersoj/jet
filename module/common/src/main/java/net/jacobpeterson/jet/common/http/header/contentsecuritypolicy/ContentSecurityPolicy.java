@@ -90,7 +90,7 @@ import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key
 public final class ContentSecurityPolicy {
 
     /**
-     * The directive delimiter: <code>";"</code>
+     * The {@link #getDirectives()} delimiter: <code>";"</code>
      */
     public static final String DIRECTIVE_DELIMITER = ";";
 
@@ -106,6 +106,8 @@ public final class ContentSecurityPolicy {
      * @param contentSecurityPolicy the {@link Header#CONTENT_SECURITY_POLICY} value {@link String}
      *
      * @return the {@link ContentSecurityPolicy}
+     *
+     * @see #toString()
      */
     public static ContentSecurityPolicy parse(final String contentSecurityPolicy) {
         return new ContentSecurityPolicy(PARSE_DIRECTIVE_SPLITTER.splitToStream(contentSecurityPolicy)

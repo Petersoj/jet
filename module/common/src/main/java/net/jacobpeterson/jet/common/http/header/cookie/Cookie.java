@@ -87,7 +87,7 @@ public final class Cookie {
     public static final String REQUEST_COOKIE_DELIMITER = ";";
 
     /**
-     * The request cookies name-value delimiter: <code>=</code>
+     * The request cookies {@link #getName()}-{@link #getValue()} delimiter: <code>=</code>
      */
     public static final String REQUEST_COOKIE_NAME_VALUE_DELIMITER = "=";
 
