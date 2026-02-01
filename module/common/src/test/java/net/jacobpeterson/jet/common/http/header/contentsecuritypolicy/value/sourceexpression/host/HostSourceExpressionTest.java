@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class HostSourceExpressionTest {
+public final class HostSourceExpressionTest {
 
     @Test
     public void create() {

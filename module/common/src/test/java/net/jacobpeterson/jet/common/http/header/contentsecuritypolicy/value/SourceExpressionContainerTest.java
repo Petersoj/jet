@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class SourceExpressionContainerTest {
+public final class SourceExpressionContainerTest {
 
     @Test
     public void wrap() {

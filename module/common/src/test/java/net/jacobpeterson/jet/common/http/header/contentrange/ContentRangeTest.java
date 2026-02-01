@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @NullMarked
-public class ContentRangeTest {
+public final class ContentRangeTest {
 
     @Test
     public void parse() {

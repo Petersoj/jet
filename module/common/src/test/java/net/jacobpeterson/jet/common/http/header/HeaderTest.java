@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class HeaderTest {
+public final class HeaderTest {
 
     @Test
     public void forString() {

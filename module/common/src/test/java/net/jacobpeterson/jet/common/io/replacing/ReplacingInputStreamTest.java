@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @NullMarked
-public class ReplacingInputStreamTest {
+public final class ReplacingInputStreamTest {
 
     @Test
     public void forStrings() throws IOException {

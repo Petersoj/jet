@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @NullMarked
-public class NonceSourceExpressionTest {
+public final class NonceSourceExpressionTest {
 
     @Test
     public void generate() {

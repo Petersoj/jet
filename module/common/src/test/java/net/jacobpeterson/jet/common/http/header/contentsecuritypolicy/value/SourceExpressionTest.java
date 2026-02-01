@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @NullMarked
-public class SourceExpressionTest {
+public final class SourceExpressionTest {
 
     @Test
     public void parse() {

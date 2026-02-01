@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class BoundedInputStreamTest {
+public final class BoundedInputStreamTest {
 
     @Test
     public void read() throws IOException {

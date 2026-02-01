@@ -4,7 +4,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings({"RequireExplicitNullMarking", "NullAway", "NullableProblems"})
-public class NoMarking {
+public final class NoMarking {
 
     @Nullable String string1;
     int primitive;

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class MethodTest {
+public final class MethodTest {
 
     @Test
     public void isSafe() {

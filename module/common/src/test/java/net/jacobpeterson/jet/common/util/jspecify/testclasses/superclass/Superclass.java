@@ -5,7 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 @NullMarked
 @SuppressWarnings({"RequireExplicitNullMarking", "NullAway"})
-public class Superclass {
+public sealed class Superclass permits Subclass {
 
     @Nullable String string1;
     int primitive;

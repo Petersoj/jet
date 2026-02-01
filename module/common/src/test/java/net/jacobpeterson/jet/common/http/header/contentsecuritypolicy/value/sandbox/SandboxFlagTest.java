@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class SandboxFlagTest {
+public final class SandboxFlagTest {
 
     @Test
     public void forString() {

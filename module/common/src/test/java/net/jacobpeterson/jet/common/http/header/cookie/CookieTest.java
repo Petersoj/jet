@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class CookieTest {
+public final class CookieTest {
 
     @Test
     public void parseRequestCookies() {
@@ -69,7 +69,7 @@ public class CookieTest {
                 .build().toString());
     }
 
-    public static class BuilderTest {
+    public static final class BuilderTest {
 
         @Test
         public void attributes() {

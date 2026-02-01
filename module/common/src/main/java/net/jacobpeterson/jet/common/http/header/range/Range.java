@@ -56,7 +56,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @NullMarked
 @Immutable
 @EqualsAndHashCode(cacheStrategy = LAZY)
-@SuppressWarnings("NullAway") // TODO remove once Null Away false positives are fixed
+@SuppressWarnings("NullAway") // TODO remove once NullAway false positives are fixed
 public final class Range {
 
     /**
@@ -183,15 +183,17 @@ public final class Range {
     private final @Getter @Nullable Long start;
 
     /**
-     * If {@link #getStart()} is non-<code>null</code>:
-     * <ul>
-     * <li>An integer in the given unit indicating the end position of the requested range. This value is optional and,
-     * if omitted, the end of the resource is used as the end of the range.</li>
-     * </ul>
-     * If {@link #getStart()} is <code>null</code>:
-     * <ul>
-     * <li>An integer indicating the number of units at the end of the resource to return.</li>
-     * </ul>
+     * <dl>
+     * <dt>If {@link #getStart()} is non-<code>null</code>:</dt>
+     * <dd>
+     * An integer in the given unit indicating the end position of the requested range. This value is optional and, if
+     * omitted, the end of the resource is used as the end of the range.
+     * </dd>
+     * <dt>If {@link #getStart()} is <code>null</code>:</dt>
+     * <dd>
+     * An integer indicating the number of units at the end of the resource to return.
+     * </dd>
+     * </dl>
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range#range-end">
      * developer.mozilla.org</a>

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class CookieAttributeTest {
+public final class CookieAttributeTest {
 
     @Test
     public void forString() {

@@ -6,7 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 @NullMarked
 @SuppressWarnings({"RequireExplicitNullMarking", "NullAway", "NullableProblems"})
-public class OuterMarking {
+public final class OuterMarking {
 
     @Nullable String string1;
     int primitive;

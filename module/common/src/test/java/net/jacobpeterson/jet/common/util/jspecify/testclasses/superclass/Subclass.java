@@ -5,7 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 @NullMarked
 @SuppressWarnings({"RequireExplicitNullMarking", "NullAway"})
-public class Subclass extends Superclass {
+public final class Subclass extends Superclass {
 
     @Nullable String subString1;
     int subPrimitive;

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class RequireTrustedTypesForTest {
+public final class RequireTrustedTypesForTest {
 
     @Test
     public void forString() {

@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @NullUnmarked
 @SuppressWarnings({"ParameterMissingNullable", "DataFlowIssue"})
-public class JSpecifyAnnotationsUtilTest {
+public final class JSpecifyAnnotationsUtilTest {
 
     @Test
     public void requireNonNullFieldsSet() {

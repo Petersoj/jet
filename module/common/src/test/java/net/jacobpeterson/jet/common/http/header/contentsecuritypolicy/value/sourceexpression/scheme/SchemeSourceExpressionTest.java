@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class SchemeSourceExpressionTest {
+public final class SchemeSourceExpressionTest {
 
     @Test
     public void forScheme() {

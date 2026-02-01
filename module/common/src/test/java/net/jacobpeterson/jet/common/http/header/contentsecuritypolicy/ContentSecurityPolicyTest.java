@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class ContentSecurityPolicyTest {
+public final class ContentSecurityPolicyTest {
 
     @Test
     public void parse() {
@@ -69,7 +69,7 @@ public class ContentSecurityPolicyTest {
         assertEquals("a", ContentSecurityPolicy.builder(ImmutableSetMultimap.of("a", "")).build().toString());
     }
 
-    public static class BuilderTest {
+    public static final class BuilderTest {
 
         @Test
         public void putDirectiveValue() {

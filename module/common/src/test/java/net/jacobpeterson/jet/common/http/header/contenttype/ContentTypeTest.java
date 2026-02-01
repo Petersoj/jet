@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class ContentTypeTest {
+public final class ContentTypeTest {
 
     @Test
     public void parse() {

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class UrlTest {
+public final class UrlTest {
 
     @Test
     public void encode() {
@@ -298,7 +298,7 @@ public class UrlTest {
         assertThrows(IllegalArgumentException.class, () -> Url.fromJava(URI.create("://a.com")));
     }
 
-    public static class BuilderTest {
+    public static final class BuilderTest {
 
         @Test
         public void scheme() {

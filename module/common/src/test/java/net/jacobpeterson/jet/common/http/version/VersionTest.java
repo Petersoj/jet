@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @NullMarked
-public class VersionTest {
+public final class VersionTest {
 
     @Test
     public void toStringNoPrefix() {

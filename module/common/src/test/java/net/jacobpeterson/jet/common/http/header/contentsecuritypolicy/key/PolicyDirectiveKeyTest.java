@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class PolicyDirectiveKeyTest {
+public final class PolicyDirectiveKeyTest {
 
     @Test
     public void forString() {

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
-public class TokenUtilTest {
+public final class TokenUtilTest {
 
     @Test
     public void generateToken() {

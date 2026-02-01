@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @NullMarked
-public class RangeTest {
+public final class RangeTest {
 
     @Test
     public void parse() {

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @NullMarked
-public class HashSourceExpressionTest {
+public final class HashSourceExpressionTest {
 
     @Test
     public void forBytesSource() {

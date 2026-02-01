@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @NullMarked
-public class PredefinedSourceExpressionTest {
+public final class PredefinedSourceExpressionTest {
 
     @Test
     public void forString() {
