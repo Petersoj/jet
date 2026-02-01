@@ -113,12 +113,15 @@ public final class Range {
             checkArgument(startEndSplit.size() == 2, "Invalid range: %s", range);
             final var builder = builder().unit(unit);
             final var start = startEndSplit.getFirst();
+            final var startIsEmpty = start.isEmpty();
             final var end = startEndSplit.get(1);
+            final var endIsEmpty = end.isEmpty();
+            checkArgument(!startIsEmpty || !endIsEmpty, "Invalid range: %s", range);
             try {
-                if (!start.isEmpty()) {
+                if (!startIsEmpty) {
                     builder.start(parseLong(start));
                 }
-                if (!end.isEmpty()) {
+                if (!endIsEmpty) {
                     builder.end(parseLong(end));
                 }
             } catch (final NumberFormatException numberFormatException) {
@@ -200,27 +203,27 @@ public final class Range {
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;
 
     /**
-     * @param unit  {@link #getUnit()}, or <code>null</code> for {@link #BYTES_UNIT}
-     * @param start {@link #getStart()}, or possibly <code>null</code> if {@link #getEnd()} is non-<code>null</code>
-     * @param end   {@link #getEnd()}, or possibly <code>null</code> if {@link #getStart()} is non-<code>null</code>
+     * @param unit  the {@link #getUnit()}, or <code>null</code> for {@link #BYTES_UNIT}
+     * @param start the {@link #getStart()}, or <code>null</code>. If this value is <code>null</code> and the given
+     *              <code>end</code> is also <code>null</code>, then this value is set to <code>0</code>.
+     * @param end   the {@link #getEnd()}, or <code>null</code>
      *
-     * @throws IllegalArgumentException thrown if {@link #getStart()} or {@link #getEnd()} are invalid
+     * @throws IllegalArgumentException thrown for invalid arguments
      */
     @lombok.Builder(toBuilder = true)
     private Range(final @Nullable String unit, @Nullable final Long start, @Nullable final Long end)
             throws IllegalArgumentException {
-        checkArgument(start != null || end != null, "`start` and `end` cannot both be `null`");
         if (start != null) {
-            checkArgument(start >= 0, "`start` must be positive");
+            checkArgument(start >= 0, "`start` must be zero or positive");
         }
         if (end != null) {
-            checkArgument(end >= 0, "`end` must be positive");
+            checkArgument(end >= 0, "`end` must be zero or positive");
         }
         if (start != null && end != null) {
             checkArgument(start <= end, "`start` must be less than or equal to `end`");
         }
         this.unit = unit == null ? BYTES_UNIT : unit;
-        this.start = start;
+        this.start = start == null && end == null ? (Long) 0L : start;
         this.end = end;
     }
 

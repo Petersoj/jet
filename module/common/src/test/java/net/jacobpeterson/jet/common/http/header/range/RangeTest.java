@@ -94,35 +94,33 @@ public class RangeTest {
 
         @Test
         public void unit() {
-            assertThrows(IllegalArgumentException.class, () -> Range.builder().build());
-            assertThrows(IllegalArgumentException.class, () -> Range.builder().unit("bits").build());
+            assertEquals(Range.BYTES_UNIT, Range.builder().build().getUnit());
             assertEquals("bits", Range.builder()
                     .unit("bits")
-                    .start(0L)
-                    .build().getUnit());
-            assertEquals(Range.BYTES_UNIT, Range.builder()
-                    .unit(Range.BYTES_UNIT)
-                    .start(0L)
-                    .build().getUnit());
-            assertEquals(Range.BYTES_UNIT, Range.builder()
                     .start(0L)
                     .build().getUnit());
         }
 
         @Test
         public void start() {
-            assertThrows(IllegalArgumentException.class, () -> Range.builder().start(-1L).build());
+            assertEquals(0, Range.builder().build().getStart());
             assertEquals(1, Range.builder()
                     .start(1L)
                     .build().getStart());
+            assertThrows(IllegalArgumentException.class, () -> Range.builder()
+                    .start(-1L)
+                    .build());
         }
 
         @Test
         public void end() {
-            assertThrows(IllegalArgumentException.class, () -> Range.builder().end(-1L).build());
+            assertNull(Range.builder().build().getEnd());
             assertEquals(1, Range.builder()
                     .end(1L)
                     .build().getEnd());
+            assertThrows(IllegalArgumentException.class, () -> Range.builder()
+                    .end(-1L)
+                    .build());
         }
     }
 
@@ -142,27 +140,14 @@ public class RangeTest {
 
     @Test
     public void _toString() {
-        assertEquals("bytes=0-", Range.builder()
-                .start(0L)
+        assertEquals("bytes=0-", Range.builder().build().toString());
+        assertEquals("bytes=1-", Range.builder()
+                .start(1L)
                 .build().toString());
         assertEquals("bytes=-1", Range.builder()
                 .end(1L)
                 .build().toString());
         assertEquals("bytes=0-1", Range.builder()
-                .start(0L)
-                .end(1L)
-                .build().toString());
-
-        assertEquals("bits=0-", Range.builder()
-                .unit("bits")
-                .start(0L)
-                .build().toString());
-        assertEquals("bits=-1", Range.builder()
-                .unit("bits")
-                .end(1L)
-                .build().toString());
-        assertEquals("bits=0-1", Range.builder()
-                .unit("bits")
                 .start(0L)
                 .end(1L)
                 .build().toString());
