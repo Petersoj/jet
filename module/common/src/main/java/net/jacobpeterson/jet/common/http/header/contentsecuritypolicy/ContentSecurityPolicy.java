@@ -550,6 +550,53 @@ public final class ContentSecurityPolicy {
     private @LazyInit @Nullable String string;
 
     /**
+     * @return {@link #containsKey(String)} {@link PolicyDirectiveKey#toString()}
+     */
+    public Boolean containsKey(final PolicyDirectiveKey policyDirectiveKey) {
+        return containsKey(policyDirectiveKey.toString());
+    }
+
+    /**
+     * @return {@link #getDirectives()} {@link ImmutableSetMultimap#containsKey(Object)}
+     */
+    public Boolean containsKey(final String policyDirectiveKey) {
+        return directives.containsKey(policyDirectiveKey);
+    }
+
+    /**
+     * @return {@link #getStringFirstEntry(String)} {@link PolicyDirectiveKey#toString()}
+     */
+    public Optional<String> getStringFirstEntry(final PolicyDirectiveKey policyDirectiveKey) {
+        return getStringFirstEntry(policyDirectiveKey.toString());
+    }
+
+    /**
+     * @return {@link #getDirectives()} {@link ImmutableSetMultimap#get(Object)} first non-empty {@link String} entry
+     */
+    public Optional<String> getStringFirstEntry(final String policyDirectiveKey) {
+        return directives.get(policyDirectiveKey).stream().findFirst().filter(not(String::isEmpty));
+    }
+
+    /**
+     * @return {@link #parseSourceExpressions(String)} {@link PolicyDirectiveKey#toString()}
+     */
+    public ImmutableSet<SourceExpressionContainer> parseSourceExpressions(final PolicyDirectiveKey policyDirectiveKey) {
+        return parseSourceExpressions(policyDirectiveKey.toString());
+    }
+
+    /**
+     * @return {@link #getDirectives()} {@link ImmutableSetMultimap#get(Object)} mapped to
+     * {@link SourceExpression#parse(String)} and {@link SourceExpressionContainer#wrap(SourceExpression)}
+     */
+    public ImmutableSet<SourceExpressionContainer> parseSourceExpressions(final String policyDirectiveKey) {
+        return directives.get(policyDirectiveKey).stream()
+                .filter(not(String::isEmpty))
+                .map(SourceExpression::parse)
+                .map(SourceExpressionContainer::wrap)
+                .collect(toImmutableSet());
+    }
+
+    /**
      * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#CHILD_SRC}
      */
@@ -759,7 +806,7 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #getDirectives()} {@link ImmutableSetMultimap#containsKey(Object)}
+     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#SANDBOX}
      */
     public boolean isSandbox() {
@@ -812,7 +859,7 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #getDirectives()} {@link PolicyDirectiveKey#REPORT_TO} first entry
+     * @return internally-cached {@link #getStringFirstEntry(PolicyDirectiveKey)} {@link PolicyDirectiveKey#REPORT_TO}
      */
     public @Nullable String getReportTo() {
         if (reportTo == null) {
@@ -843,7 +890,7 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #getDirectives()} {@link ImmutableSetMultimap#containsKey(Object)}
+     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#TRUSTED_TYPES}
      */
     public boolean isTrustedTypes() {
@@ -897,7 +944,7 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #getDirectives()} {@link ImmutableSetMultimap#containsKey(Object)}
+     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#UPGRADE_INSECURE_REQUESTS}
      */
     public boolean isUpgradeInsecureRequests() {
@@ -908,7 +955,7 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #getDirectives()} {@link ImmutableSetMultimap#containsKey(Object)}
+     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#BLOCK_ALL_MIXED_CONTENT}
      */
     public boolean isBlockAllMixedContent() {
@@ -919,30 +966,13 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #getDirectives()} {@link PolicyDirectiveKey#REPORT_URI} first entry
+     * @return internally-cached {@link #getStringFirstEntry(PolicyDirectiveKey)} {@link PolicyDirectiveKey#REPORT_URI}
      */
     public @Nullable String getReportUri() {
         if (reportUri == null) {
             reportUri = getStringFirstEntry(REPORT_URI);
         }
         return reportUri.orElse(null);
-    }
-
-    private Boolean containsKey(final PolicyDirectiveKey policyDirectiveKey) {
-        return directives.containsKey(policyDirectiveKey.toString());
-    }
-
-    private Optional<String> getStringFirstEntry(final PolicyDirectiveKey policyDirectiveKey) {
-        return directives.get(policyDirectiveKey.toString()).stream().findFirst().filter(not(String::isEmpty));
-    }
-
-    private ImmutableSet<SourceExpressionContainer> parseSourceExpressions(
-            final PolicyDirectiveKey policyDirectiveKey) {
-        return directives.get(policyDirectiveKey.toString()).stream()
-                .filter(not(String::isEmpty))
-                .map(SourceExpression::parse)
-                .map(SourceExpressionContainer::wrap)
-                .collect(toImmutableSet());
     }
 
     /**

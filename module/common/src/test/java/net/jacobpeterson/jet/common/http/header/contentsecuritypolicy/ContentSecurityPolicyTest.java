@@ -5,6 +5,7 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.key.Policy
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.requiretrustedtypesfor.RequireTrustedTypesFor;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sandbox.SandboxFlag;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpression;
+import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpressionContainer;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpressionAlgorithm;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.host.HostSourceExpression;
@@ -420,6 +421,42 @@ public final class ContentSecurityPolicyTest {
                     .reportUri("https://a.com")
                     .build());
         }
+    }
+
+    @Test
+    public void containsKeyPolicyDirectiveKey() {
+        assertTrue(ContentSecurityPolicy.parse("default-src").containsKey(PolicyDirectiveKey.DEFAULT_SRC));
+    }
+
+    @Test
+    public void containsKeyString() {
+        assertTrue(ContentSecurityPolicy.parse("a").containsKey("a"));
+    }
+
+    @Test
+    public void getStringFirstEntryPolicyDirectiveKey() {
+        assertEquals("a", ContentSecurityPolicy.parse("default-src a b;")
+                .getStringFirstEntry(PolicyDirectiveKey.DEFAULT_SRC).orElseThrow());
+    }
+
+    @Test
+    public void getStringFirstEntryString() {
+        assertEquals("b", ContentSecurityPolicy.parse("a b c;")
+                .getStringFirstEntry("a").orElseThrow());
+    }
+
+    @Test
+    public void parseSourceExpressionsPolicyDirectiveKey() {
+        assertEquals(Set.of(SourceExpressionContainer.wrap(SourceExpression.parse("'none'"))),
+                ContentSecurityPolicy.parse("default-src 'none'")
+                        .parseSourceExpressions(PolicyDirectiveKey.DEFAULT_SRC));
+    }
+
+    @Test
+    public void parseSourceExpressionsString() {
+        assertEquals(Set.of(SourceExpressionContainer.wrap(SourceExpression.parse("'none'"))),
+                ContentSecurityPolicy.parse("a 'none'")
+                        .parseSourceExpressions("a"));
     }
 
     @Test

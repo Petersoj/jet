@@ -51,6 +51,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range">developer.mozilla.org</a>
  * @see Header#RANGE
+ * @see #ALL_BYTES
  * @see ContentRange
  */
 @NullMarked
