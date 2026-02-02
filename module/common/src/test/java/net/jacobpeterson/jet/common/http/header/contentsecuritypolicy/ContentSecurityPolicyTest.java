@@ -424,39 +424,39 @@ public final class ContentSecurityPolicyTest {
     }
 
     @Test
-    public void containsKeyPolicyDirectiveKey() {
-        assertTrue(ContentSecurityPolicy.parse("default-src").containsKey(PolicyDirectiveKey.DEFAULT_SRC));
+    public void containsDirectiveKeyPolicyDirectiveKey() {
+        assertTrue(ContentSecurityPolicy.parse("default-src").containsDirectiveKey(PolicyDirectiveKey.DEFAULT_SRC));
     }
 
     @Test
-    public void containsKeyString() {
-        assertTrue(ContentSecurityPolicy.parse("a").containsKey("a"));
+    public void containsDirectiveKeyString() {
+        assertTrue(ContentSecurityPolicy.parse("a").containsDirectiveKey("a"));
     }
 
     @Test
-    public void getStringFirstEntryPolicyDirectiveKey() {
+    public void getDirectiveFirstEntryPolicyDirectiveKey() {
         assertEquals("a", ContentSecurityPolicy.parse("default-src a b;")
-                .getStringFirstEntry(PolicyDirectiveKey.DEFAULT_SRC).orElseThrow());
+                .getDirectiveFirstEntry(PolicyDirectiveKey.DEFAULT_SRC).orElseThrow());
     }
 
     @Test
-    public void getStringFirstEntryString() {
+    public void getDirectiveFirstEntryString() {
         assertEquals("b", ContentSecurityPolicy.parse("a b c;")
-                .getStringFirstEntry("a").orElseThrow());
+                .getDirectiveFirstEntry("a").orElseThrow());
     }
 
     @Test
-    public void parseSourceExpressionsPolicyDirectiveKey() {
+    public void parseDirectiveSourceExpressionsPolicyDirectiveKey() {
         assertEquals(Set.of(SourceExpressionContainer.wrap(SourceExpression.parse("'none'"))),
                 ContentSecurityPolicy.parse("default-src 'none'")
-                        .parseSourceExpressions(PolicyDirectiveKey.DEFAULT_SRC));
+                        .parseDirectiveSourceExpressions(PolicyDirectiveKey.DEFAULT_SRC));
     }
 
     @Test
-    public void parseSourceExpressionsString() {
+    public void parseDirectiveSourceExpressionsString() {
         assertEquals(Set.of(SourceExpressionContainer.wrap(SourceExpression.parse("'none'"))),
                 ContentSecurityPolicy.parse("a 'none'")
-                        .parseSourceExpressions("a"));
+                        .parseDirectiveSourceExpressions("a"));
     }
 
     @Test

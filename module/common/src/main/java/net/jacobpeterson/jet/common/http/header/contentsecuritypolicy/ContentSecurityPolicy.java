@@ -550,45 +550,46 @@ public final class ContentSecurityPolicy {
     private @LazyInit @Nullable String string;
 
     /**
-     * @return {@link #containsKey(String)} {@link PolicyDirectiveKey#toString()}
+     * @return {@link #containsDirectiveKey(String)} {@link PolicyDirectiveKey#toString()}
      */
-    public Boolean containsKey(final PolicyDirectiveKey policyDirectiveKey) {
-        return containsKey(policyDirectiveKey.toString());
+    public Boolean containsDirectiveKey(final PolicyDirectiveKey policyDirectiveKey) {
+        return containsDirectiveKey(policyDirectiveKey.toString());
     }
 
     /**
      * @return {@link #getDirectives()} {@link ImmutableSetMultimap#containsKey(Object)}
      */
-    public Boolean containsKey(final String policyDirectiveKey) {
+    public Boolean containsDirectiveKey(final String policyDirectiveKey) {
         return directives.containsKey(policyDirectiveKey);
     }
 
     /**
-     * @return {@link #getStringFirstEntry(String)} {@link PolicyDirectiveKey#toString()}
+     * @return {@link #getDirectiveFirstEntry(String)} {@link PolicyDirectiveKey#toString()}
      */
-    public Optional<String> getStringFirstEntry(final PolicyDirectiveKey policyDirectiveKey) {
-        return getStringFirstEntry(policyDirectiveKey.toString());
+    public Optional<String> getDirectiveFirstEntry(final PolicyDirectiveKey policyDirectiveKey) {
+        return getDirectiveFirstEntry(policyDirectiveKey.toString());
     }
 
     /**
      * @return {@link #getDirectives()} {@link ImmutableSetMultimap#get(Object)} first non-empty {@link String} entry
      */
-    public Optional<String> getStringFirstEntry(final String policyDirectiveKey) {
-        return directives.get(policyDirectiveKey).stream().findFirst().filter(not(String::isEmpty));
+    public Optional<String> getDirectiveFirstEntry(final String policyDirectiveKey) {
+        return directives.get(policyDirectiveKey).stream().filter(not(String::isEmpty)).findFirst();
     }
 
     /**
-     * @return {@link #parseSourceExpressions(String)} {@link PolicyDirectiveKey#toString()}
+     * @return {@link #parseDirectiveSourceExpressions(String)} {@link PolicyDirectiveKey#toString()}
      */
-    public ImmutableSet<SourceExpressionContainer> parseSourceExpressions(final PolicyDirectiveKey policyDirectiveKey) {
-        return parseSourceExpressions(policyDirectiveKey.toString());
+    public ImmutableSet<SourceExpressionContainer> parseDirectiveSourceExpressions(
+            final PolicyDirectiveKey policyDirectiveKey) {
+        return parseDirectiveSourceExpressions(policyDirectiveKey.toString());
     }
 
     /**
      * @return {@link #getDirectives()} {@link ImmutableSetMultimap#get(Object)} mapped to
      * {@link SourceExpression#parse(String)} and {@link SourceExpressionContainer#wrap(SourceExpression)}
      */
-    public ImmutableSet<SourceExpressionContainer> parseSourceExpressions(final String policyDirectiveKey) {
+    public ImmutableSet<SourceExpressionContainer> parseDirectiveSourceExpressions(final String policyDirectiveKey) {
         return directives.get(policyDirectiveKey).stream()
                 .filter(not(String::isEmpty))
                 .map(SourceExpression::parse)
@@ -597,221 +598,221 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#CHILD_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getChildSrc() {
         if (childSrc == null) {
-            childSrc = parseSourceExpressions(CHILD_SRC);
+            childSrc = parseDirectiveSourceExpressions(CHILD_SRC);
         }
         return childSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#CONNECT_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getConnectSrc() {
         if (connectSrc == null) {
-            connectSrc = parseSourceExpressions(CONNECT_SRC);
+            connectSrc = parseDirectiveSourceExpressions(CONNECT_SRC);
         }
         return connectSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#DEFAULT_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getDefaultSrc() {
         if (defaultSrc == null) {
-            defaultSrc = parseSourceExpressions(DEFAULT_SRC);
+            defaultSrc = parseDirectiveSourceExpressions(DEFAULT_SRC);
         }
         return defaultSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#FENCED_FRAME_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getFencedFrameSrc() {
         if (fencedFrameSrc == null) {
-            fencedFrameSrc = parseSourceExpressions(FENCED_FRAME_SRC);
+            fencedFrameSrc = parseDirectiveSourceExpressions(FENCED_FRAME_SRC);
         }
         return fencedFrameSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#FONT_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getFontSrc() {
         if (fontSrc == null) {
-            fontSrc = parseSourceExpressions(FONT_SRC);
+            fontSrc = parseDirectiveSourceExpressions(FONT_SRC);
         }
         return fontSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#FRAME_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getFrameSrc() {
         if (frameSrc == null) {
-            frameSrc = parseSourceExpressions(FRAME_SRC);
+            frameSrc = parseDirectiveSourceExpressions(FRAME_SRC);
         }
         return frameSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#IMG_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getImgSrc() {
         if (imgSrc == null) {
-            imgSrc = parseSourceExpressions(IMG_SRC);
+            imgSrc = parseDirectiveSourceExpressions(IMG_SRC);
         }
         return imgSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#MANIFEST_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getManifestSrc() {
         if (manifestSrc == null) {
-            manifestSrc = parseSourceExpressions(MANIFEST_SRC);
+            manifestSrc = parseDirectiveSourceExpressions(MANIFEST_SRC);
         }
         return manifestSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#MEDIA_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getMediaSrc() {
         if (mediaSrc == null) {
-            mediaSrc = parseSourceExpressions(MEDIA_SRC);
+            mediaSrc = parseDirectiveSourceExpressions(MEDIA_SRC);
         }
         return mediaSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#OBJECT_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getObjectSrc() {
         if (objectSrc == null) {
-            objectSrc = parseSourceExpressions(OBJECT_SRC);
+            objectSrc = parseDirectiveSourceExpressions(OBJECT_SRC);
         }
         return objectSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#PREFETCH_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getPrefetchSrc() {
         if (prefetchSrc == null) {
-            prefetchSrc = parseSourceExpressions(PREFETCH_SRC);
+            prefetchSrc = parseDirectiveSourceExpressions(PREFETCH_SRC);
         }
         return prefetchSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#SCRIPT_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getScriptSrc() {
         if (scriptSrc == null) {
-            scriptSrc = parseSourceExpressions(SCRIPT_SRC);
+            scriptSrc = parseDirectiveSourceExpressions(SCRIPT_SRC);
         }
         return scriptSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#SCRIPT_SRC_ELEM}
      */
     public ImmutableSet<SourceExpressionContainer> getScriptSrcElem() {
         if (scriptSrcElem == null) {
-            scriptSrcElem = parseSourceExpressions(SCRIPT_SRC_ELEM);
+            scriptSrcElem = parseDirectiveSourceExpressions(SCRIPT_SRC_ELEM);
         }
         return scriptSrcElem;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#SCRIPT_SRC_ATTR}
      */
     public ImmutableSet<SourceExpressionContainer> getScriptSrcAttr() {
         if (scriptSrcAttr == null) {
-            scriptSrcAttr = parseSourceExpressions(SCRIPT_SRC_ATTR);
+            scriptSrcAttr = parseDirectiveSourceExpressions(SCRIPT_SRC_ATTR);
         }
         return scriptSrcAttr;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#STYLE_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getStyleSrc() {
         if (styleSrc == null) {
-            styleSrc = parseSourceExpressions(STYLE_SRC);
+            styleSrc = parseDirectiveSourceExpressions(STYLE_SRC);
         }
         return styleSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#STYLE_SRC_ELEM}
      */
     public ImmutableSet<SourceExpressionContainer> getStyleSrcElem() {
         if (styleSrcElem == null) {
-            styleSrcElem = parseSourceExpressions(STYLE_SRC_ELEM);
+            styleSrcElem = parseDirectiveSourceExpressions(STYLE_SRC_ELEM);
         }
         return styleSrcElem;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#STYLE_SRC_ATTR}
      */
     public ImmutableSet<SourceExpressionContainer> getStyleSrcAttr() {
         if (styleSrcAttr == null) {
-            styleSrcAttr = parseSourceExpressions(STYLE_SRC_ATTR);
+            styleSrcAttr = parseDirectiveSourceExpressions(STYLE_SRC_ATTR);
         }
         return styleSrcAttr;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#WORKER_SRC}
      */
     public ImmutableSet<SourceExpressionContainer> getWorkerSrc() {
         if (workerSrc == null) {
-            workerSrc = parseSourceExpressions(WORKER_SRC);
+            workerSrc = parseDirectiveSourceExpressions(WORKER_SRC);
         }
         return workerSrc;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#BASE_URI}
      */
     public ImmutableSet<SourceExpressionContainer> getBaseUri() {
         if (baseUri == null) {
-            baseUri = parseSourceExpressions(BASE_URI);
+            baseUri = parseDirectiveSourceExpressions(BASE_URI);
         }
         return baseUri;
     }
 
     /**
-     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
+     * @return internally-cached {@link #containsDirectiveKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#SANDBOX}
      */
     public boolean isSandbox() {
         if (sandbox == null) {
-            sandbox = containsKey(SANDBOX);
+            sandbox = containsDirectiveKey(SANDBOX);
         }
         return sandbox;
     }
@@ -837,33 +838,34 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#FORM_ACTION}
      */
     public ImmutableSet<SourceExpressionContainer> getFormAction() {
         if (formAction == null) {
-            formAction = parseSourceExpressions(FORM_ACTION);
+            formAction = parseDirectiveSourceExpressions(FORM_ACTION);
         }
         return formAction;
     }
 
     /**
-     * @return internally-cached {@link #parseSourceExpressions(PolicyDirectiveKey)}
+     * @return internally-cached {@link #parseDirectiveSourceExpressions(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#FRAME_ANCESTORS}
      */
     public ImmutableSet<SourceExpressionContainer> getFrameAncestors() {
         if (frameAncestors == null) {
-            frameAncestors = parseSourceExpressions(FRAME_ANCESTORS);
+            frameAncestors = parseDirectiveSourceExpressions(FRAME_ANCESTORS);
         }
         return frameAncestors;
     }
 
     /**
-     * @return internally-cached {@link #getStringFirstEntry(PolicyDirectiveKey)} {@link PolicyDirectiveKey#REPORT_TO}
+     * @return internally-cached {@link #getDirectiveFirstEntry(PolicyDirectiveKey)}
+     * {@link PolicyDirectiveKey#REPORT_TO}
      */
     public @Nullable String getReportTo() {
         if (reportTo == null) {
-            reportTo = getStringFirstEntry(REPORT_TO);
+            reportTo = getDirectiveFirstEntry(REPORT_TO);
         }
         return reportTo.orElse(null);
     }
@@ -890,12 +892,12 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
+     * @return internally-cached {@link #containsDirectiveKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#TRUSTED_TYPES}
      */
     public boolean isTrustedTypes() {
         if (trustedTypes == null) {
-            trustedTypes = containsKey(TRUSTED_TYPES);
+            trustedTypes = containsDirectiveKey(TRUSTED_TYPES);
         }
         return trustedTypes;
     }
@@ -944,33 +946,34 @@ public final class ContentSecurityPolicy {
     }
 
     /**
-     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
+     * @return internally-cached {@link #containsDirectiveKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#UPGRADE_INSECURE_REQUESTS}
      */
     public boolean isUpgradeInsecureRequests() {
         if (upgradeInsecureRequests == null) {
-            upgradeInsecureRequests = containsKey(UPGRADE_INSECURE_REQUESTS);
+            upgradeInsecureRequests = containsDirectiveKey(UPGRADE_INSECURE_REQUESTS);
         }
         return upgradeInsecureRequests;
     }
 
     /**
-     * @return internally-cached {@link #containsKey(PolicyDirectiveKey)}
+     * @return internally-cached {@link #containsDirectiveKey(PolicyDirectiveKey)}
      * {@link PolicyDirectiveKey#BLOCK_ALL_MIXED_CONTENT}
      */
     public boolean isBlockAllMixedContent() {
         if (blockAllMixedContent == null) {
-            blockAllMixedContent = containsKey(BLOCK_ALL_MIXED_CONTENT);
+            blockAllMixedContent = containsDirectiveKey(BLOCK_ALL_MIXED_CONTENT);
         }
         return blockAllMixedContent;
     }
 
     /**
-     * @return internally-cached {@link #getStringFirstEntry(PolicyDirectiveKey)} {@link PolicyDirectiveKey#REPORT_URI}
+     * @return internally-cached {@link #getDirectiveFirstEntry(PolicyDirectiveKey)}
+     * {@link PolicyDirectiveKey#REPORT_URI}
      */
     public @Nullable String getReportUri() {
         if (reportUri == null) {
-            reportUri = getStringFirstEntry(REPORT_URI);
+            reportUri = getDirectiveFirstEntry(REPORT_URI);
         }
         return reportUri.orElse(null);
     }
