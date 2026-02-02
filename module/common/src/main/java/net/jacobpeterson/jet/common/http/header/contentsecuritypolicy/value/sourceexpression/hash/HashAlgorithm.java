@@ -21,10 +21,10 @@ import static java.util.Locale.ROOT;
 import static java.util.function.Function.identity;
 
 /**
- * {@link HashSourceExpressionAlgorithm} is an enum for the algorithm of {@link HashSourceExpression}.
+ * {@link HashAlgorithm} is an enum for the algorithm of {@link HashSourceExpression}.
  */
 @NullMarked
-public enum HashSourceExpressionAlgorithm {
+public enum HashAlgorithm {
 
     /**
      * The {@link Hashing#sha256() SHA-256} hash function.
@@ -45,7 +45,7 @@ public enum HashSourceExpressionAlgorithm {
     /** The {@link Function} to return the Base64-encoded hash {@link String} a given <code>byte[]</code>. */
     private final @SuppressWarnings("ImmutableEnumChecker") @Getter Function<byte[], String> function;
 
-    HashSourceExpressionAlgorithm(final String string, final HashFunction hashFunction) {
+    HashAlgorithm(final String string, final HashFunction hashFunction) {
         this.string = string;
         this.function = (bytes) -> Base64.getEncoder().encodeToString(hashFunction.hashBytes(bytes).asBytes());
     }
@@ -70,19 +70,19 @@ public enum HashSourceExpressionAlgorithm {
     }
 
     /**
-     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link HashSourceExpressionAlgorithm}.
+     * An {@link ImmutableMap} of lowercased {@link #toString()} mapped to {@link HashAlgorithm}.
      */
-    public static final ImmutableMap<String, HashSourceExpressionAlgorithm> VALUES_OF_LOWERCASED_STRINGS =
+    public static final ImmutableMap<String, HashAlgorithm> VALUES_OF_LOWERCASED_STRINGS =
             stream(values()).collect(toImmutableMap(value -> value.toString().toLowerCase(ROOT), identity()));
 
     /**
-     * Gets the {@link HashSourceExpressionAlgorithm} for the given <code>string</code>.
+     * Gets the {@link HashAlgorithm} for the given <code>string</code>.
      *
      * @param string the case-insensitive {@link #toString()}
      *
-     * @return the {@link HashSourceExpressionAlgorithm}, or <code>null</code> if no mapping exists
+     * @return the {@link HashAlgorithm}, or <code>null</code> if no mapping exists
      */
-    public static @Nullable HashSourceExpressionAlgorithm forString(final String string) {
+    public static @Nullable HashAlgorithm forString(final String string) {
         return VALUES_OF_LOWERCASED_STRINGS.get(string.toLowerCase(ROOT));
     }
 }

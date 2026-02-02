@@ -7,7 +7,7 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sand
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpressionContainer;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpression;
-import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpressionAlgorithm;
+import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashAlgorithm;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.host.HostSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.nonce.NonceSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.predefined.PredefinedSourceExpression;
@@ -162,7 +162,7 @@ public final class ContentSecurityPolicyTest {
                     .addFontSrc(HostSourceExpression.create("https://*.a.com"))
                     .build().toString());
             assertEquals("font-src 'sha512-123' 'nonce-123'", ContentSecurityPolicy.builder()
-                    .addFontSrc(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "123"))
+                    .addFontSrc(HashSourceExpression.create(HashAlgorithm.SHA_512, "123"))
                     .addFontSrc(NonceSourceExpression.create("123"))
                     .build().toString());
         }
@@ -182,7 +182,7 @@ public final class ContentSecurityPolicyTest {
         public void addImgSrc() {
             assertEquals("img-src 'sha256-pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM='",
                     ContentSecurityPolicy.builder()
-                            .addImgSrc(HashSourceExpression.forStringSource(HashSourceExpressionAlgorithm.SHA_256,
+                            .addImgSrc(HashSourceExpression.forStringSource(HashAlgorithm.SHA_256,
                                     "123"))
                             .build().toString());
             assertEquals("img-src 'self' *:", ContentSecurityPolicy.builder()
@@ -238,7 +238,7 @@ public final class ContentSecurityPolicyTest {
         @Test
         public void addScriptSrc() {
             assertEquals("script-src 'sha384-384'", ContentSecurityPolicy.builder()
-                    .addScriptSrc(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_384, "384"))
+                    .addScriptSrc(HashSourceExpression.create(HashAlgorithm.SHA_384, "384"))
                     .build().toString());
             assertEquals("script-src 'unsafe-eval' 'strict-dynamic'", ContentSecurityPolicy.builder()
                     .addScriptSrc(PredefinedSourceExpression.UNSAFE_EVAL)
@@ -293,11 +293,11 @@ public final class ContentSecurityPolicyTest {
         @Test
         public void addStyleSrcAttr() {
             assertEquals("style-src-attr 'sha512-512'", ContentSecurityPolicy.builder()
-                    .addStyleSrcAttr(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "512"))
+                    .addStyleSrcAttr(HashSourceExpression.create(HashAlgorithm.SHA_512, "512"))
                     .build().toString());
             assertEquals("style-src-attr 'sha512-512'", ContentSecurityPolicy.builder()
-                    .addStyleSrcAttr(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "512"))
-                    .addStyleSrcAttr(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "512"))
+                    .addStyleSrcAttr(HashSourceExpression.create(HashAlgorithm.SHA_512, "512"))
+                    .addStyleSrcAttr(HashSourceExpression.create(HashAlgorithm.SHA_512, "512"))
                     .build().toString());
         }
 
@@ -519,7 +519,7 @@ public final class ContentSecurityPolicyTest {
                         .build().getFontSrc());
         assertEquals(ContentSecurityPolicy.parse("font-src 'sha512-123' 'nonce-123'").getFontSrc(),
                 ContentSecurityPolicy.builder()
-                        .addFontSrc(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "123"))
+                        .addFontSrc(HashSourceExpression.create(HashAlgorithm.SHA_512, "123"))
                         .addFontSrc(NonceSourceExpression.create("123"))
                         .build().getFontSrc());
     }
@@ -542,7 +542,7 @@ public final class ContentSecurityPolicyTest {
         assertEquals(ContentSecurityPolicy.parse("img-src 'sha256-pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM='")
                         .getImgSrc(),
                 ContentSecurityPolicy.builder()
-                        .addImgSrc(HashSourceExpression.forStringSource(HashSourceExpressionAlgorithm.SHA_256, "123"))
+                        .addImgSrc(HashSourceExpression.forStringSource(HashAlgorithm.SHA_256, "123"))
                         .build().getImgSrc());
         assertEquals(ContentSecurityPolicy.parse("img-src 'self' *:").getImgSrc(),
                 ContentSecurityPolicy.builder()
@@ -607,7 +607,7 @@ public final class ContentSecurityPolicyTest {
     public void getScriptSrc() {
         assertEquals(ContentSecurityPolicy.parse("script-src 'sha384-384'").getScriptSrc(),
                 ContentSecurityPolicy.builder()
-                        .addScriptSrc(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_384, "384"))
+                        .addScriptSrc(HashSourceExpression.create(HashAlgorithm.SHA_384, "384"))
                         .build().getScriptSrc());
         assertEquals(ContentSecurityPolicy.parse("script-src 'unsafe-eval' 'strict-dynamic'").getScriptSrc(),
                 ContentSecurityPolicy.builder()
@@ -672,12 +672,12 @@ public final class ContentSecurityPolicyTest {
     public void getStyleSrcAttr() {
         assertEquals(ContentSecurityPolicy.parse("style-src-attr 'sha512-512'").getStyleSrcAttr(),
                 ContentSecurityPolicy.builder()
-                        .addStyleSrcAttr(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "512"))
+                        .addStyleSrcAttr(HashSourceExpression.create(HashAlgorithm.SHA_512, "512"))
                         .build().getStyleSrcAttr());
         assertEquals(ContentSecurityPolicy.parse("style-src-attr 'sha512-512'").getStyleSrcAttr(),
                 ContentSecurityPolicy.builder()
-                        .addStyleSrcAttr(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "512"))
-                        .addStyleSrcAttr(HashSourceExpression.create(HashSourceExpressionAlgorithm.SHA_512, "512"))
+                        .addStyleSrcAttr(HashSourceExpression.create(HashAlgorithm.SHA_512, "512"))
+                        .addStyleSrcAttr(HashSourceExpression.create(HashAlgorithm.SHA_512, "512"))
                         .build().getStyleSrcAttr());
     }
 

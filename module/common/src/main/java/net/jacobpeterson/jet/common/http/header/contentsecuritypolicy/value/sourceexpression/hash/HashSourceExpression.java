@@ -53,7 +53,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  * @see
  * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy#hash_algorithm-hash_value">
  * developer.mozilla.org</a>
- * @see HashSourceExpressionAlgorithm
+ * @see HashAlgorithm
  */
 @NullMarked
 @Immutable
@@ -61,20 +61,18 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 public final class HashSourceExpression implements SourceExpression {
 
     /**
-     * @return {@link #create(HashSourceExpressionAlgorithm, String)} with
-     * {@link HashSourceExpressionAlgorithm#hashBytes(byte[])}
+     * @return {@link #create(HashAlgorithm, String)} with
+     * {@link HashAlgorithm#hashBytes(byte[])}
      */
-    public static HashSourceExpression forBytesSource(final HashSourceExpressionAlgorithm algorithm,
-            final byte[] bytes) {
+    public static HashSourceExpression forBytesSource(final HashAlgorithm algorithm, final byte[] bytes) {
         return create(algorithm, algorithm.hashBytes(bytes));
     }
 
     /**
-     * @return {@link #create(HashSourceExpressionAlgorithm, String)} with
-     * {@link HashSourceExpressionAlgorithm#hashString(String)}
+     * @return {@link #create(HashAlgorithm, String)} with
+     * {@link HashAlgorithm#hashString(String)}
      */
-    public static HashSourceExpression forStringSource(final HashSourceExpressionAlgorithm algorithm,
-            final String string) {
+    public static HashSourceExpression forStringSource(final HashAlgorithm algorithm, final String string) {
         return create(algorithm, algorithm.hashString(string));
     }
 
@@ -86,11 +84,11 @@ public final class HashSourceExpression implements SourceExpression {
      *
      * @return the {@link HashSourceExpression}
      */
-    public static HashSourceExpression create(final HashSourceExpressionAlgorithm algorithm, final String hash) {
+    public static HashSourceExpression create(final HashAlgorithm algorithm, final String hash) {
         return new HashSourceExpression(algorithm, hash);
     }
 
-    private final @Getter HashSourceExpressionAlgorithm algorithm;
+    private final @Getter HashAlgorithm algorithm;
     /** The Base64-encoded hash {@link String} (without {@link #getPrefix()}). */
     private final @Getter String hash;
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;

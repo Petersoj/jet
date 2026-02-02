@@ -9,7 +9,7 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sour
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
-import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpressionAlgorithm.SHA_256;
+import static net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashAlgorithm.SHA_256;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

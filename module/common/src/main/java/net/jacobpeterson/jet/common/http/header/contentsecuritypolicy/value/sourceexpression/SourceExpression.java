@@ -3,7 +3,7 @@ package net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sou
 import com.google.errorprone.annotations.Immutable;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSecurityPolicy;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpression;
-import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpressionAlgorithm;
+import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashAlgorithm;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.host.HostSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.nonce.NonceSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.predefined.PredefinedSourceExpression;
@@ -43,7 +43,7 @@ public interface SourceExpression {
             }
             final var hyphenIndex = unquoted.indexOf('-');
             checkArgument(hyphenIndex != -1, "Invalid source expression: %s", sourceExpression);
-            final var hashAlgorithm = HashSourceExpressionAlgorithm.forString(unquoted.substring(0, hyphenIndex));
+            final var hashAlgorithm = HashAlgorithm.forString(unquoted.substring(0, hyphenIndex));
             checkArgument(hashAlgorithm != null, "Invalid source expression: %s", sourceExpression);
             return HashSourceExpression.create(hashAlgorithm, unquoted.substring(hyphenIndex + 1));
         }
