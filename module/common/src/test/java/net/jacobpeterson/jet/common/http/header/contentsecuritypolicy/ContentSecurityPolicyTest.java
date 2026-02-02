@@ -6,8 +6,8 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.requ
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sandbox.SandboxFlag;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.SourceExpressionContainer;
-import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashAlgorithm;
+import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.hash.HashSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.host.HostSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.nonce.NonceSourceExpression;
 import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.sourceexpression.predefined.PredefinedSourceExpression;
@@ -63,11 +63,11 @@ public final class ContentSecurityPolicyTest {
                 ContentSecurityPolicy.builder(ImmutableSetMultimap.of("a", "")).build().getDirectives());
         assertEquals(ImmutableSetMultimap.of("a", "a"),
                 ContentSecurityPolicy.builder(ImmutableSetMultimap.of("a", "a")).build().getDirectives());
-        assertEquals(ImmutableSetMultimap.of("a", "a", "a", "b"),
-                ContentSecurityPolicy.builder(ImmutableSetMultimap.of("a", "a", "a", "b")).build().getDirectives());
+        assertEquals(ImmutableSetMultimap.of("a", "A", "a", "b"),
+                ContentSecurityPolicy.builder(ImmutableSetMultimap.of("A", "A", "a", "b")).build().getDirectives());
 
         assertEquals("", ContentSecurityPolicy.builder(ImmutableSetMultimap.of("", "", "", "")).build().toString());
-        assertEquals("a", ContentSecurityPolicy.builder(ImmutableSetMultimap.of("a", "")).build().toString());
+        assertEquals("a", ContentSecurityPolicy.builder(ImmutableSetMultimap.of("A", "")).build().toString());
     }
 
     public static final class BuilderTest {

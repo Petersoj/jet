@@ -21,6 +21,7 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.value.trus
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -112,6 +113,7 @@ public final class ContentSecurityPolicy {
     public static ContentSecurityPolicy parse(final String contentSecurityPolicy) {
         return new ContentSecurityPolicy(PARSE_DIRECTIVE_SPLITTER.splitToStream(contentSecurityPolicy)
                 .map(PARSE_DIRECTIVE_VALUES_SPLITTER::splitToList)
+                .filter(not(List::isEmpty))
                 .collect(flatteningToImmutableSetMultimap(strings -> strings.getFirst().toLowerCase(ROOT),
                         keyValue -> keyValue.size() == 1 ? Stream.of("") :
                                 keyValue.subList(1, keyValue.size()).stream())));
@@ -151,7 +153,7 @@ public final class ContentSecurityPolicy {
                     .linkedHashSetValues()
                     .build();
             if (existingDirectives != null) {
-                existingDirectives.entries().forEach(entry -> putDirectiveValue(entry.getKey(), entry.getValue()));
+                existingDirectives.forEach(this::putDirectiveValue);
             }
         }
 
