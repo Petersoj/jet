@@ -302,6 +302,7 @@ public final class ResponseCacheControl {
          *
          * @see #isPrivate()
          */
+        @SuppressWarnings("IdentifierName")
         public Builder _private() {
             return putDirectiveValueless(PRIVATE);
         }
@@ -312,6 +313,7 @@ public final class ResponseCacheControl {
          *
          * @see #isPublic()
          */
+        @SuppressWarnings("IdentifierName")
         public Builder _public() {
             return putDirectiveValueless(PUBLIC);
         }
@@ -388,8 +390,8 @@ public final class ResponseCacheControl {
     private @LazyInit @Nullable Boolean mustRevalidate;
     private @LazyInit @Nullable Boolean proxyRevalidate;
     private @LazyInit @Nullable Boolean noStore;
-    private @LazyInit @Nullable Boolean _private;
-    private @LazyInit @Nullable Boolean _public;
+    private @LazyInit @SuppressWarnings("IdentifierName") @Nullable Boolean _private;
+    private @LazyInit @SuppressWarnings("IdentifierName") @Nullable Boolean _public;
     private @LazyInit @Nullable Boolean mustUnderstand;
     private @LazyInit @Nullable Boolean noTransform;
     private @LazyInit @Nullable Boolean immutable;
