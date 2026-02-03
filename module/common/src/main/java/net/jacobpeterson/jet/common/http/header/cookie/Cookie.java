@@ -482,15 +482,8 @@ public final class Cookie {
     public @Nullable Long getMaxAge() {
         if (maxAge == null) {
             final var maxAge = getAttribute(MAX_AGE);
-            if (maxAge == null) {
-                this.maxAge = Optional.empty();
-            } else {
-                try {
-                    this.maxAge = Optional.of(parseLong(maxAge));
-                } catch (final NumberFormatException numberFormatException) {
-                    throw new IllegalStateException(); // `HttpCookie` always checks if `max-age` string is a number
-                }
-            }
+            this.maxAge = maxAge == null ? Optional.empty() :
+                    Optional.of(parseLong(maxAge)); // `HttpCookie` always checks if `max-age` string is a number
         }
         return maxAge.orElse(null);
     }
