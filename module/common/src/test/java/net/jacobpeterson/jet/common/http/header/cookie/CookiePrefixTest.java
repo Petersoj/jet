@@ -20,6 +20,8 @@ public final class CookiePrefixTest {
     @Test
     public void fromCookieName() {
         assertEquals(CookiePrefix.HOST_HTTP, CookiePrefix.fromCookieName("__Host-Http-a"));
+        assertEquals(CookiePrefix.HTTP, CookiePrefix.fromCookieName("__HTTP-a"));
+        assertEquals(CookiePrefix.HOST, CookiePrefix.fromCookieName("__host-a"));
         assertNull(CookiePrefix.fromCookieName("a"));
         assertNull(CookiePrefix.fromCookieName("__a"));
     }

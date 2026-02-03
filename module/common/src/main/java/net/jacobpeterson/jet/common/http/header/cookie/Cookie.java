@@ -110,8 +110,10 @@ public final class Cookie {
         final var cookies = ImmutableList.<Cookie>builder();
         for (final var cookieSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(requestCookies)) {
             final var nameValueSplit = PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER.splitToList(cookieSplit);
-            cookies.add(builder(nameValueSplit.getFirst(),
-                    nameValueSplit.size() == 1 ? "" : nameValueSplit.get(1)).build());
+            cookies.add(builder()
+                    .name(nameValueSplit.getFirst())
+                    .value(nameValueSplit.size() == 1 ? "" : nameValueSplit.get(1))
+                    .build());
         }
         return cookies.build();
     }
@@ -168,44 +170,76 @@ public final class Cookie {
     }
 
     /**
-     * @return {@link #builder(String, String)} with the concatenation of {@link CookiePrefix#toString()} and the given
-     * <code>name</code>
-     */
-    public static Builder builder(final CookiePrefix prefix, final String name, final String value) {
-        return builder(prefix + name, value);
-    }
-
-    /**
-     * Creates a {@link Cookie} {@link Builder}.
-     * <p>
-     * Use {@link Url#encode(String)}/{@link Url#decode(String)} to encode/decode
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie-namecookie-value">
-     * illegal cookie characters</a>.
-     *
-     * @param name  the name
-     * @param value the value
+     * Creates a {@link Builder}.
      *
      * @return the {@link Builder}
      */
-    public static Builder builder(final String name, final String value) {
-        return new Builder(HttpCookie.build(name, value));
+    public static Builder builder() {
+        return new Builder(null);
     }
 
     /**
      * {@link Builder} is a builder class for {@link Cookie}.
      *
-     * @see #builder(CookiePrefix, String, String)
-     * @see #builder(String, String)
+     * @see #builder()
      */
-    @RequiredArgsConstructor(access = PRIVATE)
     public static final class Builder {
 
-        private final HttpCookie.Builder httpCookieBuilder;
+        private HttpCookie.@Nullable Builder httpCookieBuilder;
+        private @Nullable String name;
+
+        private Builder(final HttpCookie.@Nullable Builder httpCookieBuilder) {
+            this.httpCookieBuilder = httpCookieBuilder;
+        }
+
+        private void requireHttpCookieBuilder(final boolean require) {
+            checkArgument(require == (httpCookieBuilder != null), "`Cookie.Builder` `name()` and `value()` methods %s",
+                    (require ? "must be called first" : "can only be called once"));
+        }
+
+        /**
+         * Calls {@link #name(String)} with the concatenation of {@link CookiePrefix#toString()} and the given
+         * <code>name</code>.
+         */
+        public Builder name(final CookiePrefix prefix, final String name) {
+            return name(prefix + name);
+        }
+
+        /**
+         * Use {@link Url#encode(String)}/{@link Url#decode(String)} to encode/decode
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie-namecookie-value">
+         * illegal cookie characters</a>
+         * <p>
+         * Note: the {@link #value(String)} method must be called directly after this method is called.
+         *
+         * @see #getName()
+         */
+        public Builder name(final String name) {
+            requireHttpCookieBuilder(false);
+            this.name = name;
+            return this;
+        }
+
+        /**
+         * Use {@link Url#encode(String)}/{@link Url#decode(String)} to encode/decode
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#cookie-namecookie-value">
+         * illegal cookie characters</a>
+         * <p>
+         * Note: the {@link #name(String)} method must be called directly before this method is called.
+         *
+         * @see #getValue()
+         */
+        public Builder value(final String value) {
+            requireHttpCookieBuilder(false);
+            checkArgument(name != null, "`name()` must be called before `value()`");
+            httpCookieBuilder = HttpCookie.build(name, value);
+            return this;
+        }
 
         /**
          * Calls {@link Map#forEach(BiConsumer)} with {@link #attribute(String, String)}.
          *
-         * @see Cookie#getAttributes()
+         * @see #getAttributes()
          */
         public Builder attributes(final Map<String, String> attributes) {
             attributes.forEach(this::attribute);
@@ -216,32 +250,38 @@ public final class Cookie {
          * Calls {@link #attribute(String, String)} with <code>name</code> set to the given
          * {@link CookieAttribute#toString()}.
          *
-         * @see Cookie#getAttribute(CookieAttribute)
+         * @see #getAttribute(CookieAttribute)
          */
         public Builder attribute(final CookieAttribute attribute, final String value) {
             return attribute(attribute.toString(), value);
         }
 
         /**
-         * @see Cookie#getAttribute(String)
+         * @see #getAttribute(String)
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder attribute(final String name, final String value) {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.attribute(name, requireNonNull(value));
             return this;
         }
 
         /**
-         * @see Cookie#getDomain()
+         * @see #getDomain()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder domain(final String domain) {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.domain(requireNonNull(domain));
             return this;
         }
 
         /**
-         * @see Cookie#isHttpOnly()
+         * @see #isHttpOnly()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder httpOnly() {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.httpOnly(true);
             return this;
         }
@@ -256,25 +296,31 @@ public final class Cookie {
         /**
          * @param maxAge giving a value less than zero will set this to zero and expire the cookie immediately
          *
-         * @see Cookie#getMaxAge()
+         * @see #getMaxAge()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder maxAge(final long maxAge) {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.maxAge(max(0, maxAge));
             return this;
         }
 
         /**
-         * @see Cookie#getPath()
+         * @see #getPath()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder path(final String path) {
-            httpCookieBuilder.path(requireNonNull(path));
+            requireHttpCookieBuilder(true);
+            httpCookieBuilder.path(requireNonNull(path)); // `requireNonNull()` prevents path resetting
             return this;
         }
 
         /**
-         * @see Cookie#getSameSite()
+         * @see #getSameSite()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder sameSite(final CookieSameSite cookieSameSite) {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.sameSite(switch (cookieSameSite) {
                 case STRICT -> HttpCookie.SameSite.STRICT;
                 case LAX -> HttpCookie.SameSite.LAX;
@@ -284,17 +330,21 @@ public final class Cookie {
         }
 
         /**
-         * @see Cookie#isSecure()
+         * @see #isSecure()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder secure() {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.secure(true);
             return this;
         }
 
         /**
-         * @see Cookie#isPartitioned()
+         * @see #isPartitioned()
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder partitioned() {
+            requireHttpCookieBuilder(true);
             httpCookieBuilder.partitioned(true);
             return this;
         }
@@ -304,7 +354,9 @@ public final class Cookie {
          *
          * @return the built {@link Cookie}
          */
+        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Cookie build() {
+            requireHttpCookieBuilder(true);
             return new Cookie(httpCookieBuilder.build());
         }
     }
@@ -324,7 +376,7 @@ public final class Cookie {
     private @LazyInit @Nullable String responseString;
 
     /**
-     * @return the name
+     * @return the cookie name
      */
     @EqualsAndHashCode.Include
     public String getName() {
@@ -342,7 +394,7 @@ public final class Cookie {
     }
 
     /**
-     * @return the value
+     * @return the cookie value
      */
     @EqualsAndHashCode.Include
     public String getValue() {
@@ -350,7 +402,7 @@ public final class Cookie {
     }
 
     /**
-     * @return the attributes {@link Map}
+     * @return the cookie attributes {@link Map}
      */
     @EqualsAndHashCode.Include
     public Map<String, String> getAttributes() {
