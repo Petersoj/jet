@@ -129,7 +129,7 @@ public final class ResponseCacheControl {
     public static final ResponseCacheControl MAX_AGE_1_YEAR_IMMUTABLE_PUBLIC = builder()
             .maxAge(SECONDS_IN_ONE_YEAR)
             .immutable()
-            ._public()
+            .public_()
             .build();
 
     /**
@@ -139,7 +139,7 @@ public final class ResponseCacheControl {
     public static final ResponseCacheControl MAX_AGE_1_YEAR_IMMUTABLE_PRIVATE = builder()
             .maxAge(SECONDS_IN_ONE_YEAR)
             .immutable()
-            ._private()
+            .private_()
             .build();
 
     /**
@@ -303,7 +303,7 @@ public final class ResponseCacheControl {
          * @see #isPrivate()
          */
         @SuppressWarnings("IdentifierName")
-        public Builder _private() {
+        public Builder private_() {
             return putDirectiveValueless(PRIVATE);
         }
 
@@ -314,7 +314,7 @@ public final class ResponseCacheControl {
          * @see #isPublic()
          */
         @SuppressWarnings("IdentifierName")
-        public Builder _public() {
+        public Builder public_() {
             return putDirectiveValueless(PUBLIC);
         }
 
@@ -390,8 +390,8 @@ public final class ResponseCacheControl {
     private @LazyInit @Nullable Boolean mustRevalidate;
     private @LazyInit @Nullable Boolean proxyRevalidate;
     private @LazyInit @Nullable Boolean noStore;
-    private @LazyInit @SuppressWarnings("IdentifierName") @Nullable Boolean _private;
-    private @LazyInit @SuppressWarnings("IdentifierName") @Nullable Boolean _public;
+    private @LazyInit @SuppressWarnings("IdentifierName") @Nullable Boolean private_;
+    private @LazyInit @SuppressWarnings("IdentifierName") @Nullable Boolean public_;
     private @LazyInit @Nullable Boolean mustUnderstand;
     private @LazyInit @Nullable Boolean noTransform;
     private @LazyInit @Nullable Boolean immutable;
@@ -498,10 +498,10 @@ public final class ResponseCacheControl {
      * {@link ResponseDirectiveKey#PRIVATE}
      */
     public boolean isPrivate() {
-        if (_private == null) {
-            _private = containsKey(PRIVATE);
+        if (private_ == null) {
+            private_ = containsKey(PRIVATE);
         }
-        return _private;
+        return private_;
     }
 
     /**
@@ -509,10 +509,10 @@ public final class ResponseCacheControl {
      * {@link ResponseDirectiveKey#PUBLIC}
      */
     public boolean isPublic() {
-        if (_public == null) {
-            _public = containsKey(PUBLIC);
+        if (public_ == null) {
+            public_ = containsKey(PUBLIC);
         }
-        return _public;
+        return public_;
     }
 
     /**

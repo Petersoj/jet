@@ -139,16 +139,16 @@ public final class ResponseCacheControlTest {
         }
 
         @Test
-        public void _private() {
+        public void private_() {
             assertEquals(ResponseCacheControl.parse("private"), ResponseCacheControl.builder()
-                    ._private()
+                    .private_()
                     .build());
         }
 
         @Test
-        public void _public() {
+        public void public_() {
             assertEquals(ResponseCacheControl.parse("public"), ResponseCacheControl.builder()
-                    ._public()
+                    .public_()
                     .build());
         }
 
@@ -266,7 +266,7 @@ public final class ResponseCacheControlTest {
     public void isPrivate() {
         assertTrue(ResponseCacheControl.parse("private").isPrivate());
         assertTrue(ResponseCacheControl.builder()
-                ._private()
+                .private_()
                 .build().isPrivate());
     }
 
@@ -274,7 +274,7 @@ public final class ResponseCacheControlTest {
     public void isPublic() {
         assertTrue(ResponseCacheControl.parse("public").isPublic());
         assertTrue(ResponseCacheControl.builder()
-                ._public()
+                .public_()
                 .build().isPublic());
     }
 
@@ -323,7 +323,7 @@ public final class ResponseCacheControlTest {
         final var responseCacheControl = ResponseCacheControl.parse("max-age=1, immutable");
         assertEquals(responseCacheControl, responseCacheControl.toBuilder().build());
         assertEquals("max-age=1, immutable, public", responseCacheControl.toBuilder()
-                ._public()
+                .public_()
                 .build().toString());
     }
 
