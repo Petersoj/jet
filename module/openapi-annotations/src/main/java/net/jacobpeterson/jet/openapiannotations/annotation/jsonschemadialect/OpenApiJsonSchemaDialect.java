@@ -1,7 +1,8 @@
 package net.jacobpeterson.jet.openapiannotations.annotation.jsonschemadialect;
 
 import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializerExclude;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Repeatable;
@@ -33,11 +34,12 @@ public @interface OpenApiJsonSchemaDialect {
      * The name of the {@link OpenApiAnnotationsProcessor#DEFAULT_ANNOTATION_GROUP_NAME annotation group} this
      * annotation should be assigned to.
      */
-    @AnnotationJsonSerializerExclude
+    @AnnotationJsonIgnore
     String annotationGroupName() default DEFAULT_ANNOTATION_GROUP_NAME;
 
     /**
      * The {@link OpenApiJsonSchemaDialect} value.
      */
+    @AnnotationMethodIsValue
     String value() default "";
 }

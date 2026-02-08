@@ -1,7 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation.server.variable;
 
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationArrayIsMapKey;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializerExclude;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -25,7 +25,7 @@ public @interface OpenApiServerVariable {
     /**
      * The variable name.
      */
-    @AnnotationJsonSerializerExclude
+    @AnnotationJsonIgnore
     @AnnotationArrayIsMapKey
     String name() default "";
 

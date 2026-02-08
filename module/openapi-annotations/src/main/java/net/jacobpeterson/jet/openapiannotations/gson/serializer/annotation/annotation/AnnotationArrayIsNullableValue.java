@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation;
+package net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation;
 
 import org.jspecify.annotations.NullMarked;
 

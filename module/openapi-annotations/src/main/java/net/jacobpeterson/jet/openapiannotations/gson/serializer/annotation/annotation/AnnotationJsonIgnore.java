@@ -1,5 +1,6 @@
-package net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation;
+package net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation;
 
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializer;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Annotation;
@@ -10,10 +11,10 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link AnnotationJsonSerializerExclude} is an annotation for an {@link Annotation} method to be excluded by
+ * {@link AnnotationJsonIgnore} is an annotation for an {@link Annotation} method to be ignored by
  * {@link AnnotationJsonSerializer}.
  */
 @Target(METHOD)
 @Retention(RUNTIME)
 @NullMarked
-public @interface AnnotationJsonSerializerExclude {}
+public @interface AnnotationJsonIgnore {}

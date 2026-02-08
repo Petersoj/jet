@@ -2,8 +2,8 @@ package net.jacobpeterson.jet.openapiannotations.annotation.server;
 
 import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
 import net.jacobpeterson.jet.openapiannotations.annotation.server.variable.OpenApiServerVariable;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationArrayIsMap;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializerExclude;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Repeatable;
@@ -33,7 +33,7 @@ public @interface OpenApiServer {
      * The name of the {@link OpenApiAnnotationsProcessor#DEFAULT_ANNOTATION_GROUP_NAME annotation group} this
      * annotation should be assigned to.
      */
-    @AnnotationJsonSerializerExclude
+    @AnnotationJsonIgnore
     String annotationGroupName() default DEFAULT_ANNOTATION_GROUP_NAME;
 
     /**
