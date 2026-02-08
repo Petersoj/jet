@@ -4,6 +4,10 @@ plugins {
 
 dependencies {
     api(project(":module:server"))
+
+    implementation("com.google.code.gson:gson:2.13.2")
+
+    testImplementation("io.toolisticon.cute:cute:1.9.0")
 }
 
 publishing {
