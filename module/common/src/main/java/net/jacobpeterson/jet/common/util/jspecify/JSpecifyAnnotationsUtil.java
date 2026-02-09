@@ -1,16 +1,18 @@
 package net.jacobpeterson.jet.common.util.jspecify;
 
 import com.google.common.collect.ImmutableSet;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static java.util.Arrays.stream;
+import static java.util.Collections.disjoint;
 import static java.util.Collections.synchronizedMap;
 
 /**
@@ -20,8 +22,9 @@ import static java.util.Collections.synchronizedMap;
 public class JSpecifyAnnotationsUtil {
 
     /**
-     * A {@link Function} that returns a {@link NullPointerException} for the first entry in the given
-     * {@link ImmutableSet}, and {@link Exception#addSuppressed(Throwable)} used for subsequent entries.
+     * A {@link Function} for {@link #requireNonNullFieldsSet(Object, Function)} that returns a
+     * {@link NullPointerException} for the first entry in the given {@link ImmutableSet}, and
+     * {@link Exception#addSuppressed(Throwable)} used for subsequent entries.
      */
     public static Function<ImmutableSet<Field>, @Nullable RuntimeException> NESTING_NULL_POINTER_EXCEPTION =
             nonNullFieldsUnset -> {
@@ -36,6 +39,40 @@ public class JSpecifyAnnotationsUtil {
                 }
                 return nullPointerException;
             };
+
+    /**
+     * The {@link String} {@link ImmutableSet} of <code>null</code>-able annotation class names from well-known
+     * nullability annotation libraries.
+     *
+     * @see #isFieldNullable(Field)
+     */
+    public static final ImmutableSet<String> NULL_ABLE_ANNOTATION_CLASS_NAMES = ImmutableSet.of("Nullable");
+
+    /**
+     * The {@link String} {@link ImmutableSet} of non-<code>null</code> annotation class names from well-known
+     * nullability annotation libraries.
+     *
+     * @see #isFieldNullable(Field)
+     */
+    public static final ImmutableSet<String> NON_NULL_ANNOTATION_CLASS_NAMES = ImmutableSet.of("NonNull", "NotNull");
+
+    /**
+     * The {@link String} {@link ImmutableSet} of <code>null</code>-marked annotation class names from well-known
+     * nullability annotation libraries.
+     *
+     * @see #isFieldNullable(Field)
+     */
+    public static final ImmutableSet<String> NULL_MARKED_ANNOTATION_CLASS_NAMES = ImmutableSet.of("NullMarked",
+            "NotNullByDefault");
+
+    /**
+     * The {@link String} {@link ImmutableSet} of <code>null</code>-unmarked annotation class names from well-known
+     * nullability annotation libraries.
+     *
+     * @see #isFieldNullable(Field)
+     */
+    public static final ImmutableSet<String> NULL_UNMARKED_ANNOTATION_CLASS_NAMES = ImmutableSet.of("NullUnmarked",
+            "NullByDefault");
 
     private static final Map<Field, Boolean> NULLABILITY_OF_FIELDS = synchronizedMap(new HashMap<>());
 
@@ -66,10 +103,8 @@ public class JSpecifyAnnotationsUtil {
     }
 
     /**
-     * Gets an {@link ImmutableSet} of {@link Field}s that are unset (set to <code>null</code>) and have a
-     * non-<code>null</code> designation from a {@link org.jspecify.annotations} annotation: {@link Nullable} or
-     * {@link NonNull} on the {@link Field}, {@link NullMarked} or {@link NullUnmarked} on the enclosing
-     * {@link Class} or {@link Package}.
+     * Gets an {@link ImmutableSet} of non-{@link #isFieldNullable(Field)} {@link Field}s that are unset (set to
+     * <code>null</code>) in the given {@link Object}.
      *
      * @param object the {@link Object} to inspect
      *
@@ -98,47 +133,56 @@ public class JSpecifyAnnotationsUtil {
     }
 
     /**
-     * Gets the nullability designation from a {@link org.jspecify.annotations} annotation: {@link Nullable} or
-     * {@link NonNull} on the {@link Field}, {@link NullMarked} or {@link NullUnmarked} on the enclosing {@link Class}
-     * or {@link Package}.
+     * Gets the {@link Field} nullability status as designated from a well-known nullability annotation library:
+     * {@link #NULL_ABLE_ANNOTATION_CLASS_NAMES} or {@link #NON_NULL_ANNOTATION_CLASS_NAMES} on the {@link Field},
+     * {@link #NULL_MARKED_ANNOTATION_CLASS_NAMES} or {@link #NULL_UNMARKED_ANNOTATION_CLASS_NAMES} on the enclosing
+     * {@link Class} or {@link Package}.
      *
-     * @param field the {@link Field}
+     * @param field the {@link Field} to inspect
      *
-     * @return internally-cached <code>true</code> if the given {@link Field} is {@link Nullable}, <code>false</code>
-     * otherwise
+     * @return internally-cached <code>true</code> if the given {@link Field} is <code>null</code>-able,
+     * <code>false</code> otherwise
      */
     public static boolean isFieldNullable(final Field field) {
         return NULLABILITY_OF_FIELDS.computeIfAbsent(field, _ -> {
             if (field.getType().isPrimitive() || field.isSynthetic()) {
                 return false;
             }
-            final var annotatedType = field.getAnnotatedType();
-            if (annotatedType.isAnnotationPresent(Nullable.class)) {
+            final var fieldAnnotationClassNames = getAnnotationClassNames(field.getAnnotatedType().getAnnotations());
+            if (!disjoint(fieldAnnotationClassNames, NULL_ABLE_ANNOTATION_CLASS_NAMES)) {
                 return true;
             }
-            if (annotatedType.isAnnotationPresent(NonNull.class)) {
+            if (!disjoint(fieldAnnotationClassNames, NON_NULL_ANNOTATION_CLASS_NAMES)) {
                 return false;
             }
             for (var enclosingClass = field.getDeclaringClass(); enclosingClass != null;
                     enclosingClass = enclosingClass.getEnclosingClass()) {
-                if (enclosingClass.isAnnotationPresent(NullMarked.class)) {
+                final var enclosingClassAnnotationClassNames = getAnnotationClassNames(enclosingClass.getAnnotations());
+                if (!disjoint(enclosingClassAnnotationClassNames, NULL_MARKED_ANNOTATION_CLASS_NAMES)) {
                     return false;
                 }
-                if (enclosingClass.isAnnotationPresent(NullUnmarked.class)) {
+                if (!disjoint(enclosingClassAnnotationClassNames, NULL_UNMARKED_ANNOTATION_CLASS_NAMES)) {
                     return true;
                 }
             }
             final var classPackage = field.getDeclaringClass().getPackage();
             if (classPackage != null) {
-                if (classPackage.isAnnotationPresent(NullMarked.class)) {
+                final var classPackageAnnotationClassNames = getAnnotationClassNames(classPackage.getAnnotations());
+                if (!disjoint(classPackageAnnotationClassNames, NULL_MARKED_ANNOTATION_CLASS_NAMES)) {
                     return false;
                 }
-                if (classPackage.isAnnotationPresent(NullUnmarked.class)) {
+                if (!disjoint(classPackageAnnotationClassNames, NULL_UNMARKED_ANNOTATION_CLASS_NAMES)) {
                     return true;
                 }
             }
             return true;
         });
+    }
+
+    private static ImmutableSet<String> getAnnotationClassNames(final Annotation[] annotations) {
+        return stream(annotations)
+                .map(annotation -> annotation.annotationType().getSimpleName())
+                .collect(toImmutableSet());
     }
 
     private JSpecifyAnnotationsUtil() {}
