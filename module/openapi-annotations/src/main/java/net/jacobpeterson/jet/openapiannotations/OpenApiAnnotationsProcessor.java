@@ -2,7 +2,11 @@ package net.jacobpeterson.jet.openapiannotations;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
 import lombok.Data;
+import net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation.AnnotationsValidationLevel;
+import net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation.OpenApiAnnotationsValidation;
 import net.jacobpeterson.jet.openapiannotations.annotation.externaldoc.OpenApiExternalDoc;
 import net.jacobpeterson.jet.openapiannotations.annotation.externaldoc.OpenApiExternalDocs;
 import net.jacobpeterson.jet.openapiannotations.annotation.info.OpenApiInfo;
@@ -25,8 +29,11 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic.Kind;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,9 +42,13 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.networknt.schema.InputFormat.JSON;
+import static java.nio.file.Files.readString;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.SourceVersion.latestSupported;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
+import static net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation.AnnotationsValidationLevel.ERROR;
+import static net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation.AnnotationsValidationLevel.NONE;
 
 /**
  * {@link OpenApiAnnotationsProcessor} is an {@link AbstractProcessor} for OpenAPI annotations.
@@ -74,6 +85,11 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
         final var specificationAnnotationsOfGroupNames = new HashMap<String, SpecificationAnnotations>();
         final Function<String, SpecificationAnnotations> specificationAnnotationsOfGroupNamesMap = groupName ->
                 specificationAnnotationsOfGroupNames.computeIfAbsent(groupName, _ -> new SpecificationAnnotations());
+        for (final var element : roundEnv.getElementsAnnotatedWith(OpenApiAnnotationsValidation.class)) {
+            final var annotationsValidation = requireNonNull(element.getAnnotation(OpenApiAnnotationsValidation.class));
+            specificationAnnotationsOfGroupNamesMap.apply(annotationsValidation.annotationGroupName())
+                    .setValidationLevel(annotationsValidation.level());
+        }
         for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
                 OpenApiSelf.class, OpenApiSelfs.class, OpenApiSelfs::value).entrySet()) {
             final var openApiSelf = entry.getKey();
@@ -155,12 +171,37 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
                 .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer())
                 .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
                 .create();
+        Schema schema = null;
         for (final var specificationAnnotationsOfGroupName : specificationAnnotationsOfGroupNames.entrySet()) {
             final var groupName = specificationAnnotationsOfGroupName.getKey();
+            final var specificationAnnotations = specificationAnnotationsOfGroupName.getValue();
+            final var openApiJson = gson.toJson(specificationAnnotations);
+            if (specificationAnnotations.getValidationLevel() != NONE) {
+                if (schema == null) {
+                    try {
+                        schema = SchemaRegistry.withDefaultDialectId(null, null)
+                                .getSchema(readString(Paths.get(requireNonNull(
+                                        getClass().getResource("oas-3.2-schema-2025-09-17.json")).toURI())));
+                    } catch (final IOException | URISyntaxException exception) {
+                        throw new RuntimeException(exception);
+                    }
+                }
+                for (final var error : schema.validate(openApiJson, JSON, executionContext -> executionContext
+                        .executionConfig(executionConfig -> executionConfig
+                                .formatAssertionsEnabled(true)
+                                .annotationCollectionEnabled(true)))) {
+                    processingEnv.getMessager().printMessage(switch (specificationAnnotations.getValidationLevel()) {
+                        case WARNING -> Kind.WARNING;
+                        case ERROR -> Kind.ERROR;
+                        default -> throw new IllegalStateException();
+                    }, (!groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "Annotation group \"" + groupName + "\": " :
+                            "") + error.getMessage());
+                }
+            }
             try (final var openApiJsonWriter = processingEnv.getFiler().createResource(CLASS_OUTPUT,
                     getClass().getPackageName(),
                     "openapi%s.json".formatted(!groupName.isEmpty() ? "-" + groupName : "")).openWriter()) {
-                gson.toJson(specificationAnnotationsOfGroupName.getValue(), openApiJsonWriter);
+                openApiJsonWriter.write(openApiJson);
             } catch (final IOException ioException) {
                 throw new RuntimeException(ioException);
             }
@@ -171,8 +212,9 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
     @Data
     private static final class SpecificationAnnotations {
 
-        private final String openapi = OPENAPI_SPECIFICATION_VERSION;
+        private transient AnnotationsValidationLevel validationLevel = ERROR;
         private final @SerializedName("$schema") String schema = OPENAPI_SPECIFICATION_SCHEMA_URL;
+        private final String openapi = OPENAPI_SPECIFICATION_VERSION;
         private @SerializedName("$self") @Nullable OpenApiSelf self;
         private @Nullable OpenApiInfo info;
         private @Nullable OpenApiJsonSchemaDialect jsonSchemaDialect;

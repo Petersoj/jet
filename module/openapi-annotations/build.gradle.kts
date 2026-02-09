@@ -7,6 +7,8 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.13.2")
 
+    implementation("com.networknt:json-schema-validator:3.0.0")
+
     testImplementation("io.toolisticon.cute:cute:1.9.0")
 }
 
