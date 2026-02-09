@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.tag;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.externaldoc;
 
 import org.jspecify.annotations.NullMarked;
 
@@ -10,15 +10,15 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link OpenApiTags} is an annotation for repeated {@link OpenApiTag} annotations.
+ * {@link OpenApiExternalDocs} is an annotation for repeated {@link OpenApiExternalDoc} annotations.
  */
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 @NullMarked
-public @interface OpenApiTags {
+public @interface OpenApiExternalDocs {
 
     /**
-     * The {@link OpenApiTag}s.
+     * The {@link OpenApiExternalDoc}s.
      */
-    OpenApiTag[] value() default {};
+    OpenApiExternalDoc[] value() default {};
 }

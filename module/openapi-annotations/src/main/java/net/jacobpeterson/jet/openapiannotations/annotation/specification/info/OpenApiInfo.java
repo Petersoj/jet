@@ -1,8 +1,8 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.info;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.info;
 
 import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
-import net.jacobpeterson.jet.openapiannotations.annotation.info.contact.OpenApiContact;
-import net.jacobpeterson.jet.openapiannotations.annotation.info.license.OpenApiLicense;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.info.contact.OpenApiContact;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.info.license.OpenApiLicense;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import org.jspecify.annotations.NullMarked;

@@ -1,7 +1,7 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.tag;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.tag;
 
 import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
-import net.jacobpeterson.jet.openapiannotations.annotation.externaldoc.OpenApiExternalDoc;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.externaldoc.OpenApiExternalDoc;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import org.jspecify.annotations.NullMarked;

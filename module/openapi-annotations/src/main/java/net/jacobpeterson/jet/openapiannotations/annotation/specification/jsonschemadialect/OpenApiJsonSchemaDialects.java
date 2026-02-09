@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.info;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.jsonschemadialect;
 
 import org.jspecify.annotations.NullMarked;
 
@@ -10,15 +10,15 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link OpenApiInfos} is an annotation for repeated {@link OpenApiInfo} annotations.
+ * {@link OpenApiJsonSchemaDialects} is an annotation for repeated {@link OpenApiJsonSchemaDialect} annotations.
  */
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 @NullMarked
-public @interface OpenApiInfos {
+public @interface OpenApiJsonSchemaDialects {
 
     /**
-     * The {@link OpenApiInfo}s.
+     * The {@link OpenApiJsonSchemaDialect}s.
      */
-    OpenApiInfo[] value() default {};
+    OpenApiJsonSchemaDialect[] value() default {};
 }

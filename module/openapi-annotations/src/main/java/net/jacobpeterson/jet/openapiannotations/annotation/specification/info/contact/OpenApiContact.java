@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.info.contact;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.info.contact;
 
 import org.jspecify.annotations.NullMarked;
 

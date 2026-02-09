@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.self;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.self;
 
 import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;

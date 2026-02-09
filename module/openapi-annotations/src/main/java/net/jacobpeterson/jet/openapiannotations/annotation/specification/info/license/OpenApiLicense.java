@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.info.license;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.info.license;
 
 import org.jspecify.annotations.NullMarked;
 

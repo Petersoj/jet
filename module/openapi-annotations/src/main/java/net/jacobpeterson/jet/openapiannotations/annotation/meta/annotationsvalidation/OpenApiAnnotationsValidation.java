@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation;
+package net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation;
 
 import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
@@ -11,12 +11,12 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor.DEFAULT_ANNOTATION_GROUP_NAME;
-import static net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation.AnnotationsValidationLevel.ERROR;
+import static net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation.AnnotationsValidationLevel.ERROR;
 
 /**
- * {@link OpenApiAnnotationsValidation} is an annotation to declare the {@link AnnotationsValidationLevel} for OpenAPI
- * annotations, which whether the {@link OpenApiAnnotationsProcessor} validates the OpenAPI specification JSON generated
- * from the OpenAPI annotations.
+ * {@link OpenApiAnnotationsValidation} is an annotation to set the {@link AnnotationsValidationLevel} for the OpenAPI
+ * annotations of an annotation group, which determines if {@link OpenApiAnnotationsProcessor} validates the generated
+ * OpenAPI specification JSON results.
  */
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)

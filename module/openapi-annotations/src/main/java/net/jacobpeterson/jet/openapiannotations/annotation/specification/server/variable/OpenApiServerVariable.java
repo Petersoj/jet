@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.server.variable;
+package net.jacobpeterson.jet.openapiannotations.annotation.specification.server.variable;
 
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;

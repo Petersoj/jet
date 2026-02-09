@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation;
+package net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation;
 
 import org.jspecify.annotations.NullMarked;
 
