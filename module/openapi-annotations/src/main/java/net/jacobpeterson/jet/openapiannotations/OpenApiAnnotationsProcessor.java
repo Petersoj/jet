@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.SourceVersion.latestSupported;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
@@ -71,12 +72,9 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
             final var openApiSelf = entry.getKey();
             final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
                     .apply(openApiSelf.annotationGroupName());
-            if (specificationAnnotations.getSelf() != null) {
-                processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(OpenApiSelf.class.getSimpleName()), entry.getValue());
-            } else {
-                specificationAnnotations.setSelf(openApiSelf);
-            }
+            // `getElementsOfRepeatableAnnotation()` already checks for duplicate `@OpenApiSelf` annotations.
+            checkState(specificationAnnotations.getSelf() == null);
+            specificationAnnotations.setSelf(openApiSelf);
         }
         for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
                 OpenApiInfo.class, OpenApiInfos.class, OpenApiInfos::value).entrySet()) {
@@ -96,12 +94,10 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
             final var openApiJsonSchemaDialect = entry.getKey();
             final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
                     .apply(openApiJsonSchemaDialect.annotationGroupName());
-            if (specificationAnnotations.getJsonSchemaDialect() != null) {
-                processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(OpenApiJsonSchemaDialect.class.getSimpleName()), entry.getValue());
-            } else {
-                specificationAnnotations.setJsonSchemaDialect(openApiJsonSchemaDialect);
-            }
+            // `getElementsOfRepeatableAnnotation()` already checks for duplicate `@OpenApiJsonSchemaDialect`
+            // annotations.
+            checkState(specificationAnnotations.getJsonSchemaDialect() == null);
+            specificationAnnotations.setJsonSchemaDialect(openApiJsonSchemaDialect);
         }
         for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
                 OpenApiServer.class, OpenApiServers.class, OpenApiServers::value).entrySet()) {
