@@ -175,7 +175,13 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
         for (final var specificationAnnotationsOfGroupName : specificationAnnotationsOfGroupNames.entrySet()) {
             final var groupName = specificationAnnotationsOfGroupName.getKey();
             final var specificationAnnotations = specificationAnnotationsOfGroupName.getValue();
-            final var openApiJson = gson.toJson(specificationAnnotations);
+            final String openApiJson;
+            try {
+                openApiJson = gson.toJson(specificationAnnotations);
+            } catch (final Exception exception) {
+                processingEnv.getMessager().printError(exception.toString());
+                continue;
+            }
             if (specificationAnnotations.getValidationLevel() != NONE) {
                 if (schema == null) {
                     try {

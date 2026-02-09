@@ -66,7 +66,7 @@ public @interface OpenApiTag {
     /**
      * Additional external documentation for this tag.
      * <p>
-     * Note: only the first entry in this array is used (see {@link AnnotationArrayIsNullableValue}).
+     * Note: this array must only contain one element (see {@link AnnotationArrayIsNullableValue}).
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#tag-external-docs">spec.openapis.org</a>
      */

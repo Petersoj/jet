@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.stream;
 
 /**
@@ -50,6 +51,10 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 if (length == 0) {
                     value = null;
                 } else if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
+                    checkArgument(length == 1,
+                            "`@%s.%s()` is annotated with `@%s` and the length of the array value is not equal to one",
+                            method.getDeclaringClass().getSimpleName(), method.getName(),
+                            AnnotationArrayIsNullableValue.class.getSimpleName());
                     value = Array.get(value, 0);
                 } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
                     final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())

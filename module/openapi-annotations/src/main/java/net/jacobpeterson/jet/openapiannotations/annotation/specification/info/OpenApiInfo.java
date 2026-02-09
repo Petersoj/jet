@@ -70,7 +70,7 @@ public @interface OpenApiInfo {
     /**
      * The contact information for the exposed API.
      * <p>
-     * Note: only the first entry in this array is used (see {@link AnnotationArrayIsNullableValue}).
+     * Note: this array must only contain one element (see {@link AnnotationArrayIsNullableValue}).
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#info-contact">spec.openapis.org</a>
      */
@@ -80,7 +80,7 @@ public @interface OpenApiInfo {
     /**
      * The license information for the exposed API.
      * <p>
-     * Note: only the first entry in this array is used (see {@link AnnotationArrayIsNullableValue}).
+     * Note: this array must only contain one element (see {@link AnnotationArrayIsNullableValue}).
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#info-license">spec.openapis.org</a>
      */
