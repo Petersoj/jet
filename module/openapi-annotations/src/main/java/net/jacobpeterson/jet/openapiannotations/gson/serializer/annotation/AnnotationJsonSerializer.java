@@ -8,6 +8,7 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializedName;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
 import org.jspecify.annotations.NullMarked;
 
@@ -63,7 +64,13 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                     value = map;
                 }
             }
-            jsonObject.add(method.getName(), context.serialize(value));
+            final String key;
+            if (method.isAnnotationPresent(AnnotationJsonSerializedName.class)) {
+                key = method.getAnnotation(AnnotationJsonSerializedName.class).value();
+            } else {
+                key = method.getName();
+            }
+            jsonObject.add(key, context.serialize(value));
         }
         return jsonObject;
     }

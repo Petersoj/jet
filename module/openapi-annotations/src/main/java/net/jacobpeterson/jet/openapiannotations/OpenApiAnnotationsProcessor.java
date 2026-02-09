@@ -46,6 +46,13 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
 
     /**
+     * The OpenAPI specification schema URL this {@link OpenApiAnnotationsProcessor} uses.
+     *
+     * @see <a href="https://spec.openapis.org/oas/3.2/schema/2025-09-17.html">spec.openapis.org</a>
+     */
+    public static final String OPENAPI_SPECIFICATION_SCHEMA_URL = "https://spec.openapis.org/oas/3.2/schema/2025-09-17";
+
+    /**
      * The OpenAPI specification version this {@link OpenApiAnnotationsProcessor} uses.
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html">spec.openapis.org</a>
@@ -165,6 +172,7 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
     private static final class SpecificationAnnotations {
 
         private final String openapi = OPENAPI_SPECIFICATION_VERSION;
+        private final @SerializedName("$schema") String schema = OPENAPI_SPECIFICATION_SCHEMA_URL;
         private @SerializedName("$self") @Nullable OpenApiSelf self;
         private @Nullable OpenApiInfo info;
         private @Nullable OpenApiJsonSchemaDialect jsonSchemaDialect;
