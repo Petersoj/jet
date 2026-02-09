@@ -1,8 +1,11 @@
 package net.jacobpeterson.jet.openapiannotations.annotation.annotationsvalidation;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * {@link AnnotationsValidationLevel} is an enum for {@link OpenApiAnnotationsValidation#level()}.
  */
+@NullMarked
 public enum AnnotationsValidationLevel {
 
     /**
