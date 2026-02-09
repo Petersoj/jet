@@ -82,52 +82,63 @@ public class JSpecifyAnnotationsUtil {
         final var nonNullFieldsSetToNull = ImmutableSet.<Field>builderWithExpectedSize(0);
         for (var clazz = object.getClass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass()) {
             for (final var field : clazz.getDeclaredFields()) {
-                if (!field.getType().isPrimitive() && !field.isSynthetic() &&
-                        !NULLABILITY_OF_FIELDS.computeIfAbsent(field, JSpecifyAnnotationsUtil::isFieldNullable) &&
-                        isFieldNull(object, field)) {
-                    nonNullFieldsSetToNull.add(field);
+                if (!isFieldNullable(field)) {
+                    field.setAccessible(true);
+                    try {
+                        if (field.get(object) == null) {
+                            nonNullFieldsSetToNull.add(field);
+                        }
+                    } catch (final IllegalAccessException illegalAccessException) {
+                        throw new RuntimeException(illegalAccessException);
+                    }
                 }
             }
         }
         return nonNullFieldsSetToNull.build();
     }
 
-    private static boolean isFieldNullable(final Field field) {
-        final var annotatedType = field.getAnnotatedType();
-        if (annotatedType.isAnnotationPresent(Nullable.class)) {
+    /**
+     * Gets the nullability designation from a {@link org.jspecify.annotations} annotation: {@link Nullable} or
+     * {@link NonNull} on the {@link Field}, {@link NullMarked} or {@link NullUnmarked} on the enclosing {@link Class}
+     * or {@link Package}.
+     *
+     * @param field the {@link Field}
+     *
+     * @return internally-cached <code>true</code> if the given {@link Field} is {@link Nullable}, <code>false</code>
+     * otherwise
+     */
+    public static boolean isFieldNullable(final Field field) {
+        return NULLABILITY_OF_FIELDS.computeIfAbsent(field, _ -> {
+            if (field.getType().isPrimitive() || field.isSynthetic()) {
+                return false;
+            }
+            final var annotatedType = field.getAnnotatedType();
+            if (annotatedType.isAnnotationPresent(Nullable.class)) {
+                return true;
+            }
+            if (annotatedType.isAnnotationPresent(NonNull.class)) {
+                return false;
+            }
+            for (var enclosingClass = field.getDeclaringClass(); enclosingClass != null;
+                    enclosingClass = enclosingClass.getEnclosingClass()) {
+                if (enclosingClass.isAnnotationPresent(NullMarked.class)) {
+                    return false;
+                }
+                if (enclosingClass.isAnnotationPresent(NullUnmarked.class)) {
+                    return true;
+                }
+            }
+            final var classPackage = field.getDeclaringClass().getPackage();
+            if (classPackage != null) {
+                if (classPackage.isAnnotationPresent(NullMarked.class)) {
+                    return false;
+                }
+                if (classPackage.isAnnotationPresent(NullUnmarked.class)) {
+                    return true;
+                }
+            }
             return true;
-        }
-        if (annotatedType.isAnnotationPresent(NonNull.class)) {
-            return false;
-        }
-        for (var enclosingClass = field.getDeclaringClass(); enclosingClass != null;
-                enclosingClass = enclosingClass.getEnclosingClass()) {
-            if (enclosingClass.isAnnotationPresent(NullMarked.class)) {
-                return false;
-            }
-            if (enclosingClass.isAnnotationPresent(NullUnmarked.class)) {
-                return true;
-            }
-        }
-        final var classPackage = field.getDeclaringClass().getPackage();
-        if (classPackage != null) {
-            if (classPackage.isAnnotationPresent(NullMarked.class)) {
-                return false;
-            }
-            if (classPackage.isAnnotationPresent(NullUnmarked.class)) {
-                return true;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isFieldNull(final Object object, final Field field) {
-        field.setAccessible(true);
-        try {
-            return field.get(object) == null;
-        } catch (final IllegalAccessException illegalAccessException) {
-            throw new RuntimeException(illegalAccessException);
-        }
+        });
     }
 
     private JSpecifyAnnotationsUtil() {}
