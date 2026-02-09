@@ -95,7 +95,7 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
             final var openApiSelf = entry.getKey();
             final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
                     .apply(openApiSelf.annotationGroupName());
-            // `getElementsOfRepeatableAnnotation()` already checks for duplicate `@OpenApiSelf` annotations.
+            // `getElementsOfRepeatableAnnotation()` already checks for `@OpenApiSelf` duplicates.
             checkState(specificationAnnotations.getSelf() == null);
             specificationAnnotations.setSelf(openApiSelf);
         }
@@ -117,8 +117,7 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
             final var openApiJsonSchemaDialect = entry.getKey();
             final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
                     .apply(openApiJsonSchemaDialect.annotationGroupName());
-            // `getElementsOfRepeatableAnnotation()` already checks for duplicate `@OpenApiJsonSchemaDialect`
-            // annotations.
+            // `getElementsOfRepeatableAnnotation()` already checks for `@OpenApiJsonSchemaDialect` duplicates.
             checkState(specificationAnnotations.getJsonSchemaDialect() == null);
             specificationAnnotations.setJsonSchemaDialect(openApiJsonSchemaDialect);
         }
@@ -196,12 +195,13 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
                         .executionConfig(executionConfig -> executionConfig
                                 .formatAssertionsEnabled(true)
                                 .annotationCollectionEnabled(true)))) {
-                    processingEnv.getMessager().printMessage(switch (specificationAnnotations.getValidationLevel()) {
-                        case WARNING -> Kind.WARNING;
-                        case ERROR -> Kind.ERROR;
-                        default -> throw new IllegalStateException();
-                    }, (!groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "Annotation group \"" + groupName + "\": " :
-                            "") + error.getMessage());
+                    processingEnv.getMessager().printMessage(
+                            specificationAnnotations.getValidationLevel() == ERROR ? Kind.ERROR : Kind.WARNING,
+                            "OpenAPIv%s schema offense%s: %s".formatted(
+                                    OPENAPI_SPECIFICATION_VERSION,
+                                    !groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ?
+                                            " in annotation group \"" + groupName + "\"" : "",
+                                    error.getMessage()));
                 }
             }
             try (final var openApiJsonWriter = processingEnv.getFiler().createResource(CLASS_OUTPUT,
