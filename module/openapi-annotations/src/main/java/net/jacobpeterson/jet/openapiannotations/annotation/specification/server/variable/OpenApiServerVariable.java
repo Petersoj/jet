@@ -1,8 +1,8 @@
 package net.jacobpeterson.jet.openapiannotations.annotation.specification.server.variable;
 
+import com.google.gson.annotations.SerializedName;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializedName;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -36,7 +36,7 @@ public @interface OpenApiServerVariable {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#server-variable-enum">spec.openapis.org</a>
      */
-    @AnnotationJsonSerializedName("enum")
+    @SerializedName("enum")
     @SuppressWarnings("IdentifierName")
     String[] enum_() default {};
 
@@ -50,7 +50,7 @@ public @interface OpenApiServerVariable {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#server-variable-default">spec.openapis.org</a>
      */
-    @AnnotationJsonSerializedName("default")
+    @SerializedName("default")
     @SuppressWarnings("IdentifierName")
     String default_() default "";
 

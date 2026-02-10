@@ -16,7 +16,7 @@ import static net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcess
 
 /**
  * {@link OpenApiJsonSchemaDialect} is an annotation for the
- * <a href="https://spec.openapis.org/oas/v3.2.0.html#oas-json-schema-dialect">OpenAPI $self</a>.
+ * <a href="https://spec.openapis.org/oas/v3.2.0.html#oas-json-schema-dialect">OpenAPI JSON Schema Dialect</a>.
  * <p>
  * The default value for the <code>$schema</code> keyword within
  * <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-object">Schema Objects</a> contained within this OAS

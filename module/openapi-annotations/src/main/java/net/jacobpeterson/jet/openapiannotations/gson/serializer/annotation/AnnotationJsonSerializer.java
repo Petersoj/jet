@@ -4,12 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.SerializedName;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializedName;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
 import org.jspecify.annotations.NullMarked;
 
@@ -80,8 +80,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 }
             }
             final String key;
-            if (method.isAnnotationPresent(AnnotationJsonSerializedName.class)) {
-                key = method.getAnnotation(AnnotationJsonSerializedName.class).value();
+            if (method.isAnnotationPresent(SerializedName.class)) {
+                key = method.getAnnotation(SerializedName.class).value();
             } else {
                 key = method.getName();
             }
