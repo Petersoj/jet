@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.stream;
 import static java.util.HashMap.newHashMap;
 
@@ -63,10 +62,12 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 if (length == 0) {
                     value = null;
                 } else {
-                    checkArgument(length == 1,
-                            "`@%s.%s()` is annotated with `@%s`, but the array contains more than one element",
-                            method.getDeclaringClass().getSimpleName(), method.getName(),
-                            AnnotationArrayIsNullableValue.class.getSimpleName());
+                    if (length != 1) {
+                        throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array " +
+                                "contains more than one element").formatted(
+                                method.getDeclaringClass().getSimpleName(), method.getName(),
+                                AnnotationArrayIsNullableValue.class.getSimpleName()));
+                    }
                     value = Array.get(value, 0);
                 }
             } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
@@ -80,7 +81,13 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                     final var map = newHashMap(length);
                     for (var index = 0; index < length; index++) {
                         final var entry = Array.get(value, index);
-                        map.put(invokeMethod(keyMethod, entry), entry);
+                        final var key = invokeMethod(keyMethod, entry);
+                        if (map.put(key, entry) != null) {
+                            throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
+                                    method.getDeclaringClass().getSimpleName(), method.getName(),
+                                    method.getReturnType().getComponentType().getSimpleName(), keyMethod.getName(),
+                                    key));
+                        }
                     }
                     value = map;
                 }

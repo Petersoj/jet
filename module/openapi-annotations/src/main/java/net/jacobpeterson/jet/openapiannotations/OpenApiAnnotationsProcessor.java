@@ -90,9 +90,9 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
             if (openApiWrapper.annotationsValidationLevel() != NONE) {
                 if (!openApiWrapper.$schema().equals(DEFAULT_SCHEMA)) {
                     processingEnv.getMessager().printError("""
-                            `@OpenApi.annotationsValidationLevel()` is set to `%s`, but validation for custom \
-                            `@OpenApi.$schema()` of `%s` is unsupported. Set `@OpenApi.annotationsValidationLevel()` \
-                            to `NONE` or remove the custom `@OpenApi.$schema()`"""
+                            `@OpenApi.annotationsValidationLevel` is set to `%s`, but validation for custom \
+                            `@OpenApi.$schema` of `%s` is unsupported. Set `@OpenApi.annotationsValidationLevel` to \
+                            `NONE` or remove the custom `@OpenApi.$schema`"""
                             .formatted(openApiWrapper.annotationsValidationLevel(), openApiWrapper.$schema()));
                 } else {
                     if (schema == null) {

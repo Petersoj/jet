@@ -63,8 +63,14 @@ public final class OpenApiAnnotationsProcessorTest {
 
     @Test
     public void processTopLevelFailCustomScheme() {
-        blackBoxTestFail("toplevel/fail/customschema", "`@OpenApi.annotationsValidationLevel()` is set to `ERROR`, " +
-                "but validation for custom `@OpenApi.$schema()` of `https://a.com` is unsupported");
+        blackBoxTestFail("toplevel/fail/customschema", "`@OpenApi.annotationsValidationLevel` is set to `ERROR`, " +
+                "but validation for custom `@OpenApi.$schema` of `https://a.com` is unsupported");
+    }
+
+    @Test
+    public void processTopLevelFailAnnotationArrayIsMapKey() {
+        blackBoxTestFail("toplevel/fail/annotationarrayismapkey",
+                "`@OpenApiServer.variables` duplicate `@OpenApiServerVariable.name`: duplicate");
     }
 
     @Test
