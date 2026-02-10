@@ -8,6 +8,7 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializedName;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
 import org.jspecify.annotations.NullMarked;
@@ -17,10 +18,11 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.stream;
+import static java.util.HashMap.newHashMap;
 
 /**
  * {@link AnnotationJsonSerializer} is an {@link Annotation} {@link JsonSerializer} that uses reflection to invoke the
@@ -48,25 +50,33 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             var value = invokeMethod(method, src);
             if (method.getReturnType().isArray()) {
                 final var length = Array.getLength(value);
-                if (length == 0) {
-                    value = null;
-                } else if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
-                    checkArgument(length == 1,
-                            "`@%s.%s()` is annotated with `@%s` and the length of the array value is not equal to one",
-                            method.getDeclaringClass().getSimpleName(), method.getName(),
-                            AnnotationArrayIsNullableValue.class.getSimpleName());
-                    value = Array.get(value, 0);
-                } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
-                    final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
-                            .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
-                            .findFirst()
-                            .orElseThrow();
-                    final var map = new HashMap<>();
-                    for (var index = 0; index < length; index++) {
-                        final var entry = Array.get(value, index);
-                        map.put(invokeMethod(keyMethod, entry), entry);
+                if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
+                    if (length == 0) {
+                        value = null;
+                    } else {
+                        checkArgument(length == 1, "`@%s.%s()` is annotated with `@%s` and " +
+                                        "the length of the array value is not equal to one",
+                                method.getDeclaringClass().getSimpleName(), method.getName(),
+                                AnnotationArrayIsNullableValue.class.getSimpleName());
+                        value = Array.get(value, 0);
                     }
-                    value = map;
+                } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
+                    if (length == 0) {
+                        value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? Map.of() : null;
+                    } else {
+                        final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
+                                .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
+                                .findFirst()
+                                .orElseThrow();
+                        final var map = newHashMap(length);
+                        for (var index = 0; index < length; index++) {
+                            final var entry = Array.get(value, index);
+                            map.put(invokeMethod(keyMethod, entry), entry);
+                        }
+                        value = map;
+                    }
+                } else if (length == 0) {
+                    value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? value : null;
                 }
             }
             final String key;
