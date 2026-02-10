@@ -12,6 +12,7 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -27,8 +28,8 @@ import static java.util.HashMap.newHashMap;
 /**
  * {@link AnnotationJsonSerializer} is an {@link Annotation} {@link JsonSerializer} that uses reflection to invoke the
  * {@link Class#getDeclaredMethods()} of the {@link Annotation#annotationType()} and uses reflection to handle
- * {@link AnnotationJsonIgnore}, {@link AnnotationMethodIsValue}, {@link AnnotationArrayIsNullableValue},
- * {@link AnnotationArrayIsMap}, and {@link AnnotationArrayIsMapKey}.
+ * {@link AnnotationJsonIgnore}, {@link AnnotationJsonSerializeEmptyArray}, {@link AnnotationMethodIsValue},
+ * {@link AnnotationArrayIsNullableValue}, {@link AnnotationArrayIsMap}, and {@link AnnotationArrayIsMapKey}.
  */
 @NullMarked
 public final class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
@@ -40,54 +41,54 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 .filter(method -> method.isAnnotationPresent(AnnotationMethodIsValue.class))
                 .findFirst();
         if (methodIsValueMethod.isPresent()) {
-            return context.serialize(invokeMethod(methodIsValueMethod.get(), src));
+            return context.serialize(getMethodValue(src, methodIsValueMethod.get()));
         }
         final var jsonObject = new JsonObject();
         for (final var method : methods) {
-            if (method.isAnnotationPresent(AnnotationJsonIgnore.class)) {
-                continue;
-            }
-            var value = invokeMethod(method, src);
-            if (method.getReturnType().isArray()) {
-                final var length = Array.getLength(value);
-                if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
-                    if (length == 0) {
-                        value = null;
-                    } else {
-                        checkArgument(length == 1, "`@%s.%s()` is annotated with `@%s` and " +
-                                        "the length of the array value is not equal to one",
-                                method.getDeclaringClass().getSimpleName(), method.getName(),
-                                AnnotationArrayIsNullableValue.class.getSimpleName());
-                        value = Array.get(value, 0);
-                    }
-                } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
-                    if (length == 0) {
-                        value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? Map.of() : null;
-                    } else {
-                        final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
-                                .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
-                                .findFirst()
-                                .orElseThrow();
-                        final var map = newHashMap(length);
-                        for (var index = 0; index < length; index++) {
-                            final var entry = Array.get(value, index);
-                            map.put(invokeMethod(keyMethod, entry), entry);
-                        }
-                        value = map;
-                    }
-                } else if (length == 0) {
-                    value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? value : null;
-                }
-            }
-            final String key;
-            if (method.isAnnotationPresent(SerializedName.class)) {
-                key = method.getAnnotation(SerializedName.class).value();
-            } else {
-                key = method.getName();
-            }
-            jsonObject.add(key, context.serialize(value));
+            jsonObject.add(method.isAnnotationPresent(SerializedName.class) ?
+                            method.getAnnotation(SerializedName.class).value() : method.getName(),
+                    context.serialize(getMethodValue(src, method)));
         }
         return jsonObject;
+    }
+
+    private @Nullable Object getMethodValue(final Annotation src, final Method method) {
+        if (method.isAnnotationPresent(AnnotationJsonIgnore.class)) {
+            return null;
+        }
+        var value = invokeMethod(method, src);
+        if (method.getReturnType().isArray()) {
+            final var length = Array.getLength(value);
+            if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
+                if (length == 0) {
+                    value = null;
+                } else {
+                    checkArgument(length == 1,
+                            "`@%s.%s()` is annotated with `@%s`, but the array contains more than one element",
+                            method.getDeclaringClass().getSimpleName(), method.getName(),
+                            AnnotationArrayIsNullableValue.class.getSimpleName());
+                    value = Array.get(value, 0);
+                }
+            } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
+                if (length == 0) {
+                    value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? Map.of() : null;
+                } else {
+                    final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
+                            .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
+                            .findFirst()
+                            .orElseThrow();
+                    final var map = newHashMap(length);
+                    for (var index = 0; index < length; index++) {
+                        final var entry = Array.get(value, index);
+                        map.put(invokeMethod(keyMethod, entry), entry);
+                    }
+                    value = map;
+                }
+            } else if (length == 0) {
+                value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? value : null;
+            }
+        }
+        return value;
     }
 
     private Object invokeMethod(final Method method, final Object object) {
