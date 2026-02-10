@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import io.toolisticon.cute.Cute;
 import io.toolisticon.cute.CuteApi.BlackBoxTestOutcomeInterface;
-import io.toolisticon.cute.CuteApi.CompilerTestExpectAndThatInterface;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +13,8 @@ import java.net.URISyntaxException;
 
 import static java.nio.file.Files.readString;
 import static java.util.Objects.requireNonNull;
+import static javax.tools.StandardLocation.CLASS_OUTPUT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @NullMarked
 public final class OpenApiAnnotationsProcessorTest {
@@ -21,114 +22,60 @@ public final class OpenApiAnnotationsProcessorTest {
     private static final Gson GSON = new GsonBuilder().create();
 
     @Test
-    public void processMetaAnnotationsValidationSuccessNone() {
-        blackBoxTestSuccess("meta/annotationsvalidation/success/none/");
+    public void processValidationLevelSuccessNone() {
+        blackBoxTestSuccess("validationlevel/success/none/");
     }
 
     @Test
-    public void processMetaAnnotationsValidationSuccessWarning() {
-        blackBoxTestSuccess("meta/annotationsvalidation/success/warning/");
+    public void processValidationLevelSuccessWarning() {
+        blackBoxTestSuccess("validationlevel/success/warning/");
     }
 
     @Test
-    public void processMetaAnnotationsValidationFail() {
-        blackBoxTestFail("meta/annotationsvalidation/fail/", "required property 'info' not found");
+    public void processValidationLevelFail() {
+        blackBoxTestFail("validationlevel/fail/", "required property 'info' not found");
     }
 
     @Test
-    public void processSpecificationSelfSuccess() {
-        blackBoxTestSuccess("specification/self/success/");
+    public void processTopLevelSuccessRequired() {
+        blackBoxTestSuccess("toplevel/success/required/");
     }
 
     @Test
-    public void processSpecificationSelfFailDuplicate() {
-        blackBoxTestFail("specification/self/fail/duplicate/", "Duplicate");
+    public void processTopLevelSuccessMultiple() {
+        blackBoxTestSuccess("toplevel/success/multiple/");
     }
 
     @Test
-    public void processSpecificationInfoSuccessSimple() {
-        blackBoxTestSuccess("specification/info/success/simple/");
+    public void processTopLevelFailDuplicateAnnotation() {
+        blackBoxTestFail("toplevel/fail/duplicateannotation", "Duplicate");
     }
 
     @Test
-    public void processSpecificationInfoSuccessWithContact() {
-        blackBoxTestSuccess("specification/info/success/withcontact/");
+    public void processTopLevelFailDuplicateAnnotations() {
+        blackBoxTestFail("toplevel/fail/duplicateannotations", "Duplicate");
     }
 
     @Test
-    public void processSpecificationInfoFailDuplicate() {
-        blackBoxTestFail("specification/info/fail/duplicate/", "Duplicate");
+    public void processTopLevelFailDuplicateAnnotationGroupName() {
+        blackBoxTestFail("toplevel/fail/duplicateannotationgroupname", "Duplicate");
     }
 
     @Test
-    public void processSpecificationInfoFailDuplicateSingleEmpty() {
-        blackBoxTestFail("specification/info/fail/duplicatesingleempty/", "Duplicate");
+    public void processTopLevelFailCustomScheme() {
+        blackBoxTestFail("toplevel/fail/customschema", "`@OpenApi.annotationsValidationLevel()` is set to `ERROR`, " +
+                "but validation for custom `@OpenApi.$schema()` of `https://a.com` is unsupported");
     }
 
     @Test
-    public void processSpecificationInfoFailDuplicateMultipleEmpty() {
-        blackBoxTestFail("specification/info/fail/duplicatemultipleempty/", "Duplicate");
+    public void processTopLevelFailAnnotationArrayIsNullableValue() {
+        blackBoxTestFail("toplevel/fail/annotationarrayisnullablevalue",
+                "but the array contains more than one element");
     }
 
     @Test
-    public void processSpecificationJsonSchemaDialectSuccess() {
-        blackBoxTestSuccess("specification/jsonschemadialect/success/");
-    }
-
-    @Test
-    public void processSpecificationJsonSchemaDialectFailDuplicate() {
-        blackBoxTestFail("specification/jsonschemadialect/fail/duplicate/", "Duplicate");
-    }
-
-    @Test
-    public void processSpecificationExternalDocSuccess() {
-        blackBoxTestSuccess("specification/externalDoc/success/");
-    }
-
-    @Test
-    public void processSpecificationExternalDocFailDuplicate() {
-        blackBoxTestFail("specification/externalDoc/fail/duplicate/", "Duplicate");
-    }
-
-    @Test
-    public void processSpecificationServerSuccessSimple() {
-        blackBoxTestSuccess("specification/server/success/simple/");
-    }
-
-    @Test
-    public void processSpecificationServerSuccessWithVariables() {
-        blackBoxTestSuccess("specification/server/success/withvariables/");
-    }
-
-    @Test
-    public void processSpecificationServerFailDuplicateName() {
-        blackBoxTestFail("specification/server/fail/duplicatename/", "Duplicate");
-    }
-
-    @Test
-    public void processSpecificationServerFailDuplicateUrl() {
-        blackBoxTestFail("specification/server/fail/duplicateurl/", "Duplicate");
-    }
-
-    @Test
-    public void processSpecificationTagSuccessSimple() {
-        blackBoxTestSuccess("specification/tag/success/simple/");
-    }
-
-    @Test
-    public void processSpecificationTagSuccessWithExternalDoc() {
-        blackBoxTestSuccess("specification/tag/success/withexternaldoc/");
-    }
-
-    @Test
-    public void processSpecificationTagFailDuplicate() {
-        blackBoxTestFail("specification/tag/fail/duplicate/", "Duplicate");
-    }
-
-    @Test
-    public void processSpecificationTagFailAnnotationArrayIsNullableValue() {
-        blackBoxTestFail("specification/tag/fail/annotationarrayisnullablevalue/",
-                "the length of the array value is not equal to one");
+    public void processTopLevelFailValidationOpenApiVersion() {
+        blackBoxTestFail("toplevel/fail/validationopenapiversion", "/openapi: does not match the regex pattern");
     }
 
     private void blackBoxTestSuccess(final String relativeTestDirectoryPath) {
@@ -140,18 +87,24 @@ public final class OpenApiAnnotationsProcessorTest {
         } catch (final URISyntaxException uriSyntaxException) {
             throw new RuntimeException(uriSyntaxException);
         }
-        CompilerTestExpectAndThatInterface andThat = null;
-        for (final var resultFile : requireNonNull(new File(relativeTestDirectory, "results/").listFiles())) {
-            if (!resultFile.getName().endsWith(".json")) {
+        var andThat = compilationSucceeds;
+        var outputFileCount = 0;
+        for (final var outputFile : requireNonNull(new File(relativeTestDirectory, "outputs/").listFiles())) {
+            if (!outputFile.getName().endsWith(".json")) {
                 continue;
             }
-            andThat = (andThat == null ? compilationSucceeds : andThat)
-                    .andThat()
-                    .generatedResourceFile(getClass().getPackageName(), resultFile.getName())
+            andThat = andThat.andThat()
+                    .generatedResourceFile(getClass().getPackageName(), outputFile.getName())
                     .matches(fileObject -> GSON.fromJson(fileObject.getCharContent(false).toString(), JsonElement.class)
-                            .equals(GSON.fromJson(readString(resultFile.toPath()), JsonElement.class)));
+                            .equals(GSON.fromJson(readString(outputFile.toPath()), JsonElement.class)));
+            outputFileCount++;
         }
-        (andThat == null ? compilationSucceeds : andThat).executeTest();
+        final var fOutputFileCount = outputFileCount;
+        andThat.executeTest()
+                .executeCustomAssertions(compilationOutcome -> assertEquals(fOutputFileCount,
+                        compilationOutcome.getFileManager().getFileObjects().stream()
+                                .filter(fileObject -> fileObject.getLocation() == CLASS_OUTPUT)
+                                .count()));
     }
 
     private void blackBoxTestFail(final String relativeTestDirectoryPath, final String errorMessagesContain) {
