@@ -18,9 +18,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#server-variable-object">spec.openapis.org</a>
  */
+@NullMarked
 @Target({})
 @Retention(RUNTIME)
-@NullMarked
 public @interface OpenApiServerVariable {
 
     /**

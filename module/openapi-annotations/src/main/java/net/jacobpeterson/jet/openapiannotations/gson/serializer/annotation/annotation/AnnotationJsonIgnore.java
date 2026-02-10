@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@link AnnotationJsonIgnore} is an annotation for an {@link Annotation} method to be ignored by
  * {@link AnnotationJsonSerializer}, effectively equivalent to the <code>transient</code> modifier.
  */
+@NullMarked
 @Target(METHOD)
 @Retention(RUNTIME)
-@NullMarked
 public @interface AnnotationJsonIgnore {}

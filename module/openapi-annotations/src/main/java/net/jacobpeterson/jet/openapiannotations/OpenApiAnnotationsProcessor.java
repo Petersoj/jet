@@ -1,28 +1,23 @@
 package net.jacobpeterson.jet.openapiannotations;
 
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
-import lombok.Data;
-import net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation.AnnotationsValidationLevel;
-import net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation.OpenApiAnnotationsValidation;
+import lombok.Value;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApis;
+import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationsValidationLevel;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.component.OpenApiComponents;
 import net.jacobpeterson.jet.openapiannotations.annotation.specification.externaldoc.OpenApiExternalDoc;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.externaldoc.OpenApiExternalDocs;
 import net.jacobpeterson.jet.openapiannotations.annotation.specification.info.OpenApiInfo;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.info.OpenApiInfos;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.jsonschemadialect.OpenApiJsonSchemaDialect;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.jsonschemadialect.OpenApiJsonSchemaDialects;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.self.OpenApiSelf;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.self.OpenApiSelfs;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.path.OpenApiPath;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.securityrequirement.OpenApiSecurityRequirements;
 import net.jacobpeterson.jet.openapiannotations.annotation.specification.server.OpenApiServer;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.server.OpenApiServers;
 import net.jacobpeterson.jet.openapiannotations.annotation.specification.tag.OpenApiTag;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.tag.OpenApiTags;
+import net.jacobpeterson.jet.openapiannotations.annotation.specification.webhook.OpenApiWebhook;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.string.EmptyStringIsNullJsonSerializer;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -41,14 +36,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.networknt.schema.InputFormat.JSON;
 import static java.nio.file.Files.readString;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.SourceVersion.latestSupported;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
-import static net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation.AnnotationsValidationLevel.ERROR;
-import static net.jacobpeterson.jet.openapiannotations.annotation.meta.annotationsvalidation.AnnotationsValidationLevel.NONE;
+import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
+import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
+import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_SCHEMA;
+import static net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationsValidationLevel.ERROR;
+import static net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationsValidationLevel.NONE;
 
 /**
  * {@link OpenApiAnnotationsProcessor} is an {@link AbstractProcessor} for OpenAPI annotations.
@@ -56,152 +53,68 @@ import static net.jacobpeterson.jet.openapiannotations.annotation.meta.annotatio
 @NullMarked
 public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
 
-    /**
-     * The OpenAPI specification schema URL this {@link OpenApiAnnotationsProcessor} uses.
-     *
-     * @see <a href="https://spec.openapis.org/oas/3.2/schema/2025-09-17.html">spec.openapis.org</a>
-     */
-    public static final String OPENAPI_SPECIFICATION_SCHEMA_URL = "https://spec.openapis.org/oas/3.2/schema/2025-09-17";
-
-    /**
-     * The OpenAPI specification version this {@link OpenApiAnnotationsProcessor} uses.
-     *
-     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html">spec.openapis.org</a>
-     */
-    public static final String OPENAPI_SPECIFICATION_VERSION = "3.2.0";
-
-    /**
-     * OpenAPI annotations can be grouped into different specification outputs according to their <em>annotation group
-     * name</em>. This {@link String} constant acts as a reference for the default annotation group, which is just an
-     * empty {@link String}.
-     */
-    public static final String DEFAULT_ANNOTATION_GROUP_NAME = "";
-
     @Override
     public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {
             return false;
         }
-        final var specificationAnnotationsOfGroupNames = new HashMap<String, SpecificationAnnotations>();
-        final Function<String, SpecificationAnnotations> specificationAnnotationsOfGroupNamesMap = groupName ->
-                specificationAnnotationsOfGroupNames.computeIfAbsent(groupName, _ -> new SpecificationAnnotations());
-        for (final var element : roundEnv.getElementsAnnotatedWith(OpenApiAnnotationsValidation.class)) {
-            final var annotationsValidation = requireNonNull(element.getAnnotation(OpenApiAnnotationsValidation.class));
-            specificationAnnotationsOfGroupNamesMap.apply(annotationsValidation.annotationGroupName())
-                    .setValidationLevel(annotationsValidation.level());
-        }
+        final var openApiWrappersOfGroupNames = new HashMap<String, OpenApiWrapper>();
         for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
-                OpenApiSelf.class, OpenApiSelfs.class, OpenApiSelfs::value).entrySet()) {
-            final var openApiSelf = entry.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
-                    .apply(openApiSelf.annotationGroupName());
-            // `getElementsOfRepeatableAnnotation()` already checks for `@OpenApiSelf` duplicates.
-            checkState(specificationAnnotations.getSelf() == null);
-            specificationAnnotations.setSelf(openApiSelf);
-        }
-        for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
-                OpenApiInfo.class, OpenApiInfos.class, OpenApiInfos::value).entrySet()) {
-            final var openApiInfo = entry.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
-                    .apply(openApiInfo.annotationGroupName());
-            if (specificationAnnotations.getInfo() != null) {
-                processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(OpenApiInfo.class.getSimpleName()), entry.getValue());
-            } else {
-                specificationAnnotations.setInfo(openApiInfo);
+                OpenApi.class, OpenApis.class, OpenApis::value).entrySet()) {
+            final var openApi = entry.getKey();
+            if (openApiWrappersOfGroupNames.containsKey(openApi.annotationGroupName())) {
+                processingEnv.getMessager().printError(
+                        "Duplicate `@%s`%s".formatted(OpenApi.class.getSimpleName(),
+                                openApi.annotationGroupName().equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
+                                        " for annotation group \"%s\"".formatted(openApi.annotationGroupName())),
+                        entry.getValue());
+                continue;
             }
-        }
-        for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
-                OpenApiJsonSchemaDialect.class, OpenApiJsonSchemaDialects.class, OpenApiJsonSchemaDialects::value)
-                .entrySet()) {
-            final var openApiJsonSchemaDialect = entry.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
-                    .apply(openApiJsonSchemaDialect.annotationGroupName());
-            // `getElementsOfRepeatableAnnotation()` already checks for `@OpenApiJsonSchemaDialect` duplicates.
-            checkState(specificationAnnotations.getJsonSchemaDialect() == null);
-            specificationAnnotations.setJsonSchemaDialect(openApiJsonSchemaDialect);
-        }
-        for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
-                OpenApiServer.class, OpenApiServers.class, OpenApiServers::value).entrySet()) {
-            final var openApiServer = entry.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
-                    .apply(openApiServer.annotationGroupName());
-            if (specificationAnnotations.getServers() == null) {
-                specificationAnnotations.setServers(new ArrayList<>());
-            }
-            if (requireNonNull(specificationAnnotations.getServers()).stream().anyMatch(server ->
-                    server.url().equals(openApiServer.url()) || server.name().equals(openApiServer.name()))) {
-                processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(OpenApiServer.class.getSimpleName()), entry.getValue());
-            } else {
-                specificationAnnotations.getServers().add(openApiServer);
-            }
-        }
-        for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
-                OpenApiTag.class, OpenApiTags.class, OpenApiTags::value).entrySet()) {
-            final var openApiTag = entry.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
-                    .apply(openApiTag.annotationGroupName());
-            if (specificationAnnotations.getTags() == null) {
-                specificationAnnotations.setTags(new ArrayList<>());
-            }
-            if (requireNonNull(specificationAnnotations.getTags()).stream().anyMatch(tag ->
-                    tag.name().equals(openApiTag.name()))) {
-                processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(OpenApiTag.class.getSimpleName()), entry.getValue());
-            } else {
-                specificationAnnotations.getTags().add(openApiTag);
-            }
-        }
-        for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
-                OpenApiExternalDoc.class, OpenApiExternalDocs.class, OpenApiExternalDocs::value).entrySet()) {
-            final var openApiExternalDoc = entry.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupNamesMap
-                    .apply(openApiExternalDoc.annotationGroupName());
-            if (specificationAnnotations.getExternalDocs() != null) {
-                processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(OpenApiExternalDoc.class.getSimpleName()), entry.getValue());
-            } else {
-                specificationAnnotations.setExternalDocs(openApiExternalDoc);
-            }
+            openApiWrappersOfGroupNames.put(openApi.annotationGroupName(), new OpenApiWrapper(openApi));
         }
         final var gson = new GsonBuilder()
-                .enableComplexMapKeySerialization()
                 .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer())
                 .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
                 .create();
         Schema schema = null;
-        for (final var specificationAnnotationsOfGroupName : specificationAnnotationsOfGroupNames.entrySet()) {
-            final var groupName = specificationAnnotationsOfGroupName.getKey();
-            final var specificationAnnotations = specificationAnnotationsOfGroupName.getValue();
+        for (final var openApiWrapperOfGroupName : openApiWrappersOfGroupNames.entrySet()) {
+            final var groupName = openApiWrapperOfGroupName.getKey();
+            final var openApiWrapper = openApiWrapperOfGroupName.getValue();
             final String openApiJson;
             try {
-                openApiJson = gson.toJson(specificationAnnotations);
+                openApiJson = gson.toJson(openApiWrapper);
             } catch (final Exception exception) {
                 processingEnv.getMessager().printError(exception.toString());
                 continue;
             }
-            if (specificationAnnotations.getValidationLevel() != NONE) {
-                if (schema == null) {
-                    try {
-                        schema = SchemaRegistry.withDefaultDialectId(null, null)
-                                .getSchema(readString(Paths.get(requireNonNull(
-                                        getClass().getResource("oas-3.2-schema-2025-09-17.json")).toURI())));
-                    } catch (final IOException | URISyntaxException exception) {
-                        throw new RuntimeException(exception);
+            if (openApiWrapper.annotationsValidationLevel() != NONE) {
+                if (!openApiWrapper.$schema().equals(DEFAULT_SCHEMA)) {
+                    processingEnv.getMessager().printError("""
+                            `@OpenApi.annotationsValidationLevel()` is set to `%s`, but validation for custom \
+                            `@OpenApi.$schema()` of `%s` is unsupported. Set `@OpenApi.annotationsValidationLevel()` \
+                            to `NONE` or remove the custom `@OpenApi.$schema()`"""
+                            .formatted(openApiWrapper.annotationsValidationLevel(), openApiWrapper.$schema()));
+                } else {
+                    if (schema == null) {
+                        try {
+                            schema = SchemaRegistry.withDefaultDialectId(null, null)
+                                    .getSchema(readString(Paths.get(requireNonNull(
+                                            getClass().getResource("oas-3.2-schema-2025-09-17.json")).toURI())));
+                        } catch (final IOException | URISyntaxException exception) {
+                            throw new RuntimeException(exception);
+                        }
                     }
-                }
-                for (final var error : schema.validate(openApiJson, JSON, executionContext -> executionContext
-                        .executionConfig(executionConfig -> executionConfig
-                                .formatAssertionsEnabled(true)
-                                .annotationCollectionEnabled(true)))) {
-                    processingEnv.getMessager().printMessage(
-                            specificationAnnotations.getValidationLevel() == ERROR ? Kind.ERROR : Kind.WARNING,
-                            "OpenAPIv%s schema offense%s: %s".formatted(
-                                    OPENAPI_SPECIFICATION_VERSION,
-                                    !groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ?
-                                            " in annotation group \"" + groupName + "\"" : "",
-                                    error.getMessage()));
+                    for (final var error : schema.validate(openApiJson, JSON, executionContext -> executionContext
+                            .executionConfig(executionConfig -> executionConfig
+                                    .formatAssertionsEnabled(true)
+                                    .annotationCollectionEnabled(true)))) {
+                        processingEnv.getMessager().printMessage(
+                                openApiWrapper.annotationsValidationLevel() == ERROR ? Kind.ERROR : Kind.WARNING,
+                                "OpenAPIv%s schema offense%s: %s".formatted(DEFAULT_OPENAPI,
+                                        !groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ?
+                                                " in annotation group \"%s\"".formatted(groupName) : "",
+                                        error.toString()));
+                    }
                 }
             }
             try (final var openApiJsonWriter = processingEnv.getFiler().createResource(CLASS_OUTPUT,
@@ -215,18 +128,134 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
         return false;
     }
 
-    @Data
-    private static final class SpecificationAnnotations {
+    @Value
+    @SuppressWarnings({"ClassExplicitlyAnnotation", "ImmutableAnnotationChecker"})
+    private static class OpenApiWrapper implements OpenApi {
 
-        private transient AnnotationsValidationLevel validationLevel = ERROR;
-        private final @SerializedName("$schema") String schema = OPENAPI_SPECIFICATION_SCHEMA_URL;
-        private final String openapi = OPENAPI_SPECIFICATION_VERSION;
-        private @SerializedName("$self") @Nullable OpenApiSelf self;
-        private @Nullable OpenApiInfo info;
-        private @Nullable OpenApiJsonSchemaDialect jsonSchemaDialect;
-        private @Nullable List<OpenApiServer> servers;
-        private @Nullable List<OpenApiTag> tags;
-        private @Nullable OpenApiExternalDoc externalDocs;
+        OpenApi openApi;
+        List<OpenApiTag> tags;
+
+        private OpenApiWrapper(final OpenApi openApi) {
+            this.openApi = openApi;
+            tags = new ArrayList<>(List.of(openApi.tags()));
+        }
+
+        @Override
+        public String annotationGroupName() {
+            return openApi.annotationGroupName();
+        }
+
+        @Override
+        public AnnotationsValidationLevel annotationsValidationLevel() {
+            return openApi.annotationsValidationLevel();
+        }
+
+        @Override
+        public String $schema() {
+            return openApi.$schema();
+        }
+
+        @Override
+        public String openapi() {
+            return openApi.openapi();
+        }
+
+        @Override
+        public String $self() {
+            return openApi.$self();
+        }
+
+        @Override
+        public OpenApiInfo[] info() {
+            return openApi.info();
+        }
+
+        @Override
+        public String jsonSchemaDialect() {
+            return openApi.jsonSchemaDialect();
+        }
+
+        @Override
+        public OpenApiServer[] servers() {
+            return openApi.servers();
+        }
+
+        @Override
+        public OpenApiPath[] paths() {
+            return openApi.paths(); // TODO
+        }
+
+        @Override
+        public OpenApiWebhook[] webhooks() {
+            return openApi.webhooks(); // TODO
+        }
+
+        @Override
+        public OpenApiComponents[] components() {
+            return openApi.components(); // TODO
+        }
+
+        @Override
+        public OpenApiSecurityRequirements[] security() {
+            return openApi.security();
+        }
+
+        @Override
+        public OpenApiTag[] tags() {
+            return tags.toArray(OpenApiTag[]::new);
+        }
+
+        @Override
+        public OpenApiExternalDoc[] externalDocs() {
+            return openApi.externalDocs();
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return openApi.annotationType();
+        }
+    }
+
+    @Value
+    @SuppressWarnings("ClassExplicitlyAnnotation")
+    private static class OpenApiTagGenerated implements OpenApiTag {
+
+        String name;
+
+        @Override
+        public String name() {
+            return name;
+        }
+
+        @Override
+        public String summary() {
+            return "";
+        }
+
+        @Override
+        public String description() {
+            return "";
+        }
+
+        @Override
+        public OpenApiExternalDoc[] externalDocs() {
+            return new OpenApiExternalDoc[0];
+        }
+
+        @Override
+        public String parent() {
+            return "";
+        }
+
+        @Override
+        public String kind() {
+            return "";
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return OpenApiTag.class;
+        }
     }
 
     private <S extends Annotation, P extends Annotation> Map<S, Element> getElementsOfRepeatableAnnotation(

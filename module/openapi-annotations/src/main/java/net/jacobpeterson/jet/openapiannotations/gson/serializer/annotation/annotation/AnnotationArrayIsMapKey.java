@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@link AnnotationArrayIsMapKey} is an annotation for an {@link Annotation} method to denote the {@link Map} key for
  * {@link AnnotationArrayIsMap}
  */
+@NullMarked
 @Target(METHOD)
 @Retention(RUNTIME)
-@NullMarked
 public @interface AnnotationArrayIsMapKey {}

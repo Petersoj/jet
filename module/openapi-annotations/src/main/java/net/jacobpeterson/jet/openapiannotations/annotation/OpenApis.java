@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.specification.self;
+package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import org.jspecify.annotations.NullMarked;
 
@@ -10,15 +10,15 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link OpenApiSelfs} is an annotation for repeated {@link OpenApiSelf} annotations.
+ * {@link OpenApis} is an annotation for repeated {@link OpenApi} annotations.
  */
+@NullMarked
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
-@NullMarked
-public @interface OpenApiSelfs {
+public @interface OpenApis {
 
     /**
-     * The {@link OpenApiSelf}s.
+     * The {@link OpenApi}s.
      */
-    OpenApiSelf[] value() default {};
+    OpenApi[] value() default {};
 }

@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@link AnnotationJsonSerializeEmptyArray} is an annotation for an {@link Annotation} method to denote that the array
  * return value should be serialized by {@link AnnotationJsonSerializer} even if it is empty.
  */
+@NullMarked
 @Target(METHOD)
 @Retention(RUNTIME)
-@NullMarked
 public @interface AnnotationJsonSerializeEmptyArray {}

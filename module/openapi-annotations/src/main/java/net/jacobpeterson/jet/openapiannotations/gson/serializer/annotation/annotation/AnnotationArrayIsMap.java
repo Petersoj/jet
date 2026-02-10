@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * should act as a {@link Map} and not an array, with the key being the {@link Annotation} method annotated with
  * {@link AnnotationArrayIsMapKey}.
  */
+@NullMarked
 @Target(METHOD)
 @Retention(RUNTIME)
-@NullMarked
 public @interface AnnotationArrayIsMap {}

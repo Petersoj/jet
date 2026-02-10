@@ -1,19 +1,13 @@
 package net.jacobpeterson.jet.openapiannotations.annotation.specification.server;
 
-import net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor;
 import net.jacobpeterson.jet.openapiannotations.annotation.specification.server.variable.OpenApiServerVariable;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import org.jspecify.annotations.NullMarked;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcessor.DEFAULT_ANNOTATION_GROUP_NAME;
 
 /**
  * {@link OpenApiServer} is an annotation for the
@@ -23,18 +17,10 @@ import static net.jacobpeterson.jet.openapiannotations.OpenApiAnnotationsProcess
  *
  * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#server-object">spec.openapis.org</a>
  */
-@Target({TYPE, METHOD})
-@Retention(RUNTIME)
-@Repeatable(OpenApiServers.class)
 @NullMarked
+@Target({})
+@Retention(RUNTIME)
 public @interface OpenApiServer {
-
-    /**
-     * The name of the {@link OpenApiAnnotationsProcessor#DEFAULT_ANNOTATION_GROUP_NAME annotation group} this
-     * annotation should be assigned to.
-     */
-    @AnnotationJsonIgnore
-    String annotationGroupName() default DEFAULT_ANNOTATION_GROUP_NAME;
 
     /**
      * <strong><em>REQUIRED</em></strong>. A URL to the target host. This URL supports Server Variables and <em>MAY</em>

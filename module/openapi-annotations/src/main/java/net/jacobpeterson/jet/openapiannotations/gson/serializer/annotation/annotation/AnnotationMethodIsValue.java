@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * value is the value for the entire {@link Annotation} object, as opposed to the method's return value being a member
  * of the {@link Annotation} object value.
  */
+@NullMarked
 @Target(METHOD)
 @Retention(RUNTIME)
-@NullMarked
 public @interface AnnotationMethodIsValue {}

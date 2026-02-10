@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * return type should act as a single nullable value and not an array: if the array is empty, the value is equal to
  * <code>null</code>, and if the array is non-empty, the value is equal to the first element in the array.
  */
+@NullMarked
 @Target(METHOD)
 @Retention(RUNTIME)
-@NullMarked
 public @interface AnnotationArrayIsNullableValue {}
