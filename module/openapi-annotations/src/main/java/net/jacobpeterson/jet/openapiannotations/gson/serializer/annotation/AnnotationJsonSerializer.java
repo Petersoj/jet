@@ -1,7 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
@@ -10,16 +13,15 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Map;
 
 import static java.util.Arrays.stream;
 import static java.util.HashMap.newHashMap;
@@ -43,11 +45,11 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 .filter(method -> method.isAnnotationPresent(AnnotationJsonObjectInline.class))
                 .toList();
         if (valueInlinedMethods.size() == 1) {
-            return context.serialize(getMethodValue(src, valueInlinedMethods.getFirst()));
+            return getMethodJsonValue(context, src, valueInlinedMethods.getFirst());
         }
         final var jsonObject = new JsonObject();
         for (final var method : methods) {
-            final var jsonValue = context.serialize(getMethodValue(src, method));
+            final var jsonValue = getMethodJsonValue(context, src, method);
             if (method.isAnnotationPresent(AnnotationJsonObjectInline.class)) {
                 if (jsonValue.isJsonNull()) {
                     continue;
@@ -86,47 +88,58 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         return jsonObject;
     }
 
-    private @Nullable Object getMethodValue(final Annotation src, final Method method) {
+    private JsonElement getMethodJsonValue(final JsonSerializationContext context, final Annotation src,
+            final Method method) {
         final var value = invokeMethod(method, src);
-        if (method.getReturnType().isArray()) {
-            final var length = Array.getLength(value);
-            if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
-                if (length == 0) {
-                    return null;
-                } else {
-                    if (length != 1) {
-                        throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array " +
-                                "contains more than one element").formatted(method.getDeclaringClass().getSimpleName(),
-                                method.getName(), AnnotationArrayIsNullableValue.class.getSimpleName()));
-                    }
-                    return Array.get(value, 0);
-                }
-            } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
-                if (length == 0) {
-                    return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? Map.of() : null;
-                } else {
-                    final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
-                            .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
-                            .findFirst()
-                            .orElseThrow();
-                    final var map = newHashMap(length);
-                    for (var index = 0; index < length; index++) {
-                        final var entry = Array.get(value, index);
-                        final var key = invokeMethod(keyMethod, entry);
-                        if (map.put(key, entry) != null) {
-                            throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
-                                    method.getDeclaringClass().getSimpleName(), method.getName(),
-                                    method.getReturnType().getComponentType().getSimpleName(), keyMethod.getName(),
-                                    key));
-                        }
-                    }
-                    return map;
-                }
-            } else if (length == 0) {
-                return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? value : null;
+        if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
+            if (!method.getReturnType().equals(String.class)) {
+                throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
+                        .formatted(method.getDeclaringClass().getSimpleName(), method.getName(),
+                                AnnotationJsonRawString.class.getSimpleName(), String.class.getSimpleName()));
             }
+            return JsonParser.parseString((String) value);
         }
-        return value;
+        if (!method.getReturnType().isArray()) {
+            return context.serialize(value);
+        }
+        final var length = Array.getLength(value);
+        if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
+            if (length == 0) {
+                return JsonNull.INSTANCE;
+            }
+            if (length != 1) {
+                throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array " +
+                        "contains more than one element").formatted(method.getDeclaringClass().getSimpleName(),
+                        method.getName(), AnnotationArrayIsNullableValue.class.getSimpleName()));
+            }
+            return context.serialize(Array.get(value, 0));
+        }
+        if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
+            if (length == 0) {
+                return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? new JsonObject() :
+                        JsonNull.INSTANCE;
+            }
+            final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
+                    .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
+                    .findFirst()
+                    .orElseThrow();
+            final var map = newHashMap(length); // Use `Map` in case of `enableComplexMapKeySerialization()`
+            for (var index = 0; index < length; index++) {
+                final var entry = Array.get(value, index);
+                final var key = invokeMethod(keyMethod, entry);
+                if (map.put(key, entry) != null) {
+                    throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
+                            method.getDeclaringClass().getSimpleName(), method.getName(),
+                            method.getReturnType().getComponentType().getSimpleName(), keyMethod.getName(), key));
+                }
+            }
+            return context.serialize(map);
+        }
+        if (length == 0) {
+            return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? new JsonArray() :
+                    JsonNull.INSTANCE;
+        }
+        return context.serialize(value);
     }
 
     private Object invokeMethod(final Method method, final Object object) {
