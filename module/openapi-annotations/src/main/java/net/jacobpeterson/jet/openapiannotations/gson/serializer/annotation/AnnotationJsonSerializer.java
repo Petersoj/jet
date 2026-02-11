@@ -25,6 +25,7 @@ import java.lang.reflect.Type;
 
 import static java.util.Arrays.stream;
 import static java.util.HashMap.newHashMap;
+import static net.jacobpeterson.jet.openapiannotations.util.reflection.ReflectionUtil.getFullClassName;
 
 /**
  * {@link AnnotationJsonSerializer} is an {@link Annotation} {@link JsonSerializer} that uses reflection to invoke the
@@ -55,10 +56,11 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                     continue;
                 }
                 if (!jsonValue.isJsonObject()) {
-                    final var className = method.getDeclaringClass().getSimpleName();
                     throw new IllegalArgumentException(("`@%s` contains multiple methods annotated with `@%s`, but " +
-                            "the serialized value of `@%s.%s` is not a JSON object").formatted(className,
-                            AnnotationJsonObjectInline.class.getSimpleName(), className, method.getName()));
+                            "the serialized value of `@%s.%s` is not a JSON object").formatted(
+                            getFullClassName(method.getDeclaringClass()),
+                            getFullClassName(AnnotationJsonObjectInline.class),
+                            getFullClassName(method.getDeclaringClass()), method.getName()));
                 }
                 jsonValue.getAsJsonObject().asMap().forEach(jsonObject::add);
                 continue;
@@ -70,7 +72,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 if (!existingJsonValue.getClass().equals(jsonValue.getClass()) || existingJsonValue.isJsonPrimitive()) {
                     throw new IllegalArgumentException(("`@%s` contains multiple methods with a serialized name of " +
                             "\"%s\", but their return types cannot be combined").formatted(
-                            method.getDeclaringClass().getSimpleName(), jsonKey));
+                            getFullClassName(method.getDeclaringClass()), jsonKey));
                 }
                 if (existingJsonValue.isJsonObject()) {
                     jsonValue.getAsJsonObject().asMap().forEach((key, value) ->
@@ -98,8 +100,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
             if (!method.getReturnType().equals(String.class)) {
                 throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
-                        .formatted(method.getDeclaringClass().getSimpleName(), method.getName(),
-                                AnnotationJsonRawString.class.getSimpleName(), String.class.getSimpleName()));
+                        .formatted(getFullClassName(method.getDeclaringClass()), method.getName(),
+                                getFullClassName(AnnotationJsonRawString.class), getFullClassName(String.class)));
             }
             return JsonParser.parseString((String) value);
         }
@@ -113,8 +115,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             }
             if (length != 1) {
                 throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array " +
-                        "contains more than one element").formatted(method.getDeclaringClass().getSimpleName(),
-                        method.getName(), AnnotationArrayIsNullableValue.class.getSimpleName()));
+                        "contains more than one element").formatted(getFullClassName(method.getDeclaringClass()),
+                        method.getName(), getFullClassName(AnnotationArrayIsNullableValue.class)));
             }
             return context.serialize(Array.get(value, 0));
         }
@@ -133,8 +135,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 final var key = invokeMethod(keyMethod, entry);
                 if (map.put(key, entry) != null) {
                     throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
-                            method.getDeclaringClass().getSimpleName(), method.getName(),
-                            method.getReturnType().getComponentType().getSimpleName(), keyMethod.getName(), key));
+                            getFullClassName(method.getDeclaringClass()), method.getName(),
+                            getFullClassName(method.getReturnType().getComponentType()), keyMethod.getName(), key));
                 }
             }
             return context.serialize(map);

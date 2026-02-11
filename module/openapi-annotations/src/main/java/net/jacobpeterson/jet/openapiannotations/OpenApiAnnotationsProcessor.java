@@ -6,15 +6,14 @@ import com.networknt.schema.SchemaRegistry;
 import lombok.Value;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApis;
-import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationsValidationLevel;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.component.OpenApiComponents;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.externaldoc.OpenApiExternalDoc;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.info.OpenApiInfo;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.path.OpenApiPath;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.securityrequirement.OpenApiSecurityRequirements;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.server.OpenApiServer;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.tag.OpenApiTag;
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.webhook.OpenApiWebhook;
+import net.jacobpeterson.jet.openapiannotations.annotation.component.OpenApiComponents;
+import net.jacobpeterson.jet.openapiannotations.annotation.externaldoc.OpenApiExternalDoc;
+import net.jacobpeterson.jet.openapiannotations.annotation.info.OpenApiInfo;
+import net.jacobpeterson.jet.openapiannotations.annotation.path.OpenApiPath;
+import net.jacobpeterson.jet.openapiannotations.annotation.securityrequirement.OpenApiSecurityRequirements;
+import net.jacobpeterson.jet.openapiannotations.annotation.server.OpenApiServer;
+import net.jacobpeterson.jet.openapiannotations.annotation.tag.OpenApiTag;
+import net.jacobpeterson.jet.openapiannotations.annotation.webhook.OpenApiWebhook;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.string.EmptyStringIsNullJsonSerializer;
 import org.jspecify.annotations.NullMarked;
@@ -41,11 +40,12 @@ import static java.nio.file.Files.readString;
 import static java.util.Objects.requireNonNull;
 import static javax.lang.model.SourceVersion.latestSupported;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
+import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.AnnotationsValidationLevel.ERROR;
+import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.AnnotationsValidationLevel.NONE;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_SCHEMA;
-import static net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationsValidationLevel.ERROR;
-import static net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationsValidationLevel.NONE;
+import static net.jacobpeterson.jet.openapiannotations.util.reflection.ReflectionUtil.getFullClassName;
 
 /**
  * {@link OpenApiAnnotationsProcessor} is an {@link AbstractProcessor} for OpenAPI annotations.
@@ -62,15 +62,16 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
         for (final var entry : getElementsOfRepeatableAnnotation(roundEnv,
                 OpenApi.class, OpenApis.class, OpenApis::value).entrySet()) {
             final var openApi = entry.getKey();
-            if (openApiWrappersOfGroupNames.containsKey(openApi.annotationGroupName())) {
+            final var groupName = openApi.annotationGroupName();
+            if (openApiWrappersOfGroupNames.containsKey(groupName)) {
                 processingEnv.getMessager().printError(
-                        "Duplicate `@%s`%s".formatted(OpenApi.class.getSimpleName(),
-                                openApi.annotationGroupName().equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
-                                        " for annotation group \"%s\"".formatted(openApi.annotationGroupName())),
+                        "Duplicate `@%s` annotation%s".formatted(getFullClassName(OpenApi.class),
+                                groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
+                                        " for annotation group \"%s\"".formatted(groupName)),
                         entry.getValue());
                 continue;
             }
-            openApiWrappersOfGroupNames.put(openApi.annotationGroupName(), new OpenApiWrapper(openApi));
+            openApiWrappersOfGroupNames.put(groupName, new OpenApiWrapper(openApi));
         }
         final var gson = new GsonBuilder()
                 .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer())
@@ -92,7 +93,7 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
                     processingEnv.getMessager().printError("""
                             `@OpenApi.annotationsValidationLevel` is set to `%s`, but validation for custom \
                             `@OpenApi.$schema` of `%s` is unsupported. Set `@OpenApi.annotationsValidationLevel` to \
-                            `NONE` or remove the custom `@OpenApi.$schema`"""
+                            `NONE` or remove the custom `@OpenApi.$schema`."""
                             .formatted(openApiWrapper.annotationsValidationLevel(), openApiWrapper.$schema()));
                 } else {
                     if (schema == null) {
@@ -263,17 +264,17 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
             final Function<P, S[]> pluralClassValue) {
         final var elementsOfRepeatableAnnotations = new HashMap<S, Element>();
         for (final var element : roundEnv.getElementsAnnotatedWith(singularClass)) {
-            if (elementsOfRepeatableAnnotations
-                    .put(requireNonNull(element.getAnnotation(singularClass)), element) != null) {
+            if (elementsOfRepeatableAnnotations.put(
+                    requireNonNull(element.getAnnotation(singularClass)), element) != null) {
                 processingEnv.getMessager().printError("Duplicate `@%s`"
-                        .formatted(singularClass.getSimpleName()), element);
+                        .formatted(getFullClassName(singularClass)), element);
             }
         }
         for (final var element : roundEnv.getElementsAnnotatedWith(pluralClass)) {
             for (final var singular : pluralClassValue.apply(requireNonNull(element.getAnnotation(pluralClass)))) {
                 if (elementsOfRepeatableAnnotations.put(singular, element) != null) {
                     processingEnv.getMessager().printError("Duplicate `@%s`"
-                            .formatted(singularClass.getSimpleName()), element);
+                            .formatted(getFullClassName(singularClass)), element);
                 }
             }
         }
