@@ -1,8 +1,6 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import io.toolisticon.cute.Cute;
 import io.toolisticon.cute.CuteApi.BlackBoxTestOutcomeInterface;
 import org.jspecify.annotations.NullMarked;
@@ -18,8 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @NullMarked
 public final class OpenApiAnnotationsProcessorTest {
-
-    private static final Gson GSON = new GsonBuilder().create();
 
     @Test
     public void processValidationLevelSuccessNone() {
@@ -101,8 +97,8 @@ public final class OpenApiAnnotationsProcessorTest {
             }
             andThat = andThat.andThat()
                     .generatedResourceFile(getClass().getPackageName(), outputFile.getName())
-                    .matches(fileObject -> GSON.fromJson(fileObject.getCharContent(false).toString(), JsonElement.class)
-                            .equals(GSON.fromJson(readString(outputFile.toPath()), JsonElement.class)));
+                    .matches(fileObject -> JsonParser.parseString(fileObject.getCharContent(false).toString())
+                            .equals(JsonParser.parseString(readString(outputFile.toPath()))));
             outputFileCount++;
         }
         final var fOutputFileCount = outputFileCount;
