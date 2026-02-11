@@ -73,8 +73,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                             method.getDeclaringClass().getSimpleName(), jsonKey));
                 }
                 if (existingJsonValue.isJsonObject()) {
-                    final var existingJsonValueObject = existingJsonValue.getAsJsonObject();
-                    jsonValue.getAsJsonObject().asMap().forEach(existingJsonValueObject::add);
+                    jsonValue.getAsJsonObject().asMap().forEach((key, value) ->
+                            existingJsonValue.getAsJsonObject().add(key, value));
                     continue;
                 }
                 if (existingJsonValue.isJsonArray()) {
@@ -84,6 +84,10 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 throw new IllegalStateException();
             }
             jsonObject.add(jsonKey, jsonValue);
+        }
+        if (jsonObject.isEmpty() && valueInlinedMethods.stream().noneMatch(method ->
+                method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class))) {
+            return JsonNull.INSTANCE;
         }
         return jsonObject;
     }
