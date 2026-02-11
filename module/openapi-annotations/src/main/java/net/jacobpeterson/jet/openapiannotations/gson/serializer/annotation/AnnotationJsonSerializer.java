@@ -9,8 +9,8 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -27,52 +27,83 @@ import static java.util.HashMap.newHashMap;
 /**
  * {@link AnnotationJsonSerializer} is an {@link Annotation} {@link JsonSerializer} that uses reflection to invoke the
  * {@link Class#getDeclaredMethods()} of the {@link Annotation#annotationType()} and uses reflection to handle
- * {@link AnnotationJsonIgnore}, {@link AnnotationJsonSerializeEmptyArray}, {@link AnnotationMethodIsValue},
- * {@link AnnotationArrayIsNullableValue}, {@link AnnotationArrayIsMap}, and {@link AnnotationArrayIsMapKey}.
+ * {@link SerializedName}, {@link AnnotationJsonIgnore}, {@link AnnotationJsonSerializeEmptyArray},
+ * {@link AnnotationJsonObjectInline}, {@link AnnotationArrayIsNullableValue}, {@link AnnotationArrayIsMap}, and
+ * {@link AnnotationArrayIsMapKey}.
  */
 @NullMarked
 public final class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
 
     @Override
     public JsonElement serialize(final Annotation src, final Type typeOfSrc, final JsonSerializationContext context) {
-        final var methods = src.annotationType().getDeclaredMethods();
-        final var methodIsValueMethod = stream(methods)
-                .filter(method -> method.isAnnotationPresent(AnnotationMethodIsValue.class))
-                .findFirst();
-        if (methodIsValueMethod.isPresent()) {
-            return context.serialize(getMethodValue(src, methodIsValueMethod.get()));
+        final var methods = stream(src.annotationType().getDeclaredMethods())
+                .filter(method -> !method.isAnnotationPresent(AnnotationJsonIgnore.class))
+                .toList();
+        final var valueInlinedMethods = methods.stream()
+                .filter(method -> method.isAnnotationPresent(AnnotationJsonObjectInline.class))
+                .toList();
+        if (valueInlinedMethods.size() == 1) {
+            return context.serialize(getMethodValue(src, valueInlinedMethods.getFirst()));
         }
         final var jsonObject = new JsonObject();
         for (final var method : methods) {
-            jsonObject.add(method.isAnnotationPresent(SerializedName.class) ?
-                            method.getAnnotation(SerializedName.class).value() : method.getName(),
-                    context.serialize(getMethodValue(src, method)));
+            final var jsonValue = context.serialize(getMethodValue(src, method));
+            if (method.isAnnotationPresent(AnnotationJsonObjectInline.class)) {
+                if (jsonValue.isJsonNull()) {
+                    continue;
+                }
+                if (!jsonValue.isJsonObject()) {
+                    final var className = method.getDeclaringClass().getSimpleName();
+                    throw new IllegalArgumentException(("`@%s` contains multiple methods annotated with `@%s`, but " +
+                            "the serialized value of `@%s.%s` is not a JSON object").formatted(className,
+                            AnnotationJsonObjectInline.class.getSimpleName(), className, method.getName()));
+                }
+                jsonValue.getAsJsonObject().asMap().forEach(jsonObject::add);
+                continue;
+            }
+            final var jsonKey = method.isAnnotationPresent(SerializedName.class) ?
+                    method.getAnnotation(SerializedName.class).value() : method.getName();
+            final var existingJsonValue = jsonObject.get(jsonKey);
+            if (existingJsonValue != null && !existingJsonValue.isJsonNull()) {
+                if (!existingJsonValue.getClass().equals(jsonValue.getClass()) || existingJsonValue.isJsonPrimitive()) {
+                    throw new IllegalArgumentException(("`@%s` contains multiple methods with a serialized name of " +
+                            "\"%s\", but their return types cannot be combined").formatted(
+                            method.getDeclaringClass().getSimpleName(), jsonKey));
+                }
+                if (existingJsonValue.isJsonObject()) {
+                    final var existingJsonValueObject = existingJsonValue.getAsJsonObject();
+                    jsonValue.getAsJsonObject().asMap().forEach(existingJsonValueObject::add);
+                    continue;
+                }
+                if (existingJsonValue.isJsonArray()) {
+                    existingJsonValue.getAsJsonArray().addAll(jsonValue.getAsJsonArray());
+                    continue;
+                }
+                throw new IllegalStateException();
+            }
+            jsonObject.add(jsonKey, jsonValue);
         }
         return jsonObject;
     }
 
     private @Nullable Object getMethodValue(final Annotation src, final Method method) {
-        if (method.isAnnotationPresent(AnnotationJsonIgnore.class)) {
-            return null;
-        }
-        var value = invokeMethod(method, src);
+        final var value = invokeMethod(method, src);
         if (method.getReturnType().isArray()) {
             final var length = Array.getLength(value);
             if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
                 if (length == 0) {
-                    value = null;
+                    return null;
                 } else {
                     if (length != 1) {
                         throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array " +
-                                "contains more than one element").formatted(
-                                method.getDeclaringClass().getSimpleName(), method.getName(),
-                                AnnotationArrayIsNullableValue.class.getSimpleName()));
+                                "contains more than one element").formatted(method.getDeclaringClass().getSimpleName(),
+                                method.getName(), AnnotationArrayIsNullableValue.class.getSimpleName()));
                     }
-                    value = Array.get(value, 0);
+                    return Array.get(value, 0);
                 }
             } else if (method.isAnnotationPresent(AnnotationArrayIsMap.class)) {
                 if (length == 0) {
-                    value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? Map.of() : null;
+                    return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? Map.of() : null;
                 } else {
                     final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
                             .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
@@ -89,10 +120,10 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                                     key));
                         }
                     }
-                    value = map;
+                    return map;
                 }
             } else if (length == 0) {
-                value = method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? value : null;
+                return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? value : null;
             }
         }
         return value;
