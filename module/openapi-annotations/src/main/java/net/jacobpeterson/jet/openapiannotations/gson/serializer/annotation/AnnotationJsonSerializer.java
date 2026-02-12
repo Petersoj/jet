@@ -16,6 +16,7 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -97,6 +98,9 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
     private JsonElement getMethodJsonValue(final JsonSerializationContext context, final Annotation src,
             final Method method) {
         final var value = invokeMethod(method, src);
+        if (value == null) {
+            return JsonNull.INSTANCE;
+        }
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
             if (!method.getReturnType().equals(String.class)) {
                 throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
@@ -133,6 +137,9 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             for (var index = 0; index < length; index++) {
                 final var entry = Array.get(value, index);
                 final var key = invokeMethod(keyMethod, entry);
+                if (key == null) {
+                    continue;
+                }
                 if (map.put(key, entry) != null) {
                     throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
                             getFullClassName(method.getDeclaringClass()), method.getName(),
@@ -148,7 +155,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         return context.serialize(value);
     }
 
-    private Object invokeMethod(final Method method, final Object object) {
+    private @Nullable Object invokeMethod(final Method method, final Object object) {
         try {
             return method.invoke(object);
         } catch (final IllegalAccessException | InvocationTargetException exception) {
