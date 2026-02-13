@@ -16,7 +16,6 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -97,17 +96,17 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
 
     private JsonElement getMethodJsonValue(final JsonSerializationContext context, final Annotation src,
             final Method method) {
-        final var value = invokeMethod(method, src);
-        if (value == null) {
-            return JsonNull.INSTANCE;
-        }
+        final var value = invokeAnnotationMethod(method, src);
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
-            if (!method.getReturnType().equals(String.class)) {
+            if (!(value instanceof final String valueString)) {
                 throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
                         .formatted(getFullClassName(method.getDeclaringClass()), method.getName(),
                                 getFullClassName(AnnotationJsonRawString.class), getFullClassName(String.class)));
             }
-            return JsonParser.parseString((String) value);
+            if (valueString.isEmpty()) {
+                return JsonNull.INSTANCE;
+            }
+            return JsonParser.parseString(valueString);
         }
         if (!method.getReturnType().isArray()) {
             return context.serialize(value);
@@ -115,12 +114,13 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         final var length = Array.getLength(value);
         if (method.isAnnotationPresent(AnnotationArrayIsNullableValue.class)) {
             if (length == 0) {
-                return JsonNull.INSTANCE;
+                return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? new JsonObject() :
+                        JsonNull.INSTANCE;
             }
             if (length != 1) {
-                throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array " +
-                        "contains more than one element").formatted(getFullClassName(method.getDeclaringClass()),
-                        method.getName(), getFullClassName(AnnotationArrayIsNullableValue.class)));
+                throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array contains more " +
+                        "than one element").formatted(getFullClassName(method.getDeclaringClass()), method.getName(),
+                        getFullClassName(AnnotationArrayIsNullableValue.class)));
             }
             return context.serialize(Array.get(value, 0));
         }
@@ -136,10 +136,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             final var map = newHashMap(length); // Use `Map` in case of `enableComplexMapKeySerialization()`
             for (var index = 0; index < length; index++) {
                 final var entry = Array.get(value, index);
-                final var key = invokeMethod(keyMethod, entry);
-                if (key == null) {
-                    continue;
-                }
+                final var key = invokeAnnotationMethod(keyMethod, entry);
                 if (map.put(key, entry) != null) {
                     throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
                             getFullClassName(method.getDeclaringClass()), method.getName(),
@@ -155,9 +152,9 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         return context.serialize(value);
     }
 
-    private @Nullable Object invokeMethod(final Method method, final Object object) {
+    private Object invokeAnnotationMethod(final Method method, final Object object) {
         try {
-            return method.invoke(object);
+            return method.invoke(object); // Never `null` since `Annotation` methods cannot return `null`
         } catch (final IllegalAccessException | InvocationTargetException exception) {
             throw new RuntimeException(exception);
         }
