@@ -7,6 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.method.Method;
+import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.AnnotationOutputValidation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiCallback;
@@ -30,6 +33,9 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiServer;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiTag;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.header.HeaderJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.method.MethodJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.status.StatusJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.string.EmptyStringIsNullJsonSerializer;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -112,6 +118,9 @@ public final class OpenApiAnnotationsProcessor extends AbstractProcessor {
         final var annotationGson = new GsonBuilder()
                 .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer())
                 .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
+                .registerTypeAdapter(Method.class, new MethodJsonSerializer())
+                .registerTypeAdapter(Status.class, new StatusJsonSerializer())
+                .registerTypeAdapter(Header.class, new HeaderJsonSerializer())
                 .create();
         Schema schema = null;
         for (final var openApiWrapperOfGroupName : openApiWrappersOfGroupNames.entrySet()) {
