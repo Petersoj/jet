@@ -187,8 +187,9 @@ public @interface OpenApiParameter {
      * serialized)</a>, the value of <code>allowEmptyValue</code> <em>SHALL</em> be ignored. Interactions between this
      * field and the parameter’s <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-object">Schema Object</a> are
      * implementation-defined. This field is valid only for <code>query</code> parameters.
-     * <br><br><strong>Deprecated:</strong> Use of this field is <em>NOT RECOMMENDED</em>, and it is likely to be
-     * removed in a later revision.
+     * <p>
+     * <strong>Deprecated:</strong> Use of this field is <em>NOT RECOMMENDED</em>, and it is likely to be removed in a
+     * later revision.
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-allow-empty-value">spec.openapis.org</a>
      */

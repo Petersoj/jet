@@ -102,7 +102,7 @@ public @interface OpenApiOAuthFlow {
     Scope[] scopes() default {};
 
     /**
-     * {@link Scope} is an annotation for the {@link #scopes()} map.
+     * {@link Scope} is an annotation an entry in the {@link #scopes()} map.
      */
     @Target({})
     @Retention(RUNTIME) //@formatter:off

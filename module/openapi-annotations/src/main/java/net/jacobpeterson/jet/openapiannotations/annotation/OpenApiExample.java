@@ -113,9 +113,10 @@ public @interface OpenApiExample {
     /**
      * Embedded literal example. The <code>value</code> field and <code>externalValue</code> field are mutually
      * exclusive. To represent examples of media types that cannot naturally be represented in JSON or YAML, use a
-     * string value to contain the example, escaping where necessary.<br><br><strong>Deprecated for non-JSON
-     * serialization targets:</strong> Use <code>dataValue</code> and/or <code>serializedValue</code>, which both have
-     * unambiguous syntax and semantics, instead.
+     * string value to contain the example, escaping where necessary.
+     * <p>
+     * <strong>Deprecated for non-JSON serialization targets:</strong> Use <code>dataValue</code> and/or
+     * <code>serializedValue</code>, which both have unambiguous syntax and semantics, instead.
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#example-value">spec.openapis.org</a>
      */

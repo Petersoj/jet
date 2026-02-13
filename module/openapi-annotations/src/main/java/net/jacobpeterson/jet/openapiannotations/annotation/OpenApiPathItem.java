@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
@@ -58,9 +59,11 @@ public @interface OpenApiPathItem {
      * Object field appears both in the defined object and the referenced object, the behavior is undefined. See the
      * rules for resolving
      * <a href="https://spec.openapis.org/oas/v3.2.0.html#relative-references-in-api-description-uris">Relative
-     * References</a>. <br><br><em><strong>Note:</strong> The behavior of <code>$ref</code> with adjacent properties is
-     * likely to change in future versions of this specification to bring it into closer alignment with the behavior of
-     * the <a href="https://spec.openapis.org/oas/v3.2.0.html#reference-object">Reference Object</a>.</em>
+     * References</a>.
+     * <p>
+     * <em><strong>Note:</strong> The behavior of <code>$ref</code> with adjacent properties is likely to change in
+     * future versions of this specification to bring it into closer alignment with the behavior of the
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#reference-object">Reference Object</a>.</em>
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#path-item-ref">spec.openapis.org</a>
      */
@@ -166,6 +169,38 @@ public @interface OpenApiPathItem {
      */
     @AnnotationArrayIsMap
     OpenApiOperation.MapEntry[] additionalOperations() default {};
+
+    /**
+     * Instead of using {@link #get()}, {@link #put()}, {@link #post()}, {@link #delete()}, {@link #options()},
+     * {@link #head()}, {@link #patch()}, {@link #trace()}, or {@link #query()} directly, this uses the {@link Method}
+     * enum mapped to a {@link OpenApiOperation}.
+     */
+    @AnnotationArrayIsMap
+    @AnnotationJsonObjectInline
+    ForEnum[] forEnum() default {};
+
+    /**
+     * {@link ForEnum} is an annotation for an entry in the {@link #forEnum()} map.
+     */
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface ForEnum { //@formatter:on
+
+        /**
+         * The {@link #forEnum()} entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        @AnnotationArrayIsNullableValue
+        Method[] keyEnum() default {};
+
+        /**
+         * The {@link #forEnum()} entry value.
+         */
+        @AnnotationArrayIsNullableValue
+        @AnnotationJsonObjectInline
+        OpenApiOperation[] value() default {};
+    }
 
     /**
      * An alternative <code>servers</code> array to service all operations in this path. If a <code>servers</code> array

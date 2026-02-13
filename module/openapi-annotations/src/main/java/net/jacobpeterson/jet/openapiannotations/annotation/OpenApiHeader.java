@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
@@ -59,6 +60,14 @@ public @interface OpenApiHeader {
         @AnnotationJsonIgnore
         @AnnotationArrayIsMapKey
         String key() default "";
+
+        /**
+         * The map entry key enum.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        @AnnotationArrayIsNullableValue
+        Header[] keyEnum() default {};
 
         /**
          * The map entry value.
@@ -151,7 +160,6 @@ public @interface OpenApiHeader {
          *
          * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#header-style">spec.openapis.org</a>
          */
-        @AnnotationArrayIsNullableValue
         String style() default "";
 
         /**

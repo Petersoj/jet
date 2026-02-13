@@ -73,13 +73,13 @@ public @interface OpenApiResponses {
      */
     @AnnotationArrayIsMap
     @AnnotationJsonObjectInline
-    OpenApiResponse.MapEntry[] responses() default {};
+    OpenApiResponse.MapEntry[] value() default {};
 
     /**
-     * @see #responses()
+     * @see #value()
      */
     @AnnotationArrayIsMap
     @AnnotationJsonObjectInline
     @SerializedName("responses")
-    OpenApiReference.MapEntry[] responseReferences() default {};
+    OpenApiReference.MapEntry[] valueReferences() default {};
 }

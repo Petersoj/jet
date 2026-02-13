@@ -120,7 +120,6 @@ public @interface OpenApiEncoding {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#encoding-style">spec.openapis.org</a>
      */
-    @AnnotationArrayIsNullableValue
     String style() default "";
 
     /**
@@ -208,7 +207,6 @@ public @interface OpenApiEncoding {
         /**
          * @see OpenApiEncoding#style()
          */
-        @AnnotationArrayIsNullableValue
         String style() default "";
 
         /**

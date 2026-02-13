@@ -83,7 +83,7 @@ public @interface OpenApiSecurityRequirement {
     Entry[] value() default {};
 
     /**
-     * {@link Entry} is an annotation for the {@link OpenApiSecurityRequirement#value()} map.
+     * {@link Entry} is an annotation for an entry in the {@link OpenApiSecurityRequirement#value()} map.
      * <p>
      * Each name or URI <em>MUST</em> correspond to a security scheme as described above. If the security scheme is
      * of type <code>"oauth2"</code> or <code>"openIdConnect"</code>, then the value is a list of scope names

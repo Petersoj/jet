@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
@@ -41,6 +42,14 @@ public @interface OpenApiResponse {
         @AnnotationJsonIgnore
         @AnnotationArrayIsMapKey
         String key() default "";
+
+        /**
+         * The map entry key enum.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        @AnnotationArrayIsNullableValue
+        Status[] keyEnum() default {};
 
         /**
          * The map entry value.
