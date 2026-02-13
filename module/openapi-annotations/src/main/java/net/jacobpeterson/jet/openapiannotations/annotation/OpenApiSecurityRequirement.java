@@ -1,7 +1,11 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.specification.securityrequirement;
+package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -10,7 +14,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link OpenApiSecurityRequirements} is an annotation for the
+ * {@link OpenApiSecurityRequirement} is an annotation for the
  * <a href="https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object">OpenAPI Security Requirement
  * Object</a>.
  * <p>
@@ -46,12 +50,63 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @NullMarked
 @Target({})
 @Retention(RUNTIME)
-public @interface OpenApiSecurityRequirements {
+public @interface OpenApiSecurityRequirement {
 
     /**
-     * The {@link OpenApiSecurityRequirements} value.
+     * {@link MapEntry} is an annotation for an {@link OpenApiSecurityRequirement} entry in an
+     * {@link AnnotationArrayIsMap} annotation method.
+     */
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface MapEntry { //@formatter:on
+
+        /**
+         * The map entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The map entry value.
+         */
+        @AnnotationArrayIsNullableValue
+        @AnnotationJsonObjectInline
+        OpenApiSecurityRequirement[] value() default {};
+    }
+
+    /**
+     * The {@link OpenApiSecurityRequirement} value.
      */
     @AnnotationArrayIsMap
-    @AnnotationMethodIsValue
-    OpenApiSecurityRequirement[] value() default {};
+    @AnnotationJsonObjectInline
+    Entry[] value() default {};
+
+    /**
+     * {@link Entry} is an annotation for the {@link OpenApiSecurityRequirement#value()} map.
+     * <p>
+     * Each name or URI <em>MUST</em> correspond to a security scheme as described above. If the security scheme is
+     * of type <code>"oauth2"</code> or <code>"openIdConnect"</code>, then the value is a list of scope names
+     * required for the execution, and the list <em>MAY</em> be empty if authorization does not require a specified
+     * scope. For other security scheme types, the array <em>MAY</em> contain a list of role names which are required
+     * for the execution, but are not otherwise defined or exchanged in-band.
+     */
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface Entry { //@formatter:on
+
+        /**
+         * The {@link OpenApiSecurityRequirement#value()} map entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The {@link OpenApiSecurityRequirement#value()} map entry value.
+         */
+        @AnnotationJsonSerializeEmptyArray
+        @AnnotationJsonObjectInline
+        String[] value() default {};
+    }
 }

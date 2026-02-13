@@ -1,7 +1,10 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.specification.server;
+package net.jacobpeterson.jet.openapiannotations.annotation;
 
-import net.jacobpeterson.jet.openapiannotations.annotation.specification.server.variable.OpenApiServerVariable;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -21,6 +24,29 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({})
 @Retention(RUNTIME)
 public @interface OpenApiServer {
+
+    /**
+     * {@link MapEntry} is an annotation for an {@link OpenApiServer} entry in an {@link AnnotationArrayIsMap}
+     * annotation method.
+     */
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface MapEntry { //@formatter:on
+
+        /**
+         * The map entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The map entry value.
+         */
+        @AnnotationArrayIsNullableValue
+        @AnnotationJsonObjectInline
+        OpenApiServer[] value() default {};
+    }
 
     /**
      * <strong><em>REQUIRED</em></strong>. A URL to the target host. This URL supports Server Variables and <em>MAY</em>
@@ -54,5 +80,5 @@ public @interface OpenApiServer {
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#server-variables">spec.openapis.org</a>
      */
     @AnnotationArrayIsMap
-    OpenApiServerVariable[] variables() default {};
+    OpenApiServerVariable.MapEntry[] variables() default {};
 }

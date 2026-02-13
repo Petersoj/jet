@@ -1,5 +1,10 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.specification.info.contact;
+package net.jacobpeterson.jet.openapiannotations.annotation;
 
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -19,6 +24,29 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({})
 @Retention(RUNTIME)
 public @interface OpenApiContact {
+
+    /**
+     * {@link MapEntry} is an annotation for an {@link OpenApiContact} entry in an {@link AnnotationArrayIsMap}
+     * annotation method.
+     */
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface MapEntry { //@formatter:on
+
+        /**
+         * The map entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The map entry value.
+         */
+        @AnnotationArrayIsNullableValue
+        @AnnotationJsonObjectInline
+        OpenApiContact[] value() default {};
+    }
 
     /**
      * The identifying name of the contact person/organization.

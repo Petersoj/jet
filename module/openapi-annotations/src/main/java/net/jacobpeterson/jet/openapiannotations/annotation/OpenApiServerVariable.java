@@ -1,8 +1,11 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.specification.server.variable;
+package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -24,11 +27,27 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface OpenApiServerVariable {
 
     /**
-     * The variable name.
+     * {@link MapEntry} is an annotation for an {@link OpenApiServerVariable} entry in an {@link AnnotationArrayIsMap}
+     * annotation method.
      */
-    @AnnotationJsonIgnore
-    @AnnotationArrayIsMapKey
-    String name() default "";
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface MapEntry { //@formatter:on
+
+        /**
+         * The map entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The map entry value.
+         */
+        @AnnotationArrayIsNullableValue
+        @AnnotationJsonObjectInline
+        OpenApiServerVariable[] value() default {};
+    }
 
     /**
      * An enumeration of string values to be used if the substitution options are from a limited set. The array
@@ -41,8 +60,8 @@ public @interface OpenApiServerVariable {
     String[] enum_() default {};
 
     /**
-     * <strong><em>REQUIRED</em></strong>. The default value to use for substitution, which <em>SHALL</em> be sent if
-     * an alternate value is <em>not</em> supplied. If the
+     * <strong><em>REQUIRED</em></strong>. The default value to use for substitution, which <em>SHALL</em> be sent
+     * if an alternate value is <em>not</em> supplied. If the
      * <a href="https://spec.openapis.org/oas/v3.2.0.html#server-variable-enum"><code>enum</code></a>
      * is defined, the value <em>MUST</em> exist in the enum’s values. Note that this behavior is different from the
      * <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-object">Schema Object's</a> <code>default</code>

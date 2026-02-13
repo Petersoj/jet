@@ -1,19 +1,20 @@
-package net.jacobpeterson.jet.openapiannotations.annotation.specification.path;
+package net.jacobpeterson.jet.openapiannotations.annotation;
 
-import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
-import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationMethodIsValue;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link OpenApiPath} is an annotation for the
+ * {@link OpenApiPaths} is an annotation for the
  * <a href="https://spec.openapis.org/oas/v3.2.0.html#paths-object">OpenAPI Paths Object</a>.
  * <p>
  * Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL from the
@@ -24,13 +25,34 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#paths-object">spec.openapis.org</a>
  */
 @NullMarked
-@Target({})
+@Target({METHOD})
 @Retention(RUNTIME)
-public @interface OpenApiPath {
+public @interface OpenApiPaths {
 
     /**
-     * The {@link OpenApi#paths()} entry key.
-     * <p>
+     * {@link MapEntry} is an annotation for an {@link OpenApiPaths} entry in an {@link AnnotationArrayIsMap}
+     * annotation method.
+     */
+    @Target({})
+    @Retention(RUNTIME) //@formatter:off
+    @interface MapEntry { //@formatter:on
+
+        /**
+         * The map entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The map entry value.
+         */
+        @AnnotationArrayIsNullableValue
+        @AnnotationJsonObjectInline
+        OpenApiPaths[] value() default {};
+    }
+
+    /**
      * A relative path to an individual endpoint. The field name <em>MUST</em> begin with a forward slash
      * (<code>/</code>). The URL from the <a href="https://spec.openapis.org/oas/v3.2.0.html#server-object">Server
      * Object</a>’s <code>url</code> field, resolved and with template variables substituted, has the path
@@ -39,17 +61,10 @@ public @interface OpenApiPath {
      * URLs, concrete (non-templated) paths would be matched before their templated counterparts. Templated paths with
      * the same hierarchy but different templated names <em>MUST NOT</em> exist as they are identical. In case of
      * ambiguous matching, it’s up to the tooling to decide which one to use.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#paths-path">spec.openapis.org</a>
      */
-    @AnnotationJsonIgnore
-    @AnnotationArrayIsMapKey
-    String path() default "";
-
-    /**
-     * The {@link OpenApi#paths()} entry value {@link OpenApiPathItem}.
-     * <p>
-     * Note: this array must only contain one element (see {@link AnnotationArrayIsNullableValue}).
-     */
-    @AnnotationArrayIsNullableValue
-    @AnnotationMethodIsValue
-    OpenApiPathItem[] item() default {};
+    @AnnotationArrayIsMap
+    @AnnotationJsonObjectInline
+    OpenApiPathItem.MapEntry[] value() default {};
 }
