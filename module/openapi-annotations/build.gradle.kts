@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":module:server"))
 
-    implementation("com.google.code.gson:gson:2.13.2")
+    api("com.google.code.gson:gson:2.13.2")
 
     implementation("com.networknt:json-schema-validator:3.0.0")
 
