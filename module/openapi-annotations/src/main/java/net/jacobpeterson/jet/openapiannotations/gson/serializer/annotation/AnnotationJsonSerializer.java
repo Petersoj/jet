@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
@@ -24,15 +25,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import static java.util.Arrays.stream;
-import static java.util.HashMap.newHashMap;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static net.jacobpeterson.jet.openapiannotations.util.reflection.ReflectionUtil.getFullClassName;
 
 /**
- * {@link AnnotationJsonSerializer} is an {@link Annotation} {@link JsonSerializer} that uses reflection to invoke the
- * {@link Class#getDeclaredMethods()} of the {@link Annotation#annotationType()} and uses reflection to handle
+ * {@link AnnotationJsonSerializer} is a {@link JsonSerializer} for {@link Annotation} that uses reflection to invoke
+ * the {@link Class#getDeclaredMethods()} of the {@link Annotation#annotationType()} and uses reflection to handle
  * {@link SerializedName}, {@link AnnotationJsonIgnore}, {@link AnnotationJsonSerializeEmptyArray},
- * {@link AnnotationJsonObjectInline}, {@link AnnotationArrayIsNullableValue}, {@link AnnotationArrayIsMap}, and
- * {@link AnnotationArrayIsMapKey}.
+ * {@link AnnotationJsonObjectInline}, {@link AnnotationArrayIsNullableValue}, {@link AnnotationJsonRawString},
+ * {@link AnnotationArrayIsMap}, and {@link AnnotationArrayIsMapKey}.
  */
 @NullMarked
 public final class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
@@ -94,9 +97,9 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         return jsonObject;
     }
 
-    private JsonElement getMethodJsonValue(final JsonSerializationContext context, final Annotation src,
+    private JsonElement getMethodJsonValue(final JsonSerializationContext context, final Object annotationObject,
             final Method method) {
-        final var value = invokeAnnotationMethod(method, src);
+        final var value = invokeAnnotationMethod(method, annotationObject);
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
             if (!(value instanceof final String valueString)) {
                 throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
@@ -129,21 +132,32 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? new JsonObject() :
                         JsonNull.INSTANCE;
             }
-            final var keyMethod = stream(method.getReturnType().getComponentType().getDeclaredMethods())
+            final var keyMethods = stream(method.getReturnType().getComponentType().getDeclaredMethods())
                     .filter(entryMethod -> entryMethod.isAnnotationPresent(AnnotationArrayIsMapKey.class))
-                    .findFirst()
-                    .orElseThrow();
-            final var map = newHashMap(length); // Use `Map` in case of `enableComplexMapKeySerialization()`
+                    .toList();
+            final var map = new JsonObject();
             for (var index = 0; index < length; index++) {
                 final var entry = Array.get(value, index);
-                final var key = invokeAnnotationMethod(keyMethod, entry);
-                if (map.put(key, entry) != null) {
-                    throw new IllegalArgumentException("`@%s.%s` duplicate `@%s.%s`: %s".formatted(
-                            getFullClassName(method.getDeclaringClass()), method.getName(),
-                            getFullClassName(method.getReturnType().getComponentType()), keyMethod.getName(), key));
+                final var key = keyMethods.stream()
+                        .map(keyMethod -> getMethodJsonValue(context, entry, keyMethod))
+                        .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
+                        .filter(JsonPrimitive::isString).map(JsonPrimitive::getAsString)
+                        .collect(collectingAndThen(toUnmodifiableList(), keys -> {
+                            if (keys.size() != 1) {
+                                throw new IllegalArgumentException("One key must be set: " + keyMethods.stream()
+                                        .map(keyMethod -> "`@%s.%s`".formatted(
+                                                getFullClassName(keyMethod.getDeclaringClass()),
+                                                keyMethod.getName()))
+                                        .collect(joining(", ")));
+                            }
+                            return keys.getFirst();
+                        }));
+                if (map.asMap().put(key, context.serialize(entry)) != null) {
+                    throw new IllegalArgumentException("`@%s.%s` duplicate key: %s".formatted(
+                            getFullClassName(method.getDeclaringClass()), method.getName(), key));
                 }
             }
-            return context.serialize(map);
+            return map;
         }
         if (length == 0) {
             return method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class) ? new JsonArray() :
