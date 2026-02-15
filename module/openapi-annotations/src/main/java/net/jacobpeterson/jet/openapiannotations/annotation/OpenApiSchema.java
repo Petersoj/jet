@@ -5,6 +5,7 @@ import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annot
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonIgnore;
 import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.gson.serializer.annotation.annotation.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -63,5 +64,19 @@ public @interface OpenApiSchema {
         OpenApiSchema[] value() default {};
     }
 
-    // TODO
+    /**
+     * The {@link OpenApiSchema} value.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String value() default "";
+
+    /**
+     * The {@link Class} to generate a JSON schema from.
+     * <p>
+     * If {@link #value()} is set, the generated JSON schema is combined with it.
+     */
+    @AnnotationJsonIgnore
+    @AnnotationArrayIsNullableValue
+    Class<?>[] from() default {};
 }
