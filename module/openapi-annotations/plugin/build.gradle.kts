@@ -1,6 +1,7 @@
 plugins {
     id("module-common")
     `java-gradle-plugin`
+    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
     id("com.gradle.plugin-publish") version "2.0.0"
 }
 
