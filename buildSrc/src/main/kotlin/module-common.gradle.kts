@@ -7,6 +7,7 @@ plugins {
     `java-library`
     jacoco
     `maven-publish`
+
     id("io.freefair.lombok")
     id("net.ltgt.errorprone")
     id("com.github.ben-manes.versions")
@@ -30,7 +31,6 @@ val guavaVersion = "33.5.0-jre"
 
 dependencies {
     api("org.jspecify:jspecify:1.0.0")
-
     api("com.google.guava:guava:$guavaVersion")
 
     implementation("org.slf4j:slf4j-api:2.0.17")
@@ -87,6 +87,8 @@ tasks.javadoc.configure {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "ON_SUCCESS")
+    systemProperty("java.io.tmpdir", temporaryDir.path)
     testLogging {
         events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
         showStandardStreams = true
