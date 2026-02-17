@@ -3,6 +3,8 @@ package net.jacobpeterson.jet.openapiannotations.annotation;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
 
@@ -217,4 +219,11 @@ public @interface OpenApi {
      */
     @AnnotationArrayIsNullableValue
     OpenApiExternalDoc[] externalDocs() default {};
+
+    /**
+     * {@link OpenApi} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

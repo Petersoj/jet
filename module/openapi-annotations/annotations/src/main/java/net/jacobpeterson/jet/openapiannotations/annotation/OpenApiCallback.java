@@ -5,6 +5,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayI
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonIgnore;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -64,4 +65,11 @@ public @interface OpenApiCallback {
     @AnnotationArrayIsMap
     @AnnotationJsonObjectInline
     OpenApiPathItem.MapEntry[] value() default {};
+
+    /**
+     * {@link OpenApiCallback} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

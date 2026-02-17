@@ -6,6 +6,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayI
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonIgnore;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Retention;
@@ -185,4 +186,11 @@ public @interface OpenApiOperation {
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#operation-servers">spec.openapis.org</a>
      */
     OpenApiServer[] servers() default {};
+
+    /**
+     * {@link OpenApiOperation} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

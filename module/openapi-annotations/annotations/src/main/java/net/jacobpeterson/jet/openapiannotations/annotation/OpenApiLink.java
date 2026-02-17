@@ -150,4 +150,11 @@ public @interface OpenApiLink {
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#link-server">spec.openapis.org</a>
      */
     OpenApiServer[] server() default {};
+
+    /**
+     * {@link OpenApiLink} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

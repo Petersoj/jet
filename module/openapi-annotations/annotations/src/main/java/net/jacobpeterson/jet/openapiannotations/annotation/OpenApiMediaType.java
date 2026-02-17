@@ -134,4 +134,11 @@ public @interface OpenApiMediaType {
      */
     @AnnotationArrayIsNullableValue
     OpenApiEncoding[] itemEncoding() default {};
+
+    /**
+     * {@link OpenApiMediaType} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

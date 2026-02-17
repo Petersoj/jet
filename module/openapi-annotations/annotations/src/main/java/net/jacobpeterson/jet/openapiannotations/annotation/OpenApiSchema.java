@@ -65,18 +65,19 @@ public @interface OpenApiSchema {
     }
 
     /**
-     * The {@link OpenApiSchema} value.
-     */
-    @AnnotationJsonRawString
-    @AnnotationJsonObjectInline
-    String value() default "";
-
-    /**
      * The {@link Class} to generate a JSON schema from.
      * <p>
-     * If {@link #value()} is set, the generated JSON schema is combined with it.
+     * If {@link #rawJson()} is set, the JSON schema object generated from this {@link Class} is combined with the
+     * {@link #rawJson()} object.
      */
     @AnnotationJsonIgnore
     @AnnotationArrayIsNullableValue
     Class<?>[] from() default {};
+
+    /**
+     * {@link OpenApiSchema} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

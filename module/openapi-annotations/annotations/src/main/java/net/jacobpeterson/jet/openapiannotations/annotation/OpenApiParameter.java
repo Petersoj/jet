@@ -446,4 +446,11 @@ public @interface OpenApiParameter {
     @AnnotationArrayIsMap
     @SerializedName("content")
     OpenApiReference.MapEntry[] contentReferences() default {};
+
+    /**
+     * {@link OpenApiParameter} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

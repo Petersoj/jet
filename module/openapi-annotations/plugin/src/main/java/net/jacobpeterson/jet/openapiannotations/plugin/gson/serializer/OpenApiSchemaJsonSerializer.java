@@ -36,10 +36,10 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
         }
         checkArgument(from.length == 1, "`@OpenApiSchema.from` cannot contain more than one `Class`");
         final var generatedSchema = schemaGenerator.generateSchema(from[0]);
-        final var value = src.value();
-        if (!value.isEmpty()) {
-            final var valueJsonNode = JACKSON_OBJECT_MAPPER.readTree(value);
-            checkArgument(valueJsonNode.isObject(), "`@OpenApiSchema.value` must be a JSON object");
+        final var rawJson = src.rawJson();
+        if (!rawJson.isEmpty()) {
+            final var valueJsonNode = JACKSON_OBJECT_MAPPER.readTree(rawJson);
+            checkArgument(valueJsonNode.isObject(), "`@OpenApiSchema.rawJson` must be a JSON object");
             generatedSchema.setAll((ObjectNode) valueJsonNode);
         }
         return serializeAsAnnotationClass(context, new OpenApiSchemaWrapper(generatedSchema.toString()));
@@ -53,16 +53,16 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
     @SuppressWarnings({"ClassExplicitlyAnnotation", "ImmutableAnnotationChecker"})
     private static class OpenApiSchemaWrapper implements OpenApiSchema {
 
-        String value;
-
-        @Override
-        public String value() {
-            return value;
-        }
+        String rawJson;
 
         @Override
         public Class<?>[] from() {
             return new Class[]{};
+        }
+
+        @Override
+        public String rawJson() {
+            return rawJson;
         }
 
         @Override

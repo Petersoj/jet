@@ -122,4 +122,11 @@ public @interface OpenApiExample {
      */
     @AnnotationJsonRawString
     String value() default "";
+
+    /**
+     * {@link OpenApiExample} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

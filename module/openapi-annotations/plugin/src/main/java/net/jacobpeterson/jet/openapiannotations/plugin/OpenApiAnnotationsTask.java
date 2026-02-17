@@ -4,6 +4,8 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import lombok.EqualsAndHashCode;
@@ -232,7 +234,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
                                     .formatAssertionsEnabled(true)
                                     .annotationCollectionEnabled(true)));
                     if (!errors.isEmpty()) {
-                        throw new IllegalArgumentException(errors.stream()
+                        throw new IllegalArgumentException("\n" + errors.stream()
                                 .map(error -> "OpenAPIv%s schema offense%s: %s".formatted(DEFAULT_OPENAPI,
                                         getInAnnotationGroupErrorMessage(groupName), error.toString()))
                                 .collect(joining("\n")));
@@ -268,6 +270,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
         private final @Getter List<OpenApiSecurityRequirement> security = new ArrayList<>();
         private final @Getter List<OpenApiTag> tags = new ArrayList<>();
         private @Getter @Nullable OpenApiExternalDoc externalDocs;
+        private final List<String> rawJsons = new ArrayList<>();
 
         private void wrap(final OpenApi openApi, final String annotationUsageLocation) throws IllegalArgumentException {
             final var annotationOutputValidation = openApi.annotationOutputValidation();
@@ -366,6 +369,11 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
                     this.externalDocs = externalDocs[0];
                 }
             }
+
+            final var rawJson = openApi.rawJson();
+            if (!rawJson.isEmpty()) {
+                rawJsons.add(rawJson);
+            }
         }
 
         private void printErrorArrayIsNullableValue(final String methodName, final String annotationUsageLocation) {
@@ -463,6 +471,12 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             return externalDocs == null ? new OpenApiExternalDoc[]{} : new OpenApiExternalDoc[]{externalDocs};
         }
 
+        @EqualsAndHashCode.Include
+        @Override
+        public String rawJson() {
+            return combineRawJsons(rawJsons);
+        }
+
         @Override
         public Class<? extends Annotation> annotationType() {
             return OpenApi.class;
@@ -471,18 +485,30 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @SuppressWarnings({"ClassExplicitlyAnnotation", "ImmutableAnnotationChecker"})
-    private static final class OpenApiPathsWrapper implements OpenApiPaths {
+    private final class OpenApiPathsWrapper implements OpenApiPaths {
 
         private final List<OpenApiPathItem.MapEntry> value = new ArrayList<>();
+        private final List<String> rawJsons = new ArrayList<>();
 
         private void wrap(final OpenApiPaths openApiPaths) {
             value.addAll(List.of(openApiPaths.value()));
+
+            final var rawJson = openApiPaths.rawJson();
+            if (!rawJson.isEmpty()) {
+                rawJsons.add(rawJson);
+            }
         }
 
         @EqualsAndHashCode.Include
         @Override
         public OpenApiPathItem.MapEntry[] value() {
             return value.toArray(OpenApiPathItem.MapEntry[]::new);
+        }
+
+        @EqualsAndHashCode.Include
+        @Override
+        public String rawJson() {
+            return combineRawJsons(rawJsons);
         }
 
         @Override
@@ -493,7 +519,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @SuppressWarnings({"ClassExplicitlyAnnotation", "ImmutableAnnotationChecker"})
-    private static final class OpenApiComponentsWrapper implements OpenApiComponents {
+    private final class OpenApiComponentsWrapper implements OpenApiComponents {
 
         private final List<OpenApiSchema.MapEntry> schemas = new ArrayList<>();
         private final List<OpenApiResponse.MapEntry> responses = new ArrayList<>();
@@ -515,6 +541,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
         private final List<OpenApiPathItem.MapEntry> pathItems = new ArrayList<>();
         private final List<OpenApiMediaType.MapEntry> mediaTypes = new ArrayList<>();
         private final List<OpenApiReference.MapEntry> mediaTypeReferences = new ArrayList<>();
+        private final List<String> rawJsons = new ArrayList<>();
 
         private void wrap(final OpenApiComponents openApiComponents) {
             schemas.addAll(List.of(openApiComponents.schemas()));
@@ -537,6 +564,11 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             pathItems.addAll(List.of(openApiComponents.pathItems()));
             mediaTypes.addAll(List.of(openApiComponents.mediaTypes()));
             mediaTypeReferences.addAll(List.of(openApiComponents.mediaTypeReferences()));
+
+            final var rawJson = openApiComponents.rawJson();
+            if (!rawJson.isEmpty()) {
+                rawJsons.add(rawJson);
+            }
         }
 
         @EqualsAndHashCode.Include
@@ -659,10 +691,27 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             return mediaTypeReferences.toArray(OpenApiReference.MapEntry[]::new);
         }
 
+        @EqualsAndHashCode.Include
+        @Override
+        public String rawJson() {
+            return combineRawJsons(rawJsons);
+        }
+
         @Override
         public Class<? extends Annotation> annotationType() {
             return OpenApiComponents.class;
         }
+    }
+
+    private String combineRawJsons(final List<String> rawJsons) {
+        return rawJsons.stream()
+                .map(json -> JsonParser.parseString(json)
+                        .getAsJsonObject()) // Throws `IllegalStateException` as needed with a detailed message
+                .reduce((a, b) -> {
+                    a.asMap().putAll(b.asMap());
+                    return a;
+                }).map(JsonObject::toString)
+                .orElse("");
     }
 
     private String getInAnnotationGroupErrorMessage(final String annotationGroupName) {

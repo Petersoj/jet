@@ -6,11 +6,13 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.jspecify.annotations.NullMarked;
 import tools.jackson.databind.JacksonModule;
 
 /**
  * {@link OpenApiAnnotationsExtension} is a Gradle extension for {@link OpenApiAnnotationsPlugin}.
  */
+@NullMarked
 public abstract class OpenApiAnnotationsExtension {
 
     /**

@@ -5,6 +5,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayI
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonIgnore;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonObjectInline;
+import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
 
@@ -109,4 +110,11 @@ public @interface OpenApiSecurityRequirement {
         @AnnotationJsonObjectInline
         String[] value() default {};
     }
+
+    /**
+     * {@link OpenApiSecurityRequirement} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }

@@ -199,4 +199,11 @@ public @interface OpenApiHeader {
     @AnnotationArrayIsMap
     @SerializedName("content")
     OpenApiReference.MapEntry[] contentReferences() default {};
+
+    /**
+     * {@link OpenApiHeader} raw JSON.
+     */
+    @AnnotationJsonRawString
+    @AnnotationJsonObjectInline
+    String rawJson() default "";
 }
