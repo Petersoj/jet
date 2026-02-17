@@ -8,11 +8,5 @@ dependencies {
 }
 
 publishing {
-    publications {
-        getByName<MavenPublication>("maven") {
-            pom {
-                description = "The common module for Jet libraries."
-            }
-        }
-    }
+    publications.getByName<MavenPublication>("maven").pom.description = "The common module for Jet libraries."
 }

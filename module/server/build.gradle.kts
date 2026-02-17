@@ -33,11 +33,6 @@ dependencies {
 }
 
 publishing {
-    publications {
-        getByName<MavenPublication>("maven") {
-            pom {
-                description = "A simple, modern, turnkey, Java web server library."
-            }
-        }
-    }
+    publications.getByName<MavenPublication>("maven").pom.description =
+            "A simple, modern, turnkey, Java web server library."
 }

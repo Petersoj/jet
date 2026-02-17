@@ -7,6 +7,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.function.Predicate;
 
@@ -19,8 +20,10 @@ import java.util.function.Predicate;
  * @see
  * <a href="https://github.com/victools/jsonschema-generator/pull/448">github.com/victools/jsonschema-generator/pull/448</a>
  */
+@NullMarked
 public class GsonModule implements Module {
 
+    @SuppressWarnings("ConstantValue")
     @Override
     public void applyToConfigBuilder(final SchemaGeneratorConfigBuilder builder) {
         builder.forFields()

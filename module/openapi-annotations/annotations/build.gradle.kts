@@ -9,11 +9,6 @@ dependencies {
 }
 
 publishing {
-    publications {
-        getByName<MavenPublication>("maven") {
-            pom {
-                description = "A code-first OpenAPI specification annotations library."
-            }
-        }
-    }
+    publications.getByName<MavenPublication>("maven").pom.description =
+            "A code-first OpenAPI specification annotations library."
 }

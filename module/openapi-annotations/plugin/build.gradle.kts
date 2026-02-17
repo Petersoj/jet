@@ -5,15 +5,6 @@ plugins {
     id("com.gradle.plugin-publish") version "2.0.0"
 }
 
-gradlePlugin {
-    plugins {
-        create("openApiAnnotationsPlugin") {
-            id = "net.jacobpeterson.jet.openapiannotations.plugin"
-            implementationClass = "net.jacobpeterson.jet.openapiannotations.plugin.OpenApiAnnotationsPlugin"
-        }
-    }
-}
-
 dependencies {
     api(project(":module:openapi-annotations:annotations"))
 
@@ -25,11 +16,6 @@ dependencies {
 }
 
 publishing {
-    publications {
-        getByName<MavenPublication>("maven") {
-            pom {
-                description = "A code-first OpenAPI specification annotations processor Gradle plugin."
-            }
-        }
-    }
+    publications.getByName<MavenPublication>("maven").pom.description =
+            "A code-first OpenAPI specification annotations processor Gradle plugin."
 }
