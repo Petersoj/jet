@@ -9,6 +9,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonOb
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -448,7 +449,8 @@ public @interface OpenApiParameter {
     OpenApiReference.MapEntry[] contentReferences() default {};
 
     /**
-     * {@link OpenApiParameter} raw JSON.
+     * {@link OpenApiParameter} raw JSON object {@link String}, merged with the existing JSON object created from the
+     * serialization of this {@link Annotation}.
      */
     @AnnotationJsonRawString
     @AnnotationJsonObjectInline

@@ -4,7 +4,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
@@ -36,15 +36,16 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSecurityScheme
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiServer;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiTag;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.AnnotationJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.EmptyStringIsNullJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.HeaderJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.MethodJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.OpenApiSchemaJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.StatusJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.EmptyStringIsNullJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.HeaderJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.MethodJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.OpenApiSchemaJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.StatusJsonSerializer;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -377,13 +378,13 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
         }
 
         private void printErrorArrayIsNullableValue(final String methodName, final String annotationUsageLocation) {
-            throw new IllegalArgumentException(("%s: `@OpenApi.%s` is annotated with `@%s`, but the array " +
+            throw new IllegalArgumentException(("`%s`: `@OpenApi.%s` is annotated with `@%s`, but the array " +
                     "contains more than one element").formatted(annotationUsageLocation,
                     methodName, getClassName(AnnotationArrayIsNullableValue.class)));
         }
 
         private void printErrorDuplicate(final String methodName, final String annotationUsageLocation) {
-            throw new IllegalArgumentException("%s: duplicate `@OpenApi.%s`%s".formatted(annotationUsageLocation,
+            throw new IllegalArgumentException("`%s`: duplicate `@OpenApi.%s`%s".formatted(annotationUsageLocation,
                     methodName, getInAnnotationGroupErrorMessage(annotationGroupName)));
         }
 
@@ -705,12 +706,9 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
     private String combineRawJsons(final List<String> rawJsons) {
         return rawJsons.stream()
-                .map(json -> JsonParser.parseString(json)
-                        .getAsJsonObject()) // Throws `IllegalStateException` as needed with a detailed message
-                .reduce((a, b) -> {
-                    a.asMap().putAll(b.asMap());
-                    return a;
-                }).map(JsonObject::toString)
+                .map(JsonParser::parseString)
+                .reduce(GsonUtil::combine)
+                .map(JsonElement::toString)
                 .orElse("");
     }
 

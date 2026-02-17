@@ -8,6 +8,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRa
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonSerializeEmptyArray;
 import org.jspecify.annotations.NullMarked;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -221,7 +222,8 @@ public @interface OpenApi {
     OpenApiExternalDoc[] externalDocs() default {};
 
     /**
-     * {@link OpenApi} raw JSON.
+     * {@link OpenApi} raw JSON object {@link String}, merged with the existing JSON object created from the
+     * serialization of this {@link Annotation}.
      */
     @AnnotationJsonRawString
     @AnnotationJsonObjectInline

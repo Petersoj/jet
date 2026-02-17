@@ -10,6 +10,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonOb
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -233,7 +234,8 @@ public @interface OpenApiPathItem {
     OpenApiReference[] parameterReferences() default {};
 
     /**
-     * {@link OpenApiPathItem} raw JSON.
+     * {@link OpenApiPathItem} raw JSON object {@link String}, merged with the existing JSON object created from the
+     * serialization of this {@link Annotation}.
      */
     @AnnotationJsonRawString
     @AnnotationJsonObjectInline
