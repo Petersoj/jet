@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.openapischema;
+package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.google.gson.JsonElement;

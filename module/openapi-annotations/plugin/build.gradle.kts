@@ -17,7 +17,10 @@ gradlePlugin {
 dependencies {
     api(project(":module:openapi-annotations:annotations"))
 
-    api("com.github.victools:jsonschema-generator:5.0.0")
+    val jsonschemaGeneratorVersion = "5.0.0"
+    api("com.github.victools:jsonschema-generator:$jsonschemaGeneratorVersion")
+    api("com.github.victools:jsonschema-module-jackson:$jsonschemaGeneratorVersion")
+
     api("com.networknt:json-schema-validator:3.0.0")
 }
 

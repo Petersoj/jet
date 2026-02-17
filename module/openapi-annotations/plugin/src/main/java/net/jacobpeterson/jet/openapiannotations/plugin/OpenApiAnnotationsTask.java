@@ -1,5 +1,8 @@
 package net.jacobpeterson.jet.openapiannotations.plugin;
 
+import com.github.victools.jsonschema.generator.SchemaGenerator;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.google.gson.GsonBuilder;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
@@ -31,15 +34,26 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSecurityScheme
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiServer;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiTag;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.header.HeaderJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.method.MethodJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.status.StatusJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.string.EmptyStringIsNullJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.AnnotationJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.EmptyStringIsNullJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.HeaderJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.MethodJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.OpenApiSchemaJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.StatusJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsModule;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.Directory;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Property;
+import org.gradle.api.provider.SetProperty;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.OutputDirectories;
+import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -62,6 +76,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.github.victools.jsonschema.generator.OptionPreset.PLAIN_JSON;
+import static com.github.victools.jsonschema.generator.SchemaVersion.DRAFT_2020_12;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.networknt.schema.InputFormat.JSON;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -75,38 +91,35 @@ import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAUL
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_SCHEMA;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.reflection.ReflectionUtil.getClassName;
+import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 /**
  * {@link OpenApiAnnotationsTask} is the {@link DefaultTask} for {@link OpenApiAnnotationsPlugin}.
  */
 @NullMarked
-public class OpenApiAnnotationsTask extends DefaultTask {
+@CacheableTask
+public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
-    /**
-     * The output directory name: <code>"jet-openapi-annotations"</code>
-     */
-    public static final String OUTPUT_DIRECTORY_NAME = "jet-openapi-annotations";
+    @InputFiles @PathSensitive(RELATIVE)
+    public abstract SetProperty<JavaCompile> getJavaCompileTasks();
 
-    private final TaskCollection<JavaCompile> javaCompileTasks;
-    private final Directory outputDirectory;
+    @Input @Optional
+    public abstract Property<SchemaGeneratorConfigProvider> getSchemaGeneratorConfig();
 
-    public OpenApiAnnotationsTask() {
-        setGroup("Build");
-        setDescription("A code-first OpenAPI specification annotations processor Gradle plugin.");
+    @Input
+    public abstract Property<Boolean> getSchemaGeneratorGsonModule();
 
-        javaCompileTasks = getProject().getTasks().withType(JavaCompile.class);
-        getInputs().files(javaCompileTasks);
+    @Input
+    public abstract Property<Boolean> getSchemaGeneratorJacksonModule();
 
-        outputDirectory = getProject().getLayout().getBuildDirectory().dir(OUTPUT_DIRECTORY_NAME).get();
-        getOutputs().dir(outputDirectory);
-        getOutputs().cacheIf(_ -> true);
-    }
+    @OutputDirectories
+    public abstract DirectoryProperty getOutputDirectory();
 
     @TaskAction
     public void run() {
         final var classLoaderUris = new HashSet<URI>();
         final var javaCompileClassNames = new HashSet<String>();
-        for (final var javaCompileTask : javaCompileTasks) {
+        for (final var javaCompileTask : getJavaCompileTasks().get()) {
             for (final var classPath : javaCompileTask.getClasspath()) {
                 if (!classPath.exists()) {
                     continue;
@@ -168,12 +181,26 @@ public class OpenApiAnnotationsTask extends DefaultTask {
             }
             final var annotationGson = new GsonBuilder()
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer())
+                    .registerTypeHierarchyAdapter(OpenApiSchema.class, new OpenApiSchemaJsonSerializer(
+                            new SchemaGenerator(getSchemaGeneratorConfig()
+                                    .getOrElse((SchemaGeneratorConfigProvider) () -> {
+                                        final var builder = new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)
+                                                .with(new JSpecifyAnnotationsModule());
+                                        if (getSchemaGeneratorGsonModule().get()) {
+                                            builder.with(new GsonModule());
+                                        }
+                                        if (getSchemaGeneratorJacksonModule().get()) {
+                                            builder.with(new JacksonSchemaModule());
+                                        }
+                                        return builder.build();
+                                    }).provide())))
                     .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
                     .registerTypeAdapter(Method.class, new MethodJsonSerializer())
                     .registerTypeAdapter(Status.class, new StatusJsonSerializer())
                     .registerTypeAdapter(Header.class, new HeaderJsonSerializer())
                     .create();
             Schema schema = null;
+            final var outputDirectory = getOutputDirectory().get().getAsFile().toPath();
             for (final var openApiWrapperOfGroupName : openApiWrappersOfGroupNames.entrySet()) {
                 final var groupName = openApiWrapperOfGroupName.getKey();
                 final var openApiWrapper = openApiWrapperOfGroupName.getValue();
@@ -212,7 +239,7 @@ public class OpenApiAnnotationsTask extends DefaultTask {
                     }
                 }
                 try {
-                    writeString(outputDirectory.getAsFile().toPath().resolve("openapi%s.json"
+                    writeString(outputDirectory.resolve("openapi%s.json"
                             .formatted(!groupName.isEmpty() ? "-" + groupName : "")), openApiJson);
                 } catch (final IOException ioException) {
                     throw new RuntimeException(ioException);
