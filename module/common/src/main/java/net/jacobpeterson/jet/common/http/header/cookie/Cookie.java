@@ -301,7 +301,7 @@ public final class Cookie {
         @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder maxAge(final long maxAge) {
             requireHttpCookieBuilder(true);
-            httpCookieBuilder.maxAge(max(0, maxAge));
+            httpCookieBuilder.maxAge(max(0, maxAge)); // TODO https://github.com/jetty/jetty.project/pull/14311
             return this;
         }
 
