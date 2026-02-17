@@ -48,7 +48,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         final var valueInlinedMethods = methods.stream()
                 .filter(method -> method.isAnnotationPresent(AnnotationJsonObjectInline.class))
                 .toList();
-        if (valueInlinedMethods.size() == 1) {
+        if (methods.size() == 1 && valueInlinedMethods.size() == 1) {
             return getMethodJsonValue(context, src, valueInlinedMethods.getFirst());
         }
         final var jsonObject = new JsonObject();
@@ -72,9 +72,12 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                     method.getAnnotation(SerializedName.class).value() : method.getName();
             final var existingJsonValue = jsonObject.get(jsonKey);
             if (existingJsonValue != null && !existingJsonValue.isJsonNull()) {
+                if (jsonValue.isJsonNull()) {
+                    continue;
+                }
                 if (!existingJsonValue.getClass().equals(jsonValue.getClass()) || existingJsonValue.isJsonPrimitive()) {
                     throw new IllegalArgumentException(("`@%s` contains multiple methods with a serialized name of " +
-                            "\"%s\", but their return types cannot be combined").formatted(
+                            "\"%s\", but their return types cannot be merged").formatted(
                             getClassName(method.getDeclaringClass()), jsonKey));
                 }
                 if (existingJsonValue.isJsonObject()) {
