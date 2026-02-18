@@ -97,11 +97,11 @@ import static net.jacobpeterson.jet.openapiannotations.plugin.util.reflection.Re
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 /**
- * {@link OpenApiAnnotationsTask} is the {@link DefaultTask} for {@link OpenApiAnnotationsPlugin}.
+ * {@link JetOpenApiAnnotationsTask} is the {@link DefaultTask} for {@link JetOpenApiAnnotationsPlugin}.
  */
 @NullMarked
 @CacheableTask
-public abstract class OpenApiAnnotationsTask extends DefaultTask {
+public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     @InputFiles @PathSensitive(RELATIVE)
     public abstract SetProperty<JavaCompile> getJavaCompileTasks();

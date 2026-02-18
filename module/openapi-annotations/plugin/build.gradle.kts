@@ -31,7 +31,7 @@ val projectDescription = "A code-first OpenAPI specification annotations process
 gradlePlugin {
     plugins.create("openApiAnnotationsPlugin") {
         id = "net.jacobpeterson.jet.openapiannotations.plugin"
-        implementationClass = "net.jacobpeterson.jet.openapiannotations.plugin.OpenApiAnnotationsPlugin"
+        implementationClass = "net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsPlugin"
         displayName = "Jet OpenAPI Annotations Plugin"
         description = projectDescription
         website = "https://$GITHUB_PROJECT_DOMAIN_PATH"

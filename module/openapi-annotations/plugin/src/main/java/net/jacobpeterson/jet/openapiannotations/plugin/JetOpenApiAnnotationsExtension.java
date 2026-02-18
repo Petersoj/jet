@@ -11,32 +11,33 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@link OpenApiAnnotationsExtension} is a Gradle extension for {@link OpenApiAnnotationsPlugin}.
+ * {@link JetOpenApiAnnotationsExtension} is a Gradle extension for {@link JetOpenApiAnnotationsPlugin}.
  */
 @NullMarked
-public abstract class OpenApiAnnotationsExtension {
+public abstract class JetOpenApiAnnotationsExtension {
 
     /**
      * The {@link JavaCompile} tasks that are used to read compiled class files and classpaths from in
-     * {@link OpenApiAnnotationsTask}.
+     * {@link JetOpenApiAnnotationsTask}.
      */
     public abstract SetProperty<JavaCompile> getJavaCompileTasks();
 
     /**
-     * The {@link SchemaGeneratorConfigProvider} for the {@link OpenApiAnnotationsTask}.
+     * The {@link SchemaGeneratorConfigProvider} for the {@link JetOpenApiAnnotationsTask}.
      */
     public abstract Property<SchemaGeneratorConfigProvider> getSchemaGeneratorConfig();
 
     /**
-     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link JSpecifyAnnotationsSchemaModule}
-     * if {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use
+     * {@link JSpecifyAnnotationsSchemaModule} if {@link #getSchemaGeneratorConfig()} is not provided, set to
+     * <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
 
     /**
-     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} if
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} if
      * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
@@ -44,7 +45,7 @@ public abstract class OpenApiAnnotationsExtension {
     public abstract Property<Boolean> getSchemaGeneratorModuleGson();
 
     /**
-     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link JacksonSchemaModule} if
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link JacksonSchemaModule} if
      * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
@@ -52,7 +53,7 @@ public abstract class OpenApiAnnotationsExtension {
     public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
 
     /**
-     * The {@link OpenApiAnnotationsTask} output directory.
+     * The {@link JetOpenApiAnnotationsTask} output directory.
      */
     public abstract DirectoryProperty getOutputDirectory();
 }
