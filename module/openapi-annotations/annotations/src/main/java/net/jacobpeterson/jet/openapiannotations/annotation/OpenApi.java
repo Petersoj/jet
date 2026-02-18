@@ -58,11 +58,6 @@ public @interface OpenApi {
     String DEFAULT_ANNOTATION_GROUP_NAME = "";
 
     /**
-     * The default value for {@link #annotationOutputValidation()}: <code>true</code>
-     */
-    boolean DEFAULT_ANNOTATION_OUTPUT_VALIDATION = true;
-
-    /**
      * The default value for {@link #$schema()}:
      * <code>"https://spec.openapis.org/oas/3.2/schema/2025-09-17"</code>
      */
@@ -83,15 +78,6 @@ public @interface OpenApi {
      */
     @AnnotationJsonIgnore
     String annotationGroupName() default "";
-
-    /**
-     * Whether to validate the OpenAPI specification JSON output generated from {@link OpenApi} annotations.
-     * <p>
-     * Note: defaults to {@link #DEFAULT_ANNOTATION_OUTPUT_VALIDATION}.
-     */
-    @AnnotationJsonIgnore
-    @AnnotationArrayIsNullableValue
-    boolean[] annotationOutputValidation() default {};
 
     /**
      * The URL of the OpenAPI Specification JSON schema.
