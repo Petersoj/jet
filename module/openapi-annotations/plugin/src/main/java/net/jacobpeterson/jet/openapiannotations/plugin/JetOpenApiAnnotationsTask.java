@@ -103,6 +103,11 @@ import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 @CacheableTask
 public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
+    public JetOpenApiAnnotationsTask() {
+        setGroup("Build");
+        setDescription("A code-first OpenAPI specification annotations processor Gradle plugin.");
+    }
+
     @InputFiles @PathSensitive(RELATIVE)
     public abstract SetProperty<JavaCompile> getJavaCompileTasks();
 

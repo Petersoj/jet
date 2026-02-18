@@ -4,10 +4,12 @@ import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
+import org.gradle.api.Task;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.jvm.tasks.Jar;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -56,4 +58,12 @@ public abstract class JetOpenApiAnnotationsExtension {
      * The {@link JetOpenApiAnnotationsTask} output directory.
      */
     public abstract DirectoryProperty getOutputDirectory();
+
+    /**
+     * Set to <code>true</code> to include the {@link #getOutputDirectory()} in each {@link Jar} {@link Task}, set to
+     * <code>false</code> otherwise.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    public abstract Property<Boolean> getOutputDirectoryIncludeInJar();
 }

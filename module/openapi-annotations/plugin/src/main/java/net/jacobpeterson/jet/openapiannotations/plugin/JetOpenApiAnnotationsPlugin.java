@@ -4,6 +4,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.jvm.tasks.Jar;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -31,27 +32,40 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
     @Override
     public void apply(final Project project) {
         final var extension = project.getExtensions().create(EXTENSION_NAME, JetOpenApiAnnotationsExtension.class);
-        project.getTasks().register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
-            task.setGroup("Build");
-            task.setDescription("A code-first OpenAPI specification annotations processor Gradle plugin.");
+        extension.getJavaCompileTasks()
+                .convention(project.getTasks().withType(JavaCompile.class));
+        extension.getSchemaGeneratorModuleJSpecifyAnnotations()
+                .convention(false);
+        extension.getSchemaGeneratorModuleGson()
+                .convention(false);
+        extension.getSchemaGeneratorModuleJackson()
+                .convention(false);
+        extension.getOutputDirectory()
+                .convention(project.getLayout().getBuildDirectory().dir(BUILD_OUTPUT_DEFAULT_DIRECTORY_NAME));
+        final var registeredTask = project.getTasks().register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
             task.getJavaCompileTasks()
-                    .set(extension.getJavaCompileTasks()
-                            .convention(project.getTasks().withType(JavaCompile.class)));
+                    .set(extension.getJavaCompileTasks());
             task.getSchemaGeneratorConfig()
                     .set(extension.getSchemaGeneratorConfig());
             task.getSchemaGeneratorModuleJSpecifyAnnotations()
-                    .set(extension.getSchemaGeneratorModuleJSpecifyAnnotations()
-                            .convention(false));
+                    .set(extension.getSchemaGeneratorModuleJSpecifyAnnotations());
             task.getSchemaGeneratorModuleGson()
-                    .set(extension.getSchemaGeneratorModuleGson()
-                            .convention(false));
+                    .set(extension.getSchemaGeneratorModuleGson());
             task.getSchemaGeneratorModuleJackson()
-                    .set(extension.getSchemaGeneratorModuleJackson()
-                            .convention(false));
+                    .set(extension.getSchemaGeneratorModuleJackson());
             task.getOutputDirectory()
-                    .set(extension.getOutputDirectory()
-                            .convention(project.getLayout().getBuildDirectory()
-                                    .dir(BUILD_OUTPUT_DEFAULT_DIRECTORY_NAME)));
+                    .set(extension.getOutputDirectory());
+        });
+        project.afterEvaluate(evaluatedProject -> {
+            if (extension.getOutputDirectoryIncludeInJar().getOrElse(true)) {
+                evaluatedProject.getTasks().withType(Jar.class).configureEach(jarTask -> {
+                    jarTask.dependsOn(registeredTask);
+                    final var task = registeredTask.get();
+                    jarTask.from(task.getOutputDirectory(), copySpec ->
+                            copySpec.into(project.getLayout().getBuildDirectory().get().getAsFile().toPath().relativize(
+                                    task.getOutputDirectory().get().getAsFile().toPath()).toString()));
+                });
+            }
         });
     }
 }
