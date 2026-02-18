@@ -21,6 +21,11 @@ dependencies {
     api("com.networknt:json-schema-validator:3.0.0")
 }
 
+// Gradle Test Kit already provides an SLF4j binding.
+configurations.testRuntimeOnly {
+    exclude("ch.qos.logback", "logback-classic")
+}
+
 val projectDescription = "A code-first OpenAPI specification annotations processor Gradle plugin."
 
 gradlePlugin {
