@@ -18,15 +18,23 @@ public class OpenApiAnnotationsPlugin implements Plugin<Project> {
         project.getTasks().register("openApiAnnotations", OpenApiAnnotationsTask.class, task -> {
             task.setGroup("Build");
             task.setDescription("A code-first OpenAPI specification annotations processor Gradle plugin.");
-            task.getJavaCompileTasks().set(extension.getJavaCompileTasks()
-                    .convention(project.getTasks().withType(JavaCompile.class)));
-            task.getSchemaGeneratorConfig().set(extension.getSchemaGeneratorConfig());
-            task.getSchemaGeneratorGsonModule().set(extension.getSchemaGeneratorGsonModule()
-                    .convention(false));
-            task.getSchemaGeneratorJacksonModule().set(extension.getSchemaGeneratorJacksonModule()
-                    .convention(false));
-            task.getOutputDirectory().set(extension.getOutputDirectory()
-                    .convention(project.getLayout().getBuildDirectory().dir("openapi-annotations")));
+            task.getJavaCompileTasks()
+                    .set(extension.getJavaCompileTasks()
+                            .convention(project.getTasks().withType(JavaCompile.class)));
+            task.getSchemaGeneratorConfig()
+                    .set(extension.getSchemaGeneratorConfig());
+            task.getSchemaGeneratorModuleJSpecifyAnnotations()
+                    .set(extension.getSchemaGeneratorModuleJSpecifyAnnotations()
+                            .convention(false));
+            task.getSchemaGeneratorModuleGson()
+                    .set(extension.getSchemaGeneratorModuleGson()
+                            .convention(false));
+            task.getSchemaGeneratorModuleJackson()
+                    .set(extension.getSchemaGeneratorModuleJackson()
+                            .convention(false));
+            task.getOutputDirectory()
+                    .set(extension.getOutputDirectory()
+                            .convention(project.getLayout().getBuildDirectory().dir("openapi-annotations")));
         });
     }
 }

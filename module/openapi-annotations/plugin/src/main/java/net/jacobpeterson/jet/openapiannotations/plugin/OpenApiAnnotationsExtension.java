@@ -1,13 +1,14 @@
 package net.jacobpeterson.jet.openapiannotations.plugin;
 
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
-import tools.jackson.databind.JacksonModule;
 
 /**
  * {@link OpenApiAnnotationsExtension} is a Gradle extension for {@link OpenApiAnnotationsPlugin}.
@@ -27,20 +28,28 @@ public abstract class OpenApiAnnotationsExtension {
     public abstract Property<SchemaGeneratorConfigProvider> getSchemaGeneratorConfig();
 
     /**
-     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonModule} if
-     * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
+     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link JSpecifyAnnotationsSchemaModule}
+     * if {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
      */
-    public abstract Property<Boolean> getSchemaGeneratorGsonModule();
+    public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
 
     /**
-     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link JacksonModule} if
+     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} if
      * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
      */
-    public abstract Property<Boolean> getSchemaGeneratorJacksonModule();
+    public abstract Property<Boolean> getSchemaGeneratorModuleGson();
+
+    /**
+     * For the {@link OpenApiAnnotationsTask}, set to <code>true</code> to use {@link JacksonSchemaModule} if
+     * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
+     * <p>
+     * Defaults to <code>false</code>.
+     */
+    public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
 
     /**
      * The {@link OpenApiAnnotationsTask} output directory.

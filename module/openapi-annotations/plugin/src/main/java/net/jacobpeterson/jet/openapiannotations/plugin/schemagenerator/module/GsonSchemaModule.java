@@ -12,8 +12,9 @@ import org.jspecify.annotations.NullMarked;
 import java.util.function.Predicate;
 
 /**
- * {@link GsonModule} is a {@link Module} that uses {@link FieldScope#getAnnotationConsideringFieldAndGetter(Class)}
- * with {@link Expose} for {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)} and uses
+ * {@link GsonSchemaModule} is a {@link Module} that uses
+ * {@link FieldScope#getAnnotationConsideringFieldAndGetter(Class)} with {@link Expose} for
+ * {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)} and uses
  * {@link FieldScope#getAnnotationConsideringFieldAndGetter(Class)} with {@link SerializedName} for
  * {@link SchemaGeneratorConfigPart#withPropertyNameOverrideResolver(ConfigFunction)}.
  *
@@ -21,7 +22,7 @@ import java.util.function.Predicate;
  * <a href="https://github.com/victools/jsonschema-generator/pull/448">github.com/victools/jsonschema-generator/pull/448</a>
  */
 @NullMarked
-public class GsonModule implements Module {
+public class GsonSchemaModule implements Module {
 
     @SuppressWarnings("ConstantValue")
     @Override

@@ -37,8 +37,8 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiServer;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiTag;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonModule;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.EmptyStringIsNullJsonSerializer;
@@ -110,10 +110,13 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
     public abstract Property<SchemaGeneratorConfigProvider> getSchemaGeneratorConfig();
 
     @Input
-    public abstract Property<Boolean> getSchemaGeneratorGsonModule();
+    public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
 
     @Input
-    public abstract Property<Boolean> getSchemaGeneratorJacksonModule();
+    public abstract Property<Boolean> getSchemaGeneratorModuleGson();
+
+    @Input
+    public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
 
     @OutputDirectories
     public abstract DirectoryProperty getOutputDirectory();
@@ -187,12 +190,14 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
                     .registerTypeHierarchyAdapter(OpenApiSchema.class, new OpenApiSchemaJsonSerializer(
                             new SchemaGenerator(getSchemaGeneratorConfig()
                                     .getOrElse((SchemaGeneratorConfigProvider) () -> {
-                                        final var builder = new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)
-                                                .with(new JSpecifyAnnotationsModule());
-                                        if (getSchemaGeneratorGsonModule().get()) {
-                                            builder.with(new GsonModule());
+                                        final var builder = new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON);
+                                        if (getSchemaGeneratorModuleJSpecifyAnnotations().get()) {
+                                            builder.with(new JSpecifyAnnotationsSchemaModule());
                                         }
-                                        if (getSchemaGeneratorJacksonModule().get()) {
+                                        if (getSchemaGeneratorModuleGson().get()) {
+                                            builder.with(new GsonSchemaModule());
+                                        }
+                                        if (getSchemaGeneratorModuleJackson().get()) {
                                             builder.with(new JacksonSchemaModule());
                                         }
                                         return builder.build();
@@ -276,10 +281,10 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
         private void wrap(final OpenApi openApi, final String annotationUsageLocation) throws IllegalArgumentException {
             final var annotationOutputValidation = openApi.annotationOutputValidation();
             if (annotationOutputValidation.length > 1) {
-                printErrorArrayIsNullableValue("annotationOutputValidation", annotationUsageLocation);
+                throwArrayIsNullableValue("annotationOutputValidation", annotationUsageLocation);
             } else if (annotationOutputValidation.length == 1) {
                 if (this.annotationOutputValidation != null) {
-                    printErrorDuplicate("annotationOutputValidation", annotationUsageLocation);
+                    throwDuplicate("annotationOutputValidation", annotationUsageLocation);
                 } else {
                     this.annotationOutputValidation = annotationOutputValidation[0];
                 }
@@ -288,7 +293,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             final var $schema = openApi.$schema();
             if (!$schema.isEmpty()) {
                 if (this.$schema != null) {
-                    printErrorDuplicate("$schema", annotationUsageLocation);
+                    throwDuplicate("$schema", annotationUsageLocation);
                 } else {
                     this.$schema = $schema;
                 }
@@ -297,7 +302,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             final var openapi = openApi.openapi();
             if (!openapi.isEmpty()) {
                 if (this.openapi != null) {
-                    printErrorDuplicate("openapi", annotationUsageLocation);
+                    throwDuplicate("openapi", annotationUsageLocation);
                 } else {
                     this.openapi = openapi;
                 }
@@ -306,7 +311,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             final var $self = openApi.$self();
             if (!$self.isEmpty()) {
                 if (this.$self != null) {
-                    printErrorDuplicate("$self", annotationUsageLocation);
+                    throwDuplicate("$self", annotationUsageLocation);
                 } else {
                     this.$self = $self;
                 }
@@ -314,10 +319,10 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
             final var info = openApi.info();
             if (info.length > 1) {
-                printErrorArrayIsNullableValue("info", annotationUsageLocation);
+                throwArrayIsNullableValue("info", annotationUsageLocation);
             } else if (info.length == 1) {
                 if (this.info != null) {
-                    printErrorDuplicate("info", annotationUsageLocation);
+                    throwDuplicate("info", annotationUsageLocation);
                 } else {
                     this.info = info[0];
                 }
@@ -326,7 +331,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             final var jsonSchemaDialect = openApi.jsonSchemaDialect();
             if (!jsonSchemaDialect.isEmpty()) {
                 if (this.jsonSchemaDialect != null) {
-                    printErrorDuplicate("jsonSchemaDialect", annotationUsageLocation);
+                    throwDuplicate("jsonSchemaDialect", annotationUsageLocation);
                 } else {
                     this.jsonSchemaDialect = jsonSchemaDialect;
                 }
@@ -336,7 +341,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
             final var paths = openApi.paths();
             if (paths.length > 1) {
-                printErrorArrayIsNullableValue("paths", annotationUsageLocation);
+                throwArrayIsNullableValue("paths", annotationUsageLocation);
             } else if (paths.length == 1) {
                 if (this.paths == null) {
                     this.paths = new OpenApiPathsWrapper();
@@ -348,7 +353,7 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
             final var components = openApi.components();
             if (components.length > 1) {
-                printErrorArrayIsNullableValue("components", annotationUsageLocation);
+                throwArrayIsNullableValue("components", annotationUsageLocation);
             } else if (components.length == 1) {
                 if (this.components == null) {
                     this.components = new OpenApiComponentsWrapper();
@@ -362,10 +367,10 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
 
             final var externalDocs = openApi.externalDocs();
             if (externalDocs.length > 1) {
-                printErrorArrayIsNullableValue("externalDocs", annotationUsageLocation);
+                throwArrayIsNullableValue("externalDocs", annotationUsageLocation);
             } else if (externalDocs.length == 1) {
                 if (this.externalDocs != null) {
-                    printErrorDuplicate("externalDocs", annotationUsageLocation);
+                    throwDuplicate("externalDocs", annotationUsageLocation);
                 } else {
                     this.externalDocs = externalDocs[0];
                 }
@@ -377,13 +382,13 @@ public abstract class OpenApiAnnotationsTask extends DefaultTask {
             }
         }
 
-        private void printErrorArrayIsNullableValue(final String methodName, final String annotationUsageLocation) {
+        private void throwArrayIsNullableValue(final String methodName, final String annotationUsageLocation) {
             throw new IllegalArgumentException(("`%s`: `@OpenApi.%s` is annotated with `@%s`, but the array " +
                     "contains more than one element").formatted(annotationUsageLocation,
                     methodName, getClassName(AnnotationArrayIsNullableValue.class)));
         }
 
-        private void printErrorDuplicate(final String methodName, final String annotationUsageLocation) {
+        private void throwDuplicate(final String methodName, final String annotationUsageLocation) {
             throw new IllegalArgumentException("`%s`: duplicate `@OpenApi.%s`%s".formatted(annotationUsageLocation,
                     methodName, getInAnnotationGroupErrorMessage(annotationGroupName)));
         }

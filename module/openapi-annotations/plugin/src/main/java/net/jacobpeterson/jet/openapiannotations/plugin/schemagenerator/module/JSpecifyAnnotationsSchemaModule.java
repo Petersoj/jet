@@ -13,13 +13,13 @@ import java.util.function.Predicate;
 import static net.jacobpeterson.jet.common.util.jspecify.JSpecifyAnnotationsUtil.isFieldNullable;
 
 /**
- * {@link JSpecifyAnnotationsModule} is a {@link Module} that uses
+ * {@link JSpecifyAnnotationsSchemaModule} is a {@link Module} that uses
  * {@link JSpecifyAnnotationsUtil#isFieldNullable(Field)} for
  * {@link SchemaGeneratorConfigPart#withRequiredCheck(Predicate)} and
  * {@link SchemaGeneratorConfigPart#withNullableCheck(ConfigFunction)}.
  */
 @NullMarked
-public class JSpecifyAnnotationsModule implements Module {
+public class JSpecifyAnnotationsSchemaModule implements Module {
 
     @Override
     public void applyToConfigBuilder(final SchemaGeneratorConfigBuilder builder) {
