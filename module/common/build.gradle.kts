@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     // `jetty-client` depends on `jetty-server`, so including this dependency in the `common` module is fine.
-    implementation("org.eclipse.jetty:jetty-server:12.1.5")
+    implementation("org.eclipse.jetty:jetty-server:12.1.6")
 }
 
 publishing {

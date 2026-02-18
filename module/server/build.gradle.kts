@@ -18,7 +18,7 @@ dependencies {
             "win_amd64", "win_aarch64")
             .forEach { implementation("${zstdDependencyGroup}:zstd-jni:1.5.7-6:${it}") }
 
-    val jettyVersion = "12.1.5"
+    val jettyVersion = "12.1.6"
     implementation("org.eclipse.jetty:jetty-alpn-java-server:${jettyVersion}")
     implementation("org.eclipse.jetty.http2:jetty-http2-server:${jettyVersion}")
     implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server:${jettyVersion}")
