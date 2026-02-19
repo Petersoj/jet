@@ -2,6 +2,7 @@ package net.jacobpeterson.jet.openapiannotations.plugin;
 
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
@@ -54,6 +55,14 @@ public abstract class JetOpenApiAnnotationsExtension {
      * Defaults to <code>false</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
+
+    /**
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to generate an
+     * {@link OpenApiOperation#operationId()} if not already provided, set to <code>false</code> otherwise.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    public abstract Property<Boolean> getGenerateOperationId();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to validate the OpenAPI specification JSON

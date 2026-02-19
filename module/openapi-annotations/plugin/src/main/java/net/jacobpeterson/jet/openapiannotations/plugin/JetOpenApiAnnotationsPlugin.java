@@ -40,6 +40,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                 .convention(false);
         extension.getSchemaGeneratorModuleJackson()
                 .convention(false);
+        extension.getGenerateOperationId()
+                .convention(true);
         extension.getSchemaValidation()
                 .convention(true);
         extension.getOutputDirectory()
@@ -57,6 +59,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                     .set(extension.getSchemaGeneratorModuleGson());
             task.getSchemaGeneratorModuleJackson()
                     .set(extension.getSchemaGeneratorModuleJackson());
+            task.getGenerateOperationId()
+                    .set(extension.getGenerateOperationId());
             task.getSchemaValidation()
                     .set(extension.getSchemaValidation());
             task.getOutputDirectory()

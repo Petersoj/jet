@@ -11,6 +11,7 @@ import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
@@ -51,17 +52,21 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import static com.github.victools.jsonschema.generator.Option.EXTRA_OPEN_API_FORMAT_VALUES;
 import static com.github.victools.jsonschema.generator.Option.PLAIN_DEFINITION_KEYS;
 import static com.github.victools.jsonschema.generator.OptionPreset.PLAIN_JSON;
 import static com.github.victools.jsonschema.generator.SchemaVersion.DRAFT_2020_12;
+import static com.google.common.base.CaseFormat.LOWER_CAMEL;
+import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.networknt.schema.InputFormat.JSON;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.readString;
 import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.Files.writeString;
+import static java.util.Locale.ROOT;
 import static java.util.Map.entry;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
@@ -69,6 +74,9 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_SCHEMA;
+import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.walk;
+import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
+import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer.removeClassTracers;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 /**
@@ -80,6 +88,10 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$SCHEMA = "$schema";
     private static final String JSON_KEY_OPENAPI = "openapi";
+    private static final String JSON_KEY_PATHS = "paths";
+    private static final String JSON_KEY_OPERATION_ID = "operationId";
+    private static final String JSON_KEY_TAGS = "tags";
+    private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^a-zA-Z0-9]+");
 
     public JetOpenApiAnnotationsTask() {
         setGroup("Build");
@@ -100,6 +112,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     @Input
     public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
+
+    @Input
+    public abstract Property<Boolean> getGenerateOperationId();
 
     @Input
     public abstract Property<Boolean> getSchemaValidation();
@@ -172,8 +187,13 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     }
                 }
             }
+            final var tracerClasses = new HashSet<Class<? extends Annotation>>();
+            final var generateOperationId = getGenerateOperationId().get();
+            if (generateOperationId) {
+                tracerClasses.add(OpenApiOperation.class);
+            }
             final var annotationGson = new GsonBuilder()
-                    .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer())
+                    .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))
                     .registerTypeHierarchyAdapter(OpenApiSchema.class, new OpenApiSchemaJsonSerializer(
                             new SchemaGenerator(getSchemaGeneratorConfig()
                                     .getOrElse((SchemaGeneratorConfigProvider) () -> {
@@ -209,6 +229,38 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 }
                 if (!openApiJson.has(JSON_KEY_OPENAPI)) {
                     openApiJson.addProperty(JSON_KEY_OPENAPI, DEFAULT_OPENAPI);
+                }
+                if (generateOperationId) {
+                    walk(openApiJson, stack -> {
+                        final var top = requireNonNull(stack.peek());
+                        if (!top.getValue().isJsonObject()) {
+                            return true;
+                        }
+                        final var topObject = top.getValue().getAsJsonObject();
+                        final var tracerClass = topObject.get(JSON_KEY_CLASS_TRACER);
+                        if (tracerClass == null ||
+                                !tracerClass.getAsString().equals(OpenApiOperation.class.getCanonicalName())) {
+                            return true;
+                        }
+                        if (topObject.has(JSON_KEY_OPERATION_ID)) {
+                            return false;
+                        }
+                        if (stack.size() >= 4 && stack.get(stack.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
+                            var path = stack.get(stack.size() - 3).getKey().toLowerCase(ROOT);
+                            if (topObject.has(JSON_KEY_TAGS)) {
+                                for (final var tag : topObject.getAsJsonArray(JSON_KEY_TAGS)) {
+                                    path = path.replace(tag.getAsString().toLowerCase(ROOT), "");
+                                }
+                            }
+                            topObject.addProperty(JSON_KEY_OPERATION_ID, LOWER_UNDERSCORE.to(LOWER_CAMEL,
+                                    NON_ALPHANUMERIC_PATTERN.matcher(top.getKey().toLowerCase(ROOT)).replaceAll("_") +
+                                            "_" + NON_ALPHANUMERIC_PATTERN.matcher(path).replaceAll("_")));
+                        }
+                        return false;
+                    });
+                }
+                if (!tracerClasses.isEmpty()) {
+                    removeClassTracers(openApiJson);
                 }
                 final var openApiJsonString = openApiJson.toString();
                 if (getSchemaValidation().get()) {
