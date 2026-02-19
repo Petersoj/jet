@@ -96,7 +96,12 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
 
     private JsonElement getMethodJsonValue(final JsonSerializationContext context, final Object annotationObject,
             final Method method) {
-        final var value = invokeAnnotationMethod(method, annotationObject);
+        final Object value;
+        try {
+            value = method.invoke(annotationObject); // Never `null` since `Annotation` methods cannot return `null`
+        } catch (final IllegalAccessException | InvocationTargetException exception) {
+            throw new RuntimeException(exception);
+        }
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
             if (!(value instanceof final String valueString)) {
                 throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
@@ -161,13 +166,5 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                     JsonNull.INSTANCE;
         }
         return context.serialize(value);
-    }
-
-    private Object invokeAnnotationMethod(final Method method, final Object object) {
-        try {
-            return method.invoke(object); // Never `null` since `Annotation` methods cannot return `null`
-        } catch (final IllegalAccessException | InvocationTargetException exception) {
-            throw new RuntimeException(exception);
-        }
     }
 }
