@@ -9,6 +9,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
@@ -24,12 +26,15 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Set;
 
 import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.combine;
+import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.walk;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.reflection.ReflectionUtil.getClassName;
 
 /**
@@ -40,10 +45,47 @@ import static net.jacobpeterson.jet.openapiannotations.plugin.util.reflection.Re
  * {@link AnnotationArrayIsMap}, and {@link AnnotationArrayIsMapKey}.
  */
 @NullMarked
+@RequiredArgsConstructor
 public final class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
+
+    /**
+     * The JSON key name for {@link #getTracerClasses()}:
+     * <code>"__AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER__"</code>
+     */
+    public static final String JSON_KEY_CLASS_TRACER = "__AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER__";
+
+    /**
+     * Removes all {@link #JSON_KEY_CLASS_TRACER} keys from the given {@link JsonObject}.
+     *
+     * @param jsonObject the {@link JsonObject}
+     */
+    public static void removeClassTracers(final JsonObject jsonObject) {
+        walk(jsonObject, stack -> {
+            final var top = requireNonNull(stack.peek()).getValue();
+            if (top.isJsonObject()) {
+                top.getAsJsonObject().remove(JSON_KEY_CLASS_TRACER);
+            }
+            return true;
+        });
+    }
+
+    /**
+     * The {@link Set} of {@link Annotation} {@link Class}es to insert a {@link #JSON_KEY_CLASS_TRACER} property into
+     * the serialized {@link JsonObject} with the value of {@link Class#getCanonicalName()}.
+     */
+    private final @Getter Set<Class<? extends Annotation>> tracerClasses;
 
     @Override
     public JsonElement serialize(final Annotation src, final Type typeOfSrc, final JsonSerializationContext context) {
+        final var serialized = serialize(src, context);
+        final var annotationType = src.annotationType();
+        if (serialized.isJsonObject() && tracerClasses.contains(annotationType)) {
+            serialized.getAsJsonObject().addProperty(JSON_KEY_CLASS_TRACER, annotationType.getCanonicalName());
+        }
+        return serialized;
+    }
+
+    private JsonElement serialize(final Annotation src, final JsonSerializationContext context) {
         final var methods = stream(src.annotationType().getDeclaredMethods())
                 .filter(method -> !method.isAnnotationPresent(AnnotationJsonIgnore.class))
                 .toList();
