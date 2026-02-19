@@ -52,6 +52,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
+import static com.github.victools.jsonschema.generator.Option.EXTRA_OPEN_API_FORMAT_VALUES;
+import static com.github.victools.jsonschema.generator.Option.PLAIN_DEFINITION_KEYS;
 import static com.github.victools.jsonschema.generator.OptionPreset.PLAIN_JSON;
 import static com.github.victools.jsonschema.generator.SchemaVersion.DRAFT_2020_12;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -76,8 +78,7 @@ import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 @CacheableTask
 public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
-    @SuppressWarnings("IdentifierName") // TODO https://github.com/google/error-prone/issues/5515
-    private static final String JSON_KEY_$SCHEMA = "$schema";
+    private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$SCHEMA = "$schema";
     private static final String JSON_KEY_OPENAPI = "openapi";
 
     public JetOpenApiAnnotationsTask() {
@@ -176,7 +177,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .registerTypeHierarchyAdapter(OpenApiSchema.class, new OpenApiSchemaJsonSerializer(
                             new SchemaGenerator(getSchemaGeneratorConfig()
                                     .getOrElse((SchemaGeneratorConfigProvider) () -> {
-                                        final var builder = new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON);
+                                        final var builder = new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)
+                                                .with(EXTRA_OPEN_API_FORMAT_VALUES)
+                                                .with(PLAIN_DEFINITION_KEYS);
                                         if (getSchemaGeneratorModuleJSpecifyAnnotations().get()) {
                                             builder.with(new JSpecifyAnnotationsSchemaModule());
                                         }
