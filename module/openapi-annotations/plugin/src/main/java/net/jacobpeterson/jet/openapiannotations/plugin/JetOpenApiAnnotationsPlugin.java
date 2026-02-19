@@ -35,7 +35,7 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         extension.getJavaCompileTasks()
                 .convention(project.getTasks().withType(JavaCompile.class));
         extension.getSchemaGeneratorModuleJSpecifyAnnotations()
-                .convention(false);
+                .convention(true);
         extension.getSchemaGeneratorModuleGson()
                 .convention(false);
         extension.getSchemaGeneratorModuleJackson()

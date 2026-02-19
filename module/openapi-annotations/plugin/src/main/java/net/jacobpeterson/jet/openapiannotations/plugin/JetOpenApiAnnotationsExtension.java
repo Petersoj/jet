@@ -35,7 +35,7 @@ public abstract class JetOpenApiAnnotationsExtension {
      * {@link JSpecifyAnnotationsSchemaModule} if {@link #getSchemaGeneratorConfig()} is not provided, set to
      * <code>false</code> otherwise.
      * <p>
-     * Defaults to <code>false</code>.
+     * Defaults to <code>true</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
 
