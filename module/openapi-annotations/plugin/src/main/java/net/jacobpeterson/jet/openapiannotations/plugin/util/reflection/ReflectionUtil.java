@@ -9,17 +9,19 @@ import org.jspecify.annotations.NullMarked;
 public final class ReflectionUtil {
 
     /**
-     * Gets the name of the given {@link Class} by removing {@link Class#getPackageName()} from
-     * {@link Class#getCanonicalName()}.
+     * Gets the name of the given {@link Class} with enclosing {@link Class}es prepended.
      *
      * @param clazz the {@link Class}
      *
      * @return the class name {@link String}
      */
     public static String getClassName(final Class<?> clazz) {
-        final var canonicalName = clazz.getCanonicalName();
-        return (canonicalName == null ? clazz.getName().replace('$', '.') : canonicalName)
-                .replace(clazz.getPackageName() + ".", "");
+        final var className = new StringBuilder(clazz.getSimpleName());
+        for (var enclosingClass = clazz.getEnclosingClass(); enclosingClass != null;
+                enclosingClass = enclosingClass.getEnclosingClass()) {
+            className.insert(0, '.').insert(0, enclosingClass.getSimpleName());
+        }
+        return className.toString();
     }
 
     private ReflectionUtil() {}
