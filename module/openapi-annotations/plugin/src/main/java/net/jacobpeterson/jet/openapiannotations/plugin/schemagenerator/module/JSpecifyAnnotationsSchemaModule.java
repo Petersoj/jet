@@ -2,6 +2,7 @@ package net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module;
 
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import net.jacobpeterson.jet.common.util.jspecify.JSpecifyAnnotationsUtil;
@@ -15,16 +16,17 @@ import static net.jacobpeterson.jet.common.util.jspecify.JSpecifyAnnotationsUtil
 /**
  * {@link JSpecifyAnnotationsSchemaModule} is a {@link Module} that uses
  * {@link JSpecifyAnnotationsUtil#isFieldNullable(Field)} for
- * {@link SchemaGeneratorConfigPart#withRequiredCheck(Predicate)} and
- * {@link SchemaGeneratorConfigPart#withNullableCheck(ConfigFunction)}.
+ * {@link SchemaGeneratorConfigPart#withRequiredCheck(Predicate)}.
+ * <p>
+ * Note: {@link SchemaGeneratorConfigPart#withNullableCheck(ConfigFunction)} is not applied because
+ * {@link SchemaGenerator} uses <code>anyOf</code> for all nullable properties, which adds unnecessary complexity to
+ * the schema, and many OpenAPI generators reference <code>required</code> for nullability.
  */
 @NullMarked
 public class JSpecifyAnnotationsSchemaModule implements Module {
 
     @Override
     public void applyToConfigBuilder(final SchemaGeneratorConfigBuilder builder) {
-        builder.forFields()
-                .withRequiredCheck(fieldScope -> !isFieldNullable(fieldScope.getRawMember()))
-                .withNullableCheck(fieldScope -> isFieldNullable(fieldScope.getRawMember()));
+        builder.forFields().withRequiredCheck(fieldScope -> !isFieldNullable(fieldScope.getRawMember()));
     }
 }
