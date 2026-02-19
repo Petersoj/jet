@@ -74,7 +74,7 @@ tasks.withType(JavaCompile::class) {
     }
 }
 
-tasks.javadoc.configure {
+tasks.withType(Javadoc::class) {
     options {
         (this as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
         links = listOf(
@@ -85,7 +85,7 @@ tasks.javadoc.configure {
     }
 }
 
-tasks.test {
+tasks.withType(Test::class) {
     useJUnitPlatform()
     systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "ON_SUCCESS")
     systemProperty("java.io.tmpdir", temporaryDir.path)
