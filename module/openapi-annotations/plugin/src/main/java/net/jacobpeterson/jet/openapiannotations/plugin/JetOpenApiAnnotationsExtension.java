@@ -4,6 +4,7 @@ import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiComponents;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
@@ -59,7 +60,8 @@ public abstract class JetOpenApiAnnotationsExtension {
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to generate an
-     * {@link OpenApiOperation#operationId()} if not already provided, set to <code>false</code> otherwise.
+     * {@link OpenApiOperation#operationId()}, if not already provided, using the {@link OpenApiPathItem.MapEntry#key()}
+     * and {@link OpenApiOperation#tags()}, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>true</code>.
      */

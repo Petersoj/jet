@@ -66,6 +66,7 @@ import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.networknt.schema.InputFormat.JSON;
+import static java.lang.Math.max;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.readString;
 import static java.nio.file.Files.walkFileTree;
@@ -267,9 +268,15 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         if (stack.size() >= 4 && stack.get(stack.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
                             var path = stack.get(stack.size() - 3).getKey().toLowerCase(ROOT);
                             if (topObject.has(JSON_KEY_TAGS)) {
+                                var substringIndex = 0;
                                 for (final var tag : topObject.getAsJsonArray(JSON_KEY_TAGS)) {
-                                    path = path.replace(tag.getAsString().toLowerCase(ROOT), "");
+                                    final var tagString = tag.getAsString().toLowerCase(ROOT);
+                                    final var indexOfTag = path.indexOf(tagString);
+                                    if (indexOfTag != -1) {
+                                        substringIndex = max(substringIndex, indexOfTag + tagString.length());
+                                    }
                                 }
+                                path = path.substring(substringIndex);
                             }
                             topObject.addProperty(JSON_KEY_OPERATION_ID, LOWER_UNDERSCORE.to(LOWER_CAMEL,
                                     NON_ALPHANUMERIC_PATTERN.matcher(top.getKey().toLowerCase(ROOT)).replaceAll("_") +
