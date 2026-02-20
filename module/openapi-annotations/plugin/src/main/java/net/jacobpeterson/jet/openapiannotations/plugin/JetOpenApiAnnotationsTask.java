@@ -5,6 +5,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import net.jacobpeterson.jet.common.http.header.Header;
@@ -54,6 +55,9 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import static com.github.victools.jsonschema.generator.Option.DEFINITIONS_FOR_ALL_OBJECTS;
+import static com.github.victools.jsonschema.generator.Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES;
+import static com.github.victools.jsonschema.generator.Option.DEFINITION_FOR_MAIN_SCHEMA;
 import static com.github.victools.jsonschema.generator.Option.EXTRA_OPEN_API_FORMAT_VALUES;
 import static com.github.victools.jsonschema.generator.Option.PLAIN_DEFINITION_KEYS;
 import static com.github.victools.jsonschema.generator.OptionPreset.PLAIN_JSON;
@@ -71,9 +75,9 @@ import static java.util.Map.entry;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableMap;
+import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_$SCHEMA;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
-import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_SCHEMA;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.walk;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer.removeClassTracers;
@@ -87,10 +91,15 @@ import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$SCHEMA = "$schema";
+    private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$DEFS = "$defs";
+    private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$REF = "$ref";
+    private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$REF_STARTS_WITH_$DEFS = "#/$defs/";
     private static final String JSON_KEY_OPENAPI = "openapi";
     private static final String JSON_KEY_PATHS = "paths";
     private static final String JSON_KEY_OPERATION_ID = "operationId";
     private static final String JSON_KEY_TAGS = "tags";
+    private static final String JSON_KEY_COMPONENTS = "components";
+    private static final String JSON_KEY_SCHEMAS = "schemas";
     private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^a-zA-Z0-9]+");
 
     public JetOpenApiAnnotationsTask() {
@@ -115,6 +124,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     @Input
     public abstract Property<Boolean> getGenerateOperationId();
+
+    @Input
+    public abstract Property<Boolean> getMoveClassSchemasToComponents();
 
     @Input
     public abstract Property<Boolean> getSchemaValidation();
@@ -197,6 +209,14 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                             new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)).provide()
                     .with(EXTRA_OPEN_API_FORMAT_VALUES)
                     .with(PLAIN_DEFINITION_KEYS);
+            final var moveClassSchemasToComponents = getMoveClassSchemasToComponents().get();
+            if (moveClassSchemasToComponents) {
+                tracerClasses.add(OpenApiSchema.class);
+                schemaGeneratorConfigBuilder
+                        .with(DEFINITION_FOR_MAIN_SCHEMA)
+                        .with(DEFINITIONS_FOR_ALL_OBJECTS)
+                        .with(DEFINITIONS_FOR_MEMBER_SUPERTYPES);
+            }
             if (getSchemaGeneratorModuleJSpecifyAnnotations().get()) {
                 schemaGeneratorConfigBuilder.with(new JSpecifyAnnotationsSchemaModule());
             }
@@ -224,7 +244,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 final var groupName = openApiJsonOfGroupName.getKey();
                 final var openApiJson = openApiJsonOfGroupName.getValue().getAsJsonObject();
                 if (!openApiJson.has(JSON_KEY_$SCHEMA)) {
-                    openApiJson.addProperty(JSON_KEY_$SCHEMA, DEFAULT_SCHEMA);
+                    openApiJson.addProperty(JSON_KEY_$SCHEMA, DEFAULT_$SCHEMA);
                 }
                 if (!openApiJson.has(JSON_KEY_OPENAPI)) {
                     openApiJson.addProperty(JSON_KEY_OPENAPI, DEFAULT_OPENAPI);
@@ -258,13 +278,73 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         return false;
                     });
                 }
+                if (moveClassSchemasToComponents) {
+                    var components = openApiJson.get(JSON_KEY_COMPONENTS);
+                    if (components == null || components.isJsonNull()) {
+                        components = new JsonObject();
+                        openApiJson.add(JSON_KEY_COMPONENTS, components);
+                    }
+                    final var componentsObject = components.getAsJsonObject();
+                    var componentsSchemas = componentsObject.get(JSON_KEY_SCHEMAS);
+                    if (componentsSchemas == null || componentsSchemas.isJsonNull()) {
+                        componentsSchemas = new JsonObject();
+                        componentsObject.add(JSON_KEY_SCHEMAS, componentsSchemas);
+                    }
+                    final var componentsSchemasObject = componentsSchemas.getAsJsonObject();
+                    walk(openApiJson, stack -> {
+                        final var topValue = requireNonNull(stack.peek()).getValue();
+                        if (!topValue.isJsonObject()) {
+                            return true;
+                        }
+                        final var topObject = topValue.getAsJsonObject();
+                        final var tracerClass = topObject.get(JSON_KEY_CLASS_TRACER);
+                        if (tracerClass == null ||
+                                !tracerClass.getAsString().equals(OpenApiSchema.class.getCanonicalName())) {
+                            return true;
+                        }
+                        walk(topObject, schemaStack -> {
+                            final var schemaTopValue = requireNonNull(schemaStack.peek()).getValue();
+                            if (!schemaTopValue.isJsonObject()) {
+                                return true;
+                            }
+                            final var schemaTopObject = schemaTopValue.getAsJsonObject();
+                            final var schema$Ref = schemaTopObject.get(JSON_KEY_$REF);
+                            if (schema$Ref != null && !schema$Ref.isJsonNull()) {
+                                final var schemaRefString = schema$Ref.getAsString();
+                                if (schemaRefString.startsWith(JSON_KEY_$REF_STARTS_WITH_$DEFS)) {
+                                    schemaTopObject.addProperty(JSON_KEY_$REF, "#/components/schemas/" +
+                                            schemaRefString.substring(JSON_KEY_$REF_STARTS_WITH_$DEFS.length()));
+                                }
+                            }
+                            return true;
+                        });
+                        final var $defs = topObject.get(JSON_KEY_$DEFS);
+                        if ($defs != null && !$defs.isJsonNull()) {
+                            for (final var $defsEntry : $defs.getAsJsonObject().entrySet()) {
+                                final var className = $defsEntry.getKey();
+                                final var classSchema = $defsEntry.getValue();
+                                final var existingComponentSchema = componentsSchemasObject.get(className);
+                                if (existingComponentSchema != null && !existingComponentSchema.isJsonNull()) {
+                                    checkArgument(existingComponentSchema.equals(classSchema),
+                                            "The following schemas share the same component name of \"%s\":\n%s\n%s",
+                                            className, existingComponentSchema, classSchema);
+                                } else {
+                                    componentsSchemasObject.add(className, classSchema);
+                                }
+                            }
+                            topObject.remove(JSON_KEY_$DEFS);
+                        }
+                        topObject.remove(JSON_KEY_$SCHEMA);
+                        return false;
+                    });
+                }
                 if (!tracerClasses.isEmpty()) {
                     removeClassTracers(openApiJson);
                 }
                 final var openApiJsonString = openApiJson.toString();
                 if (getSchemaValidation().get()) {
                     final var $schema = openApiJson.get(JSON_KEY_$SCHEMA).getAsString();
-                    checkArgument($schema.equals(DEFAULT_SCHEMA),
+                    checkArgument($schema.equals(DEFAULT_$SCHEMA),
                             "Validation for custom `@OpenApi.$schema` of `%s` is unsupported.", $schema);
                     if (schema == null) {
                         try {

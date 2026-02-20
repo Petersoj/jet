@@ -66,8 +66,16 @@ public abstract class JetOpenApiAnnotationsExtension {
     public abstract Property<Boolean> getGenerateOperationId();
 
     /**
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to move the JSON schema generated from
+     * {@link OpenApiSchema#from()} to {@link OpenApiComponents#schemas()}, set to <code>false</code> otherwise.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    public abstract Property<Boolean> getMoveClassSchemasToComponents();
+
+    /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to validate the OpenAPI specification JSON
-     * output generated from {@link OpenApi} annotations using the {@link OpenApi#DEFAULT_SCHEMA}, set to
+     * output generated from {@link OpenApi} annotations using the {@link OpenApi#DEFAULT_$SCHEMA}, set to
      * <code>false</code> otherwise.
      * <p>
      * Defaults to <code>true</code>.

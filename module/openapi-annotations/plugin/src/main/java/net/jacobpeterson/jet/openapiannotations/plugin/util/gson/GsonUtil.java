@@ -21,8 +21,8 @@ import static java.util.Map.entry;
 public final class GsonUtil {
 
     /**
-     * Combines the given <code>a</code> {@link JsonObject} or {@link JsonArray} with the given <code>b</code>
-     * {@link JsonObject} or {@link JsonArray} into a new {@link JsonObject} or {@link JsonArray}.
+     * Recursively combines the given <code>a</code> {@link JsonObject} or {@link JsonArray} with the given
+     * <code>b</code> {@link JsonObject} or {@link JsonArray} into a new {@link JsonObject} or {@link JsonArray}.
      *
      * @param a a {@link JsonElement}
      * @param b a {@link JsonElement}

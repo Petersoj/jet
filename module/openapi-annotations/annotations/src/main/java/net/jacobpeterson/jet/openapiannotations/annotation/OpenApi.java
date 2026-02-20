@@ -61,8 +61,8 @@ public @interface OpenApi {
      * The default value for {@link #$schema()}:
      * <code>"https://spec.openapis.org/oas/3.2/schema/2025-09-17"</code>
      */
-    @SuppressWarnings("JavadocLinkAsPlainText")
-    String DEFAULT_SCHEMA = "https://spec.openapis.org/oas/3.2/schema/2025-09-17";
+    @SuppressWarnings({"JavadocLinkAsPlainText", "IdentifierName"})
+    String DEFAULT_$SCHEMA = "https://spec.openapis.org/oas/3.2/schema/2025-09-17";
 
     /**
      * The default value for {@link #openapi()}: <code>"3.2.0"</code>
@@ -82,7 +82,7 @@ public @interface OpenApi {
     /**
      * The URL of the OpenAPI Specification JSON schema.
      * <p>
-     * Note: defaults to {@link #DEFAULT_SCHEMA}.
+     * Note: defaults to {@link #DEFAULT_$SCHEMA}.
      */
     String $schema() default "";
 
