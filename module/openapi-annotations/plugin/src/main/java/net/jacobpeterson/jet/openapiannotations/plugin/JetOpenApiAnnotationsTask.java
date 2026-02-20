@@ -201,15 +201,15 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 }
             }
             final var tracerClasses = new HashSet<Class<? extends Annotation>>();
-            final var generateOperationId = getGenerateOperationId().get();
-            if (generateOperationId) {
-                tracerClasses.add(OpenApiOperation.class);
-            }
             final var schemaGeneratorConfigBuilder = getSchemaGeneratorConfigBuilderProvider()
                     .getOrElse((SchemaGeneratorConfigBuilderProvider) () ->
                             new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)).provide()
                     .with(EXTRA_OPEN_API_FORMAT_VALUES)
                     .with(PLAIN_DEFINITION_KEYS);
+            final var generateOperationId = getGenerateOperationId().get();
+            if (generateOperationId) {
+                tracerClasses.add(OpenApiOperation.class);
+            }
             final var moveClassSchemasToComponents = getMoveClassSchemasToComponents().get();
             if (moveClassSchemasToComponents) {
                 tracerClasses.add(OpenApiSchema.class);

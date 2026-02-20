@@ -66,12 +66,14 @@ public final class GsonUtil {
      * @param walker the walker {@link Function} that receives the current tree stack and returns a <code>boolean</code>
      *               of whether to walk the entry at the top of the stack
      */
-    // TODO replace `LinkedList` with `ArrayDeque`: https://bugs.openjdk.org/browse/JDK-8356821
+    @SuppressWarnings({"NonApiType", "JdkObsolete"})
     public static void walk(final JsonElement root,
+            // TODO replace `LinkedList` with `ArrayDeque`: https://bugs.openjdk.org/browse/JDK-8356821
             final Function<LinkedList<Entry<String, JsonElement>>, Boolean> walker) {
         walkRecursively(entry("root", root), new LinkedList<>(), walker);
     }
 
+    @SuppressWarnings("NonApiType")
     private static void walkRecursively(final Entry<String, JsonElement> entry,
             final LinkedList<Entry<String, JsonElement>> stack,
             final Function<LinkedList<Entry<String, JsonElement>>, Boolean> walker) {

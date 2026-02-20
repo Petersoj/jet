@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -77,9 +78,14 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
 
     @Override
     public JsonElement serialize(final Annotation src, final Type typeOfSrc, final JsonSerializationContext context) {
-        final var serialized = serialize(src, context);
+        var serialized = serialize(src, context);
         final var annotationType = src.annotationType();
-        if (serialized.isJsonObject() && tracerClasses.contains(annotationType)) {
+        if (tracerClasses.contains(annotationType)) {
+            checkArgument(serialized.isJsonObject() || serialized.isJsonNull(),
+                    "Tracer class `%s` can only be added to JSON objects", annotationType);
+            if (serialized.isJsonNull()) {
+                serialized = new JsonObject();
+            }
             serialized.getAsJsonObject().addProperty(JSON_KEY_CLASS_TRACER, annotationType.getCanonicalName());
         }
         return serialized;
