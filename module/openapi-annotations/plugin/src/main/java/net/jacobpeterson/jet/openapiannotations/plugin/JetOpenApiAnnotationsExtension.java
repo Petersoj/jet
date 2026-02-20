@@ -2,8 +2,10 @@ package net.jacobpeterson.jet.openapiannotations.plugin;
 
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiComponents;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
 import org.gradle.api.Task;
@@ -27,30 +29,29 @@ public abstract class JetOpenApiAnnotationsExtension {
     public abstract SetProperty<JavaCompile> getJavaCompileTasks();
 
     /**
-     * The {@link SchemaGeneratorConfigProvider} for the {@link JetOpenApiAnnotationsTask}.
+     * The {@link SchemaGeneratorConfigBuilderProvider} for the {@link JetOpenApiAnnotationsTask}.
      */
-    public abstract Property<SchemaGeneratorConfigProvider> getSchemaGeneratorConfig();
+    public abstract Property<SchemaGeneratorConfigBuilderProvider> getSchemaGeneratorConfigBuilderProvider();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use
-     * {@link JSpecifyAnnotationsSchemaModule} if {@link #getSchemaGeneratorConfig()} is not provided, set to
-     * <code>false</code> otherwise.
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use the
+     * {@link JSpecifyAnnotationsSchemaModule}, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>true</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} if
-     * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} the, set to
+     * <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorModuleGson();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link JacksonSchemaModule} if
-     * {@link #getSchemaGeneratorConfig()} is not provided, set to <code>false</code> otherwise.
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use the {@link JacksonSchemaModule}, set
+     * to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>false</code>.
      */

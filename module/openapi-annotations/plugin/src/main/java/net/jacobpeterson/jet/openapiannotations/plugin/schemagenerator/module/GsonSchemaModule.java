@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  * {@link SchemaGeneratorConfigPart#withPropertyNameOverrideResolver(ConfigFunction)}.
  *
  * @see
- * <a href="https://github.com/victools/jsonschema-generator/pull/448">github.com/victools/jsonschema-generator/pull/448</a>
+ * <a href="https://github.com/victools/jsonschema-generator/issues/218">github.com/victools/jsonschema-generator/issues/218</a>
  */
 @NullMarked
 public class GsonSchemaModule implements Module {

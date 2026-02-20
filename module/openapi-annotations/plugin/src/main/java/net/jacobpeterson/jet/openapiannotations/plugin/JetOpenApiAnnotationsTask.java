@@ -13,7 +13,7 @@ import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigProvider;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
@@ -102,7 +102,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     public abstract SetProperty<JavaCompile> getJavaCompileTasks();
 
     @Input @Optional
-    public abstract Property<SchemaGeneratorConfigProvider> getSchemaGeneratorConfig();
+    public abstract Property<SchemaGeneratorConfigBuilderProvider> getSchemaGeneratorConfigBuilderProvider();
 
     @Input
     public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
@@ -192,25 +192,24 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
             if (generateOperationId) {
                 tracerClasses.add(OpenApiOperation.class);
             }
+            final var schemaGeneratorConfigBuilder = getSchemaGeneratorConfigBuilderProvider()
+                    .getOrElse((SchemaGeneratorConfigBuilderProvider) () ->
+                            new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)).provide()
+                    .with(EXTRA_OPEN_API_FORMAT_VALUES)
+                    .with(PLAIN_DEFINITION_KEYS);
+            if (getSchemaGeneratorModuleJSpecifyAnnotations().get()) {
+                schemaGeneratorConfigBuilder.with(new JSpecifyAnnotationsSchemaModule());
+            }
+            if (getSchemaGeneratorModuleGson().get()) {
+                schemaGeneratorConfigBuilder.with(new GsonSchemaModule());
+            }
+            if (getSchemaGeneratorModuleJackson().get()) {
+                schemaGeneratorConfigBuilder.with(new JacksonSchemaModule());
+            }
             final var annotationGson = new GsonBuilder()
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))
-                    .registerTypeHierarchyAdapter(OpenApiSchema.class, new OpenApiSchemaJsonSerializer(
-                            new SchemaGenerator(getSchemaGeneratorConfig()
-                                    .getOrElse((SchemaGeneratorConfigProvider) () -> {
-                                        final var builder = new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)
-                                                .with(EXTRA_OPEN_API_FORMAT_VALUES)
-                                                .with(PLAIN_DEFINITION_KEYS);
-                                        if (getSchemaGeneratorModuleJSpecifyAnnotations().get()) {
-                                            builder.with(new JSpecifyAnnotationsSchemaModule());
-                                        }
-                                        if (getSchemaGeneratorModuleGson().get()) {
-                                            builder.with(new GsonSchemaModule());
-                                        }
-                                        if (getSchemaGeneratorModuleJackson().get()) {
-                                            builder.with(new JacksonSchemaModule());
-                                        }
-                                        return builder.build();
-                                    }).provide())))
+                    .registerTypeHierarchyAdapter(OpenApiSchema.class,
+                            new OpenApiSchemaJsonSerializer(new SchemaGenerator(schemaGeneratorConfigBuilder.build())))
                     .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
                     .registerTypeAdapter(Method.class, new MethodJsonSerializer())
                     .registerTypeAdapter(Status.class, new StatusJsonSerializer())

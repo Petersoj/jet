@@ -51,8 +51,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         final var registeredTask = project.getTasks().register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
             task.getJavaCompileTasks()
                     .set(extension.getJavaCompileTasks());
-            task.getSchemaGeneratorConfig()
-                    .set(extension.getSchemaGeneratorConfig());
+            task.getSchemaGeneratorConfigBuilderProvider()
+                    .set(extension.getSchemaGeneratorConfigBuilderProvider());
             task.getSchemaGeneratorModuleJSpecifyAnnotations()
                     .set(extension.getSchemaGeneratorModuleJSpecifyAnnotations());
             task.getSchemaGeneratorModuleGson()
