@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@link SchemaNameDefinitionNamingStrategy} wraps an existing {@link SchemaDefinitionNamingStrategy} and adds support
- * for the {@link SchemaName} annotation.
+ * {@link SchemaNameDefinitionNamingStrategy} wraps an existing {@link SchemaDefinitionNamingStrategy}, but uses
+ * {@link SchemaName#value()} if present.
  */
 @NullMarked
 @RequiredArgsConstructor

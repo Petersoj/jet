@@ -15,8 +15,10 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.enclosingclassname.EnclosingClassNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.EmptyStringIsNullJsonSerializer;
@@ -121,6 +123,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     public abstract Property<Boolean> getSchemaGeneratorUseSchemaNameModule();
 
     @Input
+    public abstract Property<Boolean> getSchemaGeneratorUseEnclosingClassNameModule();
+
+    @Input
     public abstract Property<Boolean> getSchemaGeneratorUseGsonModule();
 
     @Input
@@ -209,6 +214,21 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                             new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)).provide()
                     .with(EXTRA_OPEN_API_FORMAT_VALUES)
                     .with(PLAIN_DEFINITION_KEYS);
+            if (getSchemaGeneratorUseNullableModule().get()) {
+                schemaGeneratorConfigBuilder.with(new NullableSchemaModule());
+            }
+            if (getSchemaGeneratorUseSchemaNameModule().get()) {
+                schemaGeneratorConfigBuilder.with(new SchemaNameSchemaModule());
+            }
+            if (getSchemaGeneratorUseEnclosingClassNameModule().get()) {
+                schemaGeneratorConfigBuilder.with(new EnclosingClassNameSchemaModule());
+            }
+            if (getSchemaGeneratorUseGsonModule().get()) {
+                schemaGeneratorConfigBuilder.with(new GsonSchemaModule());
+            }
+            if (getSchemaGeneratorUseJacksonModule().get()) {
+                schemaGeneratorConfigBuilder.with(new JacksonSchemaModule());
+            }
             final var generateOperationId = getGenerateOperationId().get();
             if (generateOperationId) {
                 tracerClasses.add(OpenApiOperation.class);
@@ -220,15 +240,6 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         .with(DEFINITION_FOR_MAIN_SCHEMA)
                         .with(DEFINITIONS_FOR_ALL_OBJECTS)
                         .with(DEFINITIONS_FOR_MEMBER_SUPERTYPES);
-            }
-            if (getSchemaGeneratorUseNullableModule().get()) {
-                schemaGeneratorConfigBuilder.with(new NullableSchemaModule());
-            }
-            if (getSchemaGeneratorUseGsonModule().get()) {
-                schemaGeneratorConfigBuilder.with(new GsonSchemaModule());
-            }
-            if (getSchemaGeneratorUseJacksonModule().get()) {
-                schemaGeneratorConfigBuilder.with(new JacksonSchemaModule());
             }
             final var annotationGson = new GsonBuilder()
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))

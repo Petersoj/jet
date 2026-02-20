@@ -7,6 +7,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.enclosingclassname.EnclosingClassNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
@@ -50,6 +51,14 @@ public abstract class JetOpenApiAnnotationsExtension {
      * Defaults to <code>true</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorUseSchemaNameModule();
+
+    /**
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use the
+     * {@link EnclosingClassNameSchemaModule}, set to <code>false</code> otherwise.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    public abstract Property<Boolean> getSchemaGeneratorUseEnclosingClassNameModule();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} the, set to
