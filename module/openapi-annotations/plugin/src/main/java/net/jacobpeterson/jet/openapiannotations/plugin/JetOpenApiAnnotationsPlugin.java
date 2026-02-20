@@ -36,6 +36,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                 .convention(project.getTasks().withType(JavaCompile.class));
         extension.getSchemaGeneratorUseNullableModule()
                 .convention(true);
+        extension.getSchemaGeneratorUseSchemaNameModule()
+                .convention(true);
         extension.getSchemaGeneratorUseGsonModule()
                 .convention(false);
         extension.getSchemaGeneratorUseJacksonModule()
@@ -57,6 +59,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                     .set(extension.getSchemaGeneratorConfigBuilderProvider());
             task.getSchemaGeneratorUseNullableModule()
                     .set(extension.getSchemaGeneratorUseNullableModule());
+            task.getSchemaGeneratorUseSchemaNameModule()
+                    .set(extension.getSchemaGeneratorUseSchemaNameModule());
             task.getSchemaGeneratorUseGsonModule()
                     .set(extension.getSchemaGeneratorUseGsonModule());
             task.getSchemaGeneratorUseJacksonModule()

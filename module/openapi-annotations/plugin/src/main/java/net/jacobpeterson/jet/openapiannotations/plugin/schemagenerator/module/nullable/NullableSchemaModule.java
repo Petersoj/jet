@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module;
+package net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable;
 
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.Module;

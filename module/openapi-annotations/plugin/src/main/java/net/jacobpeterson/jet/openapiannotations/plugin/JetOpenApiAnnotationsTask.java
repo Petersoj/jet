@@ -15,8 +15,8 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.NullableSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.EmptyStringIsNullJsonSerializer;
@@ -116,6 +116,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     @Input
     public abstract Property<Boolean> getSchemaGeneratorUseNullableModule();
+
+    @Input
+    public abstract Property<Boolean> getSchemaGeneratorUseSchemaNameModule();
 
     @Input
     public abstract Property<Boolean> getSchemaGeneratorUseGsonModule();
@@ -332,8 +335,11 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                                 final var classSchema = $defsEntry.getValue();
                                 final var existingComponentSchema = componentsSchemasObject.get(className);
                                 if (existingComponentSchema != null && !existingComponentSchema.isJsonNull()) {
-                                    checkArgument(existingComponentSchema.equals(classSchema),
-                                            "The following schemas share the same component name of \"%s\":\n%s\n%s",
+                                    checkArgument(existingComponentSchema.equals(classSchema), """
+                                                    The following different schemas share the same component name of \
+                                                    "%s". Change the class name or use `@SchemaName`.
+                                                    %s
+                                                    %s""",
                                             className, existingComponentSchema, classSchema);
                                 } else {
                                     componentsSchemasObject.add(className, classSchema);

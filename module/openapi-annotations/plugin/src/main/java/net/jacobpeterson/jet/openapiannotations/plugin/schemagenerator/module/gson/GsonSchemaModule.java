@@ -1,22 +1,14 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module;
+package net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson;
 
-import com.github.victools.jsonschema.generator.ConfigFunction;
-import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.function.Predicate;
-
 /**
- * {@link GsonSchemaModule} is a {@link Module} that uses
- * {@link FieldScope#getAnnotationConsideringFieldAndGetter(Class)} with {@link Expose} for
- * {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)} and uses
- * {@link FieldScope#getAnnotationConsideringFieldAndGetter(Class)} with {@link SerializedName} for
- * {@link SchemaGeneratorConfigPart#withPropertyNameOverrideResolver(ConfigFunction)}.
+ * {@link GsonSchemaModule} is a {@link Module} that supports the Gson {@link Expose} and {@link SerializedName}
+ * annotations.
  *
  * @see
  * <a href="https://github.com/victools/jsonschema-generator/issues/218">github.com/victools/jsonschema-generator/issues/218</a>
