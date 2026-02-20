@@ -69,7 +69,7 @@ public abstract class JetOpenApiAnnotationsExtension {
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to move the JSON schema generated from
-     * {@link OpenApiSchema#from()} to {@link OpenApiComponents#schemas()}, set to <code>false</code> otherwise.
+     * {@link OpenApiSchema#fromClass()} to {@link OpenApiComponents#schemas()}, set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>true</code>.
      */

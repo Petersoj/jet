@@ -140,7 +140,7 @@ public @interface OpenApiHeader {
      * <em>MUST</em> pass header values through unchanged rather than attempting to automatically quote header values,
      * as the quoting rules vary too widely among different headers; see
      * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a> for
-     * guidance on quoting and escaping.</p>
+     * guidance on quoting and escaping.
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-for-use-with-schema-0">spec.openapis.org</a>
      */

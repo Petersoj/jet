@@ -66,6 +66,44 @@ public @interface OpenApiSchema {
     }
 
     /**
+     * The discriminator provides a “hint” for which of a set of schemas a payload is expected to satisfy. See
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#composition-and-inheritance-polymorphism">Composition and
+     * Inheritance</a> for more details.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-discriminator">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsNullableValue
+    OpenApiDiscriminator[] discriminator() default {};
+
+    /**
+     * Adds additional metadata to describe the XML representation of this schema.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-xml">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsNullableValue
+    OpenApiXml[] xml() default {};
+
+    /**
+     * Additional external documentation for this schema.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-external-docs">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsNullableValue
+    OpenApiExternalDoc[] externalDocs() default {};
+
+    /**
+     * A free-form field to include an example of an instance for this schema. To represent examples that cannot be
+     * naturally represented in JSON or YAML, a string value can be used to contain the example with escaping where
+     * necessary.<p><strong>Deprecated:</strong> The <code>example</code> field has been deprecated in favor of the JSON
+     * Schema <code>examples</code> keyword. Use of <code>example</code> is discouraged, and later versions of this
+     * specification may remove it.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#schema-example">spec.openapis.org</a>
+     */
+    @AnnotationJsonRawString
+    String example() default "";
+
+    /**
      * The {@link Class} to generate a JSON schema from.
      * <p>
      * If {@link #rawJson()} is set, the JSON schema object generated from this {@link Class} is combined with the
@@ -73,7 +111,7 @@ public @interface OpenApiSchema {
      */
     @AnnotationJsonIgnore
     @AnnotationArrayIsNullableValue
-    Class<?>[] from() default {};
+    Class<?>[] fromClass() default {};
 
     /**
      * {@link OpenApiSchema} raw JSON object {@link String}, merged with the existing JSON object created from the

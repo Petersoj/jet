@@ -34,11 +34,11 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
             final JsonSerializationContext context) {
         final var serialized = context.serialize(src,
                 Annotation.class); // Prevent recursion using `Annotation.class` since there is a type hierarchy adapter
-        final var from = src.from();
-        if (from.length == 0) {
+        final var fromClass = src.fromClass();
+        if (fromClass.length == 0) {
             return serialized;
         }
-        checkArgument(from.length == 1, "`@OpenApiSchema.from` cannot contain more than one `Class`");
-        return combine(serialized, JsonParser.parseString(schemaGenerator.generateSchema(from[0]).toString()));
+        checkArgument(fromClass.length == 1, "`@OpenApiSchema.fromClass` cannot contain more than one `Class`");
+        return combine(serialized, JsonParser.parseString(schemaGenerator.generateSchema(fromClass[0]).toString()));
     }
 }
