@@ -34,11 +34,11 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         final var extension = project.getExtensions().create(EXTENSION_NAME, JetOpenApiAnnotationsExtension.class);
         extension.getJavaCompileTasks()
                 .convention(project.getTasks().withType(JavaCompile.class));
-        extension.getSchemaGeneratorModuleJSpecifyAnnotations()
+        extension.getSchemaGeneratorUseNullableModule()
                 .convention(true);
-        extension.getSchemaGeneratorModuleGson()
+        extension.getSchemaGeneratorUseGsonModule()
                 .convention(false);
-        extension.getSchemaGeneratorModuleJackson()
+        extension.getSchemaGeneratorUseJacksonModule()
                 .convention(false);
         extension.getGenerateOperationId()
                 .convention(true);
@@ -55,12 +55,12 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                     .set(extension.getJavaCompileTasks());
             task.getSchemaGeneratorConfigBuilderProvider()
                     .set(extension.getSchemaGeneratorConfigBuilderProvider());
-            task.getSchemaGeneratorModuleJSpecifyAnnotations()
-                    .set(extension.getSchemaGeneratorModuleJSpecifyAnnotations());
-            task.getSchemaGeneratorModuleGson()
-                    .set(extension.getSchemaGeneratorModuleGson());
-            task.getSchemaGeneratorModuleJackson()
-                    .set(extension.getSchemaGeneratorModuleJackson());
+            task.getSchemaGeneratorUseNullableModule()
+                    .set(extension.getSchemaGeneratorUseNullableModule());
+            task.getSchemaGeneratorUseGsonModule()
+                    .set(extension.getSchemaGeneratorUseGsonModule());
+            task.getSchemaGeneratorUseJacksonModule()
+                    .set(extension.getSchemaGeneratorUseJacksonModule());
             task.getGenerateOperationId()
                     .set(extension.getGenerateOperationId());
             task.getMoveClassSchemasToComponents()

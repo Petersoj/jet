@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.common.util.jspecify;
+package net.jacobpeterson.jet.common.util.nullable;
 
 import com.google.common.collect.ImmutableSet;
 import org.jspecify.annotations.NullMarked;
@@ -16,10 +16,11 @@ import static java.util.Collections.disjoint;
 import static java.util.Collections.synchronizedMap;
 
 /**
- * {@link JSpecifyAnnotationsUtil} is a utility class for {@link org.jspecify.annotations}.
+ * {@link NullableUtil} is a utility class for <code>@Nullable</code> annotation libraries like
+ * {@link org.jspecify.annotations JSpecify}.
  */
 @NullMarked
-public class JSpecifyAnnotationsUtil {
+public class NullableUtil {
 
     /**
      * A {@link Function} for {@link #requireNonNullFieldsSet(Object, Function)} that returns a
@@ -46,7 +47,8 @@ public class JSpecifyAnnotationsUtil {
      *
      * @see #isFieldNullable(Field)
      */
-    public static final ImmutableSet<String> NULL_ABLE_ANNOTATION_CLASS_NAMES = ImmutableSet.of("Nullable");
+    public static final ImmutableSet<String> NULL_ABLE_ANNOTATION_CLASS_NAMES =
+            ImmutableSet.of("Nullable");
 
     /**
      * The {@link String} {@link ImmutableSet} of non-<code>null</code> annotation class names from well-known
@@ -54,7 +56,8 @@ public class JSpecifyAnnotationsUtil {
      *
      * @see #isFieldNullable(Field)
      */
-    public static final ImmutableSet<String> NON_NULL_ANNOTATION_CLASS_NAMES = ImmutableSet.of("NonNull", "NotNull");
+    public static final ImmutableSet<String> NON_NULL_ANNOTATION_CLASS_NAMES =
+            ImmutableSet.of("NonNull", "NotNull");
 
     /**
      * The {@link String} {@link ImmutableSet} of <code>null</code>-marked annotation class names from well-known
@@ -62,8 +65,8 @@ public class JSpecifyAnnotationsUtil {
      *
      * @see #isFieldNullable(Field)
      */
-    public static final ImmutableSet<String> NULL_MARKED_ANNOTATION_CLASS_NAMES = ImmutableSet.of("NullMarked",
-            "NotNullByDefault");
+    public static final ImmutableSet<String> NULL_MARKED_ANNOTATION_CLASS_NAMES =
+            ImmutableSet.of("NullMarked", "NotNullByDefault");
 
     /**
      * The {@link String} {@link ImmutableSet} of <code>null</code>-unmarked annotation class names from well-known
@@ -71,8 +74,8 @@ public class JSpecifyAnnotationsUtil {
      *
      * @see #isFieldNullable(Field)
      */
-    public static final ImmutableSet<String> NULL_UNMARKED_ANNOTATION_CLASS_NAMES = ImmutableSet.of("NullUnmarked",
-            "NullByDefault");
+    public static final ImmutableSet<String> NULL_UNMARKED_ANNOTATION_CLASS_NAMES =
+            ImmutableSet.of("NullUnmarked", "NullByDefault");
 
     private static final Map<Field, Boolean> NULLABILITY_OF_FIELDS = synchronizedMap(new HashMap<>());
 
@@ -185,5 +188,5 @@ public class JSpecifyAnnotationsUtil {
                 .collect(toImmutableSet());
     }
 
-    private JSpecifyAnnotationsUtil() {}
+    private NullableUtil() {}
 }

@@ -1,23 +1,23 @@
-package net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked;
+package net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked;
 
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
-@NullMarked
 @SuppressWarnings({"RequireExplicitNullMarking", "NullAway", "NullableProblems"})
-public final class OuterMarking {
+public final class InnerMarking {
 
     @Nullable String string1;
     int primitive;
     String string2;
 
-    public OuterMarking(final String string1, final int primitive, final String string2) {
+    public InnerMarking(final String string1, final int primitive, final String string2) {
         this.string1 = string1;
         this.primitive = primitive;
         this.string2 = string2;
     }
 
+    @NullUnmarked
     public static class Inner {
 
         int primitive;

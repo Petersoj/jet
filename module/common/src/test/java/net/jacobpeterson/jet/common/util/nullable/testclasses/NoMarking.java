@@ -1,18 +1,16 @@
-package net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked;
+package net.jacobpeterson.jet.common.util.nullable.testclasses;
 
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-@NullMarked
 @SuppressWarnings({"RequireExplicitNullMarking", "NullAway", "NullableProblems"})
-public final class OuterMarking {
+public final class NoMarking {
 
     @Nullable String string1;
     int primitive;
     String string2;
 
-    public OuterMarking(final String string1, final int primitive, final String string2) {
+    public NoMarking(final String string1, final int primitive, final String string2) {
         this.string1 = string1;
         this.primitive = primitive;
         this.string2 = string2;

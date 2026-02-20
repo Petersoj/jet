@@ -5,17 +5,16 @@ import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import net.jacobpeterson.jet.common.util.jspecify.JSpecifyAnnotationsUtil;
+import net.jacobpeterson.jet.common.util.nullable.NullableUtil;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
-import static net.jacobpeterson.jet.common.util.jspecify.JSpecifyAnnotationsUtil.isFieldNullable;
+import static net.jacobpeterson.jet.common.util.nullable.NullableUtil.isFieldNullable;
 
 /**
- * {@link JSpecifyAnnotationsSchemaModule} is a {@link Module} that uses
- * {@link JSpecifyAnnotationsUtil#isFieldNullable(Field)} for
+ * {@link NullableSchemaModule} is a {@link Module} that uses {@link NullableUtil#isFieldNullable(Field)} for
  * {@link SchemaGeneratorConfigPart#withRequiredCheck(Predicate)}.
  * <p>
  * Note: {@link SchemaGeneratorConfigPart#withNullableCheck(ConfigFunction)} is not applied because
@@ -23,7 +22,7 @@ import static net.jacobpeterson.jet.common.util.jspecify.JSpecifyAnnotationsUtil
  * the schema, and many OpenAPI generators reference <code>required</code> for nullability.
  */
 @NullMarked
-public class JSpecifyAnnotationsSchemaModule implements Module {
+public class NullableSchemaModule implements Module {
 
     @Override
     public void applyToConfigBuilder(final SchemaGeneratorConfigBuilder builder) {

@@ -8,7 +8,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.NullableSchemaModule;
 import org.gradle.api.Task;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -35,12 +35,12 @@ public abstract class JetOpenApiAnnotationsExtension {
     public abstract Property<SchemaGeneratorConfigBuilderProvider> getSchemaGeneratorConfigBuilderProvider();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use the
-     * {@link JSpecifyAnnotationsSchemaModule}, set to <code>false</code> otherwise.
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use the {@link NullableSchemaModule}, set
+     * to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>true</code>.
      */
-    public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
+    public abstract Property<Boolean> getSchemaGeneratorUseNullableModule();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use {@link GsonSchemaModule} the, set to
@@ -48,7 +48,7 @@ public abstract class JetOpenApiAnnotationsExtension {
      * <p>
      * Defaults to <code>false</code>.
      */
-    public abstract Property<Boolean> getSchemaGeneratorModuleGson();
+    public abstract Property<Boolean> getSchemaGeneratorUseGsonModule();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to use the {@link JacksonSchemaModule}, set
@@ -56,7 +56,7 @@ public abstract class JetOpenApiAnnotationsExtension {
      * <p>
      * Defaults to <code>false</code>.
      */
-    public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
+    public abstract Property<Boolean> getSchemaGeneratorUseJacksonModule();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to generate an

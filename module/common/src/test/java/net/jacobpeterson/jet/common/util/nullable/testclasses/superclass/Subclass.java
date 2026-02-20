@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.common.util.jspecify.testclasses.superclass;
+package net.jacobpeterson.jet.common.util.nullable.testclasses.superclass;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;

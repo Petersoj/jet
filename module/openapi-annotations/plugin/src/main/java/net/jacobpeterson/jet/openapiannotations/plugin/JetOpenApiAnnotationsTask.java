@@ -16,7 +16,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.GsonSchemaModule;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.JSpecifyAnnotationsSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.EmptyStringIsNullJsonSerializer;
@@ -115,13 +115,13 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     public abstract Property<SchemaGeneratorConfigBuilderProvider> getSchemaGeneratorConfigBuilderProvider();
 
     @Input
-    public abstract Property<Boolean> getSchemaGeneratorModuleJSpecifyAnnotations();
+    public abstract Property<Boolean> getSchemaGeneratorUseNullableModule();
 
     @Input
-    public abstract Property<Boolean> getSchemaGeneratorModuleGson();
+    public abstract Property<Boolean> getSchemaGeneratorUseGsonModule();
 
     @Input
-    public abstract Property<Boolean> getSchemaGeneratorModuleJackson();
+    public abstract Property<Boolean> getSchemaGeneratorUseJacksonModule();
 
     @Input
     public abstract Property<Boolean> getGenerateOperationId();
@@ -218,13 +218,13 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         .with(DEFINITIONS_FOR_ALL_OBJECTS)
                         .with(DEFINITIONS_FOR_MEMBER_SUPERTYPES);
             }
-            if (getSchemaGeneratorModuleJSpecifyAnnotations().get()) {
-                schemaGeneratorConfigBuilder.with(new JSpecifyAnnotationsSchemaModule());
+            if (getSchemaGeneratorUseNullableModule().get()) {
+                schemaGeneratorConfigBuilder.with(new NullableSchemaModule());
             }
-            if (getSchemaGeneratorModuleGson().get()) {
+            if (getSchemaGeneratorUseGsonModule().get()) {
                 schemaGeneratorConfigBuilder.with(new GsonSchemaModule());
             }
-            if (getSchemaGeneratorModuleJackson().get()) {
+            if (getSchemaGeneratorUseJacksonModule().get()) {
                 schemaGeneratorConfigBuilder.with(new JacksonSchemaModule());
             }
             final var annotationGson = new GsonBuilder()

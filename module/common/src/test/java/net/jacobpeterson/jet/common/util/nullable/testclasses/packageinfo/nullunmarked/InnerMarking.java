@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked;
+package net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;

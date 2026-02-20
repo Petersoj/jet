@@ -1,9 +1,9 @@
-package net.jacobpeterson.jet.common.util.jspecify;
+package net.jacobpeterson.jet.common.util.nullable;
 
-import net.jacobpeterson.jet.common.util.jspecify.testclasses.InnerMarking;
-import net.jacobpeterson.jet.common.util.jspecify.testclasses.NoMarking;
-import net.jacobpeterson.jet.common.util.jspecify.testclasses.OuterMarking;
-import net.jacobpeterson.jet.common.util.jspecify.testclasses.superclass.Subclass;
+import net.jacobpeterson.jet.common.util.nullable.testclasses.InnerMarking;
+import net.jacobpeterson.jet.common.util.nullable.testclasses.NoMarking;
+import net.jacobpeterson.jet.common.util.nullable.testclasses.OuterMarking;
+import net.jacobpeterson.jet.common.util.nullable.testclasses.superclass.Subclass;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @NullUnmarked
 @SuppressWarnings({"ParameterMissingNullable", "DataFlowIssue"})
-public final class JSpecifyAnnotationsUtilTest {
+public final class NullableUtilTest {
 
     @Test
     public void requireNonNullFieldsSet() {
@@ -125,7 +125,7 @@ public final class JSpecifyAnnotationsUtilTest {
     }
 
     private Executable requireNonNullFieldsSetExecutable(final @Nullable Object object) {
-        return () -> JSpecifyAnnotationsUtil.requireNonNullFieldsSet(object);
+        return () -> NullableUtil.requireNonNullFieldsSet(object);
     }
 
     private NoMarking noMarking(final String string1, final int primitive, final String string2) {
@@ -152,75 +152,75 @@ public final class JSpecifyAnnotationsUtilTest {
         return new InnerMarking.Inner(primitive, string1, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked.NoMarking
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked.NoMarking
     nullMarkedPackageNoMarking(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked
                 .NoMarking(string1, primitive, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked.NoMarking.Inner
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked.NoMarking.Inner
     nullMarkedPackageNoMarkingInner(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked
                 .NoMarking.Inner(primitive, string1, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked.OuterMarking
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked.OuterMarking
     nullMarkedPackageOuterMarking(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked
                 .OuterMarking(string1, primitive, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked.OuterMarking.Inner
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked.OuterMarking.Inner
     nullMarkedPackageOuterMarkingInner(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked
                 .OuterMarking.Inner(primitive, string1, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked.InnerMarking
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked.InnerMarking
     nullMarkedPackageInnerMarking(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked
                 .InnerMarking(string1, primitive, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked.InnerMarking.Inner
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked.InnerMarking.Inner
     nullMarkedPackageInnerMarkingInner(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullmarked
                 .InnerMarking.Inner(primitive, string1, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked.NoMarking
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked.NoMarking
     nullUnmarkedPackageNoMarking(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked
                 .NoMarking(string1, primitive, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked.NoMarking.Inner
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked.NoMarking.Inner
     nullUnmarkedPackageNoMarkingInner(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked
                 .NoMarking.Inner(primitive, string1, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked.OuterMarking
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked.OuterMarking
     nullUnmarkedPackageOuterMarking(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked
                 .OuterMarking(string1, primitive, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked.OuterMarking.Inner
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked.OuterMarking.Inner
     nullUnmarkedPackageOuterMarkingInner(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked
                 .OuterMarking.Inner(primitive, string1, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked.InnerMarking
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked.InnerMarking
     nullUnmarkedPackageInnerMarking(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked
                 .InnerMarking(string1, primitive, string2);
     }
 
-    private net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked.InnerMarking.Inner
+    private net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked.InnerMarking.Inner
     nullUnmarkedPackageInnerMarkingInner(final String string1, final int primitive, final String string2) {
-        return new net.jacobpeterson.jet.common.util.jspecify.testclasses.packageinfo.nullunmarked
+        return new net.jacobpeterson.jet.common.util.nullable.testclasses.packageinfo.nullunmarked
                 .InnerMarking.Inner(primitive, string1, string2);
     }
 }
