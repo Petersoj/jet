@@ -37,7 +37,9 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 /**
  * {@link ContentType} is an immutable class that represents a standardized HTTP {@link Header#CONTENT_TYPE} (aka MIME
  * type). Internally, this class wraps {@link MediaType} from <a href="https://github.com/google/guava">Google Guava</a>
- * and adds some extra functionality.
+ * and adds some extra functionality. The public constants are commonly used content types. The constants are defined as
+ * both {@link ContentType} and as {@link String} types. The {@link String} types are provided so they can be used
+ * within annotations.
  * <p>
  * The HTTP <strong><code>Content-Type</code></strong>
  * <a href="https://developer.mozilla.org/en-US/docs/Glossary/Representation_header">representation header</a> is used
@@ -73,9 +75,6 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @Immutable
 @RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(cacheStrategy = LAZY)
 public final class ContentType {
-
-    // The below public constants are commonly used content types. The constants are defined as `String` and
-    // `ContentType` types. The `String` types are provided so they can be used within annotations.
 
     /** The {@link #getType()}-{@link #getSubtype()} delimiter: <code>"/"</code> */
     public static final String TYPE_DELIMITER = "/";

@@ -1,9 +1,14 @@
 package net.jacobpeterson.jet.common.http.method;
 
+import com.google.common.collect.ImmutableMap;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
+import static java.util.function.Function.identity;
 
 /**
  * {@link Method} is an enum that represents a standardized HTTP request method.
@@ -16,6 +21,7 @@ import static java.util.Locale.ROOT;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods">developer.mozilla.org</a>
  */
 @NullMarked
+@RequiredArgsConstructor
 public enum Method {
 
     /**
@@ -25,7 +31,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/GET">
      * developer.mozilla.org</a>
      */
-    GET,
+    GET(ToString.GET),
 
     /**
      * The <code>HEAD</code> method asks for a response identical to a <code>GET</code> request, but without a response
@@ -34,7 +40,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/HEAD">
      * developer.mozilla.org</a>
      */
-    HEAD,
+    HEAD(ToString.HEAD),
 
     /**
      * The <code>POST</code> method submits an entity to the specified resource, often causing a change in state or side
@@ -43,7 +49,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST">
      * developer.mozilla.org</a>
      */
-    POST,
+    POST(ToString.POST),
 
     /**
      * The <code>PUT</code> method replaces all current representations of the target resource with the request
@@ -52,7 +58,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PUT">
      * developer.mozilla.org</a>
      */
-    PUT,
+    PUT(ToString.PUT),
 
     /**
      * The <code>DELETE</code> method deletes the specified resource.
@@ -60,7 +66,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/DELETE">
      * developer.mozilla.org</a>
      */
-    DELETE,
+    DELETE(ToString.DELETE),
 
     /**
      * The <code>CONNECT</code> method establishes a tunnel to the server identified by the target resource.
@@ -68,7 +74,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/CONNECT">
      * developer.mozilla.org</a>
      */
-    CONNECT,
+    CONNECT(ToString.CONNECT),
 
     /**
      * The <code>OPTIONS</code> method describes the communication options for the target resource.
@@ -76,7 +82,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/OPTIONS">
      * developer.mozilla.org</a>
      */
-    OPTIONS,
+    OPTIONS(ToString.OPTIONS),
 
     /**
      * The <code>TRACE</code> method performs a message loop-back test along the path to the target resource.
@@ -84,7 +90,7 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/TRACE">
      * developer.mozilla.org</a>
      */
-    TRACE,
+    TRACE(ToString.TRACE),
 
     /**
      * The <code>PATCH</code> method applies partial modifications to a resource.
@@ -92,7 +98,14 @@ public enum Method {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PATCH">
      * developer.mozilla.org</a>
      */
-    PATCH;
+    PATCH(ToString.PATCH);
+
+    private final String string;
+
+    @Override
+    public String toString() {
+        return string;
+    }
 
     /**
      * @return <code>true</code> if this {@link Method} is
@@ -130,6 +143,46 @@ public enum Method {
     }
 
     /**
+     * {@link ToString} contains the {@link #toString()} constants for all {@link Method} enums so they can be used
+     * within annotations.
+     */
+    public static final class ToString {
+
+        /** @see Method#GET */
+        public static final String GET = "GET";
+
+        /** @see Method#HEAD */
+        public static final String HEAD = "HEAD";
+
+        /** @see Method#POST */
+        public static final String POST = "POST";
+
+        /** @see Method#PUT */
+        public static final String PUT = "PUT";
+
+        /** @see Method#DELETE */
+        public static final String DELETE = "DELETE";
+
+        /** @see Method#CONNECT */
+        public static final String CONNECT = "CONNECT";
+
+        /** @see Method#OPTIONS */
+        public static final String OPTIONS = "OPTIONS";
+
+        /** @see Method#TRACE */
+        public static final String TRACE = "TRACE";
+
+        /** @see Method#PATCH */
+        public static final String PATCH = "PATCH";
+    }
+
+    /**
+     * An {@link ImmutableMap} of uppercased {@link #toString()} mapped to {@link Method}.
+     */
+    public static final ImmutableMap<String, Method> VALUES_OF_UPPERCASED_STRINGS = stream(values())
+            .collect(toImmutableMap(value -> value.toString().toUpperCase(ROOT), identity()));
+
+    /**
      * Gets the {@link Method} for the given <code>string</code>.
      *
      * @param string the case-insensitive {@link #toString()}
@@ -137,10 +190,6 @@ public enum Method {
      * @return the {@link Method}, or <code>null</code> if no mapping exists
      */
     public static @Nullable Method forString(final String string) {
-        try {
-            return valueOf(string.toUpperCase(ROOT));
-        } catch (final IllegalArgumentException illegalArgumentException) {
-            return null;
-        }
+        return VALUES_OF_UPPERCASED_STRINGS.get(string.toUpperCase(ROOT));
     }
 }

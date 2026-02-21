@@ -77,7 +77,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/WWW-Authenticate">
      * developer.mozilla.org</a>
      */
-    WWW_AUTHENTICATE("WWW-Authenticate"),
+    WWW_AUTHENTICATE(ToString.WWW_AUTHENTICATE),
 
     /**
      * Contains the credentials to authenticate a user-agent with a server.
@@ -85,7 +85,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Authorization">
      * developer.mozilla.org</a>
      */
-    AUTHORIZATION("Authorization"),
+    AUTHORIZATION(ToString.AUTHORIZATION),
 
     /**
      * Defines the authentication method that should be used to access a resource behind a proxy server.
@@ -93,7 +93,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Proxy-Authenticate">
      * developer.mozilla.org</a>
      */
-    PROXY_AUTHENTICATE("Proxy-Authenticate"),
+    PROXY_AUTHENTICATE(ToString.PROXY_AUTHENTICATE),
 
     /**
      * Contains the credentials to authenticate a user agent with a proxy server.
@@ -101,7 +101,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Proxy-Authorization">
      * developer.mozilla.org</a>
      */
-    PROXY_AUTHORIZATION("Proxy-Authorization"),
+    PROXY_AUTHORIZATION(ToString.PROXY_AUTHORIZATION),
 
     /**
      * The time, in seconds, that the object has been in a proxy cache.
@@ -109,7 +109,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Age">
      * developer.mozilla.org</a>
      */
-    AGE("Age"),
+    AGE(ToString.AGE),
 
     /**
      * Directives for caching mechanisms in both requests and responses.
@@ -117,7 +117,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control">
      * developer.mozilla.org</a>
      */
-    CACHE_CONTROL("Cache-Control"),
+    CACHE_CONTROL(ToString.CACHE_CONTROL),
 
     /**
      * Clears browsing data (e.g., cookies, storage, cache) associated with the requesting website.
@@ -125,7 +125,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Clear-Site-Data">
      * developer.mozilla.org</a>
      */
-    CLEAR_SITE_DATA("Clear-Site-Data"),
+    CLEAR_SITE_DATA(ToString.CLEAR_SITE_DATA),
 
     /**
      * The date/time after which the response is considered stale.
@@ -133,7 +133,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expires">
      * developer.mozilla.org</a>
      */
-    EXPIRES("Expires"),
+    EXPIRES(ToString.EXPIRES),
 
     /**
      * Specifies a set of rules that define how a URL's query parameters will affect cache matching. These rules dictate
@@ -142,7 +142,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/No-Vary-Search">
      * developer.mozilla.org</a>
      */
-    NO_VARY_SEARCH("No-Vary-Search"),
+    NO_VARY_SEARCH(ToString.NO_VARY_SEARCH),
 
     /**
      * The last modification date of the resource, used to compare several versions of the same resource. It is less
@@ -157,7 +157,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Last-Modified">
      * developer.mozilla.org</a>
      */
-    LAST_MODIFIED("Last-Modified"),
+    LAST_MODIFIED(ToString.LAST_MODIFIED),
 
     /**
      * A unique string identifying the version of the resource. Conditional requests using
@@ -168,7 +168,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag">
      * developer.mozilla.org</a>
      */
-    ETAG("ETag"),
+    ETAG(ToString.ETAG),
 
     /**
      * Makes the request conditional, and applies the method only if the stored resource matches one of the given
@@ -177,7 +177,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match">
      * developer.mozilla.org</a>
      */
-    IF_MATCH("If-Match"),
+    IF_MATCH(ToString.IF_MATCH),
 
     /**
      * Makes the request conditional, and applies the method only if the stored resource <em>doesn't</em> match any of
@@ -187,7 +187,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match">
      * developer.mozilla.org</a>
      */
-    IF_NONE_MATCH("If-None-Match"),
+    IF_NONE_MATCH(ToString.IF_NONE_MATCH),
 
     /**
      * Makes the request conditional, and expects the resource to be transmitted only if it has been modified after the
@@ -196,7 +196,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Modified-Since">
      * developer.mozilla.org</a>
      */
-    IF_MODIFIED_SINCE("If-Modified-Since"),
+    IF_MODIFIED_SINCE(ToString.IF_MODIFIED_SINCE),
 
     /**
      * Makes the request conditional, and expects the resource to be transmitted only if it has not been modified after
@@ -206,7 +206,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Unmodified-Since">
      * developer.mozilla.org</a>
      */
-    IF_UNMODIFIED_SINCE("If-Unmodified-Since"),
+    IF_UNMODIFIED_SINCE(ToString.IF_UNMODIFIED_SINCE),
 
     /**
      * Determines how to match request headers to decide whether a cached response can be used rather than requesting a
@@ -215,7 +215,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Vary">
      * developer.mozilla.org</a>
      */
-    VARY("Vary"),
+    VARY(ToString.VARY),
 
     /**
      * Controls whether the network connection stays open after the current transaction finishes.
@@ -223,7 +223,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Connection">
      * developer.mozilla.org</a>
      */
-    CONNECTION("Connection"),
+    CONNECTION(ToString.CONNECTION),
 
     /**
      * Controls how long a persistent connection should stay open.
@@ -231,7 +231,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive">
      * developer.mozilla.org</a>
      */
-    KEEP_ALIVE("Keep-Alive"),
+    KEEP_ALIVE(ToString.KEEP_ALIVE),
 
     /**
      * Informs the server about the <a href="https://developer.mozilla.org/en-US/docs/Glossary/MIME_type">types</a> of
@@ -240,7 +240,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept">
      * developer.mozilla.org</a>
      */
-    ACCEPT("Accept"),
+    ACCEPT(ToString.ACCEPT),
 
     /**
      * The encoding algorithm, usually a
@@ -250,7 +250,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Encoding">
      * developer.mozilla.org</a>
      */
-    ACCEPT_ENCODING("Accept-Encoding"),
+    ACCEPT_ENCODING(ToString.ACCEPT_ENCODING),
 
     /**
      * Informs the server about the human language the server is expected to send back. This is a hint and is not
@@ -260,7 +260,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Language">
      * developer.mozilla.org</a>
      */
-    ACCEPT_LANGUAGE("Accept-Language"),
+    ACCEPT_LANGUAGE(ToString.ACCEPT_LANGUAGE),
 
     /**
      * A <em>request content negotiation</em> response header that advertises which
@@ -272,7 +272,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Patch">
      * developer.mozilla.org</a>
      */
-    ACCEPT_PATCH("Accept-Patch"),
+    ACCEPT_PATCH(ToString.ACCEPT_PATCH),
 
     /**
      * A <em>request content negotiation</em> response header that advertises which
@@ -283,7 +283,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Post">
      * developer.mozilla.org</a>
      */
-    ACCEPT_POST("Accept-Post"),
+    ACCEPT_POST(ToString.ACCEPT_POST),
 
     /**
      * Indicates expectations that need to be fulfilled by the server to properly handle the request.
@@ -291,7 +291,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expect">
      * developer.mozilla.org</a>
      */
-    EXPECT("Expect"),
+    EXPECT(ToString.EXPECT),
 
     /**
      * When using
@@ -301,7 +301,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Max-Forwards">
      * developer.mozilla.org</a>
      */
-    MAX_FORWARDS("Max-Forwards"),
+    MAX_FORWARDS(ToString.MAX_FORWARDS),
 
     /**
      * Contains stored <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies">HTTP cookies</a>
@@ -313,7 +313,7 @@ public enum Header {
      * developer.mozilla.org</a>
      * @see Cookie
      */
-    COOKIE("Cookie"),
+    COOKIE(ToString.COOKIE),
 
     /**
      * Send cookies from the server to the user-agent.
@@ -322,7 +322,7 @@ public enum Header {
      * developer.mozilla.org</a>
      * @see Cookie
      */
-    SET_COOKIE("Set-Cookie"),
+    SET_COOKIE(ToString.SET_COOKIE),
 
     /**
      * Indicates whether the response to the request can be exposed when the credentials flag is true.
@@ -331,7 +331,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Credentials">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials"),
+    ACCESS_CONTROL_ALLOW_CREDENTIALS(ToString.ACCESS_CONTROL_ALLOW_CREDENTIALS),
 
     /**
      * Used in response to a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request">preflight
@@ -340,7 +340,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Headers">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_ALLOW_HEADERS("Access-Control-Allow-Headers"),
+    ACCESS_CONTROL_ALLOW_HEADERS(ToString.ACCESS_CONTROL_ALLOW_HEADERS),
 
     /**
      * Specifies the methods allowed when accessing the resource in response to a preflight request.
@@ -348,7 +348,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_ALLOW_METHODS("Access-Control-Allow-Methods"),
+    ACCESS_CONTROL_ALLOW_METHODS(ToString.ACCESS_CONTROL_ALLOW_METHODS),
 
     /**
      * Indicates whether the response can be shared.
@@ -356,7 +356,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Origin">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
+    ACCESS_CONTROL_ALLOW_ORIGIN(ToString.ACCESS_CONTROL_ALLOW_ORIGIN),
 
     /**
      * Indicates which headers can be exposed as part of the response by listing their names.
@@ -364,7 +364,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Expose-Headers">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_EXPOSE_HEADERS("Access-Control-Expose-Headers"),
+    ACCESS_CONTROL_EXPOSE_HEADERS(ToString.ACCESS_CONTROL_EXPOSE_HEADERS),
 
     /**
      * Indicates how long the results of a preflight request can be cached.
@@ -372,7 +372,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Max-Age">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_MAX_AGE("Access-Control-Max-Age"),
+    ACCESS_CONTROL_MAX_AGE(ToString.ACCESS_CONTROL_MAX_AGE),
 
     /**
      * Used when issuing a preflight request to let the server know which HTTP headers will be used when the actual
@@ -382,7 +382,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Headers">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_REQUEST_HEADERS("Access-Control-Request-Headers"),
+    ACCESS_CONTROL_REQUEST_HEADERS(ToString.ACCESS_CONTROL_REQUEST_HEADERS),
 
     /**
      * Used when issuing a preflight request to let the server know which
@@ -392,7 +392,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Method">
      * developer.mozilla.org</a>
      */
-    ACCESS_CONTROL_REQUEST_METHOD("Access-Control-Request-Method"),
+    ACCESS_CONTROL_REQUEST_METHOD(ToString.ACCESS_CONTROL_REQUEST_METHOD),
 
     /**
      * Indicates where a fetch originates from.
@@ -400,7 +400,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin">
      * developer.mozilla.org</a>
      */
-    ORIGIN("Origin"),
+    ORIGIN(ToString.ORIGIN),
 
     /**
      * Specifies origins that are allowed to see values of attributes retrieved via features of the
@@ -410,7 +410,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Timing-Allow-Origin">
      * developer.mozilla.org</a>
      */
-    TIMING_ALLOW_ORIGIN("Timing-Allow-Origin"),
+    TIMING_ALLOW_ORIGIN(ToString.TIMING_ALLOW_ORIGIN),
 
     /**
      * Indicates if the resource transmitted should be displayed inline (default behavior without the header), or if it
@@ -419,7 +419,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Disposition">
      * developer.mozilla.org</a>
      */
-    CONTENT_DISPOSITION("Content-Disposition"),
+    CONTENT_DISPOSITION(ToString.CONTENT_DISPOSITION),
 
     /**
      * Provides a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Hash_function">digest</a> of the stream of
@@ -432,7 +432,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Digest">
      * developer.mozilla.org</a>
      */
-    CONTENT_DIGEST("Content-Digest"),
+    CONTENT_DIGEST(ToString.CONTENT_DIGEST),
 
     /**
      * Provides a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Hash_function">digest</a> of the selected
@@ -448,7 +448,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Repr-Digest">
      * developer.mozilla.org</a>
      */
-    REPR_DIGEST("Repr-Digest"),
+    REPR_DIGEST(ToString.REPR_DIGEST),
 
     /**
      * States the wish for a
@@ -460,7 +460,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Want-Content-Digest">
      * developer.mozilla.org</a>
      */
-    WANT_CONTENT_DIGEST("Want-Content-Digest"),
+    WANT_CONTENT_DIGEST(ToString.WANT_CONTENT_DIGEST),
 
     /**
      * States the wish for a
@@ -472,7 +472,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Want-Repr-Digest">
      * developer.mozilla.org</a>
      */
-    WANT_REPR_DIGEST("Want-Repr-Digest"),
+    WANT_REPR_DIGEST(ToString.WANT_REPR_DIGEST),
 
     /**
      * Ensures that all resources the user agent loads (of a certain type) have
@@ -482,7 +482,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Integrity-Policy">
      * developer.mozilla.org</a>
      */
-    INTEGRITY_POLICY("Integrity-Policy"),
+    INTEGRITY_POLICY(ToString.INTEGRITY_POLICY),
 
     /**
      * Reports on resources that the user agent loads that would violate
@@ -492,7 +492,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Integrity-Policy-Report-Only">
      * developer.mozilla.org</a>
      */
-    INTEGRITY_POLICY_REPORT_ONLY("Integrity-Policy-Report-Only"),
+    INTEGRITY_POLICY_REPORT_ONLY(ToString.INTEGRITY_POLICY_REPORT_ONLY),
 
     /**
      * The size of the resource, in decimal number of bytes.
@@ -500,7 +500,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Length">
      * developer.mozilla.org</a>
      */
-    CONTENT_LENGTH("Content-Length"),
+    CONTENT_LENGTH(ToString.CONTENT_LENGTH),
 
     /**
      * Indicates the media type of the resource.
@@ -509,7 +509,7 @@ public enum Header {
      * developer.mozilla.org</a>
      * @see ContentType
      */
-    CONTENT_TYPE("Content-Type"),
+    CONTENT_TYPE(ToString.CONTENT_TYPE),
 
     /**
      * Used to specify the compression algorithm.
@@ -517,7 +517,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding">
      * developer.mozilla.org</a>
      */
-    CONTENT_ENCODING("Content-Encoding"),
+    CONTENT_ENCODING(ToString.CONTENT_ENCODING),
 
     /**
      * Describes the human language(s) intended for the audience, so that it allows a user to differentiate according to
@@ -526,7 +526,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Language">
      * developer.mozilla.org</a>
      */
-    CONTENT_LANGUAGE("Content-Language"),
+    CONTENT_LANGUAGE(ToString.CONTENT_LANGUAGE),
 
     /**
      * Indicates an alternate location for the returned data.
@@ -534,7 +534,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Location">
      * developer.mozilla.org</a>
      */
-    CONTENT_LOCATION("Content-Location"),
+    CONTENT_LOCATION(ToString.CONTENT_LOCATION),
 
     /**
      * Indicates preferences for specific server behaviors during request processing. For example, it can request
@@ -544,7 +544,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Prefer">
      * developer.mozilla.org</a>
      */
-    PREFER("Prefer"),
+    PREFER(ToString.PREFER),
 
     /**
      * Informs the client which preferences specified in the <code>Prefer</code> header were applied by the server. It
@@ -553,7 +553,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Preference-Applied">
      * developer.mozilla.org</a>
      */
-    PREFERENCE_APPLIED("Preference-Applied"),
+    PREFERENCE_APPLIED(ToString.PREFERENCE_APPLIED),
 
     /**
      * Contains information from the client-facing side of proxy servers that is altered or lost when a proxy is
@@ -562,7 +562,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Forwarded">
      * developer.mozilla.org</a>
      */
-    FORWARDED("Forwarded"),
+    FORWARDED(ToString.FORWARDED),
 
     /**
      * Added by proxies, both forward and reverse proxies, and can appear in the request headers and the response
@@ -571,7 +571,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Via">
      * developer.mozilla.org</a>
      */
-    VIA("Via"),
+    VIA(ToString.VIA),
 
     /**
      * Indicates if the server supports range requests, and if so in which unit the range can be expressed.
@@ -579,7 +579,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Ranges">
      * developer.mozilla.org</a>
      */
-    ACCEPT_RANGES("Accept-Ranges"),
+    ACCEPT_RANGES(ToString.ACCEPT_RANGES),
 
     /**
      * Indicates the part of a document that the server should return.
@@ -587,7 +587,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range">
      * developer.mozilla.org</a>
      */
-    RANGE("Range"),
+    RANGE(ToString.RANGE),
 
     /**
      * Creates a conditional range request that is only fulfilled if the given etag or date matches the remote resource.
@@ -596,7 +596,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Range">
      * developer.mozilla.org</a>
      */
-    IF_RANGE("If-Range"),
+    IF_RANGE(ToString.IF_RANGE),
 
     /**
      * Indicates where in a full body message a partial message belongs.
@@ -604,7 +604,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range">
      * developer.mozilla.org</a>
      */
-    CONTENT_RANGE("Content-Range"),
+    CONTENT_RANGE(ToString.CONTENT_RANGE),
 
     /**
      * Indicates the URL to redirect a page to.
@@ -612,7 +612,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location">
      * developer.mozilla.org</a>
      */
-    LOCATION("Location"),
+    LOCATION(ToString.LOCATION),
 
     /**
      * Directs the browser to reload the page or redirect to another. Takes the same value as the <code>meta</code>
@@ -623,7 +623,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Refresh">
      * developer.mozilla.org</a>
      */
-    REFRESH("Refresh"),
+    REFRESH(ToString.REFRESH),
 
     /**
      * Contains an Internet email address for a human user who controls the requesting user agent.
@@ -631,7 +631,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/From">
      * developer.mozilla.org</a>
      */
-    FROM("From"),
+    FROM(ToString.FROM),
 
     /**
      * Specifies the domain name of the server (for virtual hosting), and (optionally) the TCP port number on which the
@@ -640,7 +640,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host">
      * developer.mozilla.org</a>
      */
-    HOST("Host"),
+    HOST(ToString.HOST),
 
     /**
      * The address of the previous web page from which a link to the currently requested page was followed.
@@ -648,7 +648,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referer">
      * developer.mozilla.org</a>
      */
-    REFERER("Referer"),
+    REFERER(ToString.REFERER),
 
     /**
      * Governs which referrer information sent in the
@@ -658,7 +658,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy">
      * developer.mozilla.org</a>
      */
-    REFERRER_POLICY("Referrer-Policy"),
+    REFERRER_POLICY(ToString.REFERRER_POLICY),
 
     /**
      * Contains a characteristic string that allows the network protocol peers to identify the application type,
@@ -667,7 +667,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent">
      * developer.mozilla.org</a>
      */
-    USER_AGENT("User-Agent"),
+    USER_AGENT(ToString.USER_AGENT),
 
     /**
      * Lists the set of HTTP request methods supported by a resource.
@@ -675,7 +675,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow">
      * developer.mozilla.org</a>
      */
-    ALLOW("Allow"),
+    ALLOW(ToString.ALLOW),
 
     /**
      * Contains information about the software used by the origin server to handle the request.
@@ -683,7 +683,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server">
      * developer.mozilla.org</a>
      */
-    SERVER("Server"),
+    SERVER(ToString.SERVER),
 
     /**
      * Allows a server to declare an embedder policy for a given document.
@@ -691,7 +691,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy">
      * developer.mozilla.org</a>
      */
-    CROSS_ORIGIN_EMBEDDER_POLICY("Cross-Origin-Embedder-Policy"),
+    CROSS_ORIGIN_EMBEDDER_POLICY(ToString.CROSS_ORIGIN_EMBEDDER_POLICY),
 
     /**
      * Prevents other domains from opening/controlling a window.
@@ -699,7 +699,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy">
      * developer.mozilla.org</a>
      */
-    CROSS_ORIGIN_OPENER_POLICY("Cross-Origin-Opener-Policy"),
+    CROSS_ORIGIN_OPENER_POLICY(ToString.CROSS_ORIGIN_OPENER_POLICY),
 
     /**
      * Prevents other domains from reading the response of the resources to which this header is applied. See also
@@ -709,7 +709,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Resource-Policy">
      * developer.mozilla.org</a>
      */
-    CROSS_ORIGIN_RESOURCE_POLICY("Cross-Origin-Resource-Policy"),
+    CROSS_ORIGIN_RESOURCE_POLICY(ToString.CROSS_ORIGIN_RESOURCE_POLICY),
 
     /**
      * Controls resources the user agent is allowed to load for a given page.
@@ -718,7 +718,7 @@ public enum Header {
      * developer.mozilla.org</a>
      * @see ContentSecurityPolicy
      */
-    CONTENT_SECURITY_POLICY("Content-Security-Policy"),
+    CONTENT_SECURITY_POLICY(ToString.CONTENT_SECURITY_POLICY),
 
     /**
      * Allows web developers to experiment with policies by monitoring, but not enforcing, their effects. These
@@ -729,7 +729,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">
      * developer.mozilla.org</a>
      */
-    CONTENT_SECURITY_POLICY_REPORT_ONLY("Content-Security-Policy-Report-Only"),
+    CONTENT_SECURITY_POLICY_REPORT_ONLY(ToString.CONTENT_SECURITY_POLICY_REPORT_ONLY),
 
     /**
      * Lets sites opt in to reporting and enforcement of
@@ -739,7 +739,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expect-CT">
      * developer.mozilla.org</a>
      */
-    EXPECT_CT("Expect-CT"),
+    EXPECT_CT(ToString.EXPECT_CT),
 
     /**
      * Provides a mechanism to allow and deny the use of browser features in a website's own frame, and in
@@ -749,7 +749,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy">
      * developer.mozilla.org</a>
      */
-    PERMISSIONS_POLICY("Permissions-Policy"),
+    PERMISSIONS_POLICY(ToString.PERMISSIONS_POLICY),
 
     /**
      * Response header that allows website owners to specify one or more endpoints used to receive errors such as CSP
@@ -762,7 +762,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Reporting-Endpoints">
      * developer.mozilla.org</a>
      */
-    REPORTING_ENDPOINTS("Reporting-Endpoints"),
+    REPORTING_ENDPOINTS(ToString.REPORTING_ENDPOINTS),
 
     /**
      * Force communication using HTTPS instead of HTTP.
@@ -770,7 +770,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">
      * developer.mozilla.org</a>
      */
-    STRICT_TRANSPORT_SECURITY("Strict-Transport-Security"),
+    STRICT_TRANSPORT_SECURITY(ToString.STRICT_TRANSPORT_SECURITY),
 
     /**
      * Sends a signal to the server expressing the client's preference for an encrypted and authenticated response, and
@@ -781,7 +781,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Upgrade-Insecure-Requests">
      * developer.mozilla.org</a>
      */
-    UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
+    UPGRADE_INSECURE_REQUESTS(ToString.UPGRADE_INSECURE_REQUESTS),
 
     /**
      * Disables MIME sniffing and forces browser to use the type given in
@@ -791,7 +791,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options">
      * developer.mozilla.org</a>
      */
-    X_CONTENT_TYPE_OPTIONS("X-Content-Type-Options"),
+    X_CONTENT_TYPE_OPTIONS(ToString.X_CONTENT_TYPE_OPTIONS),
 
     /**
      * Indicates whether a browser should be allowed to render a page in a
@@ -807,7 +807,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options">
      * developer.mozilla.org</a>
      */
-    X_FRAME_OPTIONS("X-Frame-Options"),
+    X_FRAME_OPTIONS(ToString.X_FRAME_OPTIONS),
 
     /**
      * A cross-domain policy file may grant clients, such as Adobe Acrobat or Apache Flex (among others), permission to
@@ -820,7 +820,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Permitted-Cross-Domain-Policies">
      * developer.mozilla.org</a>
      */
-    X_PERMITTED_CROSS_DOMAIN_POLICIES("X-Permitted-Cross-Domain-Policies"),
+    X_PERMITTED_CROSS_DOMAIN_POLICIES(ToString.X_PERMITTED_CROSS_DOMAIN_POLICIES),
 
     /**
      * May be set by hosting environments or other frameworks and contains information about them while not providing
@@ -830,7 +830,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Powered-By">
      * developer.mozilla.org</a>
      */
-    X_POWERED_BY("X-Powered-By"),
+    X_POWERED_BY(ToString.X_POWERED_BY),
 
     /**
      * Enables cross-site scripting filtering.
@@ -838,7 +838,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection">
      * developer.mozilla.org</a>
      */
-    X_XSS_PROTECTION("X-XSS-Protection"),
+    X_XSS_PROTECTION(ToString.X_XSS_PROTECTION),
 
     /**
      * Indicates the relationship between a request initiator's origin and its target's origin. It is a Structured
@@ -848,7 +848,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Site">
      * developer.mozilla.org</a>
      */
-    SEC_FETCH_SITE("Sec-Fetch-Site"),
+    SEC_FETCH_SITE(ToString.SEC_FETCH_SITE),
 
     /**
      * Indicates the request's mode to a server. It is a Structured Header whose value is a token with possible values
@@ -858,7 +858,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Mode">
      * developer.mozilla.org</a>
      */
-    SEC_FETCH_MODE("Sec-Fetch-Mode"),
+    SEC_FETCH_MODE(ToString.SEC_FETCH_MODE),
 
     /**
      * Indicates whether or not a navigation request was triggered by user activation. It is a Structured Header whose
@@ -867,7 +867,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-User">
      * developer.mozilla.org</a>
      */
-    SEC_FETCH_USER("Sec-Fetch-User"),
+    SEC_FETCH_USER(ToString.SEC_FETCH_USER),
 
     /**
      * Indicates the request's destination. It is a Structured Header whose value is a token with possible values
@@ -879,7 +879,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Dest">
      * developer.mozilla.org</a>
      */
-    SEC_FETCH_DEST("Sec-Fetch-Dest"),
+    SEC_FETCH_DEST(ToString.SEC_FETCH_DEST),
 
     /**
      * Indicates the purpose of the request, when the purpose is something other than immediate use by the user-agent.
@@ -889,7 +889,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Purpose">
      * developer.mozilla.org</a>
      */
-    SEC_PURPOSE("Sec-Purpose"),
+    SEC_PURPOSE(ToString.SEC_PURPOSE),
 
     /**
      * A request header sent in preemptive request to
@@ -903,7 +903,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Navigation-Preload">
      * developer.mozilla.org</a>
      */
-    SERVICE_WORKER_NAVIGATION_PRELOAD("Service-Worker-Navigation-Preload"),
+    SERVICE_WORKER_NAVIGATION_PRELOAD(ToString.SERVICE_WORKER_NAVIGATION_PRELOAD),
 
     /**
      * Indicates the "storage access status" for the current fetch context, which will be one of <code>none</code>,
@@ -914,7 +914,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Storage-Access">
      * developer.mozilla.org</a>
      */
-    SEC_FETCH_STORAGE_ACCESS("Sec-Fetch-Storage-Access"),
+    SEC_FETCH_STORAGE_ACCESS(ToString.SEC_FETCH_STORAGE_ACCESS),
 
     /**
      * Used in response to <code>Sec-Fetch-Storage-Access</code> to indicate that the browser can activate an existing
@@ -924,7 +924,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Activate-Storage-Access">
      * developer.mozilla.org</a>
      */
-    ACTIVATE_STORAGE_ACCESS("Activate-Storage-Access"),
+    ACTIVATE_STORAGE_ACCESS(ToString.ACTIVATE_STORAGE_ACCESS),
 
     /**
      * Response header used to specify server endpoints where the browser should send warning and error reports when
@@ -933,7 +933,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Report-To">
      * developer.mozilla.org</a>
      */
-    REPORT_TO("Report-To"),
+    REPORT_TO(ToString.REPORT_TO),
 
     /**
      * Specifies the form of encoding used to safely transfer the resource to the user.
@@ -941,7 +941,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Transfer-Encoding">
      * developer.mozilla.org</a>
      */
-    TRANSFER_ENCODING("Transfer-Encoding"),
+    TRANSFER_ENCODING(ToString.TRANSFER_ENCODING),
 
     /**
      * Specifies the transfer encodings the user agent is willing to accept.
@@ -949,7 +949,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/TE">
      * developer.mozilla.org</a>
      */
-    TE("TE"),
+    TE(ToString.TE),
 
     /**
      * Allows the sender to include additional fields at the end of chunked message.
@@ -957,7 +957,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Trailer">
      * developer.mozilla.org</a>
      */
-    TRAILER("Trailer"),
+    TRAILER(ToString.TRAILER),
 
     /**
      * Response header that indicates that the server is willing to upgrade to a WebSocket connection.
@@ -965,7 +965,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Accept">
      * developer.mozilla.org</a>
      */
-    SEC_WEBSOCKET_ACCEPT("Sec-WebSocket-Accept"),
+    SEC_WEBSOCKET_ACCEPT(ToString.SEC_WEBSOCKET_ACCEPT),
 
     /**
      * In requests, this header indicates the WebSocket extensions supported by the client in preferred order. In
@@ -974,7 +974,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Extensions">
      * developer.mozilla.org</a>
      */
-    SEC_WEBSOCKET_EXTENSIONS("Sec-WebSocket-Extensions"),
+    SEC_WEBSOCKET_EXTENSIONS(ToString.SEC_WEBSOCKET_EXTENSIONS),
 
     /**
      * Request header containing a key that verifies that the client explicitly intends to open a
@@ -983,7 +983,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Key">
      * developer.mozilla.org</a>
      */
-    SEC_WEBSOCKET_KEY("Sec-WebSocket-Key"),
+    SEC_WEBSOCKET_KEY(ToString.SEC_WEBSOCKET_KEY),
 
     /**
      * In requests, this header indicates the sub-protocols supported by the client in preferred order. In responses, it
@@ -992,7 +992,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Protocol">
      * developer.mozilla.org</a>
      */
-    SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol"),
+    SEC_WEBSOCKET_PROTOCOL(ToString.SEC_WEBSOCKET_PROTOCOL),
 
     /**
      * In requests, this header indicates the version of the WebSocket protocol used by the client. In responses, it is
@@ -1002,7 +1002,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-WebSocket-Version">
      * developer.mozilla.org</a>
      */
-    SEC_WEBSOCKET_VERSION("Sec-WebSocket-Version"),
+    SEC_WEBSOCKET_VERSION(ToString.SEC_WEBSOCKET_VERSION),
 
     /**
      * Used to list alternate ways to reach this service.
@@ -1010,7 +1010,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Alt-Svc">
      * developer.mozilla.org</a>
      */
-    ALT_SVC("Alt-Svc"),
+    ALT_SVC(ToString.ALT_SVC),
 
     /**
      * Used to identify the alternative service in use.
@@ -1018,7 +1018,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Alt-Used">
      * developer.mozilla.org</a>
      */
-    ALT_USED("Alt-Used"),
+    ALT_USED(ToString.ALT_USED),
 
     /**
      * Contains the date and time at which the message was originated.
@@ -1026,7 +1026,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Date">
      * developer.mozilla.org</a>
      */
-    DATE("Date"),
+    DATE(ToString.DATE),
 
     /**
      * This entity-header field provides a means for serializing one or more links in HTTP headers. It is semantically
@@ -1037,7 +1037,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Link">
      * developer.mozilla.org</a>
      */
-    LINK("Link"),
+    LINK(ToString.LINK),
 
     /**
      * Indicates how long the user agent should wait before making a follow-up request.
@@ -1045,7 +1045,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After">
      * developer.mozilla.org</a>
      */
-    RETRY_AFTER("Retry-After"),
+    RETRY_AFTER(ToString.RETRY_AFTER),
 
     /**
      * Communicates one or more metrics and descriptions for the given request-response cycle.
@@ -1053,7 +1053,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server-Timing">
      * developer.mozilla.org</a>
      */
-    SERVER_TIMING("Server-Timing"),
+    SERVER_TIMING(ToString.SERVER_TIMING),
 
     /**
      * Included in fetches for a service worker's script resource. This header helps administrators log service worker
@@ -1062,7 +1062,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker">
      * developer.mozilla.org</a>
      */
-    SERVICE_WORKER("Service-Worker"),
+    SERVICE_WORKER(ToString.SERVICE_WORKER),
 
     /**
      * Used to remove the
@@ -1074,7 +1074,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Allowed">
      * developer.mozilla.org</a>
      */
-    SERVICE_WORKER_ALLOWED("Service-Worker-Allowed"),
+    SERVICE_WORKER_ALLOWED(ToString.SERVICE_WORKER_ALLOWED),
 
     /**
      * Links to a <a href="https://developer.mozilla.org/en-US/docs/Glossary/Source_map">source map</a> so that
@@ -1083,7 +1083,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/SourceMap">
      * developer.mozilla.org</a>
      */
-    SOURCEMAP("SourceMap"),
+    SOURCEMAP(ToString.SOURCEMAP),
 
     /**
      * This HTTP/1.1 (only) header can be used to upgrade an already established client/server connection to a different
@@ -1093,7 +1093,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Upgrade">
      * developer.mozilla.org</a>
      */
-    UPGRADE("Upgrade"),
+    UPGRADE(ToString.UPGRADE),
 
     /**
      * Provides a hint from about the priority of a particular resource request on a particular connection. The value
@@ -1103,7 +1103,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Priority">
      * developer.mozilla.org</a>
      */
-    PRIORITY("Priority"),
+    PRIORITY(ToString.PRIORITY),
 
     /**
      * Used to indicate that the response corresponding to the current request is eligible to take part in attribution
@@ -1113,7 +1113,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Eligible">
      * developer.mozilla.org</a>
      */
-    ATTRIBUTION_REPORTING_ELIGIBLE("Attribution-Reporting-Eligible"),
+    ATTRIBUTION_REPORTING_ELIGIBLE(ToString.ATTRIBUTION_REPORTING_ELIGIBLE),
 
     /**
      * Included as part of a response to a request that included an <code>Attribution-Reporting-Eligible</code> header,
@@ -1123,7 +1123,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register-Source">
      * developer.mozilla.org</a>
      */
-    ATTRIBUTION_REPORTING_REGISTER_SOURCE("Attribution-Reporting-Register-Source"),
+    ATTRIBUTION_REPORTING_REGISTER_SOURCE(ToString.ATTRIBUTION_REPORTING_REGISTER_SOURCE),
 
     /**
      * Included as part of a response to a request that included an <code>Attribution-Reporting-Eligible</code> header,
@@ -1133,7 +1133,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Attribution-Reporting-Register-Trigger">
      * developer.mozilla.org</a>
      */
-    ATTRIBUTION_REPORTING_REGISTER_TRIGGER("Attribution-Reporting-Register-Trigger"),
+    ATTRIBUTION_REPORTING_REGISTER_TRIGGER(ToString.ATTRIBUTION_REPORTING_REGISTER_TRIGGER),
 
     /**
      * Servers can advertise support for Client Hints using the <code>Accept-CH</code> header field or an equivalent
@@ -1144,7 +1144,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-CH">
      * developer.mozilla.org</a>
      */
-    ACCEPT_CH("Accept-CH"),
+    ACCEPT_CH(ToString.ACCEPT_CH),
 
     /**
      * Servers use <code>Critical-CH</code> along with
@@ -1156,7 +1156,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Critical-CH">
      * developer.mozilla.org</a>
      */
-    CRITICAL_CH("Critical-CH"),
+    CRITICAL_CH(ToString.CRITICAL_CH),
 
     /**
      * User agent's branding and version.
@@ -1164,7 +1164,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA("Sec-CH-UA"),
+    SEC_CH_UA(ToString.SEC_CH_UA),
 
     /**
      * User agent's underlying platform architecture.
@@ -1172,7 +1172,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Arch">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_ARCH("Sec-CH-UA-Arch"),
+    SEC_CH_UA_ARCH(ToString.SEC_CH_UA_ARCH),
 
     /**
      * User agent's underlying CPU architecture bitness (for example "64" bit).
@@ -1180,7 +1180,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Bitness">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_BITNESS("Sec-CH-UA-Bitness"),
+    SEC_CH_UA_BITNESS(ToString.SEC_CH_UA_BITNESS),
 
     /**
      * User agent's form-factors, describing how the user interacts with the user-agent.
@@ -1188,7 +1188,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Form-Factors">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_FORM_FACTORS("Sec-CH-UA-Form-Factors"),
+    SEC_CH_UA_FORM_FACTORS(ToString.SEC_CH_UA_FORM_FACTORS),
 
     /**
      * User agent's full version string.
@@ -1196,7 +1196,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Full-Version">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_FULL_VERSION("Sec-CH-UA-Full-Version"),
+    SEC_CH_UA_FULL_VERSION(ToString.SEC_CH_UA_FULL_VERSION),
 
     /**
      * Full version for each brand in the user agent's brand list.
@@ -1204,7 +1204,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Full-Version-List">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_FULL_VERSION_LIST("Sec-CH-UA-Full-Version-List"),
+    SEC_CH_UA_FULL_VERSION_LIST(ToString.SEC_CH_UA_FULL_VERSION_LIST),
 
     /**
      * User agent is running on a mobile device or, more generally, prefers a "mobile" user experience.
@@ -1212,7 +1212,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Mobile">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_MOBILE("Sec-CH-UA-Mobile"),
+    SEC_CH_UA_MOBILE(ToString.SEC_CH_UA_MOBILE),
 
     /**
      * User agent's device model.
@@ -1220,7 +1220,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Model">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_MODEL("Sec-CH-UA-Model"),
+    SEC_CH_UA_MODEL(ToString.SEC_CH_UA_MODEL),
 
     /**
      * User agent's underlying operation system/platform.
@@ -1228,7 +1228,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Platform">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_PLATFORM("Sec-CH-UA-Platform"),
+    SEC_CH_UA_PLATFORM(ToString.SEC_CH_UA_PLATFORM),
 
     /**
      * User agent's underlying operation system version.
@@ -1236,7 +1236,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-Platform-Version">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_PLATFORM_VERSION("Sec-CH-UA-Platform-Version"),
+    SEC_CH_UA_PLATFORM_VERSION(ToString.SEC_CH_UA_PLATFORM_VERSION),
 
     /**
      * Whether or not the user agent binary is running in 32-bit mode on 64-bit Windows.
@@ -1244,7 +1244,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-UA-WoW64">
      * developer.mozilla.org</a>
      */
-    SEC_CH_UA_WOW64("Sec-CH-UA-WoW64"),
+    SEC_CH_UA_WOW64(ToString.SEC_CH_UA_WOW64),
 
     /**
      * User's preference of dark or light color scheme.
@@ -1252,7 +1252,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Color-Scheme">
      * developer.mozilla.org</a>
      */
-    SEC_CH_PREFERS_COLOR_SCHEME("Sec-CH-Prefers-Color-Scheme"),
+    SEC_CH_PREFERS_COLOR_SCHEME(ToString.SEC_CH_PREFERS_COLOR_SCHEME),
 
     /**
      * User's preference to see fewer animations and content layout shifts.
@@ -1260,7 +1260,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Reduced-Motion">
      * developer.mozilla.org</a>
      */
-    SEC_CH_PREFERS_REDUCED_MOTION("Sec-CH-Prefers-Reduced-Motion"),
+    SEC_CH_PREFERS_REDUCED_MOTION(ToString.SEC_CH_PREFERS_REDUCED_MOTION),
 
     /**
      * Request header indicates the user agent's preference for reduced transparency.
@@ -1269,7 +1269,7 @@ public enum Header {
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-CH-Prefers-Reduced-Transparency">
      * developer.mozilla.org</a>
      */
-    SEC_CH_PREFERS_REDUCED_TRANSPARENCY("Sec-CH-Prefers-Reduced-Transparency"),
+    SEC_CH_PREFERS_REDUCED_TRANSPARENCY(ToString.SEC_CH_PREFERS_REDUCED_TRANSPARENCY),
 
     /**
      * Response header used to confirm the image device to pixel ratio (DPR) in requests where the screen
@@ -1279,7 +1279,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-DPR">
      * developer.mozilla.org</a>
      */
-    CONTENT_DPR("Content-DPR"),
+    CONTENT_DPR(ToString.CONTENT_DPR),
 
     /**
      * Approximate amount of available client RAM memory. This is part of the
@@ -1288,7 +1288,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Device-Memory">
      * developer.mozilla.org</a>
      */
-    DEVICE_MEMORY("Device-Memory"),
+    DEVICE_MEMORY(ToString.DEVICE_MEMORY),
 
     /**
      * Request header that provides the client device pixel ratio (the number of physical
@@ -1298,7 +1298,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/DPR">
      * developer.mozilla.org</a>
      */
-    DPR("DPR"),
+    DPR(ToString.DPR),
 
     /**
      * Request header provides the client's layout viewport width in
@@ -1307,7 +1307,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Viewport-Width">
      * developer.mozilla.org</a>
      */
-    VIEWPORT_WIDTH("Viewport-Width"),
+    VIEWPORT_WIDTH(ToString.VIEWPORT_WIDTH),
 
     /**
      * Request header indicates the desired resource width in physical pixels (the intrinsic size of an image).
@@ -1315,7 +1315,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Width">
      * developer.mozilla.org</a>
      */
-    WIDTH("Width"),
+    WIDTH(ToString.WIDTH),
 
     /**
      * Approximate bandwidth of the client's connection to the server, in Mbps. This is part of the
@@ -1324,7 +1324,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Downlink">
      * developer.mozilla.org</a>
      */
-    DOWNLINK("Downlink"),
+    DOWNLINK(ToString.DOWNLINK),
 
     /**
      * The <a href="https://developer.mozilla.org/en-US/docs/Glossary/Effective_connection_type">effective connection
@@ -1334,7 +1334,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ECT">
      * developer.mozilla.org</a>
      */
-    ECT("ECT"),
+    ECT(ToString.ECT),
 
     /**
      * Application layer round trip time (RTT) in milliseconds, which includes the server processing time. This is part
@@ -1344,7 +1344,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/RTT">
      * developer.mozilla.org</a>
      */
-    RTT("RTT"),
+    RTT(ToString.RTT),
 
     /**
      * A string <code>on</code> that indicates the user agent's preference for reduced data usage.
@@ -1352,7 +1352,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Save-Data">
      * developer.mozilla.org</a>
      */
-    SAVE_DATA("Save-Data"),
+    SAVE_DATA(ToString.SAVE_DATA),
 
     /**
      * A browser can use this request header to indicate the best dictionary it has available for the server to use for
@@ -1361,7 +1361,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Available-Dictionary">
      * developer.mozilla.org</a>
      */
-    AVAILABLE_DICTIONARY("Available-Dictionary"),
+    AVAILABLE_DICTIONARY(ToString.AVAILABLE_DICTIONARY),
 
     /**
      * Used when a browser already has a dictionary available for a resource and the server provided an <code>id</code>
@@ -1372,7 +1372,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Dictionary-ID">
      * developer.mozilla.org</a>
      */
-    DICTIONARY_ID("Dictionary-ID"),
+    DICTIONARY_ID(ToString.DICTIONARY_ID),
 
     /**
      * Lists the matching criteria that the dictionary can be used for in future requests.
@@ -1380,7 +1380,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Use-As-Dictionary">
      * developer.mozilla.org</a>
      */
-    USE_AS_DICTIONARY("Use-As-Dictionary"),
+    USE_AS_DICTIONARY(ToString.USE_AS_DICTIONARY),
 
     /**
      * Request header that indicates the user's tracking preference (Do Not Track). Deprecated in favor of Global
@@ -1393,7 +1393,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/DNT">
      * developer.mozilla.org</a>
      */
-    DNT("DNT"),
+    DNT(ToString.DNT),
 
     /**
      * Response header that indicates the tracking status that applied to the corresponding request. Used in conjunction
@@ -1402,7 +1402,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Tk">
      * developer.mozilla.org</a>
      */
-    TK("Tk"),
+    TK(ToString.TK),
 
     /**
      * Indicates whether the user consents to a website or service selling or sharing their personal information with
@@ -1411,7 +1411,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-GPC">
      * developer.mozilla.org</a>
      */
-    SEC_GPC("Sec-GPC"),
+    SEC_GPC(ToString.SEC_GPC),
 
     /**
      * Response header used to indicate that the associated
@@ -1423,7 +1423,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin-Agent-Cluster">
      * developer.mozilla.org</a>
      */
-    ORIGIN_AGENT_CLUSTER("Origin-Agent-Cluster"),
+    ORIGIN_AGENT_CLUSTER(ToString.ORIGIN_AGENT_CLUSTER),
 
     /**
      * Defines a mechanism that enables developers to declare a network error reporting policy.
@@ -1431,7 +1431,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/NEL">
      * developer.mozilla.org</a>
      */
-    NEL("NEL"),
+    NEL(ToString.NEL),
 
     /**
      * Response header used to mark topics of interest inferred from a calling site's URL as observed in the response to
@@ -1442,7 +1442,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Observe-Browsing-Topics">
      * developer.mozilla.org</a>
      */
-    OBSERVE_BROWSING_TOPICS("Observe-Browsing-Topics"),
+    OBSERVE_BROWSING_TOPICS(ToString.OBSERVE_BROWSING_TOPICS),
 
     /**
      * Request header that sends the selected topics for the current user along with the associated request, which are
@@ -1451,7 +1451,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Browsing-Topics">
      * developer.mozilla.org</a>
      */
-    SEC_BROWSING_TOPICS("Sec-Browsing-Topics"),
+    SEC_BROWSING_TOPICS(ToString.SEC_BROWSING_TOPICS),
 
     /**
      * A client can send the
@@ -1462,7 +1462,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Signature">
      * developer.mozilla.org</a>
      */
-    ACCEPT_SIGNATURE("Accept-Signature"),
+    ACCEPT_SIGNATURE(ToString.ACCEPT_SIGNATURE),
 
     /**
      * Indicates that the request has been conveyed in TLS early data.
@@ -1470,7 +1470,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Early-Data">
      * developer.mozilla.org</a>
      */
-    EARLY_DATA("Early-Data"),
+    EARLY_DATA(ToString.EARLY_DATA),
 
     /**
      * Provides a unique key for <code>POST</code> and <code>PATCH</code> requests, allowing them to be made
@@ -1479,7 +1479,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Idempotency-Key">
      * developer.mozilla.org</a>
      */
-    IDEMPOTENCY_KEY("Idempotency-Key"),
+    IDEMPOTENCY_KEY(ToString.IDEMPOTENCY_KEY),
 
     /**
      * Response header sent by a federated identity provider (IdP) to set its login status, meaning whether any users
@@ -1489,7 +1489,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Login">
      * developer.mozilla.org</a>
      */
-    SET_LOGIN("Set-Login"),
+    SET_LOGIN(ToString.SET_LOGIN),
 
     /**
      * The
@@ -1500,7 +1500,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Signature">
      * developer.mozilla.org</a>
      */
-    SIGNATURE("Signature"),
+    SIGNATURE(ToString.SIGNATURE),
 
     /**
      * The
@@ -1511,7 +1511,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Signed-Headers">
      * developer.mozilla.org</a>
      */
-    SIGNED_HEADERS("Signed-Headers"),
+    SIGNED_HEADERS(ToString.SIGNED_HEADERS),
 
     /**
      * Provides a list of URLs pointing to text resources containing
@@ -1522,7 +1522,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Speculation-Rules">
      * developer.mozilla.org</a>
      */
-    SPECULATION_RULES("Speculation-Rules"),
+    SPECULATION_RULES(ToString.SPECULATION_RULES),
 
     /**
      * Contains one or more tag values from the speculation rules that resulted in the speculation so a server can
@@ -1531,7 +1531,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Speculation-Tags">
      * developer.mozilla.org</a>
      */
-    SEC_SPECULATION_TAGS("Sec-Speculation-Tags"),
+    SEC_SPECULATION_TAGS(ToString.SEC_SPECULATION_TAGS),
 
     /**
      * Set by a navigation target to opt-in to using various higher-risk loading modes. For example, cross-origin,
@@ -1542,7 +1542,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Supports-Loading-Mode">
      * developer.mozilla.org</a>
      */
-    SUPPORTS_LOADING_MODE("Supports-Loading-Mode"),
+    SUPPORTS_LOADING_MODE(ToString.SUPPORTS_LOADING_MODE),
 
     /**
      * Identifies the originating IP addresses of a client connecting to a web server through an HTTP proxy or a load
@@ -1551,7 +1551,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For">
      * developer.mozilla.org</a>
      */
-    X_FORWARDED_FOR("X-Forwarded-For"),
+    X_FORWARDED_FOR(ToString.X_FORWARDED_FOR),
 
     /**
      * Identifies the original host requested that a client used to connect to your proxy or load balancer.
@@ -1559,7 +1559,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Host">
      * developer.mozilla.org</a>
      */
-    X_FORWARDED_HOST("X-Forwarded-Host"),
+    X_FORWARDED_HOST(ToString.X_FORWARDED_HOST),
 
     /**
      * Identifies the protocol (HTTP or HTTPS) that a client used to connect to your proxy or load balancer.
@@ -1567,7 +1567,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Proto">
      * developer.mozilla.org</a>
      */
-    X_FORWARDED_PROTO("X-Forwarded-Proto"),
+    X_FORWARDED_PROTO(ToString.X_FORWARDED_PROTO),
 
     /**
      * Controls DNS prefetching, a feature by which browsers proactively perform domain name resolution on both links
@@ -1577,7 +1577,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-DNS-Prefetch-Control">
      * developer.mozilla.org</a>
      */
-    X_DNS_PREFETCH_CONTROL("X-DNS-Prefetch-Control"),
+    X_DNS_PREFETCH_CONTROL(ToString.X_DNS_PREFETCH_CONTROL),
 
     /**
      * The
@@ -1590,7 +1590,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Robots-Tag">
      * developer.mozilla.org</a>
      */
-    X_ROBOTS_TAG("X-Robots-Tag"),
+    X_ROBOTS_TAG(ToString.X_ROBOTS_TAG),
 
     /**
      * Implementation-specific header that may have various effects anywhere along the request-response chain. Used for
@@ -1599,7 +1599,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Pragma">
      * developer.mozilla.org</a>
      */
-    PRAGMA("Pragma"),
+    PRAGMA(ToString.PRAGMA),
 
     /**
      * General warning information about possible problems.
@@ -1607,7 +1607,7 @@ public enum Header {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Warning">
      * developer.mozilla.org</a>
      */
-    WARNING("Warning"),
+    WARNING(ToString.WARNING),
 
     // BEGIN https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
 
@@ -1617,7 +1617,7 @@ public enum Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    X_ACCEL_EXPIRES("X-Accel-Expires"),
+    X_ACCEL_EXPIRES(ToString.X_ACCEL_EXPIRES),
 
     /**
      * For Nginx proxy module: performs an
@@ -1626,7 +1626,7 @@ public enum Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    X_ACCEL_REDIRECT("X-Accel-Redirect"),
+    X_ACCEL_REDIRECT(ToString.X_ACCEL_REDIRECT),
 
     /**
      * For Nginx proxy module: sets the
@@ -1635,7 +1635,7 @@ public enum Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    X_ACCEL_LIMIT_RATE("X-Accel-Limit-Rate"),
+    X_ACCEL_LIMIT_RATE(ToString.X_ACCEL_LIMIT_RATE),
 
     /**
      * For Nginx proxy module: enables or disables
@@ -1643,7 +1643,7 @@ public enum Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    X_ACCEL_BUFFERING("X-Accel-Buffering"),
+    X_ACCEL_BUFFERING(ToString.X_ACCEL_BUFFERING),
 
     /**
      * For Nginx proxy module: sets the desired
@@ -1651,7 +1651,7 @@ public enum Header {
      *
      * @see <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers">nginx.org</a>
      */
-    X_ACCEL_CHARSET("X-Accel-Charset");
+    X_ACCEL_CHARSET(ToString.X_ACCEL_CHARSET);
 
     // END https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
 
@@ -1660,6 +1660,517 @@ public enum Header {
     @Override
     public String toString() {
         return string;
+    }
+
+    /**
+     * {@link ToString} contains the {@link #toString()} constants for all {@link Header} enums so they can be used
+     * within annotations.
+     */
+    public static final class ToString {
+
+        /** @see Header#WWW_AUTHENTICATE */
+        public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+
+        /** @see Header#AUTHORIZATION */
+        public static final String AUTHORIZATION = "Authorization";
+
+        /** @see Header#PROXY_AUTHENTICATE */
+        public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
+
+        /** @see Header#PROXY_AUTHORIZATION */
+        public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
+
+        /** @see Header#AGE */
+        public static final String AGE = "Age";
+
+        /** @see Header#CACHE_CONTROL */
+        public static final String CACHE_CONTROL = "Cache-Control";
+
+        /** @see Header#CLEAR_SITE_DATA */
+        public static final String CLEAR_SITE_DATA = "Clear-Site-Data";
+
+        /** @see Header#EXPIRES */
+        public static final String EXPIRES = "Expires";
+
+        /** @see Header#NO_VARY_SEARCH */
+        public static final String NO_VARY_SEARCH = "No-Vary-Search";
+
+        /** @see Header#LAST_MODIFIED */
+        public static final String LAST_MODIFIED = "Last-Modified";
+
+        /** @see Header#ETAG */
+        public static final String ETAG = "ETag";
+
+        /** @see Header#IF_MATCH */
+        public static final String IF_MATCH = "If-Match";
+
+        /** @see Header#IF_NONE_MATCH */
+        public static final String IF_NONE_MATCH = "If-None-Match";
+
+        /** @see Header#IF_MODIFIED_SINCE */
+        public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+
+        /** @see Header#IF_UNMODIFIED_SINCE */
+        public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+
+        /** @see Header#VARY */
+        public static final String VARY = "Vary";
+
+        /** @see Header#CONNECTION */
+        public static final String CONNECTION = "Connection";
+
+        /** @see Header#KEEP_ALIVE */
+        public static final String KEEP_ALIVE = "Keep-Alive";
+
+        /** @see Header#ACCEPT */
+        public static final String ACCEPT = "Accept";
+
+        /** @see Header#ACCEPT_ENCODING */
+        public static final String ACCEPT_ENCODING = "Accept-Encoding";
+
+        /** @see Header#ACCEPT_LANGUAGE */
+        public static final String ACCEPT_LANGUAGE = "Accept-Language";
+
+        /** @see Header#ACCEPT_PATCH */
+        public static final String ACCEPT_PATCH = "Accept-Patch";
+
+        /** @see Header#ACCEPT_POST */
+        public static final String ACCEPT_POST = "Accept-Post";
+
+        /** @see Header#EXPECT */
+        public static final String EXPECT = "Expect";
+
+        /** @see Header#MAX_FORWARDS */
+        public static final String MAX_FORWARDS = "Max-Forwards";
+
+        /** @see Header#COOKIE */
+        public static final String COOKIE = "Cookie";
+
+        /** @see Header#SET_COOKIE */
+        public static final String SET_COOKIE = "Set-Cookie";
+
+        /** @see Header#ACCESS_CONTROL_ALLOW_CREDENTIALS */
+        public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+
+        /** @see Header#ACCESS_CONTROL_ALLOW_HEADERS */
+        public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+
+        /** @see Header#ACCESS_CONTROL_ALLOW_METHODS */
+        public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+
+        /** @see Header#ACCESS_CONTROL_ALLOW_ORIGIN */
+        public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+
+        /** @see Header#ACCESS_CONTROL_EXPOSE_HEADERS */
+        public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+
+        /** @see Header#ACCESS_CONTROL_MAX_AGE */
+        public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
+
+        /** @see Header#ACCESS_CONTROL_REQUEST_HEADERS */
+        public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
+
+        /** @see Header#ACCESS_CONTROL_REQUEST_METHOD */
+        public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
+
+        /** @see Header#ORIGIN */
+        public static final String ORIGIN = "Origin";
+
+        /** @see Header#TIMING_ALLOW_ORIGIN */
+        public static final String TIMING_ALLOW_ORIGIN = "Timing-Allow-Origin";
+
+        /** @see Header#CONTENT_DISPOSITION */
+        public static final String CONTENT_DISPOSITION = "Content-Disposition";
+
+        /** @see Header#CONTENT_DIGEST */
+        public static final String CONTENT_DIGEST = "Content-Digest";
+
+        /** @see Header#REPR_DIGEST */
+        public static final String REPR_DIGEST = "Repr-Digest";
+
+        /** @see Header#WANT_CONTENT_DIGEST */
+        public static final String WANT_CONTENT_DIGEST = "Want-Content-Digest";
+
+        /** @see Header#WANT_REPR_DIGEST */
+        public static final String WANT_REPR_DIGEST = "Want-Repr-Digest";
+
+        /** @see Header#INTEGRITY_POLICY */
+        public static final String INTEGRITY_POLICY = "Integrity-Policy";
+
+        /** @see Header#INTEGRITY_POLICY_REPORT_ONLY */
+        public static final String INTEGRITY_POLICY_REPORT_ONLY = "Integrity-Policy-Report-Only";
+
+        /** @see Header#CONTENT_LENGTH */
+        public static final String CONTENT_LENGTH = "Content-Length";
+
+        /** @see Header#CONTENT_TYPE */
+        public static final String CONTENT_TYPE = "Content-Type";
+
+        /** @see Header#CONTENT_ENCODING */
+        public static final String CONTENT_ENCODING = "Content-Encoding";
+
+        /** @see Header#CONTENT_LANGUAGE */
+        public static final String CONTENT_LANGUAGE = "Content-Language";
+
+        /** @see Header#CONTENT_LOCATION */
+        public static final String CONTENT_LOCATION = "Content-Location";
+
+        /** @see Header#PREFER */
+        public static final String PREFER = "Prefer";
+
+        /** @see Header#PREFERENCE_APPLIED */
+        public static final String PREFERENCE_APPLIED = "Preference-Applied";
+
+        /** @see Header#FORWARDED */
+        public static final String FORWARDED = "Forwarded";
+
+        /** @see Header#VIA */
+        public static final String VIA = "Via";
+
+        /** @see Header#ACCEPT_RANGES */
+        public static final String ACCEPT_RANGES = "Accept-Ranges";
+
+        /** @see Header#RANGE */
+        public static final String RANGE = "Range";
+
+        /** @see Header#IF_RANGE */
+        public static final String IF_RANGE = "If-Range";
+
+        /** @see Header#CONTENT_RANGE */
+        public static final String CONTENT_RANGE = "Content-Range";
+
+        /** @see Header#LOCATION */
+        public static final String LOCATION = "Location";
+
+        /** @see Header#REFRESH */
+        public static final String REFRESH = "Refresh";
+
+        /** @see Header#FROM */
+        public static final String FROM = "From";
+
+        /** @see Header#HOST */
+        public static final String HOST = "Host";
+
+        /** @see Header#REFERER */
+        public static final String REFERER = "Referer";
+
+        /** @see Header#REFERRER_POLICY */
+        public static final String REFERRER_POLICY = "Referrer-Policy";
+
+        /** @see Header#USER_AGENT */
+        public static final String USER_AGENT = "User-Agent";
+
+        /** @see Header#ALLOW */
+        public static final String ALLOW = "Allow";
+
+        /** @see Header#SERVER */
+        public static final String SERVER = "Server";
+
+        /** @see Header#CROSS_ORIGIN_EMBEDDER_POLICY */
+        public static final String CROSS_ORIGIN_EMBEDDER_POLICY = "Cross-Origin-Embedder-Policy";
+
+        /** @see Header#CROSS_ORIGIN_OPENER_POLICY */
+        public static final String CROSS_ORIGIN_OPENER_POLICY = "Cross-Origin-Opener-Policy";
+
+        /** @see Header#CROSS_ORIGIN_RESOURCE_POLICY */
+        public static final String CROSS_ORIGIN_RESOURCE_POLICY = "Cross-Origin-Resource-Policy";
+
+        /** @see Header#CONTENT_SECURITY_POLICY */
+        public static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
+
+        /** @see Header#CONTENT_SECURITY_POLICY_REPORT_ONLY */
+        public static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
+
+        /** @see Header#EXPECT_CT */
+        public static final String EXPECT_CT = "Expect-CT";
+
+        /** @see Header#PERMISSIONS_POLICY */
+        public static final String PERMISSIONS_POLICY = "Permissions-Policy";
+
+        /** @see Header#REPORTING_ENDPOINTS */
+        public static final String REPORTING_ENDPOINTS = "Reporting-Endpoints";
+
+        /** @see Header#STRICT_TRANSPORT_SECURITY */
+        public static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
+
+        /** @see Header#UPGRADE_INSECURE_REQUESTS */
+        public static final String UPGRADE_INSECURE_REQUESTS = "Upgrade-Insecure-Requests";
+
+        /** @see Header#X_CONTENT_TYPE_OPTIONS */
+        public static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
+
+        /** @see Header#X_FRAME_OPTIONS */
+        public static final String X_FRAME_OPTIONS = "X-Frame-Options";
+
+        /** @see Header#X_PERMITTED_CROSS_DOMAIN_POLICIES */
+        public static final String X_PERMITTED_CROSS_DOMAIN_POLICIES = "X-Permitted-Cross-Domain-Policies";
+
+        /** @see Header#X_POWERED_BY */
+        public static final String X_POWERED_BY = "X-Powered-By";
+
+        /** @see Header#X_XSS_PROTECTION */
+        public static final String X_XSS_PROTECTION = "X-XSS-Protection";
+
+        /** @see Header#SEC_FETCH_SITE */
+        public static final String SEC_FETCH_SITE = "Sec-Fetch-Site";
+
+        /** @see Header#SEC_FETCH_MODE */
+        public static final String SEC_FETCH_MODE = "Sec-Fetch-Mode";
+
+        /** @see Header#SEC_FETCH_USER */
+        public static final String SEC_FETCH_USER = "Sec-Fetch-User";
+
+        /** @see Header#SEC_FETCH_DEST */
+        public static final String SEC_FETCH_DEST = "Sec-Fetch-Dest";
+
+        /** @see Header#SEC_PURPOSE */
+        public static final String SEC_PURPOSE = "Sec-Purpose";
+
+        /** @see Header#SERVICE_WORKER_NAVIGATION_PRELOAD */
+        public static final String SERVICE_WORKER_NAVIGATION_PRELOAD = "Service-Worker-Navigation-Preload";
+
+        /** @see Header#SEC_FETCH_STORAGE_ACCESS */
+        public static final String SEC_FETCH_STORAGE_ACCESS = "Sec-Fetch-Storage-Access";
+
+        /** @see Header#ACTIVATE_STORAGE_ACCESS */
+        public static final String ACTIVATE_STORAGE_ACCESS = "Activate-Storage-Access";
+
+        /** @see Header#REPORT_TO */
+        public static final String REPORT_TO = "Report-To";
+
+        /** @see Header#TRANSFER_ENCODING */
+        public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+
+        /** @see Header#TE */
+        public static final String TE = "TE";
+
+        /** @see Header#TRAILER */
+        public static final String TRAILER = "Trailer";
+
+        /** @see Header#SEC_WEBSOCKET_ACCEPT */
+        public static final String SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
+
+        /** @see Header#SEC_WEBSOCKET_EXTENSIONS */
+        public static final String SEC_WEBSOCKET_EXTENSIONS = "Sec-WebSocket-Extensions";
+
+        /** @see Header#SEC_WEBSOCKET_KEY */
+        public static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
+
+        /** @see Header#SEC_WEBSOCKET_PROTOCOL */
+        public static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+
+        /** @see Header#SEC_WEBSOCKET_VERSION */
+        public static final String SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
+
+        /** @see Header#ALT_SVC */
+        public static final String ALT_SVC = "Alt-Svc";
+
+        /** @see Header#ALT_USED */
+        public static final String ALT_USED = "Alt-Used";
+
+        /** @see Header#DATE */
+        public static final String DATE = "Date";
+
+        /** @see Header#LINK */
+        public static final String LINK = "Link";
+
+        /** @see Header#RETRY_AFTER */
+        public static final String RETRY_AFTER = "Retry-After";
+
+        /** @see Header#SERVER_TIMING */
+        public static final String SERVER_TIMING = "Server-Timing";
+
+        /** @see Header#SERVICE_WORKER */
+        public static final String SERVICE_WORKER = "Service-Worker";
+
+        /** @see Header#SERVICE_WORKER_ALLOWED */
+        public static final String SERVICE_WORKER_ALLOWED = "Service-Worker-Allowed";
+
+        /** @see Header#SOURCEMAP */
+        public static final String SOURCEMAP = "SourceMap";
+
+        /** @see Header#UPGRADE */
+        public static final String UPGRADE = "Upgrade";
+
+        /** @see Header#PRIORITY */
+        public static final String PRIORITY = "Priority";
+
+        /** @see Header#ATTRIBUTION_REPORTING_ELIGIBLE */
+        public static final String ATTRIBUTION_REPORTING_ELIGIBLE = "Attribution-Reporting-Eligible";
+
+        /** @see Header#ATTRIBUTION_REPORTING_REGISTER_SOURCE */
+        public static final String ATTRIBUTION_REPORTING_REGISTER_SOURCE = "Attribution-Reporting-Register-Source";
+
+        /** @see Header#ATTRIBUTION_REPORTING_REGISTER_TRIGGER */
+        public static final String ATTRIBUTION_REPORTING_REGISTER_TRIGGER = "Attribution-Reporting-Register-Trigger";
+
+        /** @see Header#ACCEPT_CH */
+        public static final String ACCEPT_CH = "Accept-CH";
+
+        /** @see Header#CRITICAL_CH */
+        public static final String CRITICAL_CH = "Critical-CH";
+
+        /** @see Header#SEC_CH_UA */
+        public static final String SEC_CH_UA = "Sec-CH-UA";
+
+        /** @see Header#SEC_CH_UA_ARCH */
+        public static final String SEC_CH_UA_ARCH = "Sec-CH-UA-Arch";
+
+        /** @see Header#SEC_CH_UA_BITNESS */
+        public static final String SEC_CH_UA_BITNESS = "Sec-CH-UA-Bitness";
+
+        /** @see Header#SEC_CH_UA_FORM_FACTORS */
+        public static final String SEC_CH_UA_FORM_FACTORS = "Sec-CH-UA-Form-Factors";
+
+        /** @see Header#SEC_CH_UA_FULL_VERSION */
+        public static final String SEC_CH_UA_FULL_VERSION = "Sec-CH-UA-Full-Version";
+
+        /** @see Header#SEC_CH_UA_FULL_VERSION_LIST */
+        public static final String SEC_CH_UA_FULL_VERSION_LIST = "Sec-CH-UA-Full-Version-List";
+
+        /** @see Header#SEC_CH_UA_MOBILE */
+        public static final String SEC_CH_UA_MOBILE = "Sec-CH-UA-Mobile";
+
+        /** @see Header#SEC_CH_UA_MODEL */
+        public static final String SEC_CH_UA_MODEL = "Sec-CH-UA-Model";
+
+        /** @see Header#SEC_CH_UA_PLATFORM */
+        public static final String SEC_CH_UA_PLATFORM = "Sec-CH-UA-Platform";
+
+        /** @see Header#SEC_CH_UA_PLATFORM_VERSION */
+        public static final String SEC_CH_UA_PLATFORM_VERSION = "Sec-CH-UA-Platform-Version";
+
+        /** @see Header#SEC_CH_UA_WOW64 */
+        public static final String SEC_CH_UA_WOW64 = "Sec-CH-UA-WoW64";
+
+        /** @see Header#SEC_CH_PREFERS_COLOR_SCHEME */
+        public static final String SEC_CH_PREFERS_COLOR_SCHEME = "Sec-CH-Prefers-Color-Scheme";
+
+        /** @see Header#SEC_CH_PREFERS_REDUCED_MOTION */
+        public static final String SEC_CH_PREFERS_REDUCED_MOTION = "Sec-CH-Prefers-Reduced-Motion";
+
+        /** @see Header#SEC_CH_PREFERS_REDUCED_TRANSPARENCY */
+        public static final String SEC_CH_PREFERS_REDUCED_TRANSPARENCY = "Sec-CH-Prefers-Reduced-Transparency";
+
+        /** @see Header#CONTENT_DPR */
+        public static final String CONTENT_DPR = "Content-DPR";
+
+        /** @see Header#DEVICE_MEMORY */
+        public static final String DEVICE_MEMORY = "Device-Memory";
+
+        /** @see Header#DPR */
+        public static final String DPR = "DPR";
+
+        /** @see Header#VIEWPORT_WIDTH */
+        public static final String VIEWPORT_WIDTH = "Viewport-Width";
+
+        /** @see Header#WIDTH */
+        public static final String WIDTH = "Width";
+
+        /** @see Header#DOWNLINK */
+        public static final String DOWNLINK = "Downlink";
+
+        /** @see Header#ECT */
+        public static final String ECT = "ECT";
+
+        /** @see Header#RTT */
+        public static final String RTT = "RTT";
+
+        /** @see Header#SAVE_DATA */
+        public static final String SAVE_DATA = "Save-Data";
+
+        /** @see Header#AVAILABLE_DICTIONARY */
+        public static final String AVAILABLE_DICTIONARY = "Available-Dictionary";
+
+        /** @see Header#DICTIONARY_ID */
+        public static final String DICTIONARY_ID = "Dictionary-ID";
+
+        /** @see Header#USE_AS_DICTIONARY */
+        public static final String USE_AS_DICTIONARY = "Use-As-Dictionary";
+
+        /** @see Header#DNT */
+        public static final String DNT = "DNT";
+
+        /** @see Header#TK */
+        public static final String TK = "Tk";
+
+        /** @see Header#SEC_GPC */
+        public static final String SEC_GPC = "Sec-GPC";
+
+        /** @see Header#ORIGIN_AGENT_CLUSTER */
+        public static final String ORIGIN_AGENT_CLUSTER = "Origin-Agent-Cluster";
+
+        /** @see Header#NEL */
+        public static final String NEL = "NEL";
+
+        /** @see Header#OBSERVE_BROWSING_TOPICS */
+        public static final String OBSERVE_BROWSING_TOPICS = "Observe-Browsing-Topics";
+
+        /** @see Header#SEC_BROWSING_TOPICS */
+        public static final String SEC_BROWSING_TOPICS = "Sec-Browsing-Topics";
+
+        /** @see Header#ACCEPT_SIGNATURE */
+        public static final String ACCEPT_SIGNATURE = "Accept-Signature";
+
+        /** @see Header#EARLY_DATA */
+        public static final String EARLY_DATA = "Early-Data";
+
+        /** @see Header#IDEMPOTENCY_KEY */
+        public static final String IDEMPOTENCY_KEY = "Idempotency-Key";
+
+        /** @see Header#SET_LOGIN */
+        public static final String SET_LOGIN = "Set-Login";
+
+        /** @see Header#SIGNATURE */
+        public static final String SIGNATURE = "Signature";
+
+        /** @see Header#SIGNED_HEADERS */
+        public static final String SIGNED_HEADERS = "Signed-Headers";
+
+        /** @see Header#SPECULATION_RULES */
+        public static final String SPECULATION_RULES = "Speculation-Rules";
+
+        /** @see Header#SEC_SPECULATION_TAGS */
+        public static final String SEC_SPECULATION_TAGS = "Sec-Speculation-Tags";
+
+        /** @see Header#SUPPORTS_LOADING_MODE */
+        public static final String SUPPORTS_LOADING_MODE = "Supports-Loading-Mode";
+
+        /** @see Header#X_FORWARDED_FOR */
+        public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
+        /** @see Header#X_FORWARDED_HOST */
+        public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+
+        /** @see Header#X_FORWARDED_PROTO */
+        public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+
+        /** @see Header#X_DNS_PREFETCH_CONTROL */
+        public static final String X_DNS_PREFETCH_CONTROL = "X-DNS-Prefetch-Control";
+
+        /** @see Header#X_ROBOTS_TAG */
+        public static final String X_ROBOTS_TAG = "X-Robots-Tag";
+
+        /** @see Header#PRAGMA */
+        public static final String PRAGMA = "Pragma";
+
+        /** @see Header#WARNING */
+        public static final String WARNING = "Warning";
+
+        /** @see Header#X_ACCEL_EXPIRES */
+        public static final String X_ACCEL_EXPIRES = "X-Accel-Expires";
+
+        /** @see Header#X_ACCEL_REDIRECT */
+        public static final String X_ACCEL_REDIRECT = "X-Accel-Redirect";
+
+        /** @see Header#X_ACCEL_LIMIT_RATE */
+        public static final String X_ACCEL_LIMIT_RATE = "X-Accel-Limit-Rate";
+
+        /** @see Header#X_ACCEL_BUFFERING */
+        public static final String X_ACCEL_BUFFERING = "X-Accel-Buffering";
+
+        /** @see Header#X_ACCEL_CHARSET */
+        public static final String X_ACCEL_CHARSET = "X-Accel-Charset";
     }
 
     /**

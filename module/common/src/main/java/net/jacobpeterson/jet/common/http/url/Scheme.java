@@ -29,35 +29,35 @@ public enum Scheme {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/blob"><code>blob</code></a>
      */
-    BLOB("blob", null),
+    BLOB(ToString.BLOB, null),
 
     /**
      * Data directly embedded in the URL.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data"><code>data</code></a>
      */
-    DATA("data", null),
+    DATA(ToString.DATA, null),
 
     /**
      * Host-specific file names.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#file"><code>file</code></a>
      */
-    FILE("file", null),
+    FILE(ToString.FILE, null),
 
     /**
      * <a href="https://developer.mozilla.org/en-US/docs/Glossary/FTP">File Transfer Protocol</a>.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#ftp"><code>ftp</code></a>
      */
-    FTP("ftp", 21),
+    FTP(ToString.FTP, 21),
 
     /**
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">Hypertext Transfer Protocol</a>.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#http"><code>http</code></a>
      */
-    HTTP("http", 80),
+    HTTP(ToString.HTTP, 80),
 
     /**
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">Hypertext Transfer Protocol</a>
@@ -65,7 +65,7 @@ public enum Scheme {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#http"><code>https</code></a>
      */
-    HTTPS("https", 443),
+    HTTPS(ToString.HTTPS, 443),
 
     /**
      * URL-embedded JavaScript code.
@@ -73,35 +73,35 @@ public enum Scheme {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/javascript">
      * <code>javascript</code></a>
      */
-    JAVASCRIPT("javascript", null),
+    JAVASCRIPT(ToString.JAVASCRIPT, null),
 
     /**
      * Electronic mail address.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#mailto"><code>mailto</code></a>
      */
-    MAILTO("mailto", null),
+    MAILTO(ToString.MAILTO, null),
 
     /**
      * Secure shell.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#ssh"><code>ssh</code></a>
      */
-    SSH("ssh", 22),
+    SSH(ToString.SSH, 22),
 
     /**
      * Telephone.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#tel"><code>tel</code></a>
      */
-    TEL("tel", null),
+    TEL(ToString.TEL, null),
 
     /**
      * Uniform Resource Names.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/urn"><code>urn</code></a>
      */
-    URN("urn", null),
+    URN(ToString.URN, null),
 
     /**
      * Source code of the resource.
@@ -109,14 +109,14 @@ public enum Scheme {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#view-source">
      * <code>view-source</code></a>
      */
-    VIEW_SOURCE("view-source", null),
+    VIEW_SOURCE(ToString.VIEW_SOURCE, null),
 
     /**
      * <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">WebSocket connections</a>.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#ws"><code>ws</code></a>
      */
-    WS("ws", 80),
+    WS(ToString.WS, 80),
 
     /**
      * <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">WebSocket connections</a>
@@ -124,7 +124,7 @@ public enum Scheme {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes#ws"><code>wss</code></a>
      */
-    WSS("wss", 443);
+    WSS(ToString.WSS, 443);
 
     private final String string;
     /** The default port, or <code>null</code> if there is no well-known default port. */
@@ -133,6 +133,55 @@ public enum Scheme {
     @Override
     public String toString() {
         return string;
+    }
+
+    /**
+     * {@link ToString} contains the {@link #toString()} constants for all {@link Scheme} enums so they can be used
+     * within annotations.
+     */
+    public static final class ToString {
+
+        /** @see Scheme#BLOB */
+        public static final String BLOB = "blob";
+
+        /** @see Scheme#DATA */
+        public static final String DATA = "data";
+
+        /** @see Scheme#FILE */
+        public static final String FILE = "file";
+
+        /** @see Scheme#FTP */
+        public static final String FTP = "ftp";
+
+        /** @see Scheme#HTTP */
+        public static final String HTTP = "http";
+
+        /** @see Scheme#HTTPS */
+        public static final String HTTPS = "https";
+
+        /** @see Scheme#JAVASCRIPT */
+        public static final String JAVASCRIPT = "javascript";
+
+        /** @see Scheme#MAILTO */
+        public static final String MAILTO = "mailto";
+
+        /** @see Scheme#SSH */
+        public static final String SSH = "ssh";
+
+        /** @see Scheme#TEL */
+        public static final String TEL = "tel";
+
+        /** @see Scheme#URN */
+        public static final String URN = "urn";
+
+        /** @see Scheme#VIEW_SOURCE */
+        public static final String VIEW_SOURCE = "view-source";
+
+        /** @see Scheme#WS */
+        public static final String WS = "ws";
+
+        /** @see Scheme#WSS */
+        public static final String WSS = "wss";
     }
 
     /**

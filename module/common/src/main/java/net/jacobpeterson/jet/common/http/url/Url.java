@@ -54,29 +54,29 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  * components that make up a URI:
  * <ul>
  * <li>
- *     <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes">Schemes</a> -
- *     The first part of the URI, before the <code>:</code> character, which indicates the protocol the browser must
- *     use to fetch the resource.
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes">Schemes</a> -
+ * The first part of the URI, before the <code>:</code> character, which indicates the protocol the browser must use to
+ * fetch the resource.
  * </li>
  * <li>
- *     <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Authority">Authority</a> -
- *     The section that comes after the scheme and before the path. It may have up to three parts: <code>user</code>
- *     information, <code>host</code>, and <code>port</code>.
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Authority">Authority</a> -
+ * The section that comes after the scheme and before the path. It may have up to three parts: <code>user</code>
+ * information, <code>host</code>, and <code>port</code>.
  * </li>
  * <li>
- *     <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Path">Path</a> -
- *     The section after the authority. Contains data, usually organized in hierarchical form, to identify a resource
- *     within the scope of the URI's scheme and authority.
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Path">Path</a> -
+ * The section after the authority. Contains data, usually organized in hierarchical form, to identify a resource within
+ * the scope of the URI's scheme and authority.
  * </li>
  * <li>
- *     <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Query">Query</a> -
- *     The section after the path. Contains non-hierarchical data to identify a resource within the scope of the
- *     URI's scheme and naming authority along with data in the path component.
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Query">Query</a> -
+ * The section after the path. Contains non-hierarchical data to identify a resource within the scope of the URI's
+ * scheme and naming authority along with data in the path component.
  * </li>
  * <li>
- *     <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment">Fragment</a> -
- *     An optional part at the end of a URI starting with a <code>#</code> character. It is used to identify a
- *     specific part of the resource, such as a section of a document or a position in a video.
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment">Fragment</a> -
+ * An optional part at the end of a URI starting with a <code>#</code> character. It is used to identify a specific part
+ * of the resource, such as a section of a document or a position in a video.
  * </li>
  * </ul>
  *

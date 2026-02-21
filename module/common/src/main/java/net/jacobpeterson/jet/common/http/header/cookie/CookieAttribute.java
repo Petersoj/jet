@@ -104,11 +104,11 @@ public enum CookieAttribute {
      * matched as well. For example, for <code>Path=/docs</code>,
      * <ul>
      * <li>
-     *     the request paths <code>/docs</code>, <code>/docs/</code>, <code>/docs/Web/</code>, and
-     *     <code>/docs/Web/HTTP</code> will all match.
+     * the request paths <code>/docs</code>, <code>/docs/</code>, <code>/docs/Web/</code>, and
+     * <code>/docs/Web/HTTP</code> will all match.
      * </li>
      * <li>
-     *     the request paths <code>/</code>, <code>/docsets</code>, <code>/fr/docs</code> will not match.
+     * the request paths <code>/</code>, <code>/docsets</code>, <code>/fr/docs</code> will not match.
      * </li>
      * </ul>
      * <strong>Note:</strong> The <code>path</code> attribute lets you control what cookies the browser sends based
