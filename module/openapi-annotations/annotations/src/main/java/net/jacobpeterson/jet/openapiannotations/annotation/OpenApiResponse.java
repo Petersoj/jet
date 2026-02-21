@@ -46,6 +46,14 @@ public @interface OpenApiResponse {
         String key() default "";
 
         /**
+         * The map entry key <code>int</code>.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        @AnnotationArrayIsNullableValue
+        int[] keyInt() default {};
+
+        /**
          * The map entry key enum.
          */
         @AnnotationJsonIgnore

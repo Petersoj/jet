@@ -175,21 +175,29 @@ public @interface OpenApiPathItem {
     /**
      * Instead of using {@link #get()}, {@link #put()}, {@link #post()}, {@link #delete()}, {@link #options()},
      * {@link #head()}, {@link #patch()}, {@link #trace()}, or {@link #query()} directly, this uses the {@link Method}
-     * enum mapped to a {@link OpenApiOperation}.
+     * enum or {@link Method.ToString} constant mapped to a {@link OpenApiOperation}.
      */
     @AnnotationArrayIsMap
     @AnnotationJsonObjectInline
-    ForEnum[] forEnum() default {};
+    MethodEntry[] methods() default {};
 
     /**
-     * {@link ForEnum} is an annotation for an entry in the {@link #forEnum()} map.
+     * {@link MethodEntry} is an annotation for an entry in the {@link #methods()} map.
      */
     @Target({})
     @Retention(RUNTIME) //@formatter:off
-    @interface ForEnum { //@formatter:on
+    // Note: this interface is not named `Method` because that would clash with the `common` module `Method` enum.
+    @interface MethodEntry { //@formatter:on
 
         /**
-         * The {@link #forEnum()} entry key.
+         * The {@link #methods()} entry key.
+         */
+        @AnnotationJsonIgnore
+        @AnnotationArrayIsMapKey
+        String key() default "";
+
+        /**
+         * The {@link #methods()} entry key enum.
          */
         @AnnotationJsonIgnore
         @AnnotationArrayIsMapKey
@@ -197,7 +205,7 @@ public @interface OpenApiPathItem {
         Method[] keyEnum() default {};
 
         /**
-         * The {@link #forEnum()} entry value.
+         * The {@link #methods()} entry value.
          */
         @AnnotationArrayIsNullableValue
         @AnnotationJsonObjectInline
