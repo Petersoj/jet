@@ -19,12 +19,12 @@ import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gs
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.EmptyStringIsNullJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.HeaderJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.MethodJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.OpenApiSchemaJsonSerializer;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.StatusJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.AnnotationJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.OpenApiSchemaJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.commonenum.HeaderJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.commonenum.MethodJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.commonenum.StatusJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.string.EmptyStringIsNullJsonSerializer;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -81,8 +81,8 @@ import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAUL
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
 import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.walk;
-import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
-import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.AnnotationJsonSerializer.removeClassTracers;
+import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
+import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.AnnotationJsonSerializer.removeClassTracers;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 /**

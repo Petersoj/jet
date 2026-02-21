@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer;
+package net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.google.gson.GsonBuilder;
@@ -20,8 +20,8 @@ import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil
  * {@link OpenApiSchemaJsonSerializer} is a {@link JsonSerializer} for {@link OpenApiSchema}.
  * <p>
  * Note: {@link OpenApiSchemaJsonSerializer} <strong>MUST</strong> be used with {@link AnnotationJsonSerializer}
- * given to {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}, otherwise a recursive infinity loop will
- * occur.
+ * registered using {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}, otherwise a recursive infinity loop
+ * will occur.
  */
 @NullMarked
 @RequiredArgsConstructor
