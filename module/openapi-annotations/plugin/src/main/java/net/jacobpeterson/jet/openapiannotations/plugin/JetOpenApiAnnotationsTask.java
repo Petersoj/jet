@@ -15,7 +15,6 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.enclosingclassname.EnclosingClassNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
@@ -123,9 +122,6 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     public abstract Property<Boolean> getSchemaGeneratorUseSchemaNameModule();
 
     @Input
-    public abstract Property<Boolean> getSchemaGeneratorUseEnclosingClassNameModule();
-
-    @Input
     public abstract Property<Boolean> getSchemaGeneratorUseGsonModule();
 
     @Input
@@ -219,9 +215,6 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
             }
             if (getSchemaGeneratorUseSchemaNameModule().get()) {
                 schemaGeneratorConfigBuilder.with(new SchemaNameSchemaModule());
-            }
-            if (getSchemaGeneratorUseEnclosingClassNameModule().get()) {
-                schemaGeneratorConfigBuilder.with(new EnclosingClassNameSchemaModule());
             }
             if (getSchemaGeneratorUseGsonModule().get()) {
                 schemaGeneratorConfigBuilder.with(new GsonSchemaModule());

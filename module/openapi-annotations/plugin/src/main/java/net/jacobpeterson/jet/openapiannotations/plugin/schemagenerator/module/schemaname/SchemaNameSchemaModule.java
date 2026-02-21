@@ -3,7 +3,6 @@ package net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.s
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
-import com.github.victools.jsonschema.generator.naming.DefaultSchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import org.jspecify.annotations.NullMarked;
 
@@ -17,8 +16,6 @@ public class SchemaNameSchemaModule implements Module {
 
     @Override
     public void applyToConfigBuilder(final SchemaGeneratorConfigBuilder builder) {
-        final var existing = builder.forTypesInGeneral().getDefinitionNamingStrategy();
-        builder.forTypesInGeneral().withDefinitionNamingStrategy(new SchemaNameDefinitionNamingStrategy(
-                existing != null ? existing : new DefaultSchemaDefinitionNamingStrategy()));
+        builder.forTypesInGeneral().withDefinitionNamingStrategy(new SchemaNameDefinitionNamingStrategy());
     }
 }
