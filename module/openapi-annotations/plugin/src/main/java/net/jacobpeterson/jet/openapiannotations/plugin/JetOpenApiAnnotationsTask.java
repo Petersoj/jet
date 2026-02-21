@@ -361,6 +361,12 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         topObject.remove(JSON_KEY_$SCHEMA);
                         return false;
                     });
+                    if (componentsSchemasObject.isEmpty()) {
+                        componentsObject.remove(JSON_KEY_SCHEMAS);
+                    }
+                    if (componentsObject.isEmpty()) {
+                        openApiJson.remove(JSON_KEY_COMPONENTS);
+                    }
                 }
                 if (!tracerClasses.isEmpty()) {
                     removeClassTracers(openApiJson);
