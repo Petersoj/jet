@@ -6,12 +6,16 @@ import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.regex.Pattern;
+
 /**
  * {@link SchemaNameDefinitionNamingStrategy} is a {@link SchemaDefinitionNamingStrategy} that uses
  * {@link SchemaName#value()} for type names along with all {@link Class#getEnclosingClass()} type names prepended.
  */
 @NullMarked
 public class SchemaNameDefinitionNamingStrategy implements SchemaDefinitionNamingStrategy {
+
+    private static final Pattern TYPE_PARAMETERS_DELIMITERS_PATTERN = Pattern.compile("[, <>]");
 
     @Override
     public String getDefinitionNameForKey(final DefinitionKey key, final SchemaGenerationContext generationContext) {
@@ -26,7 +30,7 @@ public class SchemaNameDefinitionNamingStrategy implements SchemaDefinitionNamin
 
     private String getTypeSchemaName(final SchemaGenerationContext generationContext, final ResolvedType type) {
         final var schemaName = type.getErasedType().getDeclaredAnnotation(SchemaName.class);
-        return schemaName != null ? schemaName.value() :
-                generationContext.getTypeContext().getSimpleTypeDescription(type);
+        return schemaName != null ? schemaName.value() : TYPE_PARAMETERS_DELIMITERS_PATTERN.matcher(
+                generationContext.getTypeContext().getSimpleTypeDescription(type)).replaceAll("");
     }
 }
