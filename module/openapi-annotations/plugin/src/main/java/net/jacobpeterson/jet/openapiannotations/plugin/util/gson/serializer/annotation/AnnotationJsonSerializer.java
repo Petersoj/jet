@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
@@ -190,8 +189,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 final var entry = Array.get(value, index);
                 final var key = keyMethods.stream()
                         .map(keyMethod -> getMethodJsonValue(context, entry, keyMethod))
-                        .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
-                        .filter(JsonPrimitive::isString).map(JsonPrimitive::getAsString)
+                        .filter(JsonElement::isJsonPrimitive)
+                        .map(jsonElement -> jsonElement.getAsJsonPrimitive().getAsString())
                         .collect(collectingAndThen(toUnmodifiableList(), keys -> {
                             if (keys.size() != 1) {
                                 throw new IllegalArgumentException("Exactly one key must be set: " + keyMethods.stream()
