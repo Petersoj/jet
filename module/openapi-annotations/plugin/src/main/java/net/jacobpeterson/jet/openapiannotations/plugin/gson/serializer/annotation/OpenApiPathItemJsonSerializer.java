@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation;
+package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;

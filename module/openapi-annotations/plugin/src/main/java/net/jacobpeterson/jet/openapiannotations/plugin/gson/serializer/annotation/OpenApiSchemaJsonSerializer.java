@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation;
+package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.google.gson.GsonBuilder;
@@ -14,7 +14,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.combine;
+import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.combine;
 
 /**
  * {@link OpenApiSchemaJsonSerializer} is a {@link JsonSerializer} for {@link OpenApiSchema}.

@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.util.gson;
+package net.jacobpeterson.jet.openapiannotations.plugin.gson;
 
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;

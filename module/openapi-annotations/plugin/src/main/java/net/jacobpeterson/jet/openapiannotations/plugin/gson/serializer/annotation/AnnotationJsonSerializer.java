@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation;
+package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -17,7 +17,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonIg
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonSerializeEmptyArray;
-import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.annotation.Annotation;
@@ -33,9 +33,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.combine;
-import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil.walk;
-import static net.jacobpeterson.jet.openapiannotations.plugin.util.reflection.ReflectionUtil.getClassName;
+import static net.jacobpeterson.jet.openapiannotations.annotation.schemaname.SchemaNameUtil.getFullSchemaName;
+import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.combine;
+import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.walk;
 
 /**
  * {@link AnnotationJsonSerializer} is a {@link JsonSerializer} for {@link Annotation} that uses reflection to invoke
@@ -112,9 +112,9 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 } catch (final Exception exception) {
                     throw new IllegalArgumentException(("`@%s` contains multiple methods annotated with `@%s`, " +
                             "but the serialized value of `@%s.%s` could not be combined").formatted(
-                            getClassName(method.getDeclaringClass()),
-                            getClassName(AnnotationJsonObjectInline.class),
-                            getClassName(method.getDeclaringClass()), method.getName()),
+                            getFullSchemaName(method.getDeclaringClass()),
+                            getFullSchemaName(AnnotationJsonObjectInline.class),
+                            getFullSchemaName(method.getDeclaringClass()), method.getName()),
                             exception);
                 }
                 continue;
@@ -128,7 +128,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                 } catch (final Exception exception) {
                     throw new IllegalArgumentException(("`@%s` contains multiple methods with a serialized name of " +
                             "\"%s\", but their return types could not be combined").formatted(
-                            getClassName(method.getDeclaringClass()), methodJsonKey),
+                            getFullSchemaName(method.getDeclaringClass()), methodJsonKey),
                             exception);
                 }
             }
@@ -152,8 +152,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
             if (!(value instanceof final String valueString)) {
                 throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
-                        .formatted(getClassName(method.getDeclaringClass()), method.getName(),
-                                getClassName(AnnotationJsonRawString.class), getClassName(String.class)));
+                        .formatted(getFullSchemaName(method.getDeclaringClass()), method.getName(),
+                                getFullSchemaName(AnnotationJsonRawString.class), getFullSchemaName(String.class)));
             }
             if (valueString.isEmpty()) {
                 return JsonNull.INSTANCE;
@@ -171,8 +171,8 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             }
             if (length != 1) {
                 throw new IllegalArgumentException(("`@%s.%s` is annotated with `@%s`, but the array contains more " +
-                        "than one element").formatted(getClassName(method.getDeclaringClass()), method.getName(),
-                        getClassName(AnnotationArrayIsNullableValue.class)));
+                        "than one element").formatted(getFullSchemaName(method.getDeclaringClass()), method.getName(),
+                        getFullSchemaName(AnnotationArrayIsNullableValue.class)));
             }
             return context.serialize(Array.get(value, 0));
         }
@@ -195,7 +195,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                             if (keys.size() != 1) {
                                 throw new IllegalArgumentException("Exactly one key must be set: " + keyMethods.stream()
                                         .map(keyMethod -> "`@%s.%s`".formatted(
-                                                getClassName(keyMethod.getDeclaringClass()),
+                                                getFullSchemaName(keyMethod.getDeclaringClass()),
                                                 keyMethod.getName()))
                                         .collect(joining(", ")));
                             }
@@ -203,7 +203,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
                         }));
                 if (map.asMap().put(key, context.serialize(entry)) != null) {
                     throw new IllegalArgumentException("`@%s.%s` duplicate key: %s".formatted(
-                            getClassName(method.getDeclaringClass()), method.getName(), key));
+                            getFullSchemaName(method.getDeclaringClass()), method.getName(), key));
                 }
             }
             return map;

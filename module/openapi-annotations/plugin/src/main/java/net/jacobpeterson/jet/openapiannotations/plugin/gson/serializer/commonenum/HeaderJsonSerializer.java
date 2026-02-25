@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.commonenum;
+package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.commonenum;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
