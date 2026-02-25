@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.Generated;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
@@ -67,6 +68,7 @@ public @interface OpenApiXml {
     /**
      * {@link NodeType} is an enum for {@link #nodeType()}.
      */
+    @Generated
     enum NodeType {
 
         @SerializedName("element")

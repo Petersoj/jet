@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.Generated;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
@@ -75,6 +76,7 @@ public @interface OpenApiSecurityScheme {
     /**
      * {@link Type} is an enum for {@link #type()}.
      */
+    @Generated
     enum Type {
 
         @SerializedName("apiKey")
@@ -127,6 +129,7 @@ public @interface OpenApiSecurityScheme {
     /**
      * {@link In} is an enum for {@link #in()}.
      */
+    @Generated
     enum In {
 
         @SerializedName("query")

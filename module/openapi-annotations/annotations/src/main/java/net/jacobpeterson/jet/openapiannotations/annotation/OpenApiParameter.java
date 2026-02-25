@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.openapiannotations.annotation;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.Generated;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationArrayIsNullableValue;
@@ -106,6 +107,7 @@ public @interface OpenApiParameter {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-locations">spec.openapis.org</a>
      */
+    @Generated
     enum ParameterLocation {
 
         /**
@@ -280,6 +282,7 @@ public @interface OpenApiParameter {
          *
          * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#style-values">spec.openapis.org</a>
          */
+        @Generated
         enum Style {
 
             /**
