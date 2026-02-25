@@ -13,6 +13,7 @@ import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
+import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
@@ -20,6 +21,7 @@ import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nu
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.AnnotationJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.OpenApiPathItemJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.annotation.OpenApiSchemaJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.commonenum.HeaderJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.util.gson.serializer.commonenum.MethodJsonSerializer;
@@ -238,6 +240,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))
                     .registerTypeHierarchyAdapter(OpenApiSchema.class,
                             new OpenApiSchemaJsonSerializer(new SchemaGenerator(schemaGeneratorConfigBuilder.build())))
+                    .registerTypeHierarchyAdapter(OpenApiPathItem.class, new OpenApiPathItemJsonSerializer())
                     .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
                     .registerTypeAdapter(Method.class, new MethodJsonSerializer())
                     .registerTypeAdapter(Status.class, new StatusJsonSerializer())

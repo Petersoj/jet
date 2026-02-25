@@ -32,8 +32,8 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
     @Override
     public JsonElement serialize(final OpenApiSchema src, final Type typeOfSrc,
             final JsonSerializationContext context) {
-        final var serialized = context.serialize(src,
-                Annotation.class); // Prevent recursion using `Annotation.class` since there is a type hierarchy adapter
+        // Prevent recursive infinity loop by using `Annotation.class`
+        final var serialized = context.serialize(src, Annotation.class);
         final var fromClass = src.fromClass();
         if (fromClass.length == 0) {
             return serialized;
