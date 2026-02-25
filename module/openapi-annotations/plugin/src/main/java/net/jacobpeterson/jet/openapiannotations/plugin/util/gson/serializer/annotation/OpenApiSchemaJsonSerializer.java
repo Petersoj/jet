@@ -20,7 +20,7 @@ import static net.jacobpeterson.jet.openapiannotations.plugin.util.gson.GsonUtil
  * {@link OpenApiSchemaJsonSerializer} is a {@link JsonSerializer} for {@link OpenApiSchema}.
  * <p>
  * Note: {@link OpenApiSchemaJsonSerializer} <strong>MUST</strong> be used with {@link AnnotationJsonSerializer}
- * registered using {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}, otherwise a recursive infinity loop
+ * registered using {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}, otherwise a recursive infinite loop
  * will occur.
  */
 @NullMarked
@@ -32,7 +32,7 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
     @Override
     public JsonElement serialize(final OpenApiSchema src, final Type typeOfSrc,
             final JsonSerializationContext context) {
-        // Prevent recursive infinity loop by using `Annotation.class`
+        // Prevent recursive infinite loop by using `Annotation.class`
         final var serialized = context.serialize(src, Annotation.class);
         final var fromClass = src.fromClass();
         if (fromClass.length == 0) {
