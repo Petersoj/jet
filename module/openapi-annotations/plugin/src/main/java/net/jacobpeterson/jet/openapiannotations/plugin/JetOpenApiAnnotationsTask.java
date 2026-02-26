@@ -290,9 +290,12 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         String fromClassMethodName = null;
                         String fromMethodAndPath = null;
                         if (generateOperationId == FROM_CLASS_METHOD_NAME || generateOperationId == BOTH) {
-                            final var methodTracer = topObject.get(JSON_KEY_METHOD_TRACER).getAsString();
-                            fromClassMethodName = methodTracer.substring(
-                                    methodTracer.indexOf(ANNOTATION_METHOD_CLASS_NAME_DELIMITER) + 1);
+                            final var methodTracer = topObject.get(JSON_KEY_METHOD_TRACER);
+                            if (methodTracer != null && !methodTracer.isJsonNull()) {
+                                final var methodTracerString = methodTracer.getAsString();
+                                fromClassMethodName = methodTracerString.substring(
+                                        methodTracerString.indexOf(ANNOTATION_METHOD_CLASS_NAME_DELIMITER) + 1);
+                            }
                         }
                         if (generateOperationId == FROM_METHOD_AND_PATH || generateOperationId == BOTH) {
                             if (stack.size() >= 4 && stack.get(stack.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
@@ -313,7 +316,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                                         NON_ALPHANUMERIC_PATTERN.matcher(path).replaceAll("_"));
                             }
                         }
-                        if (generateOperationId == BOTH && fromMethodAndPath != null) {
+                        if (generateOperationId == BOTH && fromClassMethodName != null && fromMethodAndPath != null) {
                             checkArgument(fromClassMethodName.equals(fromMethodAndPath),
                                     "Operation ID \"%s\" generated from class method name does not match " +
                                             "generated operation ID \"%s\" from @OpenApi annotation method and path",
