@@ -425,7 +425,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     if (!errors.isEmpty()) {
                         throw new IllegalArgumentException("\n" + errors.stream()
                                 .map(error -> "        OpenAPIv%s schema offense%s: %s".formatted(DEFAULT_OPENAPI,
-                                        getInAnnotationGroupErrorMessage(groupName), error.toString()))
+                                        groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
+                                                " in annotation group \"%s\"".formatted(groupName),
+                                        error.toString()))
                                 .collect(joining("\n")));
                     }
                 }
@@ -439,10 +441,5 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
         } catch (final IOException ioException) {
             throw new RuntimeException(ioException);
         }
-    }
-
-    private String getInAnnotationGroupErrorMessage(final String annotationGroupName) {
-        return annotationGroupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
-                " in annotation group \"%s\"".formatted(annotationGroupName);
     }
 }
