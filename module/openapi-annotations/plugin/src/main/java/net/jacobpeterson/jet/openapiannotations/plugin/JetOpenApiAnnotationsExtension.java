@@ -12,11 +12,14 @@ import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nu
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import org.gradle.api.Task;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.tasks.Jar;
 import org.jspecify.annotations.NullMarked;
+
+import java.util.Map;
 
 /**
  * {@link JetOpenApiAnnotationsExtension} is a Gradle extension for {@link JetOpenApiAnnotationsPlugin}.
@@ -66,6 +69,12 @@ public abstract class JetOpenApiAnnotationsExtension {
      * Defaults to <code>false</code>.
      */
     public abstract Property<Boolean> getSchemaGeneratorUseJacksonModule();
+
+    /**
+     * For the {@link JetOpenApiAnnotationsTask}, a {@link Map} containing simple type mappings with the fully qualified
+     * class name as the key and the raw JSON schema as the value.
+     */
+    public abstract MapProperty<String, String> getSchemaGeneratorSimpleTypeMappings();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set the {@link GenerateOperationId} configuration.

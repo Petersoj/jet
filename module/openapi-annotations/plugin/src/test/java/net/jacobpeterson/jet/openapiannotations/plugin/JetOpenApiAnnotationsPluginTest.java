@@ -44,6 +44,11 @@ public final class JetOpenApiAnnotationsPluginTest {
     }
 
     @Test
+    public void successSimpleTypeMappings(@TempDir final Path tempDir) {
+        testSuccess(tempDir, "simpletypemappings");
+    }
+
+    @Test
     public void successAll(@TempDir final Path tempDir) {
         testSuccess(tempDir, "all");
     }

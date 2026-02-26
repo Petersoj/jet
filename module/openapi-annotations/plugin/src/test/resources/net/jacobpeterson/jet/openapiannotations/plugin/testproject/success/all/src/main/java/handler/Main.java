@@ -8,6 +8,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiServer;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiServerVariable;
 import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 @OpenApi(
         annotationGroupName = Main.AnnotationGroupName.WEB,
         info = @OpenApiInfo(
@@ -54,7 +55,6 @@ import org.jspecify.annotations.NullMarked;
                         """)
         }
 )
-@NullMarked
 public final class Main {
 
     public static final class AnnotationGroupName {

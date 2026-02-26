@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.openapiannotations.plugin;
 
+import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
@@ -31,6 +32,7 @@ import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nu
 import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.CacheableTask;
@@ -42,6 +44,7 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,6 +141,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     @Input
     public abstract Property<Boolean> getSchemaGeneratorUseJacksonModule();
+
+    @Input @Optional
+    public abstract MapProperty<String, String> getSchemaGeneratorSimpleTypeMappings();
 
     @Input
     public abstract Property<GenerateOperationId> getGenerateOperationId();
@@ -237,6 +243,14 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
             }
             if (getSchemaGeneratorUseJacksonModule().get()) {
                 schemaGeneratorConfigBuilder.with(new JacksonSchemaModule());
+            }
+            final var simpleTypeMappings = getSchemaGeneratorSimpleTypeMappings().getOrNull();
+            if (simpleTypeMappings != null) {
+                schemaGeneratorConfigBuilder.forTypesInGeneral().withCustomDefinitionProvider((javaType, context) -> {
+                    final var rawJson = simpleTypeMappings.get(javaType.getErasedType().getName());
+                    return rawJson == null ? null : new CustomDefinition((ObjectNode)
+                            context.getGeneratorConfig().getObjectMapper().readTree(rawJson), true);
+                });
             }
             final var generateOperationId = getGenerateOperationId().get();
             if (generateOperationId != DISABLED) {

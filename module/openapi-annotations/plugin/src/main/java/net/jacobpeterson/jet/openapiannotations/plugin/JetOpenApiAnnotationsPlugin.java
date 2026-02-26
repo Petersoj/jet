@@ -67,6 +67,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                     .set(extension.getSchemaGeneratorUseGsonModule());
             task.getSchemaGeneratorUseJacksonModule()
                     .set(extension.getSchemaGeneratorUseJacksonModule());
+            task.getSchemaGeneratorSimpleTypeMappings()
+                    .set(extension.getSchemaGeneratorSimpleTypeMappings());
             task.getGenerateOperationId()
                     .set(extension.getGenerateOperationId());
             task.getMoveClassSchemasToComponents()
