@@ -7,7 +7,6 @@ plugins {
     `java-library`
     jacoco
     `maven-publish`
-
     id("io.freefair.lombok")
     id("net.ltgt.errorprone")
     id("com.github.ben-manes.versions")

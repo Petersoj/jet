@@ -143,29 +143,17 @@ public class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
                 try {
                     jsonObject = combine(jsonObject, methodJsonValue).getAsJsonObject();
                 } catch (final Exception exception) {
-                    throw new IllegalArgumentException(("`@%s` contains multiple methods annotated with `@%s`, " +
-                            "but the serialized value of `@%s.%s` could not be combined").formatted(
-                            getFullSchemaName(method.getDeclaringClass()),
-                            getFullSchemaName(AnnotationJsonObjectInline.class),
-                            getFullSchemaName(method.getDeclaringClass()), method.getName()),
+                    throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but could not be inlined"
+                            .formatted(getFullSchemaName(method.getDeclaringClass()), method.getName(),
+                                    getFullSchemaName(AnnotationJsonObjectInline.class)),
                             exception);
                 }
                 continue;
             }
             final var methodJsonKey = method.isAnnotationPresent(SerializedName.class) ?
                     method.getAnnotation(SerializedName.class).value() : method.getName();
-            var jsonValue = methodJsonValue;
-            if (jsonObject.has(methodJsonKey)) {
-                try {
-                    jsonValue = combine(jsonValue, jsonObject.get(methodJsonKey));
-                } catch (final Exception exception) {
-                    throw new IllegalArgumentException(("`@%s` contains multiple methods with a serialized name of " +
-                            "\"%s\", but their return types could not be combined").formatted(
-                            getFullSchemaName(method.getDeclaringClass()), methodJsonKey),
-                            exception);
-                }
-            }
-            jsonObject.add(methodJsonKey, jsonValue);
+            jsonObject.add(methodJsonKey, !jsonObject.has(methodJsonKey) ? methodJsonValue :
+                    combine(methodJsonValue, jsonObject.get(methodJsonKey)));
         }
         if (jsonObject.isEmpty() && valueInlinedMethods.stream().noneMatch(method ->
                 method.isAnnotationPresent(AnnotationJsonSerializeEmptyArray.class))) {
@@ -183,15 +171,7 @@ public class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
             throw new RuntimeException(exception);
         }
         if (method.isAnnotationPresent(AnnotationJsonRawString.class)) {
-            if (!(value instanceof final String valueString)) {
-                throw new IllegalArgumentException("`@%s.%s` is annotated with `@%s`, but the return type is not `%s`"
-                        .formatted(getFullSchemaName(method.getDeclaringClass()), method.getName(),
-                                getFullSchemaName(AnnotationJsonRawString.class), getFullSchemaName(String.class)));
-            }
-            if (valueString.isEmpty()) {
-                return JsonNull.INSTANCE;
-            }
-            return JsonParser.parseString(valueString);
+            return ((String) value).isEmpty() ? JsonNull.INSTANCE : JsonParser.parseString(((String) value));
         }
         if (!method.getReturnType().isArray()) {
             return context.serialize(value);

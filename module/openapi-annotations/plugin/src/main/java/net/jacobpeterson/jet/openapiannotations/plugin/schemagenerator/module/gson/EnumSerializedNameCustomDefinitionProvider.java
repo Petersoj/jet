@@ -5,6 +5,7 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.google.gson.annotations.SerializedName;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.JsonNodeFactory;
 
@@ -16,6 +17,7 @@ import static com.github.victools.jsonschema.generator.SchemaKeyword.TAG_ENUM;
  * {@link EnumSerializedNameCustomDefinitionProvider} is a {@link CustomDefinitionProviderV2} to support
  * {@link SerializedName} on {@link Enum} fields.
  */
+@NullMarked
 public class EnumSerializedNameCustomDefinitionProvider implements CustomDefinitionProviderV2 {
 
     @Override
