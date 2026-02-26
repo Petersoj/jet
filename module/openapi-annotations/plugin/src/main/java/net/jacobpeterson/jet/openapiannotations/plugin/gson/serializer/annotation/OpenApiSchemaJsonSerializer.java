@@ -2,7 +2,6 @@ package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotati
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +13,7 @@ import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.combine;
+import static net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorUtil.generateSchemaToGsonAndInlineSingleSimpleTypeDef;
 
 /**
  * {@link OpenApiSchemaJsonSerializer} is a {@link JsonSerializer} for {@link OpenApiSchema}.
@@ -33,6 +33,6 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
             return serialized;
         }
         checkArgument(fromClass.length == 1, "`@OpenApiSchema.fromClass` cannot contain more than one `Class`");
-        return combine(serialized, JsonParser.parseString(schemaGenerator.generateSchema(fromClass[0]).toString()));
+        return combine(serialized, generateSchemaToGsonAndInlineSingleSimpleTypeDef(schemaGenerator, fromClass[0]));
     }
 }
