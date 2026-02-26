@@ -1,7 +1,6 @@
 package net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
@@ -18,10 +17,6 @@ import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.comb
 
 /**
  * {@link OpenApiSchemaJsonSerializer} is a {@link JsonSerializer} for {@link OpenApiSchema}.
- * <p>
- * Note: {@link OpenApiSchemaJsonSerializer} <strong>MUST</strong> be used with {@link AnnotationJsonSerializer}
- * registered using {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}, otherwise a recursive infinite loop
- * will occur.
  */
 @NullMarked
 @RequiredArgsConstructor
@@ -32,7 +27,6 @@ public class OpenApiSchemaJsonSerializer implements JsonSerializer<OpenApiSchema
     @Override
     public JsonElement serialize(final OpenApiSchema src, final Type typeOfSrc,
             final JsonSerializationContext context) {
-        // Prevent recursive infinite loop by using `Annotation.class`
         final var serialized = context.serialize(src, Annotation.class);
         final var fromClass = src.fromClass();
         if (fromClass.length == 0) {

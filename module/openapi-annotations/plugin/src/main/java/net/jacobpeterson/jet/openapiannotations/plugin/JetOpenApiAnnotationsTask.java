@@ -15,18 +15,19 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
-import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.OpenApiJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.OpenApiPathItemJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.OpenApiSchemaJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.commonenum.HeaderJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.commonenum.MethodJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.commonenum.StatusJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.string.EmptyStringIsNullJsonSerializer;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.SchemaGeneratorConfigBuilderProvider;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.gson.GsonSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.nullable.NullableSchemaModule;
+import net.jacobpeterson.jet.openapiannotations.plugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -54,6 +55,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -84,7 +86,7 @@ import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAUL
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
 import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.walk;
 import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
-import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.removeClassTracers;
+import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.removeTracers;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 /**
@@ -190,6 +192,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .hashKeys()
                     .arrayListValues()
                     .<String, OpenApi>build();
+            final var methodsOfOpenApis = new HashMap<OpenApi, java.lang.reflect.Method>();
             for (final var javaCompileClassName : javaCompileClassNames) {
                 final Class<?> javaCompileClass;
                 try {
@@ -203,6 +206,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 for (final var method : javaCompileClass.getDeclaredMethods()) {
                     for (final var openApi : method.getDeclaredAnnotationsByType(OpenApi.class)) {
                         openApisOfGroupNames.put(openApi.annotationGroupName(), openApi);
+                        methodsOfOpenApis.put(openApi, method);
                     }
                 }
             }
@@ -238,6 +242,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
             }
             final var annotationGson = new GsonBuilder()
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))
+                    .registerTypeHierarchyAdapter(OpenApi.class, new OpenApiJsonSerializer(methodsOfOpenApis))
                     .registerTypeHierarchyAdapter(OpenApiSchema.class,
                             new OpenApiSchemaJsonSerializer(new SchemaGenerator(schemaGeneratorConfigBuilder.build())))
                     .registerTypeHierarchyAdapter(OpenApiPathItem.class, new OpenApiPathItemJsonSerializer())
@@ -365,7 +370,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     }
                 }
                 if (!tracerClasses.isEmpty()) {
-                    removeClassTracers(openApiJson);
+                    removeTracers(openApiJson);
                 }
                 final var openApiJsonString = openApiJson.toString();
                 if (getSchemaValidation().get()) {

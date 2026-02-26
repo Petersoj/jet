@@ -19,6 +19,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonRa
 import net.jacobpeterson.jet.openapiannotations.annotation.meta.AnnotationJsonSerializeEmptyArray;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -55,15 +56,33 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
     public static final String JSON_KEY_CLASS_TRACER = "__AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER__";
 
     /**
-     * Removes all {@link #JSON_KEY_CLASS_TRACER} keys from the given {@link JsonObject}.
+     * The JSON key name for {@link #CURRENT_ANNOTATION_METHOD}:
+     * <code>"__AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER__"</code>
+     */
+    public static final String JSON_KEY_METHOD_TRACER = "__AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER__";
+
+    /**
+     * The {@link ThreadLocal} {@link Method} of the current {@link Annotation} being serialized. If set and the
+     * {@link Annotation#annotationType()} being serialized is in {@link #getTracerClasses()}, then a property with the
+     * key of {@link #JSON_KEY_METHOD_TRACER} and a value of
+     * <code>{@link Class#getCanonicalName()} + "#" + {@link Method#getName()}</code> is added to the serialized
+     * {@link JsonObject}.
+     */
+    public static final ThreadLocal<@Nullable Method> CURRENT_ANNOTATION_METHOD = new ThreadLocal<>();
+
+    /**
+     * Removes all {@link #JSON_KEY_CLASS_TRACER} and {@link #JSON_KEY_METHOD_TRACER} keys from the given
+     * {@link JsonObject}.
      *
      * @param jsonObject the {@link JsonObject}
      */
-    public static void removeClassTracers(final JsonObject jsonObject) {
+    public static void removeTracers(final JsonObject jsonObject) {
         walk(jsonObject, stack -> {
             final var top = requireNonNull(stack.peek()).getValue();
             if (top.isJsonObject()) {
-                top.getAsJsonObject().remove(JSON_KEY_CLASS_TRACER);
+                final var topObject = top.getAsJsonObject();
+                topObject.remove(JSON_KEY_CLASS_TRACER);
+                topObject.remove(JSON_KEY_METHOD_TRACER);
             }
             return true;
         });
@@ -85,7 +104,16 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             if (serialized.isJsonNull()) {
                 serialized = new JsonObject();
             }
-            serialized.getAsJsonObject().addProperty(JSON_KEY_CLASS_TRACER, annotationType.getCanonicalName());
+            final var serializedObject = serialized.getAsJsonObject();
+
+            serializedObject.addProperty(JSON_KEY_CLASS_TRACER, annotationType.getCanonicalName());
+
+            final var currentAnnotationMethod = CURRENT_ANNOTATION_METHOD.get();
+            if (currentAnnotationMethod != null) {
+                serializedObject.addProperty(JSON_KEY_METHOD_TRACER,
+                        currentAnnotationMethod.getDeclaringClass().getCanonicalName() +
+                                "#" + currentAnnotationMethod.getName());
+            }
         }
         return serialized;
     }
