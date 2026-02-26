@@ -221,10 +221,11 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
             final var tracerClasses = new HashSet<Class<? extends Annotation>>();
             final var schemaGeneratorConfigBuilder = getSchemaGeneratorConfigBuilderProvider()
                     .getOrElse((SchemaGeneratorConfigBuilderProvider) () ->
-                            new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)).provide()
-                    .with(EXTRA_OPEN_API_FORMAT_VALUES)
-                    .with(PLAIN_DEFINITION_KEYS)
-                    .with(ENUM_KEYWORD_FOR_SINGLE_VALUES);
+                            new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)
+                                    .with(EXTRA_OPEN_API_FORMAT_VALUES)
+                                    .with(PLAIN_DEFINITION_KEYS)
+                                    .with(ENUM_KEYWORD_FOR_SINGLE_VALUES))
+                    .provide();
             if (getSchemaGeneratorUseNullableModule().get()) {
                 schemaGeneratorConfigBuilder.with(new NullableSchemaModule());
             }
