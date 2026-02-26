@@ -47,7 +47,7 @@ import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.walk
  */
 @NullMarked
 @RequiredArgsConstructor
-public final class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
+public class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
 
     /**
      * The JSON key name for {@link #getTracerClasses()}:

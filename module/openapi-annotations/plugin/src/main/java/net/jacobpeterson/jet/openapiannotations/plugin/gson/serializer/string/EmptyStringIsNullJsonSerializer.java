@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
  * {@link String#isEmpty()} as {@link JsonNull}.
  */
 @NullMarked
-public final class EmptyStringIsNullJsonSerializer implements JsonSerializer<String> {
+public class EmptyStringIsNullJsonSerializer implements JsonSerializer<String> {
 
     @Override
     public JsonElement serialize(final String src, final Type typeOfSrc, final JsonSerializationContext context) {

@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  * {@link StatusJsonSerializer} is a {@link JsonSerializer} for {@link Status}.
  */
 @NullMarked
-public final class StatusJsonSerializer implements JsonSerializer<Status> {
+public class StatusJsonSerializer implements JsonSerializer<Status> {
 
     @Override
     public JsonElement serialize(final Status src, final Type typeOfSrc, final JsonSerializationContext context) {

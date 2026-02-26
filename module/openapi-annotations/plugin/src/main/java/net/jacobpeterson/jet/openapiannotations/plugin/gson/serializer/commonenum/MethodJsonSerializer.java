@@ -15,7 +15,7 @@ import static java.util.Locale.ROOT;
  * {@link MethodJsonSerializer} is a {@link JsonSerializer} for {@link Method}.
  */
 @NullMarked
-public final class MethodJsonSerializer implements JsonSerializer<Method> {
+public class MethodJsonSerializer implements JsonSerializer<Method> {
 
     @Override
     public JsonElement serialize(final Method src, final Type typeOfSrc, final JsonSerializationContext context) {
