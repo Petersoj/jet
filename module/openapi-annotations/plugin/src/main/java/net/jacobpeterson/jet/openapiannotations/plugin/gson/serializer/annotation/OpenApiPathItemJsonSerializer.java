@@ -11,6 +11,7 @@ import org.jspecify.annotations.NullMarked;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Locale.ROOT;
 
 /**
@@ -25,8 +26,9 @@ public class OpenApiPathItemJsonSerializer implements JsonSerializer<OpenApiPath
         final var lowercased = new JsonObject();
         for (final var entry : context.serialize(src, Annotation.class).getAsJsonObject().entrySet()) {
             final var key = entry.getKey();
-            lowercased.add(Method.VALUES_OF_UPPERCASED_STRINGS.containsKey(key) ? key.toLowerCase(ROOT) : key,
-                    entry.getValue());
+            checkArgument(lowercased.asMap().put(Method.VALUES_OF_UPPERCASED_STRINGS.containsKey(key) ?
+                            key.toLowerCase(ROOT) : key, entry.getValue()) == null,
+                    "Duplicate key due to lowercasing: \"%s\"", key);
         }
         return lowercased;
     }
