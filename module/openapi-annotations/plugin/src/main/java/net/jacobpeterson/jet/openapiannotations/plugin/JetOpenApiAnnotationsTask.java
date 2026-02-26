@@ -64,6 +64,7 @@ import java.util.regex.Pattern;
 import static com.github.victools.jsonschema.generator.Option.DEFINITIONS_FOR_ALL_OBJECTS;
 import static com.github.victools.jsonschema.generator.Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES;
 import static com.github.victools.jsonschema.generator.Option.DEFINITION_FOR_MAIN_SCHEMA;
+import static com.github.victools.jsonschema.generator.Option.ENUM_KEYWORD_FOR_SINGLE_VALUES;
 import static com.github.victools.jsonschema.generator.Option.EXTRA_OPEN_API_FORMAT_VALUES;
 import static com.github.victools.jsonschema.generator.Option.PLAIN_DEFINITION_KEYS;
 import static com.github.victools.jsonschema.generator.OptionPreset.PLAIN_JSON;
@@ -222,7 +223,8 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .getOrElse((SchemaGeneratorConfigBuilderProvider) () ->
                             new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)).provide()
                     .with(EXTRA_OPEN_API_FORMAT_VALUES)
-                    .with(PLAIN_DEFINITION_KEYS);
+                    .with(PLAIN_DEFINITION_KEYS)
+                    .with(ENUM_KEYWORD_FOR_SINGLE_VALUES);
             if (getSchemaGeneratorUseNullableModule().get()) {
                 schemaGeneratorConfigBuilder.with(new NullableSchemaModule());
             }
