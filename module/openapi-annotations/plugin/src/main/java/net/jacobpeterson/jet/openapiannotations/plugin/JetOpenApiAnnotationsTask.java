@@ -15,6 +15,7 @@ import net.jacobpeterson.jet.openapiannotations.annotation.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.annotation.OpenApiSchema;
+import net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsExtension.GenerateOperationId;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.OpenApiJsonSerializer;
@@ -84,8 +85,14 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_$SCHEMA;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
 import static net.jacobpeterson.jet.openapiannotations.annotation.OpenApi.DEFAULT_OPENAPI;
+import static net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;
+import static net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsExtension.GenerateOperationId.DISABLED;
+import static net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsExtension.GenerateOperationId.FROM_CLASS_METHOD_NAME;
+import static net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsExtension.GenerateOperationId.FROM_METHOD_AND_PATH;
 import static net.jacobpeterson.jet.openapiannotations.plugin.gson.GsonUtil.walk;
+import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.ANNOTATION_METHOD_CLASS_NAME_DELIMITER;
 import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
+import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER;
 import static net.jacobpeterson.jet.openapiannotations.plugin.gson.serializer.annotation.AnnotationJsonSerializer.removeTracers;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
@@ -132,7 +139,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     public abstract Property<Boolean> getSchemaGeneratorUseJacksonModule();
 
     @Input
-    public abstract Property<Boolean> getGenerateOperationId();
+    public abstract Property<GenerateOperationId> getGenerateOperationId();
 
     @Input
     public abstract Property<Boolean> getMoveClassSchemasToComponents();
@@ -229,7 +236,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 schemaGeneratorConfigBuilder.with(new JacksonSchemaModule());
             }
             final var generateOperationId = getGenerateOperationId().get();
-            if (generateOperationId) {
+            if (generateOperationId != DISABLED) {
                 tracerClasses.add(OpenApiOperation.class);
             }
             final var moveClassSchemasToComponents = getMoveClassSchemasToComponents().get();
@@ -265,7 +272,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 if (!openApiJson.has(JSON_KEY_OPENAPI)) {
                     openApiJson.addProperty(JSON_KEY_OPENAPI, DEFAULT_OPENAPI);
                 }
-                if (generateOperationId) {
+                if (generateOperationId != DISABLED) {
                     walk(openApiJson, stack -> {
                         final var top = requireNonNull(stack.peek());
                         if (!top.getValue().isJsonObject()) {
@@ -280,22 +287,41 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         if (topObject.has(JSON_KEY_OPERATION_ID)) {
                             return false;
                         }
-                        if (stack.size() >= 4 && stack.get(stack.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
-                            var path = stack.get(stack.size() - 3).getKey().toLowerCase(ROOT);
-                            if (topObject.has(JSON_KEY_TAGS)) {
-                                var substringIndex = 0;
-                                for (final var tag : topObject.getAsJsonArray(JSON_KEY_TAGS)) {
-                                    final var tagString = tag.getAsString().toLowerCase(ROOT);
-                                    final var indexOfTag = path.indexOf(tagString);
-                                    if (indexOfTag != -1) {
-                                        substringIndex = max(substringIndex, indexOfTag + tagString.length());
+                        String fromClassMethodName = null;
+                        String fromMethodAndPath = null;
+                        if (generateOperationId == FROM_CLASS_METHOD_NAME || generateOperationId == BOTH) {
+                            final var methodTracer = topObject.get(JSON_KEY_METHOD_TRACER).getAsString();
+                            fromClassMethodName = methodTracer.substring(
+                                    methodTracer.indexOf(ANNOTATION_METHOD_CLASS_NAME_DELIMITER) + 1);
+                        }
+                        if (generateOperationId == FROM_METHOD_AND_PATH || generateOperationId == BOTH) {
+                            if (stack.size() >= 4 && stack.get(stack.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
+                                var path = stack.get(stack.size() - 3).getKey().toLowerCase(ROOT);
+                                if (topObject.has(JSON_KEY_TAGS)) {
+                                    var substringIndex = 0;
+                                    for (final var tag : topObject.getAsJsonArray(JSON_KEY_TAGS)) {
+                                        final var tagString = tag.getAsString().toLowerCase(ROOT);
+                                        final var indexOfTag = path.indexOf(tagString);
+                                        if (indexOfTag != -1) {
+                                            substringIndex = max(substringIndex, indexOfTag + tagString.length());
+                                        }
                                     }
+                                    path = path.substring(substringIndex);
                                 }
-                                path = path.substring(substringIndex);
+                                fromMethodAndPath = LOWER_UNDERSCORE.to(LOWER_CAMEL, NON_ALPHANUMERIC_PATTERN.matcher(
+                                        top.getKey().toLowerCase(ROOT)).replaceAll("_") + "_" +
+                                        NON_ALPHANUMERIC_PATTERN.matcher(path).replaceAll("_"));
                             }
-                            topObject.addProperty(JSON_KEY_OPERATION_ID, LOWER_UNDERSCORE.to(LOWER_CAMEL,
-                                    NON_ALPHANUMERIC_PATTERN.matcher(top.getKey().toLowerCase(ROOT)).replaceAll("_") +
-                                            "_" + NON_ALPHANUMERIC_PATTERN.matcher(path).replaceAll("_")));
+                        }
+                        if (generateOperationId == BOTH && fromMethodAndPath != null) {
+                            checkArgument(fromClassMethodName.equals(fromMethodAndPath),
+                                    "Operation ID \"%s\" generated from class method name does not match " +
+                                            "generated operation ID \"%s\" from @OpenApi annotation method and path",
+                                    fromClassMethodName, fromMethodAndPath);
+                        }
+                        if (fromClassMethodName != null || fromMethodAndPath != null) {
+                            topObject.addProperty(JSON_KEY_OPERATION_ID,
+                                    fromClassMethodName != null ? fromClassMethodName : fromMethodAndPath);
                         }
                         return false;
                     });

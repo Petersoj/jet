@@ -7,6 +7,8 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.tasks.Jar;
 import org.jspecify.annotations.NullMarked;
 
+import static net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;
+
 /**
  * {@link JetOpenApiAnnotationsPlugin} is {@link Project} {@link Plugin} for {@link OpenApi} annotations.
  */
@@ -43,7 +45,7 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         extension.getSchemaGeneratorUseJacksonModule()
                 .convention(false);
         extension.getGenerateOperationId()
-                .convention(true);
+                .convention(BOTH);
         extension.getMoveClassSchemasToComponents()
                 .convention(true);
         extension.getSchemaValidation()

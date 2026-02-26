@@ -68,13 +68,43 @@ public abstract class JetOpenApiAnnotationsExtension {
     public abstract Property<Boolean> getSchemaGeneratorUseJacksonModule();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to generate an
-     * {@link OpenApiOperation#operationId()}, if not already provided, using the {@link OpenApiPathItem.MapEntry#key()}
-     * and {@link OpenApiOperation#tags()}, set to <code>false</code> otherwise.
+     * For the {@link JetOpenApiAnnotationsTask}, set the {@link GenerateOperationId} configuration.
      * <p>
-     * Defaults to <code>true</code>.
+     * Defaults to {@link GenerateOperationId#BOTH}.
      */
-    public abstract Property<Boolean> getGenerateOperationId();
+    public abstract Property<GenerateOperationId> getGenerateOperationId();
+
+    /**
+     * {@link GenerateOperationId} is an enum for {@link #getGenerateOperationId()}.
+     */
+    public enum GenerateOperationId {
+
+        /**
+         * Do not generate {@link OpenApiOperation#operationId()}.
+         */
+        DISABLED,
+
+        /**
+         * If not already provided, generate {@link OpenApiOperation#operationId()} using the name of the class method
+         * annotated with the {@link OpenApi} annotation.
+         */
+        FROM_CLASS_METHOD_NAME,
+
+        /**
+         * If not already provided, generate {@link OpenApiOperation#operationId()} by concatenating
+         * {@link OpenApiPathItem#methods()} with the lower-camelcase conversion of the path segments of
+         * {@link OpenApiPathItem.MapEntry#key()} after the index of {@link OpenApiOperation#tags()}.
+         */
+        FROM_METHOD_AND_PATH,
+
+        /**
+         * If not already provided, generate {@link OpenApiOperation#operationId()} using the
+         * {@link #FROM_CLASS_METHOD_NAME} configuration and ensuring the generated value is equal to the generated
+         * value of the {@link #FROM_METHOD_AND_PATH} configuration. This enforces the same naming convention for both
+         * the class method name and the API path.
+         */
+        BOTH
+    }
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to move the JSON schema generated from

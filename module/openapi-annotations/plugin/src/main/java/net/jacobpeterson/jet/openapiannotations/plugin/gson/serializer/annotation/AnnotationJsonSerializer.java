@@ -62,10 +62,15 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
     public static final String JSON_KEY_METHOD_TRACER = "__AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER__";
 
     /**
+     * The delimiter as described by {@link #CURRENT_ANNOTATION_METHOD}: <code>"#"</code>
+     */
+    public static final String ANNOTATION_METHOD_CLASS_NAME_DELIMITER = "#";
+
+    /**
      * The {@link ThreadLocal} {@link Method} of the current {@link Annotation} being serialized. If set and the
      * {@link Annotation#annotationType()} being serialized is in {@link #getTracerClasses()}, then a property with the
-     * key of {@link #JSON_KEY_METHOD_TRACER} and a value of
-     * <code>{@link Class#getCanonicalName()} + "#" + {@link Method#getName()}</code> is added to the serialized
+     * key of {@link #JSON_KEY_METHOD_TRACER} and a value of the concatenation of {@link Class#getCanonicalName()},
+     * {@link #ANNOTATION_METHOD_CLASS_NAME_DELIMITER}, and {@link Method#getName()} is added to the serialized
      * {@link JsonObject}.
      */
     public static final ThreadLocal<@Nullable Method> CURRENT_ANNOTATION_METHOD = new ThreadLocal<>();
@@ -112,7 +117,7 @@ public final class AnnotationJsonSerializer implements JsonSerializer<Annotation
             if (currentAnnotationMethod != null) {
                 serializedObject.addProperty(JSON_KEY_METHOD_TRACER,
                         currentAnnotationMethod.getDeclaringClass().getCanonicalName() +
-                                "#" + currentAnnotationMethod.getName());
+                                ANNOTATION_METHOD_CLASS_NAME_DELIMITER + currentAnnotationMethod.getName());
             }
         }
         return serialized;
