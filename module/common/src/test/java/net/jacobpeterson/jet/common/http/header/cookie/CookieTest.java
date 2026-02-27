@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.common.http.header.cookie;
 
+import com.google.common.collect.ImmutableMap;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
@@ -23,15 +24,15 @@ public final class CookieTest {
 
     @Test
     public void parseRequestCookies() {
-        assertEquals("[a=b, c=d]", Cookie.parseRequestCookies("a=b; c=d").toString());
-        assertEquals("[a=, c=d]", Cookie.parseRequestCookies("a; c=d").toString());
-        assertEquals("[a=, c=d]", Cookie.parseRequestCookies("a; c=d; ").toString());
-        assertEquals("[a=, c=d]", Cookie.parseRequestCookies("a; c=d ;").toString());
-        assertEquals("[]", Cookie.parseRequestCookies("").toString());
-        assertEquals("[]", Cookie.parseRequestCookies(" ").toString());
-        assertEquals("[]", Cookie.parseRequestCookies(";").toString());
-        assertEquals("[]", Cookie.parseRequestCookies(";;").toString());
-        assertEquals("[]", Cookie.parseRequestCookies("; ; ").toString());
+        assertEquals(ImmutableMap.of("a", "b", "c", "d"), Cookie.parseRequestCookies("a=b; c=d"));
+        assertEquals(ImmutableMap.of("a", "", "c", "d"), Cookie.parseRequestCookies("a; c=d"));
+        assertEquals(ImmutableMap.of("a", "", "c", "d"), Cookie.parseRequestCookies("a; c=d; "));
+        assertEquals(ImmutableMap.of("a", "", "c", "d"), Cookie.parseRequestCookies("a; c=d ;"));
+        assertEquals(ImmutableMap.of(), Cookie.parseRequestCookies(""));
+        assertEquals(ImmutableMap.of(), Cookie.parseRequestCookies(" "));
+        assertEquals(ImmutableMap.of(), Cookie.parseRequestCookies(";"));
+        assertEquals(ImmutableMap.of(), Cookie.parseRequestCookies(";;"));
+        assertEquals(ImmutableMap.of(), Cookie.parseRequestCookies("; ; "));
         assertTrue(Cookie.parseRequestCookies(" ").isEmpty());
     }
 

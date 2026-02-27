@@ -1,7 +1,7 @@
 package net.jacobpeterson.jet.common.http.header.cookie;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.EqualsAndHashCode;
@@ -98,24 +98,21 @@ public final class Cookie {
             Splitter.on(REQUEST_COOKIE_NAME_VALUE_DELIMITER).limit(2).trimResults();
 
     /**
-     * Parses the given {@link Header#COOKIE} value {@link String} into a {@link ImmutableList} of {@link Cookie}s.
+     * Parses the given {@link Header#COOKIE} value {@link String} into a {@link String} {@link ImmutableMap}.
      *
      * @param requestCookies the {@link Header#COOKIE} value {@link String}
      *
-     * @return the {@link Cookie} {@link ImmutableList}
+     * @return the {@link String} {@link ImmutableMap}
      *
      * @see #toRequestString()
      */
-    public static ImmutableList<Cookie> parseRequestCookies(final String requestCookies) {
-        final var cookies = ImmutableList.<Cookie>builder();
+    public static ImmutableMap<String, String> parseRequestCookies(final String requestCookies) {
+        final var cookies = ImmutableMap.<String, String>builder();
         for (final var cookieSplit : PARSE_REQUEST_COOKIES_COOKIE_SPLITTER.split(requestCookies)) {
             final var nameValueSplit = PARSE_REQUEST_COOKIES_NAME_VALUE_SPLITTER.splitToList(cookieSplit);
-            cookies.add(builder()
-                    .name(nameValueSplit.getFirst())
-                    .value(nameValueSplit.size() == 1 ? "" : nameValueSplit.get(1))
-                    .build());
+            cookies.put(nameValueSplit.getFirst(), nameValueSplit.size() == 1 ? "" : nameValueSplit.get(1));
         }
-        return cookies.build();
+        return cookies.buildKeepingLast();
     }
 
     /**
