@@ -73,6 +73,10 @@ public class BasicAuthentication {
      * The auth scheme: <code>"Basic"</code>
      */
     public static final String AUTH_SCHEME = "Basic";
+
+    /**
+     * {@link #AUTH_SCHEME} {@link String#toLowerCase()}.
+     */
     public static final String AUTH_SCHEME_LOWERCASE = AUTH_SCHEME.toLowerCase(ROOT);
 
     /**
