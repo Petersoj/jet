@@ -28,6 +28,8 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  * or <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/416"><code>416 Range Not
  * Satisfiable</code></a> responses.
  *
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range">
+ * developer.mozilla.org</a>
  * @see Header#CONTENT_RANGE
  * @see Status#PARTIAL_CONTENT_206
  * @see Status#RANGE_NOT_SATISFIABLE_416
@@ -37,7 +39,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @Immutable
 @EqualsAndHashCode(cacheStrategy = LAZY)
 @SuppressWarnings("NullAway") // TODO remove once NullAway false positives are fixed
-public class ContentRange {
+public final class ContentRange {
 
     /**
      * The bytes unit: <code>"bytes"</code>

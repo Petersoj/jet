@@ -67,7 +67,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @Immutable
 @EqualsAndHashCode(cacheStrategy = LAZY)
 @SuppressWarnings("NullAway") // TODO remove once NullAway false positives are fixed
-public class BasicAuthentication {
+public final class BasicAuthentication {
 
     /**
      * The auth scheme: <code>"Basic"</code>
