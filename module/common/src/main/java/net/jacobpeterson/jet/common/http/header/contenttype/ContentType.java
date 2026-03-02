@@ -124,6 +124,11 @@ public final class ContentType {
     public static final ContentType TEXT_XML = create(TEXT_TYPE_STRING, TEXT_XML_SUBTYPE_STRING);
     public static final ContentType TEXT_XML_UTF_8 = TEXT_XML.withCharset(UTF_8);
 
+    public static final String TEXT_EVENT_STREAM_SUBTYPE_STRING = "event-stream";
+    public static final String TEXT_EVENT_STREAM_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER +
+            TEXT_EVENT_STREAM_SUBTYPE_STRING;
+    public static final ContentType TEXT_EVENT_STREAM = create(TEXT_TYPE_STRING, TEXT_EVENT_STREAM_SUBTYPE_STRING);
+
     // END text types
 
     // BEGIN image types
