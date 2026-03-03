@@ -137,10 +137,10 @@ public final class Range {
     /**
      * Creates a {@link Header#RANGE} value {@link String} from the given {@link Range} {@link Collection}.
      *
-     * @param ranges the {@link Range} {@link Collection}. If {@link Collection#isEmpty()}, then
-     *               {@link Range#toString()} of {@link #ALL_BYTES} is returned.
+     * @param ranges the {@link Range} {@link Collection}
      *
-     * @return the {@link Header#RANGE} value {@link String}
+     * @return the {@link Header#RANGE} value {@link String} ({@link Range#toString()} of {@link #ALL_BYTES} is returned
+     * if the given <code>ranges</code> {@link Collection#isEmpty()}
      */
     public static String multipleToString(final Collection<Range> ranges) {
         if (ranges.isEmpty()) {
