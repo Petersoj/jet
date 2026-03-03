@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.url.Url;
 import org.eclipse.jetty.http.HttpCookie;
-import org.eclipse.jetty.http.HttpDateTime;
 import org.eclipse.jetty.http.SetCookieParser;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -17,6 +16,7 @@ import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +26,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
@@ -431,13 +432,14 @@ public final class Cookie {
     }
 
     /**
-     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#EXPIRES} parsed into
-     * {@link ZonedDateTime}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#EXPIRES}
+     * {@link ZonedDateTime#parse(CharSequence, DateTimeFormatter)} {@link DateTimeFormatter#RFC_1123_DATE_TIME}
      */
     public @Nullable ZonedDateTime getExpires() {
         if (expires == null) {
             final var expires = getAttribute(EXPIRES);
-            this.expires = Optional.ofNullable(expires == null ? null : HttpDateTime.parse(expires));
+            this.expires = Optional.ofNullable(expires == null ? null :
+                    ZonedDateTime.parse(expires, RFC_1123_DATE_TIME));
         }
         return expires.orElse(null);
     }
