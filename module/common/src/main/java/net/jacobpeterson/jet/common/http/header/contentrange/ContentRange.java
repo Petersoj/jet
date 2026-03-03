@@ -62,7 +62,7 @@ public final class ContentRange {
     public static final String RANGE_SIZE_DELIMITER = "/";
 
     /**
-     * The {@link #getRangeStart()}-{@link #getRangeEnd()} delimiter: <code>"-"</code>
+     * The {@link #getStart()}-{@link #getEnd()} delimiter: <code>"-"</code>
      */
     public static final String RANGE_START_END_DELIMITER = "-";
 
@@ -91,11 +91,11 @@ public final class ContentRange {
         checkArgument(rangeSizeSplit.size() == 2, "Invalid content range: %s", contentRange);
         final var range = rangeSizeSplit.getFirst();
         if (!range.equals(UNKNOWN_TOKEN)) {
-            final var rangeStartEndSplit = PARSE_RANGE_START_END_SPLITTER.splitToList(range);
-            checkArgument(rangeStartEndSplit.size() == 2, "Invalid content range: %s", contentRange);
+            final var startEndSplit = PARSE_RANGE_START_END_SPLITTER.splitToList(range);
+            checkArgument(startEndSplit.size() == 2, "Invalid content range: %s", contentRange);
             try {
-                builder.rangeStart(parseLong(rangeStartEndSplit.getFirst()));
-                builder.rangeEnd(parseLong(rangeStartEndSplit.get(1)));
+                builder.start(parseLong(startEndSplit.getFirst()));
+                builder.end(parseLong(startEndSplit.get(1)));
             } catch (final NumberFormatException numberFormatException) {
                 throw new IllegalArgumentException(numberFormatException);
             }
@@ -138,9 +138,8 @@ public final class ContentRange {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range#range">
      * developer.mozilla.org</a>
-     * @see #getRangeEnd()
      */
-    private final @Getter @Nullable Long rangeStart;
+    private final @Getter @Nullable Long start;
 
     /**
      * A range with the format <code>&lt;range-start&gt;-&lt;range-end&gt;</code>, where
@@ -153,9 +152,8 @@ public final class ContentRange {
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range#range">
      * developer.mozilla.org</a>
-     * @see #getRangeStart()
      */
-    private final @Getter @Nullable Long rangeEnd;
+    private final @Getter @Nullable Long end;
 
     /**
      * The total length of the document (or <code>*</code> if unknown).
@@ -168,35 +166,34 @@ public final class ContentRange {
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;
 
     /**
-     * @param unit       {@link #getUnit()}, or <code>null</code> for {@link #BYTES_UNIT}
-     * @param rangeStart the {@link #getRangeStart()}, or possibly <code>null</code> if the given <code>rangeEnd</code>
-     *                   is also <code>null</code>
-     * @param rangeEnd   the {@link #getRangeEnd()}, or possibly <code>null</code> if the given <code>rangeStart</code>
-     *                   is also <code>null</code>
-     * @param size       the {@link #getSize()}
+     * @param unit  {@link #getUnit()}, or <code>null</code> for {@link #BYTES_UNIT}
+     * @param start the {@link #getStart()}, or possibly <code>null</code> if the given <code>end</code> is also
+     *              <code>null</code>
+     * @param end   the {@link #getEnd()}, or possibly <code>null</code> if the given <code>start</code> is also
+     *              <code>null</code>
+     * @param size  the {@link #getSize()}
      *
      * @throws IllegalArgumentException thrown for invalid arguments
      */
     @lombok.Builder(toBuilder = true)
-    private ContentRange(final @Nullable String unit, @Nullable final Long rangeStart, @Nullable final Long rangeEnd,
+    private ContentRange(final @Nullable String unit, @Nullable final Long start, @Nullable final Long end,
             @Nullable final Long size) throws IllegalArgumentException {
-        checkArgument((rangeStart == null) == (rangeEnd == null),
-                "Both `rangeStart` and `rangeEnd` must be `null` or non-`null`");
-        final var rangeSet = rangeStart != null;
+        checkArgument((start == null) == (end == null), "Both `start` and `end` must be `null` or non-`null`");
+        final var rangeSet = start != null;
         if (rangeSet) {
-            checkArgument(rangeStart >= 0, "`rangeStart` must be zero or positive");
-            checkArgument(rangeEnd >= 0, "`rangeEnd` must be zero or positive");
-            checkArgument(rangeStart <= rangeEnd, "`rangeStart` must be less than or equal to `rangeEnd`");
+            checkArgument(start >= 0, "`start` must be zero or positive");
+            checkArgument(end >= 0, "`end` must be zero or positive");
+            checkArgument(start <= end, "`start` must be less than or equal to `end`");
         }
         if (size != null) {
             checkArgument(size >= 0, "`size` must be zero or positive");
             if (rangeSet) {
-                checkArgument(rangeEnd <= size, "`rangeEnd` must be less than or equal to `size`");
+                checkArgument(end <= size, "`end` must be less than or equal to `size`");
             }
         }
         this.unit = unit == null ? BYTES_UNIT : unit;
-        this.rangeStart = rangeStart;
-        this.rangeEnd = rangeEnd;
+        this.start = start;
+        this.end = end;
         this.size = size;
     }
 
@@ -210,10 +207,10 @@ public final class ContentRange {
         if (string == null) {
             final var string = new StringBuilder();
             string.append(unit).append(' ');
-            if (rangeStart == null || rangeEnd == null) {
+            if (start == null || end == null) {
                 string.append(UNKNOWN_TOKEN);
             } else {
-                string.append(rangeStart).append(RANGE_START_END_DELIMITER).append(rangeEnd);
+                string.append(start).append(RANGE_START_END_DELIMITER).append(end);
             }
             string.append(RANGE_SIZE_DELIMITER);
             string.append(size == null ? UNKNOWN_TOKEN : size);

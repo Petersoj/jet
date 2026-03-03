@@ -15,29 +15,29 @@ public final class ContentRangeTest {
         {
             final var contentRange = ContentRange.parse("bytes */*");
             assertEquals("bytes", contentRange.getUnit());
-            assertNull(contentRange.getRangeStart());
-            assertNull(contentRange.getRangeEnd());
+            assertNull(contentRange.getStart());
+            assertNull(contentRange.getEnd());
             assertNull(contentRange.getSize());
         }
         {
             final var contentRange = ContentRange.parse("bits  0-1 / *");
             assertEquals("bits", contentRange.getUnit());
-            assertEquals(0, contentRange.getRangeStart());
-            assertEquals(1, contentRange.getRangeEnd());
+            assertEquals(0, contentRange.getStart());
+            assertEquals(1, contentRange.getEnd());
             assertNull(contentRange.getSize());
         }
         {
             final var contentRange = ContentRange.parse("bytes */ 10");
             assertEquals("bytes", contentRange.getUnit());
-            assertNull(contentRange.getRangeStart());
-            assertNull(contentRange.getRangeEnd());
+            assertNull(contentRange.getStart());
+            assertNull(contentRange.getEnd());
             assertEquals(10, contentRange.getSize());
         }
         {
             final var contentRange = ContentRange.parse("bytes 0-1/10");
             assertEquals("bytes", contentRange.getUnit());
-            assertEquals(0, contentRange.getRangeStart());
-            assertEquals(1, contentRange.getRangeEnd());
+            assertEquals(0, contentRange.getStart());
+            assertEquals(1, contentRange.getEnd());
             assertEquals(10, contentRange.getSize());
         }
         assertThrows(IllegalArgumentException.class, () -> ContentRange.parse(""));
@@ -67,38 +67,38 @@ public final class ContentRangeTest {
         }
 
         @Test
-        public void rangeStart() {
-            assertNull(ContentRange.builder().build().getRangeStart());
+        public void start() {
+            assertNull(ContentRange.builder().build().getStart());
             assertEquals(1, ContentRange.builder()
-                    .rangeStart(1L)
-                    .rangeEnd(2L)
-                    .build().getRangeStart());
+                    .start(1L)
+                    .end(2L)
+                    .build().getStart());
             assertThrows(IllegalArgumentException.class, () -> ContentRange.builder()
-                    .rangeStart(1L)
+                    .start(1L)
                     .build());
             assertThrows(IllegalArgumentException.class, () -> ContentRange.builder()
-                    .rangeStart(-1L)
-                    .rangeEnd(1L)
+                    .start(-1L)
+                    .end(1L)
                     .build());
         }
 
         @Test
-        public void rangeEnd() {
-            assertNull(ContentRange.builder().build().getRangeEnd());
+        public void end() {
+            assertNull(ContentRange.builder().build().getEnd());
             assertEquals(2, ContentRange.builder()
-                    .rangeStart(1L)
-                    .rangeEnd(2L)
-                    .build().getRangeEnd());
+                    .start(1L)
+                    .end(2L)
+                    .build().getEnd());
             assertThrows(IllegalArgumentException.class, () -> ContentRange.builder()
-                    .rangeEnd(1L)
+                    .end(1L)
                     .build());
             assertThrows(IllegalArgumentException.class, () -> ContentRange.builder()
-                    .rangeStart(1L)
-                    .rangeEnd(-1L)
+                    .start(1L)
+                    .end(-1L)
                     .build());
             assertThrows(IllegalArgumentException.class, () -> ContentRange.builder()
-                    .rangeStart(2L)
-                    .rangeEnd(1L)
+                    .start(2L)
+                    .end(1L)
                     .build());
         }
 
@@ -109,8 +109,8 @@ public final class ContentRangeTest {
                     .size(2L)
                     .build().getSize());
             assertThrows(IllegalArgumentException.class, () -> ContentRange.builder()
-                    .rangeStart(1L)
-                    .rangeEnd(2L)
+                    .start(1L)
+                    .end(2L)
                     .size(1L)
                     .build());
         }
@@ -123,15 +123,15 @@ public final class ContentRangeTest {
                 .unit("bits")
                 .build().toString());
         assertEquals("bytes 0-1/*", ContentRange.builder()
-                .rangeStart(0L)
-                .rangeEnd(1L)
+                .start(0L)
+                .end(1L)
                 .build().toString());
         assertEquals("bytes */1", ContentRange.builder()
                 .size(1L)
                 .build().toString());
         assertEquals("bytes 0-1/1", ContentRange.builder()
-                .rangeStart(0L)
-                .rangeEnd(1L)
+                .start(0L)
+                .end(1L)
                 .size(1L)
                 .build().toString());
     }
