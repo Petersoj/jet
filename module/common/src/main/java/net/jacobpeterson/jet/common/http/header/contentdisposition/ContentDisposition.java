@@ -7,8 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
-import net.jacobpeterson.jet.common.http.header.contentrange.ContentRange;
-import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.url.Url;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -25,7 +23,8 @@ import static net.jacobpeterson.jet.common.http.url.Url.decode;
 import static net.jacobpeterson.jet.common.http.url.Url.encode;
 
 /**
- * {@link ContentRange} is an immutable class that represents a standardized HTTP {@link Header#CONTENT_DISPOSITION}.
+ * {@link ContentDisposition} is an immutable class that represents a standardized HTTP
+ * {@link Header#CONTENT_DISPOSITION}.
  * <p>
  * The HTTP <strong><code>Content-Disposition</code></strong> header indicates whether content should be displayed
  * <em>inline</em> in the browser as a web page or part of a web page or downloaded as an <em>attachment</em> locally.
@@ -44,7 +43,7 @@ import static net.jacobpeterson.jet.common.http.url.Url.encode;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Disposition">
  * developer.mozilla.org</a>
  * @see Header#CONTENT_DISPOSITION
- * @see Range
+ * @see ContentDispositionType
  */
 @NullMarked
 @Immutable
@@ -91,6 +90,15 @@ public final class ContentDisposition {
     private static final Splitter PARSE_DIRECTIVE_KEY_VALUE_SPLITTER =
             Splitter.on(DIRECTIVE_KEY_VALUE_DELIMITER).limit(2).trimResults();
 
+    /**
+     * Parses the given {@link Header#CONTENT_DISPOSITION} value {@link String} into a {@link ContentDisposition}.
+     *
+     * @param contentDisposition the {@link Header#CONTENT_DISPOSITION} value {@link String}
+     *
+     * @return the {@link ContentDisposition}
+     *
+     * @throws IllegalArgumentException thrown upon parsing failure
+     */
     public static ContentDisposition parse(final String contentDisposition) throws IllegalArgumentException {
         final var builder = builder();
         for (final var directive : PARSE_DIRECTIVE_SPLITTER.split(contentDisposition)) {

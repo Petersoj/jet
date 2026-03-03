@@ -22,8 +22,10 @@ public class StatusException extends RuntimeException {
 
     /** The response {@link Status}. */
     private final Status status;
+
     /** The response body bytes. */
     private final byte[] body;
+
     /** The {@link ContentType} of {@link #getBody()}. */
     private final ContentType contentType;
 
