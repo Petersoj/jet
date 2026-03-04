@@ -135,7 +135,18 @@ public final class ETag {
      */
     private final @Getter @EqualsAndHashCode.Include String value;
 
+    private @LazyInit @Nullable String valueQuoted;
     private @LazyInit @Nullable String string;
+
+    /**
+     * @return internally-cached concatenation of a double-quote, {@link #getValue()}, and a double-quote
+     */
+    public String getValueQuoted() {
+        if (valueQuoted == null) {
+            valueQuoted = '"' + value + '"';
+        }
+        return valueQuoted;
+    }
 
     /**
      * @return internally-cached {@link String} value for {@link Header#ETAG}
