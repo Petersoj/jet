@@ -1,6 +1,5 @@
-package net.jacobpeterson.jet.common.io;
+package net.jacobpeterson.jet.common.io.util;
 
-import com.google.errorprone.annotations.Immutable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
@@ -92,7 +91,6 @@ public final class IoUtil {
     /**
      * {@link Peeked} is a class for the return type of {@link #peekInputStream(InputStream, int)}.
      */
-    @Immutable
     @RequiredArgsConstructor(access = PRIVATE) @Getter
     public static final class Peeked {
 

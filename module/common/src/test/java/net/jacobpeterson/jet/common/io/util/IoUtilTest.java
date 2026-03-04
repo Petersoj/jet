@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.common.io;
+package net.jacobpeterson.jet.common.io.util;
 
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
