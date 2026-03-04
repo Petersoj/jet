@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -121,6 +123,40 @@ public enum CompressionType {
     /**
      * @return {@link #compress(OutputStream, Integer)} with <code>level</code> set to <code>null</code>
      */
+    public byte[] compress(final byte[] bytes) {
+        return compress(bytes, (Integer) null);
+    }
+
+    /**
+     * @return {@link #compress(OutputStream, Integer, byte[])} with <code>dictionary</code> set to <code>null</code>
+     */
+    public byte[] compress(final byte[] bytes, final @Nullable Integer level) {
+        return compress(bytes, level, null);
+    }
+
+    /**
+     * @return {@link #compress(OutputStream, Integer, byte[])} with <code>level</code> set to <code>null</code>
+     */
+    public byte[] compress(final byte[] bytes, final byte @Nullable [] dictionary) {
+        return compress(bytes, null, dictionary);
+    }
+
+    /**
+     * @return {@link #compress(OutputStream, Integer, byte[])} {@link ByteArrayOutputStream#toByteArray()}
+     */
+    public byte[] compress(final byte[] bytes, final @Nullable Integer level, final byte @Nullable [] dictionary) {
+        final var compressed = new ByteArrayOutputStream();
+        try (final var compress = compress(compressed, level, dictionary)) {
+            compress.write(bytes);
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
+        }
+        return compressed.toByteArray();
+    }
+
+    /**
+     * @return {@link #compress(OutputStream, Integer)} with <code>level</code> set to <code>null</code>
+     */
     public OutputStream compress(final OutputStream outputStream) throws IOException {
         return compress(outputStream, (Integer) null);
     }
@@ -186,6 +222,25 @@ public enum CompressionType {
                 yield compress;
             }
         };
+    }
+
+    /**
+     * @return {@link #decompress(byte[], byte[])} with <code>dictionary</code> set to <code>null</code>
+     */
+    public byte[] decompress(final byte[] bytes) {
+        return decompress(bytes, null);
+    }
+
+    /**
+     * @return {@link #decompress(InputStream, byte[])} with {@link ByteArrayInputStream#ByteArrayInputStream(byte[])}
+     * and {@link InputStream#readAllBytes()}
+     */
+    public byte[] decompress(final byte[] bytes, final byte @Nullable [] dictionary) {
+        try (final var decompress = decompress(new ByteArrayInputStream(bytes), dictionary)) {
+            return decompress.readAllBytes();
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
+        }
     }
 
     /**
