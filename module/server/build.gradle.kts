@@ -5,6 +5,8 @@ plugins {
 dependencies {
     api(project(":module:common"))
 
+    api("com.github.ben-manes.caffeine:caffeine:3.2.3")
+
     val brotliDependencyGroup = "com.aayushatharva.brotli4j"
     setOf("brotli4j",
             "native-linux-x86_64", "native-linux-aarch64",

@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
+import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 
@@ -54,16 +55,17 @@ public final class IoUtil {
         final var decoder = charset.newDecoder();
         decoder.onMalformedInput(REPORT);
         decoder.onUnmappableCharacter(REPORT);
+        final CharBuffer decoded;
         try {
-            final var decoded = decoder.decode(wrap(bytes, offset, length));
-            while (decoded.hasRemaining()) {
-                final var c = decoded.get();
-                if (c != '\n' && c != '\r' && c != '\t' && (c < 0x20 || c == 0x7F)) {
-                    return false;
-                }
-            }
+            decoded = decoder.decode(wrap(bytes, offset, length));
         } catch (final CharacterCodingException characterCodingException) {
             return false;
+        }
+        while (decoded.hasRemaining()) {
+            final var c = decoded.get();
+            if (c != '\n' && c != '\r' && c != '\t' && (c < 0x20 || c == 0x7F)) {
+                return false;
+            }
         }
         return true;
     }
