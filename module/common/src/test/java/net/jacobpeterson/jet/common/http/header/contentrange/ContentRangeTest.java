@@ -117,6 +117,7 @@ public final class ContentRangeTest {
         assertThrows(IllegalArgumentException.class, () -> ContentRange.parse("a 0/*"));
         assertThrows(IllegalArgumentException.class, () -> ContentRange.parse("bytes -1--2/*"));
         assertThrows(IllegalArgumentException.class, () -> ContentRange.parse("bytes 1-2/-1"));
+        assertThrows(IllegalArgumentException.class, () -> ContentRange.parse("bytes 1-2/2"));
         assertThrows(IllegalArgumentException.class, () -> ContentRange.parse("bytes 2-1/2"));
         assertThrows(IllegalArgumentException.class, () -> ContentRange.parse("bytes 1-3/2"));
     }
@@ -218,10 +219,15 @@ public final class ContentRangeTest {
         assertEquals("bytes */1", ContentRange.builder()
                 .size(1L)
                 .build().toString());
-        assertEquals("bytes 0-1/1", ContentRange.builder()
+        assertEquals("bytes 0-0/0", ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .size(0L)
+                .build().toString());
+        assertEquals("bytes 0-1/2", ContentRange.builder()
                 .start(0L)
                 .end(1L)
-                .size(1L)
+                .size(2L)
                 .build().toString());
     }
 }

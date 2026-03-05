@@ -224,7 +224,7 @@ public final class ContentRange {
         if (size != null) {
             checkArgument(size >= 0, "`size` must be zero or positive");
             if (rangeSet) {
-                checkArgument(end <= size, "`end` must be less than or equal to `size`");
+                checkArgument(size == 0 ? end <= size : end < size, "`end` must be less than `size`");
             }
         }
         this.unit = unit == null ? BYTES_UNIT : unit;
