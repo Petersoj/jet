@@ -3,7 +3,13 @@ package net.jacobpeterson.jet.common.http.header.contentrange;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.writeString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -204,6 +210,69 @@ public final class ContentRangeTest {
                 .end(0L)
                 .size(1L)
                 .build().isRedundant());
+    }
+
+    @Test
+    public void newFileInputStream(final @TempDir File tempDir) throws Exception {
+        final var emptyFile = new File(tempDir, "empty");
+        writeString(emptyFile.toPath(), "");
+
+        final var abcFile = new File(tempDir, "abc");
+        writeString(abcFile.toPath(), "abc");
+
+        try (final var inputStream = ContentRange.builder().build().newFileInputStream(emptyFile)) {
+            assertArrayEquals(new byte[]{}, inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .build().newFileInputStream(emptyFile)) {
+            assertArrayEquals(new byte[]{}, inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .build().newFileInputStream(abcFile)) {
+            assertArrayEquals("a".getBytes(UTF_8), inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(1L)
+                .end(1L)
+                .build().newFileInputStream(abcFile)) {
+            assertArrayEquals("b".getBytes(UTF_8), inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(1L)
+                .end(2L)
+                .build().newFileInputStream(abcFile)) {
+            assertArrayEquals("bc".getBytes(UTF_8), inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .build().newFileInputStream(abcFile)) {
+            assertArrayEquals("a".getBytes(UTF_8), inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(2L)
+                .build().newFileInputStream(abcFile)) {
+            assertArrayEquals("abc".getBytes(UTF_8), inputStream.readAllBytes());
+        }
+
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(2L)
+                .size(3L)
+                .build().newFileInputStream(abcFile)) {
+            assertArrayEquals("abc".getBytes(UTF_8), inputStream.readAllBytes());
+        }
     }
 
     @Test

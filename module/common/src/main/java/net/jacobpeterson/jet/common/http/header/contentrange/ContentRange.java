@@ -8,12 +8,22 @@ import lombok.Getter;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.status.Status;
+import net.jacobpeterson.jet.common.io.bounded.BoundedInputStream;
+import net.jacobpeterson.jet.common.io.bounded.OnBoundCount;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
+import static java.nio.channels.Channels.newInputStream;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
@@ -239,6 +249,37 @@ public final class ContentRange {
      */
     public boolean isRedundant() {
         return start != null && end != null && size != null && start == 0 && end == max(0, size - 1);
+    }
+
+    /**
+     * Creates a {@link InputStream} to read the contents of the given {@link File} at {@link #getStart()}
+     * through {@link #getEnd()}, or the entire {@link File} contents if {@link #isRedundant()} or {@link #getStart()}
+     * and {@link #getEnd()} are <code>null</code>.
+     *
+     * @param file the {@link File}
+     *
+     * @return the {@link InputStream}
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public InputStream newFileInputStream(final File file) throws IOException {
+        if (!isRedundant() && start != null && end != null) {
+            final var randomAccessFile = new RandomAccessFile(file, "r");
+            try {
+                randomAccessFile.seek(start);
+                return new BoundedInputStream(new FilterInputStream(newInputStream(randomAccessFile.getChannel())) {
+                    @Override
+                    public void close() throws IOException {
+                        randomAccessFile.close();
+                    }
+                }, end - start + 1, OnBoundCount.CLOSE);
+            } catch (final Throwable throwable) {
+                randomAccessFile.close();
+                throw throwable;
+            }
+        } else {
+            return new FileInputStream(file);
+        }
     }
 
     /**
