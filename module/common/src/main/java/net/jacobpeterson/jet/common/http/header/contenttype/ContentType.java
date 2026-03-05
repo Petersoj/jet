@@ -33,6 +33,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllLines;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Function.identity;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
@@ -402,6 +403,85 @@ public final class ContentType {
     // END multipart types
 
     /**
+     * An {@link ImmutableMap} of all the public static {@link ContentType}s declared in this class with
+     * {@link ContentType#toString()} as the key.
+     */
+    public static final ImmutableMap<String, ContentType> COMMON_CONTENT_TYPES = ImmutableSet.of(
+                    WILDCARD_WILDCARD,
+                    TEXT_WILDCARD,
+                    TEXT_CSS,
+                    TEXT_CSS_UTF_8,
+                    TEXT_CSV,
+                    TEXT_CSV_UTF_8,
+                    TEXT_HTML,
+                    TEXT_HTML_UTF_8,
+                    TEXT_MARKDOWN,
+                    TEXT_MARKDOWN_UTF_8,
+                    TEXT_PLAIN,
+                    TEXT_PLAIN_UTF_8,
+                    TEXT_TSV,
+                    TEXT_TSV_UTF_8,
+                    TEXT_XML,
+                    TEXT_XML_UTF_8,
+                    TEXT_EVENT_STREAM,
+                    IMAGE_WILDCARD,
+                    IMAGE_BMP,
+                    IMAGE_GIF,
+                    IMAGE_ICO,
+                    IMAGE_JPEG,
+                    IMAGE_PNG,
+                    IMAGE_SVG,
+                    IMAGE_SVG_UTF_8,
+                    IMAGE_TIFF,
+                    IMAGE_AVIF,
+                    IMAGE_WEBP,
+                    IMAGE_HEIC,
+                    IMAGE_HEIF,
+                    AUDIO_WILDCARD,
+                    AUDIO_MP4,
+                    AUDIO_MPEG,
+                    AUDIO_OGG,
+                    AUDIO_WEBM,
+                    AUDIO_AAC,
+                    AUDIO_VORBIS,
+                    AUDIO_VND_WAVE,
+                    VIDEO_WILDCARD,
+                    VIDEO_MP4,
+                    VIDEO_MPEG,
+                    VIDEO_OGG,
+                    VIDEO_QUICKTIME,
+                    VIDEO_WEBM,
+                    APPLICATION_WILDCARD,
+                    APPLICATION_GZIP,
+                    APPLICATION_JAVASCRIPT,
+                    APPLICATION_JAVASCRIPT_UTF_8,
+                    APPLICATION_JSON,
+                    APPLICATION_JSON_UTF_8,
+                    APPLICATION_JWT,
+                    APPLICATION_MANIFEST_JSON,
+                    APPLICATION_MANIFEST_JSON_UTF_8,
+                    APPLICATION_OCTET_STREAM,
+                    APPLICATION_PDF,
+                    APPLICATION_RTF,
+                    APPLICATION_RTF_UTF_8,
+                    APPLICATION_WASM,
+                    APPLICATION_FORM_URL_ENCODED,
+                    APPLICATION_XHTML,
+                    APPLICATION_XHTML_UTF_8,
+                    APPLICATION_XML,
+                    APPLICATION_XML_UTF_8,
+                    APPLICATION_ZIP,
+                    FONT_WILDCARD,
+                    FONT_COLLECTION,
+                    FONT_OTF,
+                    FONT_TTF,
+                    FONT_WOFF,
+                    FONT_WOFF2,
+                    MULTIPART_WILDCARD,
+                    MULTIPART_FORM_DATA)
+            .stream().collect(toImmutableMap(ContentType::toString, identity()));
+
+    /**
      * A non-exhaustive {@link ImmutableSet} of common parameter-less {@link ContentType}s that modern browsers can
      * typically render through an HTML tag without the need for any extra plugins and have a very low likelihood of
      * being vulnerable to XSS attacks if the content is used with the proper HTML tag or directly rendered in a browser
@@ -473,12 +553,14 @@ public final class ContentType {
     }
 
     /**
-     * @return {@link #wrap(MediaType)} {@link MediaType#parse(String)}
+     * @return {@link #COMMON_CONTENT_TYPES} {@link ImmutableMap#get(Object)}, otherwise {@link #wrap(MediaType)}
+     * {@link MediaType#parse(String)}
      *
      * @see #toString()
      */
     public static ContentType parse(final String contentType) {
-        return wrap(MediaType.parse(contentType));
+        final var commonContentType = COMMON_CONTENT_TYPES.get(contentType.trim().toLowerCase(ROOT));
+        return commonContentType != null ? commonContentType : wrap(MediaType.parse(contentType));
     }
 
     /**
@@ -497,7 +579,7 @@ public final class ContentType {
      * @return the {@link ContentType}, or <code>null</code> if no mapping exists
      */
     public static @Nullable ContentType forFileExtension(final String fileExtension) {
-        return CONTENT_TYPE_OF_FILE_EXTENSIONS.get(fileExtension.toLowerCase(ROOT));
+        return CONTENT_TYPE_OF_FILE_EXTENSIONS.get(fileExtension.trim().toLowerCase(ROOT));
     }
 
     /**
