@@ -29,11 +29,20 @@ public final class ContentTypeTest {
     }
 
     @Test
+    public void forFilename() {
+        assertEquals(ContentType.create("image", "svg+xml"), ContentType.forFilename("abc.svg"));
+        assertEquals(ContentType.create("image", "svg+xml"), ContentType.forFilename(".svg"));
+        assertNull(ContentType.forFilename(""));
+        assertNull(ContentType.forFilename("asdf"));
+    }
+
+    @Test
     public void forFileExtension() {
         assertEquals(ContentType.create("image", "svg+xml"), ContentType.forFileExtension("svg"));
         assertEquals(ContentType.create("image", "png"), ContentType.forFileExtension("png"));
         assertEquals(ContentType.create("image", "png"), ContentType.forFileExtension("PNG"));
         assertEquals(ContentType.create("video", "mp4"), ContentType.forFileExtension("mp4"));
+        assertNull(ContentType.forFileExtension("asdfasdf"));
         assertNull(ContentType.forFileExtension("."));
     }
 

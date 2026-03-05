@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.io.Files;
 import com.google.common.net.MediaType;
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
@@ -27,6 +28,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSetMultimap.flatteningToImmutableSetMultimap;
+import static com.google.common.io.Files.getFileExtension;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllLines;
 import static java.util.Locale.ROOT;
@@ -477,6 +479,13 @@ public final class ContentType {
      */
     public static ContentType parse(final String contentType) {
         return wrap(MediaType.parse(contentType));
+    }
+
+    /**
+     * @return {@link #forFileExtension(String)} with {@link Files#getFileExtension(String)}
+     */
+    public static @Nullable ContentType forFilename(final String filename) {
+        return forFileExtension(getFileExtension(filename));
     }
 
     /**
