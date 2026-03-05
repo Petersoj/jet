@@ -1,13 +1,7 @@
-package net.jacobpeterson.jet.common.io.util;
+package net.jacobpeterson.jet.common.util.string;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -15,13 +9,12 @@ import java.nio.charset.Charset;
 import static java.lang.Math.min;
 import static java.nio.ByteBuffer.wrap;
 import static java.nio.charset.CodingErrorAction.REPORT;
-import static lombok.AccessLevel.PRIVATE;
 
 /**
- * {@link IoUtil} is utility class for I/O.
+ * {@link StringUtil} is utility class for {@link String}.
  */
 @NullMarked
-public final class IoUtil {
+public final class StringUtil {
 
     /**
      * @return {@link #isLikelyPlainText(Charset, byte[], int, int)} with <code>offset</code> set to <code>0</code> and
@@ -69,40 +62,5 @@ public final class IoUtil {
         return true;
     }
 
-    /**
-     * Peeks bytes from the given {@link InputStream}.
-     * <p>
-     * Note: the returned {@link Peeked#getInputStream()} must be used for future read operations and
-     * the given {@link InputStream} must no longer be used directly.
-     *
-     * @param inputStream the {@link InputStream}
-     * @param peekLength  the peek length
-     *
-     * @return the {@link Peeked}
-     *
-     * @throws IOException thrown for {@link IOException}s
-     */
-    public static Peeked peekInputStream(final InputStream inputStream, final int peekLength) throws IOException {
-        final var peekedBytesRead = inputStream.readNBytes(peekLength);
-        return new Peeked(new SequenceInputStream(new ByteArrayInputStream(peekedBytesRead), inputStream),
-                peekedBytesRead);
-    }
-
-    /**
-     * {@link Peeked} is a class for the return type of {@link #peekInputStream(InputStream, int)}.
-     */
-    @RequiredArgsConstructor(access = PRIVATE) @Getter
-    public static final class Peeked {
-
-        /**
-         * The {@link InputStream} given to {@link #peekInputStream(InputStream, int)}, but with {@link #getBytes()}
-         * prepended using {@link SequenceInputStream}.
-         */
-        private final InputStream inputStream;
-
-        /** The peeked bytes. */
-        private final byte[] bytes;
-    }
-
-    private IoUtil() {}
+    private StringUtil() {}
 }

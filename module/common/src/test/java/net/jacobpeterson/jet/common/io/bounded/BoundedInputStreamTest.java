@@ -159,31 +159,27 @@ public final class BoundedInputStreamTest {
 
     @Test
     public void available() throws IOException {
-        {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
-            assertTrue(boundedInputStream.available() > 0);
-            assertEquals('a', boundedInputStream.read());
-            assertTrue(boundedInputStream.available() > 0);
-            assertEquals('b', boundedInputStream.read());
-            assertEquals(0, boundedInputStream.available());
-        }
+        final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
+        assertTrue(boundedInputStream.available() > 0);
+        assertEquals('a', boundedInputStream.read());
+        assertTrue(boundedInputStream.available() > 0);
+        assertEquals('b', boundedInputStream.read());
+        assertEquals(0, boundedInputStream.available());
     }
 
     @Test
     public void markAndReset() throws IOException {
-        {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
-            assertTrue(boundedInputStream.markSupported());
-            assertEquals('a', boundedInputStream.read());
-            boundedInputStream.mark(Integer.MAX_VALUE);
-            assertFalse(boundedInputStream.isBound());
-            assertEquals('b', boundedInputStream.read());
-            boundedInputStream.reset();
-            assertFalse(boundedInputStream.isBound());
-            assertEquals('b', boundedInputStream.read());
-            assertTrue(boundedInputStream.isBound());
-            assertThrows(BoundException.class, boundedInputStream::read);
-        }
+        final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
+        assertTrue(boundedInputStream.markSupported());
+        assertEquals('a', boundedInputStream.read());
+        boundedInputStream.mark(Integer.MAX_VALUE);
+        assertFalse(boundedInputStream.isBound());
+        assertEquals('b', boundedInputStream.read());
+        boundedInputStream.reset();
+        assertFalse(boundedInputStream.isBound());
+        assertEquals('b', boundedInputStream.read());
+        assertTrue(boundedInputStream.isBound());
+        assertThrows(BoundException.class, boundedInputStream::read);
     }
 
     private ByteArrayInputStream stringStream(final String string) {
