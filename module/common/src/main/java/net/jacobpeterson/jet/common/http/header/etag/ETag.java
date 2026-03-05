@@ -9,7 +9,12 @@ import net.jacobpeterson.jet.common.http.header.Header;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.File;
+import java.util.Base64;
+import java.util.Objects;
+
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.nio.ByteBuffer.allocate;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
@@ -40,6 +45,36 @@ public final class ETag {
      * The "weak" prefix: <code>"W/"</code>
      */
     public static final String WEAK_PREFIX = "W/";
+
+    /**
+     * @return {@link #computeWeak(String, long, long)} with {@link File#getName()}, {@link File#lastModified()}, and
+     * {@link File#length()}
+     */
+    public static ETag computeWeak(final File file) {
+        return computeWeak(file.getName(), file.lastModified(), file.length());
+    }
+
+    /**
+     * Computes a weak {@link ETag} for the given file attributes.
+     *
+     * @param name         the name
+     * @param lastModified the last modified epoch
+     * @param size         the size
+     *
+     * @return the {@link ETag}
+     */
+    public static ETag computeWeak(final String name, final long lastModified, final long size) {
+        // Based on the same algorithm as `org.eclipse.jetty.http.EtagUtils.computeWeakEtag()`.
+        final var hashBytes = allocate(Integer.BYTES + Long.BYTES + Long.BYTES);
+        final var nameHashcode = Objects.hashCode(name);
+        hashBytes.putInt(nameHashcode);
+        hashBytes.putLong(lastModified ^ nameHashcode);
+        hashBytes.putLong(size ^ nameHashcode);
+        return builder()
+                .weak()
+                .value(Base64.getEncoder().withoutPadding().encodeToString(hashBytes.array()))
+                .build();
+    }
 
     /**
      * Parses the given {@link Header#ETAG} value {@link String} into an {@link ETag}.
