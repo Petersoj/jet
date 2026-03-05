@@ -31,6 +31,7 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.nio.ByteBuffer.allocateDirect;
 import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
 /**
@@ -53,7 +54,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#gzip">
      * developer.mozilla.org</a>
      */
-    GZIP("gzip", 0, 9, 5),
+    GZIP("gzip", 0, 9, 5, false),
 
     /**
      * A format using the <a href="https://en.wikipedia.org/wiki/LZW">Lempel-Ziv-Welch</a> (LZW) algorithm. The value
@@ -64,7 +65,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#compress">
      * developer.mozilla.org</a>
      */
-    COMPRESS("compress", 0, 0, 0),
+    COMPRESS("compress", 0, 0, 0, false),
 
     /**
      * Using the <a href="https://en.wikipedia.org/wiki/Zlib">zlib</a> structure (defined in
@@ -75,7 +76,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#deflate">
      * developer.mozilla.org</a>
      */
-    DEFLATE("deflate", 0, 9, 5),
+    DEFLATE("deflate", 0, 9, 5, false),
 
     /**
      * A format using the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Brotli_compression">Brotli</a>
@@ -84,7 +85,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#br">
      * developer.mozilla.org</a>
      */
-    BROTLI("br", 0, 11, 4),
+    BROTLI("br", 0, 11, 4, false),
 
     /**
      * A format using the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Zstandard_compression">
@@ -94,7 +95,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#zstd">
      * developer.mozilla.org</a>
      */
-    ZSTANDARD("zstd", 0, 22, 6),
+    ZSTANDARD("zstd", 0, 22, 6, false),
 
     /**
      * A format that uses the
@@ -106,7 +107,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#dcb">
      * developer.mozilla.org</a>
      */
-    DICTIONARY_COMPRESSED_BROTLI("dcb", 0, 11, 4),
+    DICTIONARY_COMPRESSED_BROTLI("dcb", 0, 11, 4, true),
 
     /**
      * A format that uses the
@@ -118,7 +119,27 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#dcz">
      * developer.mozilla.org</a>
      */
-    DICTIONARY_COMPRESSED_ZSTANDARD("dcz", 0, 22, 6);
+    DICTIONARY_COMPRESSED_ZSTANDARD("dcz", 0, 22, 6, true);
+
+    private final String string;
+
+    /** The minimum compression level. */
+    private final @Getter int minimumLevel;
+
+    /** The maximum compression level. */
+    private final @Getter int maximumLevel;
+
+    /**
+     * The compression level to achieve roughly a 100 MB/s throughput according
+     * <a href="https://github.com/inikep/lzbench">this</a> benchmark.
+     */
+    private final @Getter int defaultLevel;
+
+    /**
+     * Whether a compression dictionary is required for {@link #compress(OutputStream, Integer, byte[])} and
+     * {@link #decompress(InputStream, byte[])}.
+     */
+    private final @Getter boolean dictionaryRequired;
 
     /**
      * @return {@link #compress(OutputStream, Integer)} with <code>level</code> set to <code>null</code>
@@ -182,8 +203,7 @@ public enum CompressionType {
      *
      * @param outputStream the {@link OutputStream} to compress
      * @param level        the compression level, or <code>null</code> for {@link #getDefaultLevel()}
-     * @param dictionary   the dictionary bytes for {@link #DICTIONARY_COMPRESSED_BROTLI} or
-     *                     {@link #DICTIONARY_COMPRESSED_ZSTANDARD}, or <code>null</code> for no dictionary
+     * @param dictionary   the dictionary bytes if {@link #isDictionaryRequired()}, <code>null</code> otherwise
      *
      * @return the compressing {@link OutputStream}
      *
@@ -191,6 +211,7 @@ public enum CompressionType {
      */
     public OutputStream compress(final OutputStream outputStream, final @Nullable Integer level,
             final byte @Nullable [] dictionary) throws IOException {
+        checkArgument(!dictionaryRequired || dictionary != null, "`dictionary` must be set for `%s`", name());
         final var levelOrDefault = level != null ? level : getDefaultLevel();
         return switch (this) {
             case GZIP -> new GZIPOutputStream(outputStream, DEFAULT_BUFFER_SIZE) {{ def.setLevel(levelOrDefault); }};
@@ -205,20 +226,18 @@ public enum CompressionType {
             case BROTLI -> new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault), DEFAULT_BUFFER_SIZE);
             case ZSTANDARD -> new ZstdOutputStream(outputStream, RecyclingBufferPool.INSTANCE, levelOrDefault);
             case DICTIONARY_COMPRESSED_BROTLI -> {
-                checkArgument(dictionary != null, "`dictionary` must be set for `%s`", name());
                 final var compress = new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault),
                         DEFAULT_BUFFER_SIZE);
                 compress.attachDictionary((PreparedDictionary) () -> {
-                    final var dictionaryDirect = allocateDirect(dictionary.length);
+                    final var dictionaryDirect = allocateDirect(requireNonNull(dictionary).length);
                     dictionaryDirect.put(dictionary);
                     return dictionaryDirect;
                 });
                 yield compress;
             }
             case DICTIONARY_COMPRESSED_ZSTANDARD -> {
-                checkArgument(dictionary != null, "`dictionary` must be set for `%s`", name());
                 final var compress = new ZstdOutputStream(outputStream, RecyclingBufferPool.INSTANCE, levelOrDefault);
-                compress.setDict(dictionary);
+                compress.setDict(requireNonNull(dictionary));
                 yield compress;
             }
         };
@@ -255,8 +274,7 @@ public enum CompressionType {
      * {@link CompressionType}.
      *
      * @param inputStream the {@link InputStream} to decompress
-     * @param dictionary  the dictionary bytes for {@link #DICTIONARY_COMPRESSED_BROTLI} or
-     *                    {@link #DICTIONARY_COMPRESSED_ZSTANDARD}, or <code>null</code> for no dictionary
+     * @param dictionary  the dictionary bytes if {@link #isDictionaryRequired()}, <code>null</code> otherwise
      *
      * @return the decompressing {@link InputStream}
      *
@@ -264,6 +282,7 @@ public enum CompressionType {
      */
     public InputStream decompress(final InputStream inputStream, final byte @Nullable [] dictionary)
             throws IOException {
+        checkArgument(!dictionaryRequired || dictionary != null, "`dictionary` must be set for `%s`", name());
         return switch (this) {
             case GZIP -> new GZIPInputStream(inputStream, DEFAULT_BUFFER_SIZE);
             case COMPRESS -> throw new UnsupportedOperationException();
@@ -277,35 +296,19 @@ public enum CompressionType {
             case BROTLI -> new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
             case ZSTANDARD -> new ZstdInputStream(inputStream, RecyclingBufferPool.INSTANCE);
             case DICTIONARY_COMPRESSED_BROTLI -> {
-                checkArgument(dictionary != null, "`dictionary` must be set for `%s`", name());
                 final var decompress = new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
-                final var dictionaryDirect = allocateDirect(dictionary.length);
+                final var dictionaryDirect = allocateDirect(requireNonNull(dictionary).length);
                 dictionaryDirect.put(dictionary);
                 decompress.attachDictionary(dictionaryDirect);
                 yield decompress;
             }
             case DICTIONARY_COMPRESSED_ZSTANDARD -> {
-                checkArgument(dictionary != null, "`dictionary` must be set for `%s`", name());
                 final var decompress = new ZstdInputStream(inputStream, RecyclingBufferPool.INSTANCE);
-                decompress.setDict(dictionary);
+                decompress.setDict(requireNonNull(dictionary));
                 yield decompress;
             }
         };
     }
-
-    private final String string;
-
-    /** The minimum compression level. */
-    private final @Getter int minimumLevel;
-
-    /** The maximum compression level. */
-    private final @Getter int maximumLevel;
-
-    /**
-     * The compression level to achieve roughly a 100 MB/s throughput according
-     * <a href="https://github.com/inikep/lzbench">this</a> benchmark.
-     */
-    private final @Getter int defaultLevel;
 
     @Override
     public String toString() {
