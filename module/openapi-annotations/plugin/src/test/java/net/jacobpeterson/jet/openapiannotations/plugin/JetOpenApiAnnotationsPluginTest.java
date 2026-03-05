@@ -34,57 +34,57 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public final class JetOpenApiAnnotationsPluginTest {
 
     @Test
-    public void successNone(@TempDir final Path tempDir) {
+    public void successNone(final @TempDir Path tempDir) {
         testSuccess(tempDir, "none");
     }
 
     @Test
-    public void successEmptyNoValidation(@TempDir final Path tempDir) {
+    public void successEmptyNoValidation(final @TempDir Path tempDir) {
         testSuccess(tempDir, "emptynovalidation");
     }
 
     @Test
-    public void successSimpleTypeMappings(@TempDir final Path tempDir) {
+    public void successSimpleTypeMappings(final @TempDir Path tempDir) {
         testSuccess(tempDir, "simpletypemappings");
     }
 
     @Test
-    public void successAll(@TempDir final Path tempDir) {
+    public void successAll(final @TempDir Path tempDir) {
         testSuccess(tempDir, "all");
     }
 
     @Test
-    public void failEmpty(@TempDir final Path tempDir) {
+    public void failEmpty(final @TempDir Path tempDir) {
         testFail(tempDir, "empty", "required property 'info' not found");
     }
 
     @Test
-    public void failCouldNotBeInlined(@TempDir final Path tempDir) {
+    public void failCouldNotBeInlined(final @TempDir Path tempDir) {
         testFail(tempDir, "couldnotbeinlined", "could not be inlined");
     }
 
     @Test
-    public void failArrayContainsMoreThanOneElement(@TempDir final Path tempDir) {
+    public void failArrayContainsMoreThanOneElement(final @TempDir Path tempDir) {
         testFail(tempDir, "arraycontainsmorethanoneelement", "the array contains more than one element");
     }
 
     @Test
-    public void failExactlyOneKey(@TempDir final Path tempDir) {
+    public void failExactlyOneKey(final @TempDir Path tempDir) {
         testFail(tempDir, "exactlyonekey", "Exactly one key must be set");
     }
 
     @Test
-    public void failDuplicateKey(@TempDir final Path tempDir) {
+    public void failDuplicateKey(final @TempDir Path tempDir) {
         testFail(tempDir, "duplicatekey", "duplicate key");
     }
 
     @Test
-    public void failInAnnotationGroup(@TempDir final Path tempDir) {
+    public void failInAnnotationGroup(final @TempDir Path tempDir) {
         testFail(tempDir, "inannotationgroup", "in annotation group \"TEST\"");
     }
 
     @Test
-    public void failDuplicateComponentName(@TempDir final Path tempDir) {
+    public void failDuplicateComponentName(final @TempDir Path tempDir) {
         testFail(tempDir, "duplicatecomponentname", "different schemas share the same component name of \"TestA\"");
     }
 

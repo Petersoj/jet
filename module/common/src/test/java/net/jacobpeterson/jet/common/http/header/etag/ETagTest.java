@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public final class ETagTest {
 
     @Test
-    public void computeWeak(@TempDir final File tempDir) {
+    public void computeWeak(final @TempDir File tempDir) {
         final var etag = ETag.computeWeak(tempDir);
         assertTrue(etag.isWeak());
         assertFalse(etag.getValue().isEmpty());
