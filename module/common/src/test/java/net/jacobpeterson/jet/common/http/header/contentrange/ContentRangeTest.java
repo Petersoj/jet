@@ -5,8 +5,10 @@ import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @NullMarked
 public final class ContentRangeTest {
@@ -177,6 +179,30 @@ public final class ContentRangeTest {
                     .size(1L)
                     .build());
         }
+    }
+
+    @Test
+    public void isRedundant() {
+        assertFalse(ContentRange.builder().build().isRedundant());
+        assertFalse(ContentRange.builder()
+                .start(0L)
+                .end(1L)
+                .build().isRedundant());
+        assertTrue(ContentRange.builder()
+                .start(0L)
+                .end(1L)
+                .size(2L)
+                .build().isRedundant());
+        assertTrue(ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .size(0L)
+                .build().isRedundant());
+        assertTrue(ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .size(1L)
+                .build().isRedundant());
     }
 
     @Test

@@ -81,7 +81,8 @@ public final class ContentRange {
      *              {@link ContentRange#getEnd()} of <code>size - 1</code>
      * @param size  the {@link ContentRange#getSize()}
      *
-     * @return the {@link ContentRange}
+     * @return the {@link ContentRange} ({@link ContentRange#getStart()} and {@link ContentRange#getEnd()} are never
+     * <code>null</code>)
      */
     public static ContentRange forRange(final @Nullable Range range, final long size) {
         long start = 0;
@@ -230,6 +231,14 @@ public final class ContentRange {
         this.start = start;
         this.end = end;
         this.size = size;
+    }
+
+    /**
+     * @return <code>true</code> if {@link #getStart()} equals <code>0</code> and {@link #getEnd()} equals
+     * {@link #getSize()} minus one.
+     */
+    public boolean isRedundant() {
+        return start != null && end != null && size != null && start == 0 && end == max(0, size - 1);
     }
 
     /**
