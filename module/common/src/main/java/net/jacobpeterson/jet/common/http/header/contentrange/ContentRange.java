@@ -274,7 +274,11 @@ public final class ContentRange {
                     }
                 }, end - start + 1, OnBoundCount.CLOSE);
             } catch (final Throwable throwable) {
-                randomAccessFile.close();
+                try {
+                    randomAccessFile.close();
+                } catch (final Throwable closeThrowable) {
+                    throwable.addSuppressed(closeThrowable);
+                }
                 throw throwable;
             }
         } else {
