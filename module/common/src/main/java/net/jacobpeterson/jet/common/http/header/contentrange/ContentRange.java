@@ -252,9 +252,30 @@ public final class ContentRange {
     }
 
     /**
-     * Creates a {@link InputStream} to read the contents of the given {@link File} at {@link #getStart()}
-     * through {@link #getEnd()}, or the entire {@link File} contents if {@link #isRedundant()} or if
-     * {@link #getStart()} or {@link #getEnd()} are <code>null</code>.
+     * If not {@link #isRedundant()} and {@link #getStart()} and {@link #getEnd()} are non-<code>null</code>, then
+     * {@link InputStream#skipNBytes(long)} with {@link #getStart()} is called and a {@link BoundedInputStream} is
+     * returned, otherwise the given {@link InputStream} is returned without modification.
+     *
+     * @param inputStream the {@link InputStream}
+     *
+     * @return the {@link InputStream}
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public InputStream forInputStream(final InputStream inputStream) throws IOException {
+        if (!isRedundant() && start != null && end != null) {
+            inputStream.skipNBytes(start);
+            return new BoundedInputStream(inputStream, end - start + 1, OnBoundCount.CLOSE);
+        } else {
+            return inputStream;
+        }
+    }
+
+    /**
+     * Creates a {@link InputStream} to read the contents of the given {@link File}.
+     * <p>
+     * If not {@link #isRedundant()} and {@link #getStart()} and {@link #getEnd()} are non-<code>null</code>, then
+     * {@link RandomAccessFile} and {@link BoundedInputStream} are used, otherwise {@link FileInputStream} is used.
      *
      * @param file the {@link File}
      *

@@ -5,6 +5,7 @@ import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -213,6 +214,51 @@ public final class ContentRangeTest {
     }
 
     @Test
+    public void forInputStream() throws Exception {
+        try (final var inputStream = ContentRange.builder().build()
+                .forInputStream(new ByteArrayInputStream(new byte[]{}))) {
+            assertArrayEquals(new byte[]{}, inputStream.readAllBytes());
+        }
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .build().forInputStream(new ByteArrayInputStream(new byte[]{}))) {
+            assertArrayEquals(new byte[]{}, inputStream.readAllBytes());
+        }
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .build().forInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2}))) {
+            assertArrayEquals(new byte[]{0}, inputStream.readAllBytes());
+        }
+        try (final var inputStream = ContentRange.builder()
+                .start(1L)
+                .end(1L)
+                .build().forInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2}))) {
+            assertArrayEquals(new byte[]{1}, inputStream.readAllBytes());
+        }
+        try (final var inputStream = ContentRange.builder()
+                .start(1L)
+                .end(2L)
+                .build().forInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2}))) {
+            assertArrayEquals(new byte[]{1, 2}, inputStream.readAllBytes());
+        }
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(2L)
+                .build().forInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2}))) {
+            assertArrayEquals(new byte[]{0, 1, 2}, inputStream.readAllBytes());
+        }
+        try (final var inputStream = ContentRange.builder()
+                .start(0L)
+                .end(2L)
+                .size(3L)
+                .build().forInputStream(new ByteArrayInputStream(new byte[]{0, 1, 2}))) {
+            assertArrayEquals(new byte[]{0, 1, 2}, inputStream.readAllBytes());
+        }
+    }
+
+    @Test
     public void newFileInputStream(final @TempDir File tempDir) throws Exception {
         final var emptyFile = new File(tempDir, "empty");
         writeString(emptyFile.toPath(), "");
@@ -245,12 +291,6 @@ public final class ContentRangeTest {
                 .end(2L)
                 .build().newFileInputStream(abcFile)) {
             assertArrayEquals("bc".getBytes(UTF_8), inputStream.readAllBytes());
-        }
-        try (final var inputStream = ContentRange.builder()
-                .start(0L)
-                .end(0L)
-                .build().newFileInputStream(abcFile)) {
-            assertArrayEquals("a".getBytes(UTF_8), inputStream.readAllBytes());
         }
         try (final var inputStream = ContentRange.builder()
                 .start(0L)
