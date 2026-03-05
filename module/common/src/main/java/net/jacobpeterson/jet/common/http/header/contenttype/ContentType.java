@@ -671,6 +671,13 @@ public final class ContentType {
     }
 
     /**
+     * Checks if this {@link #withoutParameters()} is in {@link #COMPRESSED_CONTENT_TYPES}.
+     */
+    public boolean isCompressed() {
+        return COMPRESSED_CONTENT_TYPES.contains(withoutParameters());
+    }
+
+    /**
      * Gets the dot-less file extensions for this {@link ContentType} from {@link #FILE_EXTENSIONS_OF_CONTENT_TYPES}.
      *
      * @return the {@link String} {@link ImmutableSet}

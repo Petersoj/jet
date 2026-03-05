@@ -163,6 +163,12 @@ public final class ContentTypeTest {
     }
 
     @Test
+    public void isCompressed() {
+        assertTrue(ContentType.IMAGE_JPEG.isCompressed());
+        assertFalse(ContentType.IMAGE_SVG.isCompressed());
+    }
+
+    @Test
     public void getFileExtensions() {
         assertTrue(ContentType.APPLICATION_JSON.getFileExtensions().contains("json"));
         assertTrue(ContentType.create("a", "b").getFileExtensions().isEmpty());

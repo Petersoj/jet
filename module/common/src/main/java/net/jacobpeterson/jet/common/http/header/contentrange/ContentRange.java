@@ -253,8 +253,8 @@ public final class ContentRange {
 
     /**
      * Creates a {@link InputStream} to read the contents of the given {@link File} at {@link #getStart()}
-     * through {@link #getEnd()}, or the entire {@link File} contents if {@link #isRedundant()} or {@link #getStart()}
-     * and {@link #getEnd()} are <code>null</code>.
+     * through {@link #getEnd()}, or the entire {@link File} contents if {@link #isRedundant()} or if
+     * {@link #getStart()} or {@link #getEnd()} are <code>null</code>.
      *
      * @param file the {@link File}
      *
