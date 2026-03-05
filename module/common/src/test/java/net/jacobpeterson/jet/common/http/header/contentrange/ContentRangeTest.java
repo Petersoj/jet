@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.common.http.header.contentrange;
 
+import net.jacobpeterson.jet.common.http.header.range.Range;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,68 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @NullMarked
 public final class ContentRangeTest {
+
+    @Test
+    public void forRange() {
+        {
+            final var contentRange = ContentRange.forRange(Range.builder().build(), 0);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(0, contentRange.getStart());
+            assertEquals(0, contentRange.getEnd());
+            assertEquals(0, contentRange.getSize());
+        }
+        {
+            final var contentRange = ContentRange.forRange(Range.builder()
+                    .start(0L)
+                    .build(), 0);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(0, contentRange.getStart());
+            assertEquals(0, contentRange.getEnd());
+            assertEquals(0, contentRange.getSize());
+        }
+        {
+            final var contentRange = ContentRange.forRange(Range.builder().build(), 10);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(0, contentRange.getStart());
+            assertEquals(9, contentRange.getEnd());
+            assertEquals(10, contentRange.getSize());
+        }
+        {
+            final var contentRange = ContentRange.forRange(Range.builder()
+                    .end(2L)
+                    .build(), 10);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(8, contentRange.getStart());
+            assertEquals(9, contentRange.getEnd());
+            assertEquals(10, contentRange.getSize());
+        }
+        {
+            final var contentRange = ContentRange.forRange(Range.builder()
+                    .start(1L)
+                    .end(2L)
+                    .build(), 10);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(1, contentRange.getStart());
+            assertEquals(2, contentRange.getEnd());
+            assertEquals(10, contentRange.getSize());
+        }
+        {
+            final var contentRange = ContentRange.forRange(Range.builder()
+                    .start(5L)
+                    .build(), 10);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(5, contentRange.getStart());
+            assertEquals(9, contentRange.getEnd());
+            assertEquals(10, contentRange.getSize());
+        }
+        {
+            final var contentRange = ContentRange.forRange(null, 10);
+            assertEquals("bytes", contentRange.getUnit());
+            assertEquals(0, contentRange.getStart());
+            assertEquals(9, contentRange.getEnd());
+            assertEquals(10, contentRange.getSize());
+        }
+    }
 
     @Test
     public void parse() {

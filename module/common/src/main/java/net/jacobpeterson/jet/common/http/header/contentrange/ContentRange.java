@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
+import static java.lang.Math.max;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
@@ -72,6 +73,40 @@ public final class ContentRange {
             Splitter.on(RANGE_SIZE_DELIMITER).limit(2).trimResults();
     private static final Splitter PARSE_RANGE_START_END_SPLITTER =
             Splitter.on(RANGE_START_END_DELIMITER).limit(2).trimResults();
+
+    /**
+     * Gets the {@link ContentRange} for the given {@link Range} and known content <code>size</code>.
+     *
+     * @param range the {@link Range}, or <code>null</code> for {@link ContentRange#getStart()} of <code>0</code> and
+     *              {@link ContentRange#getEnd()} of <code>size - 1</code>
+     * @param size  the {@link ContentRange#getSize()}
+     *
+     * @return the {@link ContentRange}
+     */
+    public static ContentRange forRange(final @Nullable Range range, final long size) {
+        long start = 0;
+        var end = max(0, size - 1);
+        if (range != null) {
+            final var rangeStart = range.getStart();
+            final var rangeEnd = range.getEnd();
+            if (rangeStart != null && rangeEnd != null) {
+                start = rangeStart;
+                end = rangeEnd;
+            } else if (rangeStart != null) {
+                start = rangeStart;
+            } else if (rangeEnd != null) {
+                start = size - rangeEnd;
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+        return builder()
+                .unit(range != null ? range.getUnit() : null)
+                .start(start)
+                .end(end)
+                .size(size)
+                .build();
+    }
 
     /**
      * Parses the given {@link Header#CONTENT_RANGE} value {@link String} into a {@link ContentRange}.

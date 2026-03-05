@@ -227,7 +227,7 @@ public final class Range {
             checkArgument(start <= end, "`start` must be less than or equal to `end`");
         }
         this.unit = unit == null ? BYTES_UNIT : unit;
-        this.start = start == null && end == null ? (Long) 0L : start;
+        this.start = start == null && end == null ? Long.valueOf(0) : start;
         this.end = end;
     }
 
