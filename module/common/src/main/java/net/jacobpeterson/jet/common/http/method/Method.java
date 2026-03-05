@@ -143,6 +143,17 @@ public enum Method {
     }
 
     /**
+     * @return <code>true</code> if this {@link Method} is for metadata and should not contain a response body,
+     * <code>false</code> otherwise
+     */
+    public boolean hasNoResponseBody() {
+        return switch (this) {
+            case HEAD, OPTIONS, TRACE -> true;
+            case GET, POST, PUT, DELETE, CONNECT, PATCH -> false;
+        };
+    }
+
+    /**
      * {@link ToString} contains the {@link #toString()} constants for all {@link Method} enums so they can be used
      * within annotations.
      */

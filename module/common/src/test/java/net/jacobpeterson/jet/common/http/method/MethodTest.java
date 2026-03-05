@@ -30,6 +30,12 @@ public final class MethodTest {
     }
 
     @Test
+    public void hasNoResponseBody() {
+        assertTrue(Method.HEAD.hasNoResponseBody());
+        assertFalse(Method.GET.hasNoResponseBody());
+    }
+
+    @Test
     public void forString() {
         assertEquals(Method.GET, Method.forString("GET"));
         assertEquals(Method.GET, Method.forString("get"));
