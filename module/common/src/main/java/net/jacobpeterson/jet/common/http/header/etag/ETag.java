@@ -1,5 +1,7 @@
 package net.jacobpeterson.jet.common.http.header.etag;
 
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingInputStream;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.EqualsAndHashCode;
@@ -10,10 +12,14 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.hash.Hashing.sha256;
+import static com.google.common.io.ByteStreams.nullOutputStream;
 import static java.nio.ByteBuffer.allocate;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
@@ -47,6 +53,37 @@ public final class ETag {
     public static final String WEAK_PREFIX = "W/";
 
     /**
+     * @return {@link #computeStrong(InputStream)} with {@link FileInputStream#FileInputStream(File)}
+     */
+    public static ETag computeStrong(final File file) {
+        try (final var fileInputStream = new FileInputStream(file)) {
+            return computeStrong(fileInputStream);
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
+        }
+    }
+
+    /**
+     * Computes a strong {@link ETag} for the given entity content using {@link HashingInputStream} with
+     * {@link Hashing#sha256()}.
+     *
+     * @param content the content {@link InputStream}
+     *
+     * @return the strong {@link ETag}
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public static ETag computeStrong(final InputStream content) {
+        try (final var hashingInputStream = new HashingInputStream(sha256(), content)) {
+            hashingInputStream.transferTo(nullOutputStream());
+            return builder()
+                    .value(hashingInputStream.hash().toString())
+                    .build();
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
+        }
+    }
+
+    /**
      * @return {@link #computeWeak(String, long, long)} with {@link File#getName()}, {@link File#lastModified()}, and
      * {@link File#length()}
      */
@@ -55,18 +92,18 @@ public final class ETag {
     }
 
     /**
-     * Computes a weak {@link ETag} for the given file attributes.
+     * Computes a weak {@link ETag} for the given entity attributes.
      *
      * @param name         the name
      * @param lastModified the last modified epoch
      * @param size         the size
      *
-     * @return the {@link ETag}
+     * @return the weak {@link ETag}
      */
     public static ETag computeWeak(final String name, final long lastModified, final long size) {
         // Based on the same algorithm as `org.eclipse.jetty.http.EtagUtils.computeWeakEtag()`.
         final var hashBytes = allocate(Integer.BYTES + Long.BYTES + Long.BYTES);
-        final var nameHashcode = Objects.hashCode(name);
+        final var nameHashcode = name.hashCode();
         hashBytes.putInt(nameHashcode);
         hashBytes.putLong(lastModified ^ nameHashcode);
         hashBytes.putLong(size ^ nameHashcode);
