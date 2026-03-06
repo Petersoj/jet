@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.exception;
+package net.jacobpeterson.jet.server.handle.response.exception;
 
 import lombok.Getter;
 import net.jacobpeterson.jet.common.http.status.Status;
