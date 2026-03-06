@@ -259,16 +259,16 @@ public final class ContentRangeTest {
     }
 
     @Test
-    public void newFileInputStream(final @TempDir File tempDir) throws Exception {
+    public void forFile(final @TempDir File tempDir) throws Exception {
         final var emptyFile = new File(tempDir, "empty");
         writeString(emptyFile.toPath(), "");
-        try (final var inputStream = ContentRange.builder().build().newFileInputStream(emptyFile)) {
+        try (final var inputStream = ContentRange.builder().build().forFile(emptyFile)) {
             assertArrayEquals(new byte[]{}, inputStream.readAllBytes());
         }
         try (final var inputStream = ContentRange.builder()
                 .start(0L)
                 .end(0L)
-                .build().newFileInputStream(emptyFile)) {
+                .build().forFile(emptyFile)) {
             assertArrayEquals(new byte[]{}, inputStream.readAllBytes());
         }
 
@@ -277,32 +277,32 @@ public final class ContentRangeTest {
         try (final var inputStream = ContentRange.builder()
                 .start(0L)
                 .end(0L)
-                .build().newFileInputStream(abcFile)) {
+                .build().forFile(abcFile)) {
             assertArrayEquals("a".getBytes(UTF_8), inputStream.readAllBytes());
         }
         try (final var inputStream = ContentRange.builder()
                 .start(1L)
                 .end(1L)
-                .build().newFileInputStream(abcFile)) {
+                .build().forFile(abcFile)) {
             assertArrayEquals("b".getBytes(UTF_8), inputStream.readAllBytes());
         }
         try (final var inputStream = ContentRange.builder()
                 .start(1L)
                 .end(2L)
-                .build().newFileInputStream(abcFile)) {
+                .build().forFile(abcFile)) {
             assertArrayEquals("bc".getBytes(UTF_8), inputStream.readAllBytes());
         }
         try (final var inputStream = ContentRange.builder()
                 .start(0L)
                 .end(2L)
-                .build().newFileInputStream(abcFile)) {
+                .build().forFile(abcFile)) {
             assertArrayEquals("abc".getBytes(UTF_8), inputStream.readAllBytes());
         }
         try (final var inputStream = ContentRange.builder()
                 .start(0L)
                 .end(2L)
                 .size(3L)
-                .build().newFileInputStream(abcFile)) {
+                .build().forFile(abcFile)) {
             assertArrayEquals("abc".getBytes(UTF_8), inputStream.readAllBytes());
         }
     }

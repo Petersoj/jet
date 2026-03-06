@@ -15,15 +15,12 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
 import static java.lang.Math.max;
-import static java.nio.channels.Channels.newInputStream;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
@@ -272,39 +269,10 @@ public final class ContentRange {
     }
 
     /**
-     * Creates a {@link InputStream} to read the contents of the given {@link File}.
-     * <p>
-     * If not {@link #isRedundant()} and {@link #getStart()} and {@link #getEnd()} are non-<code>null</code>, then
-     * {@link RandomAccessFile} and {@link BoundedInputStream} are used, otherwise {@link FileInputStream} is used.
-     *
-     * @param file the {@link File}
-     *
-     * @return the {@link InputStream}
-     *
-     * @throws IOException thrown for {@link IOException}s
+     * @return {@link #forInputStream(InputStream)} with {@link FileInputStream#FileInputStream(File)}
      */
-    public InputStream newFileInputStream(final File file) throws IOException {
-        if (!isRedundant() && start != null && end != null) {
-            final var randomAccessFile = new RandomAccessFile(file, "r");
-            try {
-                randomAccessFile.seek(start);
-                return new BoundedInputStream(new FilterInputStream(newInputStream(randomAccessFile.getChannel())) {
-                    @Override
-                    public void close() throws IOException {
-                        randomAccessFile.close();
-                    }
-                }, end - start + 1, OnBoundCount.CLOSE);
-            } catch (final Throwable throwable) {
-                try {
-                    randomAccessFile.close();
-                } catch (final Throwable closeThrowable) {
-                    throwable.addSuppressed(closeThrowable);
-                }
-                throw throwable;
-            }
-        } else {
-            return new FileInputStream(file);
-        }
+    public InputStream forFile(final File file) throws IOException {
+        return forInputStream(new FileInputStream(file));
     }
 
     /**
