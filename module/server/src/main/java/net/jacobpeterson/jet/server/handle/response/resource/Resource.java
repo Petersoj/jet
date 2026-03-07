@@ -55,7 +55,8 @@ public final class Resource {
                 .build();
     }
 
-    @Immutable @Value
+    @Immutable
+    @Value
     private static class OfClasspathCacheKey {
 
         Class<?> clazz;
@@ -153,10 +154,11 @@ public final class Resource {
                 }).build();
     }
 
-    @Immutable @Value
+    @Immutable
+    @Value
     private static class OfFileCacheKey {
 
-        File file;
+        String filePath;
         boolean exposeFilename;
     }
 
@@ -171,9 +173,10 @@ public final class Resource {
      * @param file the {@link File}
      */
     public static void ofFileImmutableCacheInvalidate(final File file) {
-        // Invalidate all cache entry variants for `file`
-        OF_FILE_CACHE.invalidate(new OfFileCacheKey(file, true));
-        OF_FILE_CACHE.invalidate(new OfFileCacheKey(file, false));
+        final var filePath = file.getPath();
+        // Invalidate all cache entry variants.
+        OF_FILE_CACHE.invalidate(new OfFileCacheKey(filePath, true));
+        OF_FILE_CACHE.invalidate(new OfFileCacheKey(filePath, false));
     }
 
     /**
@@ -189,11 +192,11 @@ public final class Resource {
      * {@link ContentRange#forFile(File)}.
      *
      * @param file           the {@link File}
-     * @param immutable      <code>true</code> if the given {@link File} is immutable (the name, metadata, and content
-     *                       will never change while the JVM is running) and the computed {@link Resource} should be
-     *                       internally cached and use {@link ETag#computeStrong(File)}, <code>false</code> otherwise.
-     *                       Call {@link #ofFileImmutableCacheInvalidate(File)} when the immutable {@link File} is
-     *                       deleted.
+     * @param immutable      <code>true</code> if the given {@link File} is immutable (the path, name, metadata, and
+     *                       content will never change while the JVM is running) and the computed {@link Resource}
+     *                       should be internally cached and use {@link ETag#computeStrong(File)}, <code>false</code>
+     *                       otherwise. Call {@link #ofFileImmutableCacheInvalidate(File)} when the immutable
+     *                       {@link File} is deleted.
      * @param exposeFilename <code>true</code> to set {@link ContentDisposition#getFilename()} to
      *                       {@link File#getName()}, <code>false</code> to not set
      *                       {@link ContentDisposition#getFilename()}
@@ -205,12 +208,12 @@ public final class Resource {
             final @Nullable Range range) throws StatusException {
         if (!file.exists()) {
             if (immutable) {
-                OF_FILE_CACHE.invalidate(new OfFileCacheKey(file, exposeFilename));
+                OF_FILE_CACHE.invalidate(new OfFileCacheKey(file.getPath(), exposeFilename));
             }
             throw new StatusException(NOT_FOUND_404, "Nonexistent file: " + file);
         }
         final var resource = !immutable ? ofFileNoRange(file, true, exposeFilename) :
-                OF_FILE_CACHE.get(new OfFileCacheKey(file, exposeFilename), _ ->
+                OF_FILE_CACHE.get(new OfFileCacheKey(file.getPath(), exposeFilename), _ ->
                         ofFileNoRange(file, false, exposeFilename));
         if (range == null) {
             return resource;
