@@ -1,0 +1,520 @@
+package net.jacobpeterson.jet.server.handle.response;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
+import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
+import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
+import net.jacobpeterson.jet.common.http.header.contentrange.ContentRange;
+import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSecurityPolicy;
+import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
+import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
+import net.jacobpeterson.jet.common.http.header.etag.ETag;
+import net.jacobpeterson.jet.common.http.header.stricttransportsecurity.StrictTransportSecurity;
+import net.jacobpeterson.jet.common.http.status.Status;
+import net.jacobpeterson.jet.common.http.url.Url;
+import net.jacobpeterson.jet.server.handle.Handle;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.ZoneOffset.UTC;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static java.util.Objects.requireNonNull;
+import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_DISPOSITION;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_ENCODING;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_LENGTH;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_RANGE;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_SECURITY_POLICY;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
+import static net.jacobpeterson.jet.common.http.header.Header.ETAG;
+import static net.jacobpeterson.jet.common.http.header.Header.LAST_MODIFIED;
+import static net.jacobpeterson.jet.common.http.header.Header.LOCATION;
+import static net.jacobpeterson.jet.common.http.header.Header.SET_COOKIE;
+import static net.jacobpeterson.jet.common.http.header.Header.STRICT_TRANSPORT_SECURITY;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.APPLICATION_JSON_UTF_8;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_HTML_UTF_8;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_PLAIN_UTF_8;
+import static net.jacobpeterson.jet.common.http.status.Status.FOUND_302;
+import static net.jacobpeterson.jet.common.http.status.Status.MOVED_PERMANENTLY_301;
+import static net.jacobpeterson.jet.common.http.status.Status.OK_200;
+
+/**
+ * {@link Response} is a class that represents a web server request.
+ */
+@NullMarked
+@RequiredArgsConstructor
+public final class Response {
+
+    private final Handle handle;
+
+    /**
+     * The {@link Status} code.
+     * <p>
+     * Defaults to {@link Status#OK_200} {@link Status#getCode()}.
+     */
+    private @Getter Integer statusCode = OK_200.getCode();
+
+    /**
+     * The {@link Status}.
+     * <p>
+     * Defaults to {@link Status#OK_200}.
+     */
+    private @Getter @Nullable Status status = OK_200;
+
+    /** The headers {@link String} {@link ListMultimap}. */
+    private final @Getter ListMultimap<String, String> headers = MultimapBuilder.ListMultimapBuilder
+            .hashKeys()
+            .arrayListValues(1)
+            .build();
+
+    private ContentSecurityPolicy.@Nullable Builder contentSecurityPolicyBuilder;
+
+    /** The body {@link InputStream}. */
+    private @Getter @Nullable InputStream bodyInputStream;
+
+    /**
+     * Sets {@link #getStatusCode()} and {@link #getStatus()} with {@link Status#forCode(int)}.
+     */
+    public void setStatusCode(final int statusCode) {
+        this.statusCode = statusCode;
+        status = Status.forCode(statusCode);
+    }
+
+    /**
+     * Sets {@link #getStatus()} and {@link #getStatusCode()} with {@link Status#getCode()}.
+     */
+    public void setStatus(final Status status) {
+        this.status = status;
+        statusCode = status.getCode();
+    }
+
+    /**
+     * @return {@link #getHeader(String)} with {@link Header#toString()}
+     */
+    public @Nullable String getHeader(final Header header) {
+        return getHeader(header.toString());
+    }
+
+    /**
+     * @return {@link #getHeaders()} {@link ImmutableListMultimap#get(Object)} {@link ImmutableList#getFirst()} or
+     * <code>null</code>
+     */
+    public @Nullable String getHeader(final String header) {
+        final var headers = this.headers.get(header);
+        return headers.isEmpty() ? null : headers.getFirst();
+    }
+
+    /**
+     * Calls {@link #setHeader(String, String)} with {@link Header#toString()}.
+     */
+    public void setHeader(final Header key, final String value) {
+        setHeader(key.toString(), value);
+    }
+
+    /**
+     * Calls {@link #getHeaders()} {@link ListMultimap#removeAll(Object)} for the given <code>key</code>, then
+     * calls {@link #getHeaders()} {@link ListMultimap#put(Object, Object)}.
+     */
+    public void setHeader(final String key, final String value) {
+        headers.removeAll(key);
+        headers.put(key, value);
+    }
+
+    /**
+     * Calls {@link #addHeader(String, String)} with {@link Header#toString()}.
+     */
+    public void addHeader(final Header key, final String value) {
+        addHeader(key.toString(), value);
+    }
+
+    /**
+     * Calls {@link #getHeaders()} {@link ListMultimap#put(Object, Object)}.
+     */
+    public void addHeader(final String key, final String value) {
+        headers.put(key, value);
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_LENGTH}.
+     */
+    public void setContentLength(final Long contentLength) {
+        setHeader(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#LAST_MODIFIED}
+     * {@link DateTimeFormatter#RFC_1123_DATE_TIME} {@link DateTimeFormatter#format(TemporalAccessor)}
+     * {@link ZonedDateTime#withZoneSameInstant(ZoneId)} {@link ZoneOffset#UTC}.
+     */
+    public void setLastModified(final ZonedDateTime lastModified) {
+        setHeader(LAST_MODIFIED, RFC_1123_DATE_TIME.format(lastModified.withZoneSameInstant(UTC)));
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#LAST_MODIFIED}
+     * {@link DateTimeFormatter#RFC_1123_DATE_TIME} {@link DateTimeFormatter#format(TemporalAccessor)}.
+     */
+    public void setLastModified(final Instant lastModified) {
+        setHeader(LAST_MODIFIED, RFC_1123_DATE_TIME.format(lastModified));
+    }
+
+    /**
+     * Calls {@link #setContentType(String)} with {@link ContentType#toString()}.
+     */
+    public void setContentType(final ContentType contentType) {
+        setContentType(contentType.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_TYPE}.
+     */
+    public void setContentType(final String contentType) {
+        setHeader(CONTENT_TYPE, contentType);
+    }
+
+    /**
+     * Calls {@link #setContentEncoding(String)} with {@link ContentEncoding#toString()}.
+     */
+    public void setContentEncoding(final ContentEncoding contentEncoding) {
+        setContentEncoding(contentEncoding.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_ENCODING}.
+     */
+    public void setContentEncoding(final String contentEncoding) {
+        setHeader(CONTENT_ENCODING, contentEncoding);
+    }
+
+    /**
+     * Calls {@link #setContentRange(String)} with {@link ContentRange#toString()}.
+     */
+    public void setContentRange(final ContentRange contentRange) {
+        setContentRange(contentRange.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_RANGE}.
+     */
+    public void setContentRange(final String contentRange) {
+        setHeader(CONTENT_RANGE, contentRange);
+    }
+
+    /**
+     * Calls {@link #setContentDisposition(String)} with {@link ContentDisposition#toString()}.
+     */
+    public void setContentDisposition(final ContentDisposition contentDisposition) {
+        setContentDisposition(contentDisposition.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_DISPOSITION}.
+     */
+    public void setContentDisposition(final String contentDisposition) {
+        setHeader(CONTENT_DISPOSITION, contentDisposition);
+    }
+
+    /**
+     * Calls {@link #setETag(String)} with {@link ETag#toString()}.
+     */
+    public void setETag(final ETag eTag) {
+        setETag(eTag.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#ETAG}.
+     */
+    public void setETag(final String eTag) {
+        setHeader(ETAG, eTag);
+    }
+
+    /**
+     * Calls {@link #setCacheControl(String)} with {@link ResponseCacheControl#toString()}.
+     */
+    public void setCacheControl(final ResponseCacheControl responseCacheControl) {
+        setCacheControl(responseCacheControl.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_RANGE}.
+     */
+    public void setCacheControl(final String responseCacheControl) {
+        setHeader(CACHE_CONTROL, responseCacheControl);
+    }
+
+    /**
+     * Calls {@link #setStrictTransportSecurity(String)} with {@link StrictTransportSecurity#toString()}.
+     */
+    public void setStrictTransportSecurity(final StrictTransportSecurity strictTransportSecurity) {
+        setStrictTransportSecurity(strictTransportSecurity.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#STRICT_TRANSPORT_SECURITY}.
+     */
+    public void setStrictTransportSecurity(final String strictTransportSecurity) {
+        setHeader(STRICT_TRANSPORT_SECURITY, strictTransportSecurity);
+    }
+
+    /**
+     * Calls {@link #setContentSecurityPolicy(String)} with {@link ContentSecurityPolicy#toString()}.
+     */
+    public void setContentSecurityPolicy(final ContentSecurityPolicy contentSecurityPolicy) {
+        setContentSecurityPolicy(contentSecurityPolicy.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_SECURITY_POLICY}.
+     */
+    public void setContentSecurityPolicy(final String contentSecurityPolicy) {
+        setHeader(CONTENT_SECURITY_POLICY, contentSecurityPolicy);
+    }
+
+    /**
+     * @return internally-cached {@link ContentSecurityPolicy.Builder}
+     */
+    public ContentSecurityPolicy.Builder getContentSecurityPolicyBuilder() {
+        if (contentSecurityPolicyBuilder == null) {
+            contentSecurityPolicyBuilder = ContentSecurityPolicy.builder();
+        }
+        return contentSecurityPolicyBuilder;
+    }
+
+    /**
+     * Calls {@link #addHeader(Header, String)} {@link Header#SET_COOKIE} {@link Cookie#toResponseString()}.
+     */
+    public void addCookie(final Cookie cookie) {
+        addHeader(SET_COOKIE, cookie.toResponseString());
+    }
+
+    /**
+     * Calls {@link #redirectTemporarily(String)} with {@link Url#toString()}.
+     */
+    public void redirectTemporarily(final Url location) {
+        redirectTemporarily(location.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(String, String)} with {@link Header#LOCATION} and calls {@link #setStatus(Status)} with
+     * {@link Status#FOUND_302}.
+     */
+    public void redirectTemporarily(final String location) {
+        setStatus(FOUND_302);
+        setHeader(LOCATION, location);
+    }
+
+    /**
+     * Calls {@link #redirectPermanently(String)} with {@link Url#toString()}.
+     */
+    public void redirectPermanently(final Url location) {
+        redirectPermanently(location.toString());
+    }
+
+    /**
+     * Calls {@link #setHeader(String, String)} with {@link Header#LOCATION} and calls {@link #setStatus(Status)} with
+     * {@link Status#MOVED_PERMANENTLY_301}.
+     */
+    public void redirectPermanently(final String location) {
+        setStatus(MOVED_PERMANENTLY_301);
+        setHeader(LOCATION, location);
+    }
+
+    /**
+     * Sets {@link #getBodyInputStream()}.
+     * <p>
+     * {@link InputStream#close()} is guaranteed to be called.
+     *
+     * @param bodyInputStream the body {@link InputStream}
+     */
+    public void setBodyInputStream(final InputStream bodyInputStream) {
+        if (this.bodyInputStream != null) {
+            try {
+                this.bodyInputStream.close();
+            } catch (final IOException ioException) {
+                throw new RuntimeException(ioException);
+            }
+        }
+        this.bodyInputStream = bodyInputStream;
+    }
+
+    /**
+     * Calls {@link #setContentLength(Long)} and {@link #setBodyInputStream(InputStream)} with
+     * {@link ByteArrayInputStream#ByteArrayInputStream(byte[])}.
+     */
+    public void setBodyBytes(final byte[] bytes) {
+        setBodyInputStream(new ByteArrayInputStream(bytes));
+        setContentLength((long) bytes.length);
+    }
+
+    /**
+     * Calls {@link #setBodyString(String, Charset)} with {@link StandardCharsets#UTF_8} and calls
+     * {@link #setContentLength(Long)}.
+     */
+    public void setBodyString(final String string) {
+        setBodyString(string, UTF_8);
+    }
+
+    /**
+     * Calls {@link #setBodyBytes(byte[])} with {@link String#getBytes(Charset)}.
+     */
+    public void setBodyString(final String string, final Charset charset) {
+        setBodyBytes(string.getBytes(charset));
+    }
+
+    /**
+     * Calls {@link #responseInputStream(Status, ContentType, InputStream)} with {@link Status#OK_200}.
+     */
+    public void responseInputStream(final ContentType contentType, final InputStream inputStream) {
+        responseInputStream(OK_200, contentType, inputStream);
+    }
+
+    /**
+     * Calls {@link #responseInputStream(int, ContentType, InputStream)} with {@link Status#getCode()}.
+     */
+    public void responseInputStream(final Status status, final ContentType contentType, final InputStream inputStream) {
+        responseInputStream(status.getCode(), contentType, inputStream);
+    }
+
+    /**
+     * Shortcut for {@link #setStatusCode(int)}, {@link #setContentType(ContentType)}, and
+     * {@link #setBodyInputStream(InputStream)}.
+     */
+    public void responseInputStream(final int statusCode, final ContentType contentType,
+            final InputStream inputStream) {
+        setStatusCode(statusCode);
+        setContentType(contentType);
+        setBodyInputStream(inputStream);
+    }
+
+    /**
+     * Calls {@link #responseBytes(Status, ContentType, byte[])} with {@link Status#OK_200}.
+     */
+    public void responseBytes(final ContentType contentType, final byte[] bytes) {
+        responseBytes(OK_200, contentType, bytes);
+    }
+
+    /**
+     * Calls {@link #responseBytes(int, ContentType, byte[])} with {@link Status#getCode()}.
+     */
+    public void responseBytes(final Status status, final ContentType contentType, final byte[] bytes) {
+        responseBytes(status.getCode(), contentType, bytes);
+    }
+
+    /**
+     * Shortcut for {@link #setStatusCode(int)}, {@link #setContentType(ContentType)}, and
+     * {@link #setBodyBytes(byte[])}.
+     */
+    public void responseBytes(final int statusCode, final ContentType contentType, final byte[] bytes) {
+        setStatusCode(statusCode);
+        setContentType(contentType);
+        setBodyBytes(bytes);
+    }
+
+    /**
+     * Calls {@link #responseString(Status, ContentType, String)} with {@link Status#OK_200}.
+     */
+    public void responseString(final ContentType contentType, final String string) {
+        responseString(OK_200, contentType, string);
+    }
+
+    /**
+     * Calls {@link #responseString(int, ContentType, String)} with {@link Status#getCode()}.
+     */
+    public void responseString(final Status status, final ContentType contentType, final String string) {
+        responseString(status.getCode(), contentType, string);
+    }
+
+    /**
+     * Shortcut for {@link #setStatusCode(int)}, {@link #setContentType(ContentType)}, and
+     * {@link #setBodyString(String, Charset)}.
+     */
+    public void responseString(final int statusCode, final ContentType contentType, final String string) {
+        setStatusCode(statusCode);
+        final var contentTypeWithCharset = contentType.getCharset() != null ? contentType :
+                contentType.withCharset(UTF_8);
+        setContentType(contentTypeWithCharset);
+        setBodyString(string, requireNonNull(contentTypeWithCharset.getCharset()));
+    }
+
+    /**
+     * Calls {@link #responseText(Status, String)} with {@link Status#OK_200}.
+     */
+    public void responseText(final String text) {
+        responseText(OK_200, text);
+    }
+
+    /**
+     * Calls {@link #responseText(int, String)} with {@link Status#getCode()}.
+     */
+    public void responseText(final Status status, final String text) {
+        responseText(status.getCode(), text);
+    }
+
+    /**
+     * Calls {@link #responseString(int, ContentType, String)} with {@link ContentType#TEXT_PLAIN_UTF_8}.
+     */
+    public void responseText(final int statusCode, final String text) {
+        responseString(statusCode, TEXT_PLAIN_UTF_8, text);
+    }
+
+    /**
+     * Calls {@link #responseHtml(Status, String)} with {@link Status#OK_200}.
+     */
+    public void responseHtml(final String html) {
+        responseHtml(OK_200, html);
+    }
+
+    /**
+     * Calls {@link #responseHtml(int, String)} with {@link Status#getCode()}.
+     */
+    public void responseHtml(final Status status, final String html) {
+        responseHtml(status.getCode(), html);
+    }
+
+    /**
+     * Calls {@link #responseString(int, ContentType, String)} with {@link ContentType#TEXT_HTML_UTF_8}.
+     */
+    public void responseHtml(final int statusCode, final String html) {
+        responseString(statusCode, TEXT_HTML_UTF_8, html);
+    }
+
+    /**
+     * Calls {@link #responseJson(Status, String)} with {@link Status#OK_200}.
+     */
+    public void responseJson(final String json) {
+        responseJson(OK_200, json);
+    }
+
+    /**
+     * Calls {@link #responseJson(int, String)} with {@link Status#getCode()}.
+     */
+    public void responseJson(final Status status, final String json) {
+        responseJson(status.getCode(), json);
+    }
+
+    /**
+     * Calls {@link #responseString(int, ContentType, String)} with {@link ContentType#APPLICATION_JSON_UTF_8}.
+     */
+    public void responseJson(final int statusCode, final String json) {
+        responseString(statusCode, APPLICATION_JSON_UTF_8, json);
+    }
+}
