@@ -15,14 +15,22 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSec
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
+import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.header.stricttransportsecurity.StrictTransportSecurity;
+import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.url.Url;
+import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.Handle;
+import net.jacobpeterson.jet.server.handle.request.Request;
+import net.jacobpeterson.jet.server.handle.response.resource.Resource;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -38,6 +46,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
+import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_RANGES;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_DISPOSITION;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_ENCODING;
@@ -46,16 +55,22 @@ import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_RANGE;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_SECURITY_POLICY;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
 import static net.jacobpeterson.jet.common.http.header.Header.ETAG;
+import static net.jacobpeterson.jet.common.http.header.Header.IF_NONE_MATCH;
 import static net.jacobpeterson.jet.common.http.header.Header.LAST_MODIFIED;
 import static net.jacobpeterson.jet.common.http.header.Header.LOCATION;
 import static net.jacobpeterson.jet.common.http.header.Header.SET_COOKIE;
 import static net.jacobpeterson.jet.common.http.header.Header.STRICT_TRANSPORT_SECURITY;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.APPLICATION_JSON_UTF_8;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.APPLICATION_OCTET_STREAM;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_HTML_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_PLAIN_UTF_8;
+import static net.jacobpeterson.jet.common.http.header.range.Range.BYTES_UNIT;
 import static net.jacobpeterson.jet.common.http.status.Status.FOUND_302;
 import static net.jacobpeterson.jet.common.http.status.Status.MOVED_PERMANENTLY_301;
+import static net.jacobpeterson.jet.common.http.status.Status.NOT_MODIFIED_304;
 import static net.jacobpeterson.jet.common.http.status.Status.OK_200;
+import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_206;
+import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainText;
 
 /**
  * {@link Response} is a class that represents a web server request.
@@ -516,5 +531,195 @@ public final class Response {
      */
     public void responseJson(final int statusCode, final String json) {
         responseString(statusCode, APPLICATION_JSON_UTF_8, json);
+    }
+
+    /**
+     * Calls {@link #responseResource(Resource, boolean, boolean, ContentType, Integer, boolean)} with
+     * <code>acceptRanges</code> set to <code>true</code>, <code>untrustedContentType</code> set to <code>null</code>,
+     * <code>peekLength</code> set to <code>1024</code>, and <code>setBodyInputStream</code> to the negation of
+     * {@link Request#getMethodEnum()} {@link Method#hasNoResponseBody()}.
+     */
+    public void responseResource(final Resource resource, final boolean trustedContentType) {
+        final var requestMethod = handle.getRequest().getMethodEnum();
+        responseResource(resource, true, trustedContentType, null, 1024,
+                requestMethod == null || !requestMethod.hasNoResponseBody());
+    }
+
+    /**
+     * Applies the given {@link Resource} to this {@link Response}.
+     *
+     * @param resource             the {@link Resource}
+     * @param acceptRanges         <code>true</code> to {@link #setHeader(Header, String)} {@link Header#ACCEPT_RANGES}
+     *                             {@link Range#BYTES_UNIT}, <code>false</code> otherwise
+     * @param trustedContentType   <code>true</code> to designate the {@link Resource#getContentType()} as trusted and
+     *                             apply it if non-<code>null</code>, <code>false</code> to designate the given
+     *                             {@link Resource#getContentType()} as untrusted and apply it if non-<code>null</code>
+     *                             and {@link ContentType#isXssSafeHtmlTag()}.
+     *                             <p>
+     *                             For example, a user might upload a file named "code.js" that contains safe or unsafe
+     *                             Javascript code, but user-uploaded files are untrusted, so
+     *                             {@link #setContentType(ContentType)} should never be set to
+     *                             {@link ContentType#APPLICATION_JAVASCRIPT}, but should instead be safely set to
+     *                             {@link ContentType#TEXT_PLAIN}.
+     * @param untrustedContentType if non-<code>null</code> and the logic described by the
+     *                             <code>trustedContentType</code> argument is not applied, then apply this
+     *                             {@link ContentType} instead
+     * @param peekLength           if non-<code>null</code> and the logic described by the
+     *                             <code>trustedContentType</code> and <code>untrustedContentType</code> arguments are
+     *                             not applied, then peek this many bytes into {@link Resource#getContent()} and use
+     *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
+     * @param setBodyInputStream   <code>true</code> to {@link #setBodyInputStream(InputStream)} to
+     *                             {@link Resource#getContent()}, <code>false</code> to not
+     *                             {@link #setBodyInputStream(InputStream)}
+     */
+    public void responseResource(final Resource resource, final boolean acceptRanges, final boolean trustedContentType,
+            final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
+            boolean setBodyInputStream) {
+        var notModified = false;
+        final var lastModified = resource.getLastModified();
+        if (lastModified != null) {
+            setLastModified(lastModified);
+            final var ifModifiedSince = handle.getRequest().getIfModifiedSince();
+            if (ifModifiedSince != null && !lastModified.isAfter(ifModifiedSince.toInstant())) {
+                notModified = true;
+            }
+        }
+        final var etag = resource.getEtag();
+        if (etag != null) {
+            setETag(etag);
+            final var ifNoneMatch = handle.getRequest().getHeader(IF_NONE_MATCH);
+            if (ifNoneMatch != null && ifNoneMatch.equals(etag.getValueQuoted())) {
+                notModified = true;
+            }
+        }
+        if (notModified) {
+            setStatus(NOT_MODIFIED_304);
+            return;
+        }
+        if (acceptRanges) {
+            setHeader(ACCEPT_RANGES, BYTES_UNIT);
+        }
+
+        final var contentLength = resource.getContentLength();
+        if (contentLength != null) {
+            setContentLength(contentLength);
+        }
+
+        final var contentEncoding = resource.getContentEncoding();
+        if (contentEncoding != null) {
+            setContentEncoding(contentEncoding);
+        }
+
+        final var contentType = resource.getContentType();
+        if (contentType != null && (trustedContentType || contentType.isXssSafeHtmlTag())) {
+            setContentType(contentType);
+        } else if (untrustedContentType != null) {
+            setContentType(untrustedContentType);
+        } else if (peekLength != null &&
+                (contentEncoding == null || !contentEncoding.getType().isDictionaryRequired())) {
+            final byte[] peekedBytes;
+            final var content = resource.getContent().get();
+            InputStream contentMarkable = null;
+            try {
+                contentMarkable = content.markSupported() ? content : new BufferedInputStream(content);
+                contentMarkable.mark(Integer.MAX_VALUE);
+                if (contentEncoding != null) {
+                    try (final var decompressed = contentEncoding.getType()
+                            .decompress(new FilterInputStream(contentMarkable) {
+                                // Close decompression stream, but do not close underlying stream.
+                                @Override public void close() {}
+                            })) {
+                        peekedBytes = decompressed.readNBytes(peekLength);
+                    }
+                } else {
+                    peekedBytes = contentMarkable.readNBytes(peekLength);
+                }
+                if (setBodyInputStream) {
+                    setBodyInputStream = false;
+                    contentMarkable.reset();
+                    setBodyInputStream(contentMarkable);
+                } else {
+                    contentMarkable.close();
+                }
+            } catch (final Throwable throwable) {
+                try {
+                    (contentMarkable != null ? contentMarkable : content).close();
+                } catch (final Throwable closeThrowable) {
+                    throwable.addSuppressed(closeThrowable);
+                }
+                throw new RuntimeException(throwable);
+            }
+            setContentType(isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM);
+        } else {
+            setContentType(APPLICATION_OCTET_STREAM);
+        }
+
+        final var contentRange = resource.getContentRange();
+        if (contentRange != null) {
+            setContentRange(contentRange);
+            setStatus(PARTIAL_CONTENT_206);
+        }
+
+        final var contentDisposition = resource.getContentDisposition();
+        if (contentDisposition != null) {
+            setContentDisposition(contentDisposition);
+        }
+
+        if (setBodyInputStream) {
+            setBodyInputStream(resource.getContent().get());
+        }
+    }
+
+    /**
+     * Calls {@link #responseClasspath(Class, String, boolean)} with <code>exposeFilename</code> set to
+     * <code>true</code>.
+     */
+    public void responseClasspath(final Class<?> clazz, final String resourceName) {
+        responseClasspath(clazz, resourceName, true);
+    }
+
+    /**
+     * Calls {@link #responseResource(Resource, boolean)} with <code>trustedContentType</code> set to <code>true</code>
+     * and {@link Resource#ofClasspath(Class, String, boolean, Range)} with <code>range</code> set to
+     * {@link Request#getRange()}.
+     */
+    public void responseClasspath(final Class<?> clazz, final String resourceName, final boolean exposeFilename) {
+        responseResource(Resource.ofClasspath(clazz, resourceName, exposeFilename, handle.getRequest().getRange()),
+                true);
+    }
+
+    /**
+     * Calls {@link #responseFileMutable(File, boolean, boolean)} with <code>exposeFilename</code> set to
+     * <code>true</code>.
+     */
+    public void responseFileMutable(final File file, final boolean trustedContentType) {
+        responseFileImmutable(file, true, trustedContentType);
+    }
+
+    /**
+     * Calls {@link #responseResource(Resource, boolean)} with {@link Resource#ofFile(File, boolean, Range)} with
+     * <code>immutable</code> set to <code>false</code> and <code>range</code> set to {@link Request#getRange()}.
+     */
+    public void responseFileMutable(final File file, final boolean exposeFilename, final boolean trustedContentType) {
+        responseResource(Resource.ofFile(file, false, exposeFilename, handle.getRequest().getRange()),
+                trustedContentType);
+    }
+
+    /**
+     * Calls {@link #responseFileImmutable(File, boolean, boolean)} with <code>exposeFilename</code> set to
+     * <code>true</code>.
+     */
+    public void responseFileImmutable(final File file, final boolean trustedContentType) {
+        responseFileImmutable(file, true, trustedContentType);
+    }
+
+    /**
+     * Calls {@link #responseResource(Resource, boolean)} with {@link Resource#ofFile(File, boolean, Range)} with
+     * <code>immutable</code> set to <code>true</code> and <code>range</code> set to {@link Request#getRange()}.
+     */
+    public void responseFileImmutable(final File file, final boolean exposeFilename, final boolean trustedContentType) {
+        responseResource(Resource.ofFile(file, true, exposeFilename, handle.getRequest().getRange()),
+                trustedContentType);
     }
 }
