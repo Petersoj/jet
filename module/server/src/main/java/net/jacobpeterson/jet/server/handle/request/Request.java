@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.authorization.BasicAuthentication;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCacheControl;
+import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
 import net.jacobpeterson.jet.common.http.header.range.Range;
@@ -22,8 +23,10 @@ import net.jacobpeterson.jet.common.io.bounded.OnBoundCount;
 import net.jacobpeterson.jet.server.Jet;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
+import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.MultiPartConfig;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -34,10 +37,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.io.ByteStreams.readFully;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static java.util.stream.StreamSupport.stream;
 import static net.jacobpeterson.jet.common.http.header.Header.AUTHORIZATION;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
@@ -49,6 +56,7 @@ import static net.jacobpeterson.jet.common.http.status.Status.BAD_REQUEST_400;
 import static net.jacobpeterson.jet.common.http.status.Status.CONTENT_TOO_LARGE_413;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
 import static net.jacobpeterson.jet.common.http.url.Scheme.HTTP;
+import static org.eclipse.jetty.http.MultiPartFormData.getParts;
 import static org.eclipse.jetty.io.Content.Source.asInputStream;
 
 /**
@@ -58,6 +66,8 @@ import static org.eclipse.jetty.io.Content.Source.asInputStream;
 @RequiredArgsConstructor
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Request {
+
+    private static @Nullable MultiPartConfig defaultMultiPartConfig;
 
     private final Handle handle;
     private @LazyInit @Nullable Version version;
@@ -427,5 +437,71 @@ public final class Request {
         } catch (final Exception exception) {
             throw new StatusException(BAD_REQUEST_400, exception);
         }
+    }
+
+    /**
+     * @return {@link #getBodyMultiParts(MultipartConfig)} with {@link Jet#getDefaultMultipartConfig()}
+     */
+    public ImmutableList<MultiPart> getBodyMultiParts() {
+        if (defaultMultiPartConfig == null) { // Racy cache access is fine here due to immutable idempotency
+            defaultMultiPartConfig = multipartConfigToJetty(handle.getInternals().getJet().getDefaultMultipartConfig());
+        }
+        return getBodyMultiParts(defaultMultiPartConfig);
+    }
+
+    /**
+     * @return the {@link MultiPart} {@link ImmutableList} read from the body
+     */
+    public ImmutableList<MultiPart> getBodyMultiParts(final MultipartConfig config) {
+        return getBodyMultiParts(multipartConfigToJetty(config));
+    }
+
+    private MultiPartConfig multipartConfigToJetty(final MultipartConfig config) {
+        return new MultiPartConfig.Builder()
+                .maxSize(config.getMaxTotalSize())
+                .maxParts(config.getMaxPartCount())
+                .maxPartSize(config.getMaxPartSize())
+                .maxMemoryPartSize(config.getPartSizeMemoryToDiskThreshold())
+                .location(config.getTemporaryDirectory())
+                .build();
+    }
+
+    private ImmutableList<MultiPart> getBodyMultiParts(final MultiPartConfig jettyConfig) {
+        if (bodyMultiParts == null) {
+            try {
+                final var request = handle.getInternals().getRequest();
+                bodyMultiParts = stream(getParts(request, request, getHeader(CONTENT_TYPE), jettyConfig)
+                        .spliterator(), false)
+                        .map(MultiPart::new)
+                        .collect(toImmutableList());
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, exception);
+            }
+        }
+        return bodyMultiParts;
+    }
+
+    /**
+     * @return {@link #getBodyMultiParts()} {@link Stream#filter(Predicate)}
+     * {@link MultiPart#getContentDisposition()} {@link ContentDisposition#getName()} or <code>null</code>
+     */
+    public @Nullable MultiPart getBodyMultiPart(final String name) {
+        return getBodyMultiPart(getBodyMultiParts(), name);
+    }
+
+    /**
+     * @return {@link #getBodyMultiParts(MultipartConfig)} {@link Stream#filter(Predicate)}
+     * {@link MultiPart#getContentDisposition()} {@link ContentDisposition#getName()} or <code>null</code>
+     */
+    public @Nullable MultiPart getBodyMultiPart(final MultipartConfig config, final String name) {
+        return getBodyMultiPart(getBodyMultiParts(config), name);
+    }
+
+    private @Nullable MultiPart getBodyMultiPart(final ImmutableList<MultiPart> multiParts, final String name) {
+        return multiParts.stream()
+                .filter(multiPart -> multiPart.getContentDisposition() != null &&
+                        name.equals(multiPart.getContentDisposition().getName()))
+                .findFirst()
+                .orElse(null);
     }
 }
