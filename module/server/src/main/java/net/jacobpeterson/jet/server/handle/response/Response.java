@@ -6,6 +6,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -41,6 +43,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
@@ -103,8 +106,21 @@ public final class Response {
 
     private ContentSecurityPolicy.@Nullable Builder contentSecurityPolicyBuilder;
 
-    /** The body {@link InputStream}. */
+    /**
+     * The body {@link InputStream}.
+     * <p>
+     * {@link InputStream#close()} is guaranteed to be called.
+     * <p>
+     * Cannot be used with {@link #setBodyOutputStreamApplier(Consumer)}.
+     */
     private @Getter @Nullable InputStream bodyInputStream;
+
+    /**
+     * The body {@link OutputStream} applier.
+     * <p>
+     * Cannot be used with {@link #setBodyInputStream(InputStream)}.
+     */
+    private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
 
     /**
      * Sets {@link #getStatusCode()} and {@link #getStatus()} with {@link Status#forCode(int)}.
@@ -355,10 +371,6 @@ public final class Response {
 
     /**
      * Sets {@link #getBodyInputStream()}.
-     * <p>
-     * {@link InputStream#close()} is guaranteed to be called.
-     *
-     * @param bodyInputStream the body {@link InputStream}
      */
     public void setBodyInputStream(final InputStream bodyInputStream) {
         if (this.bodyInputStream != null) {

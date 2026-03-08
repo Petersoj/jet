@@ -38,8 +38,8 @@ import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
 
 /**
- * {@link Resource} is a class that represents arbitrary data with associated metadata (e.g. a file) for a web server
- * response.
+ * {@link Resource} is a class that represents arbitrary data with associated metadata (e.g. a file) to serve as a web
+ * server response.
  */
 @NullMarked
 @Immutable
