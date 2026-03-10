@@ -3,20 +3,18 @@ package net.jacobpeterson.jet.server.handle;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@link HandleFactory} is a {@link FunctionalInterface} factory for creating {@link Handle} instances.
- *
- * @param <T> the {@link Handle} type
+ * {@link HandleFactory} is a {@link FunctionalInterface} for creating new {@link Handle} instances.
  */
 @NullMarked
 @FunctionalInterface
-public interface HandleFactory<T extends Handle> {
+public interface HandleFactory {
 
     /**
-     * Creates a {@link Handle} instance.
+     * Creates a new {@link Handle} instance.
      *
      * @param internals the {@link HandleInternals}
      *
-     * @return the {@link Handle} instance
+     * @return the new {@link Handle} instance
      */
-    T create(final HandleInternals internals);
+    Handle create(final HandleInternals internals);
 }
