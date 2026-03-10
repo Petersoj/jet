@@ -25,6 +25,12 @@ import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
+import net.jacobpeterson.jet.server.route.route.Route;
+import net.jacobpeterson.jet.server.route.route.RouteMatch;
+import net.jacobpeterson.jet.server.route.route.simple.exact.PathRouteMatch;
+import net.jacobpeterson.jet.server.route.route.simple.pathparameters.PathParametersRouteMatch;
+import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRouteMatch;
+import net.jacobpeterson.jet.server.route.route.simple.pathstartswith.PathStartsWithRouteMatch;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.MultiPartConfig;
 import org.jspecify.annotations.NullMarked;
@@ -82,6 +88,48 @@ public final class Request {
     private @LazyInit @Nullable Optional<RequestCacheControl> cacheControl;
     private @LazyInit @Nullable Optional<BasicAuthentication> basicAuthentication;
     private @LazyInit @Nullable ImmutableList<MultiPart> bodyMultiParts;
+
+    /**
+     * @return the {@link Route} that provided the {@link RouteMatch}
+     */
+    public Route getRouteOfMatch() {
+        return handle.getInternals().getRouteOfMatch();
+    }
+
+    /**
+     * @return the {@link RouteMatch} from {@link Route#match(Handle)}
+     */
+    public RouteMatch getRouteMatch() {
+        return handle.getInternals().getRouteMatch();
+    }
+
+    /**
+     * @return {@link #getRouteMatch()} cast to {@link PathRouteMatch}
+     */
+    public PathRouteMatch getRoutePathExact() {
+        return (PathRouteMatch) getRouteMatch();
+    }
+
+    /**
+     * @return {@link #getRouteMatch()} cast to {@link PathStartsWithRouteMatch}
+     */
+    public PathStartsWithRouteMatch getRoutePathStartsWith() {
+        return (PathStartsWithRouteMatch) getRouteMatch();
+    }
+
+    /**
+     * @return {@link #getRouteMatch()} cast to {@link PathRegexRouteMatch}
+     */
+    public PathRegexRouteMatch getRoutePathRegex() {
+        return (PathRegexRouteMatch) getRouteMatch();
+    }
+
+    /**
+     * @return {@link #getRouteMatch()} cast to {@link PathParametersRouteMatch}
+     */
+    public PathParametersRouteMatch getRoutePathParameters() {
+        return (PathParametersRouteMatch) getRouteMatch();
+    }
 
     /**
      * @return internally-cached {@link Version}
