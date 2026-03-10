@@ -68,11 +68,13 @@ public class SimpleSessionStore implements SessionStore {
     /**
      * Calls {@link #SimpleSessionStore(int, String, Consumer, Cache)} with {@link #DEFAULT_ID_TOKEN_LENGTH},
      * {@link #DEFAULT_COOKIE_NAME}, {@link #DEFAULT_COOKIE_MODIFIER}, and
-     * {@link Caffeine#expireAfterAccess(long, TimeUnit)} set to three days
+     * {@link Caffeine#expireAfterAccess(long, TimeUnit)} set to 7 days with {@link Caffeine#softValues()}.
      */
     public SimpleSessionStore() {
-        this(DEFAULT_ID_TOKEN_LENGTH, DEFAULT_COOKIE_NAME, DEFAULT_COOKIE_MODIFIER,
-                Caffeine.newBuilder().expireAfterAccess(3, DAYS).build());
+        this(DEFAULT_ID_TOKEN_LENGTH, DEFAULT_COOKIE_NAME, DEFAULT_COOKIE_MODIFIER, Caffeine.newBuilder()
+                .expireAfterAccess(7, DAYS)
+                .softValues()
+                .build());
     }
 
     /**

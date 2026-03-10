@@ -49,7 +49,7 @@ public final class Resource {
     private static <T> Cache<T, Resource> newCache() {
         return Caffeine.newBuilder()
                 // Long enough that the cost of recomputing a strong ETag is negligible, but short enough to reduce
-                // memory usage.
+                // memory usage and evict unusable entries that reference a deleted file.
                 .expireAfterAccess(7, DAYS)
                 .softValues()
                 .build();
