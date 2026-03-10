@@ -160,13 +160,6 @@ public final class Range {
     }
 
     /**
-     * {@link Builder} is a builder class for {@link Range}.
-     *
-     * @see #builder()
-     */
-    public static final class Builder {}
-
-    /**
      * The unit in which ranges are defined. Currently only <code>bytes</code> are a registered unit.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range#unit">

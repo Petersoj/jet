@@ -37,7 +37,8 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
  * {@link Url} is an immutable class that represents a standardized Uniform Resource Locator (URL), the most common
- * subtype of a Uniform Resource Identifier (URI), requiring a scheme, host, and path that starts with <code>/</code>.
+ * subtype of a Uniform Resource Identifier (URI), requiring a scheme, host, and path that always starts with
+ * <code>/</code>.
  * <p>
  * <strong>Uniform Resource Identifiers (URI)</strong> are used to identify "resources" on the web. URIs are commonly
  * used as targets of <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">HTTP</a> requests, in which case the

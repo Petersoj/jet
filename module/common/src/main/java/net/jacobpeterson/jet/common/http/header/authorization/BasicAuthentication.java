@@ -121,13 +121,6 @@ public final class BasicAuthentication {
                 .build();
     }
 
-    /**
-     * {@link Builder} is a builder class for {@link BasicAuthentication}.
-     *
-     * @see #builder()
-     */
-    public static final class Builder {}
-
     /** The username. */
     private final @Getter String username;
     /** The password. */

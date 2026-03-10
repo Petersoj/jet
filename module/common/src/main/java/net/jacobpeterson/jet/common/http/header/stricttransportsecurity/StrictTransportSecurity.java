@@ -132,13 +132,6 @@ public final class StrictTransportSecurity {
     }
 
     /**
-     * {@link Builder} is a builder class for {@link StrictTransportSecurity}.
-     *
-     * @see #builder()
-     */
-    public static final class Builder {}
-
-    /**
      * The time, in seconds, that the browser should remember that a host is only to be accessed using HTTPS.
      *
      * @see

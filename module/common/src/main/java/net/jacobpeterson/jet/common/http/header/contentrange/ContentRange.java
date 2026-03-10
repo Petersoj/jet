@@ -155,13 +155,6 @@ public final class ContentRange {
     }
 
     /**
-     * {@link Builder} is a builder class for {@link ContentRange}.
-     *
-     * @see #builder()
-     */
-    public static final class Builder {}
-
-    /**
      * The unit for specifying ranges. Currently, only <code>bytes</code> is supported.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range#unit">
