@@ -1,6 +1,8 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathstartswith;
 
 import lombok.Getter;
+import net.jacobpeterson.jet.common.http.method.Method;
+import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.route.route.Route;
@@ -16,6 +18,31 @@ import static com.google.common.base.Preconditions.checkArgument;
 @NullMarked
 @Getter
 public class PathStartsWithRoute implements Route {
+
+    /**
+     * The method to match the request method against, or <code>null</code> for any.
+     */
+    private final @Nullable String method;
+
+    /**
+     * The {@link Method} to match the request {@link Method} against, or <code>null</code> for any.
+     */
+    private final @Nullable Method methodEnum;
+
+    /**
+     * The scheme to match the request scheme against, or <code>null</code> for any.
+     */
+    private final @Nullable String scheme;
+
+    /**
+     * The {@link Scheme} to match the request {@link Scheme} against, or <code>null</code> for any.
+     */
+    private final @Nullable Scheme schemeEnum;
+
+    /**
+     * The host to match the request host against, or <code>null</code> for any.
+     */
+    private final @Nullable String host;
 
     /**
      * The path to starts-with match a request path against.
@@ -58,6 +85,13 @@ public class PathStartsWithRoute implements Route {
     private final boolean ignoreCase;
 
     /**
+     * Instantiates a new Path starts with route.
+     *
+     * @param method                   the {@link #getMethod()}
+     * @param methodEnum               the {@link #getMethodEnum()}
+     * @param scheme                   the {@link #getScheme()}
+     * @param schemeEnum               the {@link #getSchemeEnum()}
+     * @param host                     the {@link #getHost()}
      * @param path                     the {@link #getPath()}
      * @param requirePathEndsWithSlash the {@link #isRequirePathEndsWithSlash()}. Defaults to <code>true</code>
      * @param useDecodedRequestPath    the {@link #isUseDecodedRequestPath()}. Defaults to <code>true</code>
@@ -65,9 +99,16 @@ public class PathStartsWithRoute implements Route {
      * @param ignoreCase               the {@link #isIgnoreCase()}. Defaults to <code>true</code>
      */
     @lombok.Builder(toBuilder = true)
-    private PathStartsWithRoute(final String path, final @Nullable Boolean requirePathEndsWithSlash,
+    protected PathStartsWithRoute(final @Nullable String method, final @Nullable Method methodEnum,
+            final @Nullable String scheme, final @Nullable Scheme schemeEnum, final @Nullable String host,
+            final String path, final @Nullable Boolean requirePathEndsWithSlash,
             final @Nullable Boolean useDecodedRequestPath, final @Nullable Boolean useNormalizedRequestPath,
             final @Nullable Boolean ignoreCase) {
+        this.method = method;
+        this.methodEnum = methodEnum;
+        this.scheme = scheme;
+        this.schemeEnum = schemeEnum;
+        this.host = host;
         this.path = path;
         pathEndsWithSlash = path.endsWith("/");
         pathWithoutEndingSlash = pathEndsWithSlash ? path.substring(0, path.length() - 1) : path;
@@ -81,7 +122,23 @@ public class PathStartsWithRoute implements Route {
 
     @Override
     public @Nullable PathStartsWithRouteMatch match(final Handle handle) {
-        final var requestUrl = handle.getRequest().getUrl();
+        final var request = handle.getRequest();
+        if (method != null && !method.equalsIgnoreCase(request.getMethod())) {
+            return null;
+        }
+        if (methodEnum != null && methodEnum != request.getMethodEnum()) {
+            return null;
+        }
+        final var requestUrl = request.getUrl();
+        if (scheme != null && !scheme.equalsIgnoreCase(requestUrl.getScheme())) {
+            return null;
+        }
+        if (schemeEnum != null && schemeEnum != requestUrl.getSchemeEnum()) {
+            return null;
+        }
+        if (host != null && host.equalsIgnoreCase(requestUrl.getHost())) {
+            return null;
+        }
         final String requestPath;
         if (useNormalizedRequestPath) {
             requestPath = useDecodedRequestPath ? requestUrl.getNormalizedPath() :

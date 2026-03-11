@@ -2,6 +2,8 @@ package net.jacobpeterson.jet.server.route.route.simple.pathparameters;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.jacobpeterson.jet.common.http.method.Method;
+import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.route.route.Route;
 import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRoute;
@@ -42,10 +44,50 @@ public class PathParametersRoute implements Route {
         private final PathRegexRoute.Builder builder = PathRegexRoute.builder();
 
         /**
+         * @see PathRegexRoute.Builder#method(String)
+         */
+        public Builder method(final String method) {
+            builder.method(method);
+            return this;
+        }
+
+        /**
+         * @see PathRegexRoute.Builder#methodEnum(Method)
+         */
+        public Builder methodEnum(final Method methodEnum) {
+            builder.methodEnum(methodEnum);
+            return this;
+        }
+
+        /**
+         * @see PathRegexRoute.Builder#scheme(String)
+         */
+        public Builder scheme(final String scheme) {
+            builder.scheme(scheme);
+            return this;
+        }
+
+        /**
+         * @see PathRegexRoute.Builder#schemeEnum(Scheme)
+         */
+        public Builder schemeEnum(final Scheme schemeEnum) {
+            builder.schemeEnum(schemeEnum);
+            return this;
+        }
+
+        /**
+         * @see PathRegexRoute.Builder#host(String)
+         */
+        public Builder host(final String host) {
+            builder.host(host);
+            return this;
+        }
+
+        /**
          * The parameterized path e.g. <code>/blog/{postId}/{commentId}</code>.
          */
-        public Builder path(final String path) {
-            builder.regex(PATH_PARAMETERS_TO_REGEX.matcher(path).replaceAll("(?<$1>[^/]+)"));
+        public Builder parameterizedPath(final String parameterizedPath) {
+            builder.pathRegex(PATH_PARAMETERS_TO_REGEX.matcher(parameterizedPath).replaceAll("(?<$1>[^/]+)"));
             return this;
         }
 

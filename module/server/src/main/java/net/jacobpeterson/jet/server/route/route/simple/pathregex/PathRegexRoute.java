@@ -2,6 +2,8 @@ package net.jacobpeterson.jet.server.route.route.simple.pathregex;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.jacobpeterson.jet.common.http.method.Method;
+import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.route.route.Route;
@@ -36,23 +38,68 @@ public class PathRegexRoute implements Route {
      */
     public static final class Builder {
 
-        private @Nullable Pattern pattern;
+        private @Nullable String method;
+        private @Nullable Method methodEnum;
+        private @Nullable String scheme;
+        private @Nullable Scheme schemeEnum;
+        private @Nullable String host;
+        private @Nullable Pattern pathPattern;
         private boolean useDecodedRequestPath = true;
         private boolean useNormalizedRequestPath = true;
 
         /**
-         * @see #getPattern()
+         * @see #getMethod()
          */
-        public Builder pattern(final Pattern pattern) {
-            this.pattern = pattern;
+        public Builder method(final String method) {
+            this.method = method;
             return this;
         }
 
         /**
-         * Calls {@link #pattern(Pattern)} with {@link Pattern#compile(String)}
+         * @see #getMethodEnum()
          */
-        public Builder regex(final String regex) {
-            return pattern(Pattern.compile(regex));
+        public Builder methodEnum(final Method methodEnum) {
+            this.methodEnum = methodEnum;
+            return this;
+        }
+
+        /**
+         * @see #getScheme()
+         */
+        public Builder scheme(final String scheme) {
+            this.scheme = scheme;
+            return this;
+        }
+
+        /**
+         * @see #getSchemeEnum()
+         */
+        public Builder schemeEnum(final Scheme schemeEnum) {
+            this.schemeEnum = schemeEnum;
+            return this;
+        }
+
+        /**
+         * @see #getHost()
+         */
+        public Builder host(final String host) {
+            this.host = host;
+            return this;
+        }
+
+        /**
+         * @see #getPathPattern()
+         */
+        public Builder pathPattern(final Pattern pathPattern) {
+            this.pathPattern = pathPattern;
+            return this;
+        }
+
+        /**
+         * Calls {@link #pathPattern(Pattern)} with {@link Pattern#compile(String)}
+         */
+        public Builder pathRegex(final String pathRegex) {
+            return pathPattern(Pattern.compile(pathRegex));
         }
 
         /**
@@ -77,15 +124,41 @@ public class PathRegexRoute implements Route {
          * @return the built {@link PathRegexRoute}
          */
         public PathRegexRoute build() {
-            return new PathRegexRoute(requireNonNull(pattern, "`pattern` must be set"),
-                    useDecodedRequestPath, useNormalizedRequestPath);
+            return new PathRegexRoute(method, methodEnum, scheme, schemeEnum, host,
+                    requireNonNull(pathPattern, "`pattern` must be set"), useDecodedRequestPath,
+                    useNormalizedRequestPath);
         }
     }
 
     /**
-     * The regular expression (regex) {@link Pattern}.
+     * The method to match the request method against, or <code>null</code> for any.
      */
-    private final Pattern pattern;
+    private final @Nullable String method;
+
+    /**
+     * The {@link Method} to match the request {@link Method} against, or <code>null</code> for any.
+     */
+    private final @Nullable Method methodEnum;
+
+    /**
+     * The scheme to match the request scheme against, or <code>null</code> for any.
+     */
+    private final @Nullable String scheme;
+
+    /**
+     * The {@link Scheme} to match the request {@link Scheme} against, or <code>null</code> for any.
+     */
+    private final @Nullable Scheme schemeEnum;
+
+    /**
+     * The host to match the request host against, or <code>null</code> for any.
+     */
+    private final @Nullable String host;
+
+    /**
+     * The path regular expression (regex) {@link Pattern}.
+     */
+    private final Pattern pathPattern;
 
     /**
      * Whether to use the decoded path from {@link Request#getUrl()}.
@@ -103,7 +176,23 @@ public class PathRegexRoute implements Route {
 
     @Override
     public @Nullable PathRegexRouteMatch match(final Handle handle) {
-        final var requestUrl = handle.getRequest().getUrl();
+        final var request = handle.getRequest();
+        if (method != null && !method.equalsIgnoreCase(request.getMethod())) {
+            return null;
+        }
+        if (methodEnum != null && methodEnum != request.getMethodEnum()) {
+            return null;
+        }
+        final var requestUrl = request.getUrl();
+        if (scheme != null && !scheme.equalsIgnoreCase(requestUrl.getScheme())) {
+            return null;
+        }
+        if (schemeEnum != null && schemeEnum != requestUrl.getSchemeEnum()) {
+            return null;
+        }
+        if (host != null && host.equalsIgnoreCase(requestUrl.getHost())) {
+            return null;
+        }
         final String requestPath;
         if (useNormalizedRequestPath) {
             requestPath = useDecodedRequestPath ? requestUrl.getNormalizedPath() :
@@ -111,7 +200,7 @@ public class PathRegexRoute implements Route {
         } else {
             requestPath = useDecodedRequestPath ? requestUrl.getPath() : requestUrl.getEncodedPath();
         }
-        final var matcher = pattern.matcher(requestPath);
+        final var matcher = pathPattern.matcher(requestPath);
         return matcher.matches() ? new PathRegexRouteMatch(matcher) : null;
     }
 }
