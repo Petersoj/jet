@@ -18,6 +18,8 @@ import static java.util.Objects.requireNonNull;
  * constructors.
  * <p>
  * Note: the fields in this class are for internal use only.
+ * <p>
+ * Note: this class is not thread-safe.
  */
 @NullMarked
 @RequiredArgsConstructor

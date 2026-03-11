@@ -31,6 +31,8 @@ import static org.eclipse.jetty.io.Content.Source.asInputStream;
 
 /**
  * {@link MultiPart} is a class that represents a part in a multipart web server request.
+ * <p>
+ * Note: this class is not thread-safe.
  */
 @NullMarked
 @RequiredArgsConstructor

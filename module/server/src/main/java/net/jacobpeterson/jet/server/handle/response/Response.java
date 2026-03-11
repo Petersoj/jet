@@ -77,6 +77,8 @@ import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainT
 
 /**
  * {@link Response} is a class that represents a web server request.
+ * <p>
+ * Note: this class is not thread-safe.
  */
 @NullMarked
 @RequiredArgsConstructor
@@ -162,7 +164,7 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #getHeaders()} {@link ListMultimap#removeAll(Object)} for the given <code>key</code>, then
+     * Calls {@link #getHeaders()} {@link ListMultimap#removeAll(Object)} with the given <code>key</code>, then
      * calls {@link #getHeaders()} {@link ListMultimap#put(Object, Object)}.
      */
     public void setHeader(final String key, final String value) {

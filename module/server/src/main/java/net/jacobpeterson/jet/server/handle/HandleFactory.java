@@ -11,6 +11,8 @@ public interface HandleFactory {
 
     /**
      * Creates a new {@link Handle} instance.
+     * <p>
+     * Note: this method implementation must be thread-safe.
      *
      * @param internals the {@link HandleInternals}
      *

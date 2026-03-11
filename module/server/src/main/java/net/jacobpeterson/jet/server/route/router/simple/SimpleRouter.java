@@ -33,7 +33,7 @@ public class SimpleRouter implements Router {
      * @param route   the {@link Route}
      * @param handler the {@link Handler}
      */
-    public void addFirstPriority(final Route route, final Handler handler) {
+    public void addFirst(final Route route, final Handler handler) {
         handlersOfRoutes.addFirst(entry(route, handler));
     }
 
@@ -43,7 +43,7 @@ public class SimpleRouter implements Router {
      * @param route   the {@link Route}
      * @param handler the {@link Handler}
      */
-    public void addLastPriority(final Route route, final Handler handler) {
+    public void addLast(final Route route, final Handler handler) {
         handlersOfRoutes.addLast(entry(route, handler));
     }
 

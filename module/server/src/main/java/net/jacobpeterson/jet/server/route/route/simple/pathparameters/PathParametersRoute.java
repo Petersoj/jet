@@ -45,7 +45,7 @@ public final class PathParametersRoute implements Route {
                 .replaceAll(matchResult -> {
                     final var group1 = matchResult.group(1);
                     checkArgument(NAMED_CAPTURE_GROUP_CHECK_PATTERN.matcher(group1).matches(),
-                            "Path parameter name must be alphanumerics and start with a letter: \"%s\"", group1);
+                            "Path parameter name must be alphanumerics and start with a letter: %s", group1);
                     return "(?<$1>[^/]+)";
                 }) + "$";
     }

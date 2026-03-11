@@ -17,6 +17,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * {@link Handle} is a class that represents a web server request and response.
+ * <p>
+ * Note: this class is not thread-safe.
  */
 @NullMarked
 @RequiredArgsConstructor
