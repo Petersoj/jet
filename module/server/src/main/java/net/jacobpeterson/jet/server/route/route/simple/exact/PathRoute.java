@@ -1,8 +1,11 @@
 package net.jacobpeterson.jet.server.route.route.simple.exact;
 
+import com.google.errorprone.annotations.Immutable;
 import lombok.Builder;
 import lombok.Builder.Default;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -11,12 +14,15 @@ import net.jacobpeterson.jet.server.route.route.Route;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
+
 /**
  * {@link PathRoute} is a {@link Route} for matching a request path against the given route path.
  */
 @NullMarked
-@Getter @Builder(toBuilder = true)
-public class PathRoute implements Route {
+@Immutable
+@Getter @Builder(toBuilder = true) @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
+public final class PathRoute implements Route {
 
     /**
      * The method to match the request method against, or <code>null</code> for any.

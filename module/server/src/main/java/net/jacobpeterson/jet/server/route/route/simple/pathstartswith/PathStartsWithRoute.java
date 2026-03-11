@@ -1,6 +1,9 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathstartswith;
 
+import com.google.errorprone.annotations.Immutable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -10,14 +13,16 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
  * {@link PathStartsWithRoute} is a {@link Route} for matching a request path against the given route path using
  * {@link String#startsWith(String)}.
  */
 @NullMarked
-@Getter
-public class PathStartsWithRoute implements Route {
+@Immutable
+@Getter @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
+public final class PathStartsWithRoute implements Route {
 
     /**
      * The method to match the request method against, or <code>null</code> for any.
@@ -99,7 +104,7 @@ public class PathStartsWithRoute implements Route {
      * @param ignoreCase               the {@link #isIgnoreCase()}. Defaults to <code>true</code>
      */
     @lombok.Builder(toBuilder = true)
-    protected PathStartsWithRoute(final @Nullable String method, final @Nullable Method methodEnum,
+    private PathStartsWithRoute(final @Nullable String method, final @Nullable Method methodEnum,
             final @Nullable String scheme, final @Nullable Scheme schemeEnum, final @Nullable String host,
             final String path, final @Nullable Boolean requirePathEndsWithSlash,
             final @Nullable Boolean useDecodedRequestPath, final @Nullable Boolean useNormalizedRequestPath,

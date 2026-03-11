@@ -1,8 +1,10 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathparameters;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -15,6 +17,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static lombok.AccessLevel.PRIVATE;
+import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
  * {@link PathParametersRoute} is a {@link Route} that transforms the given path-parameterized route into a wrapped
@@ -22,8 +25,8 @@ import static lombok.AccessLevel.PRIVATE;
  * <code>/blog/{postId}/{commentId}</code>.
  */
 @NullMarked
-@Getter @RequiredArgsConstructor(access = PRIVATE)
-public class PathParametersRoute implements Route {
+@Getter @RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
+public final class PathParametersRoute implements Route {
 
     private static final Pattern PATH_PARAMETER_PATTERN = Pattern.compile("\\{([^/]+)}");
     private static final Pattern NAMED_CAPTURE_GROUP_CHECK_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*$");

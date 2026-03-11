@@ -1,7 +1,6 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathstartswith;
 
 import lombok.Value;
-import lombok.experimental.NonFinal;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
 import org.jspecify.annotations.NullMarked;
 
@@ -9,7 +8,7 @@ import org.jspecify.annotations.NullMarked;
  * {@link PathStartsWithRouteMatch} is a {@link RouteMatch} for {@link PathStartsWithRoute}.
  */
 @NullMarked
-@Value @NonFinal
+@Value
 public class PathStartsWithRouteMatch implements RouteMatch {
 
     /**

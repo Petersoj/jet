@@ -1,7 +1,6 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathregex;
 
 import lombok.Value;
-import lombok.experimental.NonFinal;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
 import org.jspecify.annotations.NullMarked;
 
@@ -12,7 +11,7 @@ import java.util.regex.Pattern;
  * {@link PathRegexRouteMatch} is a {@link RouteMatch} for {@link PathRegexRoute}.
  */
 @NullMarked
-@Value @NonFinal
+@Value
 public class PathRegexRouteMatch implements RouteMatch {
 
     /**

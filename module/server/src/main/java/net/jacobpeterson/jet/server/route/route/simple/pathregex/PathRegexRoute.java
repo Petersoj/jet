@@ -1,7 +1,10 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathregex;
 
+import com.google.errorprone.annotations.Immutable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -14,13 +17,15 @@ import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PRIVATE;
+import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
  * {@link PathRegexRoute} is a {@link Route} for matching a request path against the given {@link Pattern}.
  */
 @NullMarked
-@Getter @RequiredArgsConstructor(access = PRIVATE)
-public class PathRegexRoute implements Route {
+@Immutable
+@Getter @RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
+public final class PathRegexRoute implements Route {
 
     /**
      * Creates a {@link Builder}.

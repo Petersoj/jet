@@ -54,12 +54,12 @@ public final class Accept {
     public static final String WEIGHT_PARAMETER_KEY = "q";
 
     /**
-     * The delimiter: <code>","</code>
+     * The content types delimiter: <code>","</code>
      */
-    public static final String CONTENT_TYPE_DELIMITER = ",";
+    public static final String CONTENT_TYPES_DELIMITER = ",";
 
-    private static final Splitter PARSE_CONTENT_TYPE_SPLITTER =
-            Splitter.on(CONTENT_TYPE_DELIMITER).trimResults().omitEmptyStrings();
+    private static final Splitter PARSE_CONTENT_TYPES_SPLITTER =
+            Splitter.on(CONTENT_TYPES_DELIMITER).trimResults().omitEmptyStrings();
 
     /**
      * Parses the given {@link Header#ACCEPT} value {@link String} into an {@link Accept}.
@@ -72,7 +72,7 @@ public final class Accept {
      */
     public static Accept parse(final String accept) throws IllegalArgumentException {
         return builder()
-                .addAll(PARSE_CONTENT_TYPE_SPLITTER.splitToStream(accept)
+                .addAll(PARSE_CONTENT_TYPES_SPLITTER.splitToStream(accept)
                         .map(ContentType::parse)
                         .collect(toImmutableList()))
                 .build();
@@ -151,7 +151,7 @@ public final class Accept {
         if (string == null) {
             string = contentTypes.stream()
                     .map(ContentType::toString)
-                    .collect(joining(CONTENT_TYPE_DELIMITER + " "));
+                    .collect(joining(CONTENT_TYPES_DELIMITER + " "));
         }
         return string;
     }
