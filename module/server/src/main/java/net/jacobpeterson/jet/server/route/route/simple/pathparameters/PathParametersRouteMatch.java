@@ -1,12 +1,10 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathparameters;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
-import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRouteMatch;
 import org.jspecify.annotations.NullMarked;
-
-import java.util.regex.Matcher;
 
 import static java.util.Objects.requireNonNull;
 
@@ -15,21 +13,14 @@ import static java.util.Objects.requireNonNull;
  */
 @NullMarked
 @Value @NonFinal
-public class PathParametersRouteMatch extends PathRegexRouteMatch {
+public class PathParametersRouteMatch implements RouteMatch {
+
+    ImmutableMap<String, String> parameters;
 
     /**
-     * Instantiates a new {@link PathParametersRouteMatch}.
-     *
-     * @param matcher the {@link Matcher}
-     */
-    public PathParametersRouteMatch(final Matcher matcher) {
-        super(matcher);
-    }
-
-    /**
-     * @return {@link #getMatcher()} {@link Matcher#group(String)}
+     * @return {@link #getParameters()} {@link ImmutableMap#get(Object)}
      */
     public String get(final String key) {
-        return requireNonNull(getMatcher().group(key));
+        return requireNonNull(parameters.get(key));
     }
 }

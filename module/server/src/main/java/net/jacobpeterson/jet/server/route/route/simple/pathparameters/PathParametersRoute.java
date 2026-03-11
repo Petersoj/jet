@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.server.route.route.simple.pathparameters;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.method.Method;
@@ -12,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static lombok.AccessLevel.PRIVATE;
 
 /**
@@ -23,7 +25,27 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter @RequiredArgsConstructor(access = PRIVATE)
 public class PathParametersRoute implements Route {
 
-    private static final Pattern PATH_PARAMETERS_TO_REGEX = Pattern.compile("\\{([^/]+)}");
+    private static final Pattern PATH_PARAMETER_PATTERN = Pattern.compile("\\{([^/]+)}");
+    private static final Pattern NAMED_CAPTURE_GROUP_CHECK_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*$");
+
+    /**
+     * Transforms the given <code>parameterizedPath</code> into a regular expression (regex) for matching the path
+     * parameters as capture groups.
+     *
+     * @param parameterizedPath the parameterized path e.g. <code>/blog/{postId}/{commentId}</code>
+     *
+     * @return the regex {@link String}
+     */
+    public static String toRegex(final String parameterizedPath) {
+        return "^" + PATH_PARAMETER_PATTERN.matcher("\\Q" +
+                        PATH_PARAMETER_PATTERN.matcher(parameterizedPath).replaceAll("\\\\E{$1}\\\\Q") + "\\E")
+                .replaceAll(matchResult -> {
+                    final var group1 = matchResult.group(1);
+                    checkArgument(NAMED_CAPTURE_GROUP_CHECK_PATTERN.matcher(group1).matches(),
+                            "Path parameter name must be alphanumerics and start with a letter: \"%s\"", group1);
+                    return "(?<$1>[^/]+)";
+                }) + "$";
+    }
 
     /**
      * Creates a {@link Builder}.
@@ -84,10 +106,19 @@ public class PathParametersRoute implements Route {
         }
 
         /**
-         * The parameterized path e.g. <code>/blog/{postId}/{commentId}</code>.
+         * Calls {@link #parameterizedPath(String, int)} with <code>patternFlags</code> set to <code>9</code>.
          */
         public Builder parameterizedPath(final String parameterizedPath) {
-            builder.pathRegex(PATH_PARAMETERS_TO_REGEX.matcher(parameterizedPath).replaceAll("(?<$1>[^/]+)"));
+            return parameterizedPath(parameterizedPath, 0);
+        }
+
+        /**
+         * Calls {@link PathRegexRoute.Builder#pathPattern(Pattern)} with {@link Pattern#compile(String, int)} with
+         * {@link #toRegex(String)}.
+         */
+        @SuppressWarnings("MagicConstant")
+        public Builder parameterizedPath(final String parameterizedPath, final int patternFlags) {
+            builder.pathPattern(Pattern.compile(toRegex(parameterizedPath), patternFlags));
             return this;
         }
 
@@ -122,6 +153,17 @@ public class PathParametersRoute implements Route {
     @Override
     public @Nullable PathParametersRouteMatch match(final Handle handle) {
         final var match = pathRegexRoute.match(handle);
-        return match == null ? null : new PathParametersRouteMatch(match.getMatcher());
+        if (match == null) {
+            return null;
+        }
+        final var parameters = ImmutableMap.<String, String>builder();
+        final var matcher = match.getMatcher();
+        for (final var groupName : matcher.namedGroups().keySet()) {
+            final var group = matcher.group(groupName);
+            if (group != null) {
+                parameters.put(groupName, group);
+            }
+        }
+        return new PathParametersRouteMatch(parameters.build());
     }
 }
