@@ -7,6 +7,7 @@ import com.google.common.io.ByteStreams;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.accept.Accept;
 import net.jacobpeterson.jet.common.http.header.authorization.BasicAuthentication;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
@@ -51,6 +52,7 @@ import static com.google.common.io.ByteStreams.readFully;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.stream.StreamSupport.stream;
+import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT;
 import static net.jacobpeterson.jet.common.http.header.Header.AUTHORIZATION;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
@@ -81,6 +83,7 @@ public final class Request {
     private @LazyInit @Nullable Url url;
     private @LazyInit @Nullable ImmutableListMultimap<String, String> headers;
     private @LazyInit @Nullable ImmutableMap<String, String> cookies;
+    private @LazyInit @Nullable Optional<Accept> accept;
     private @LazyInit @Nullable Optional<ContentType> contentType;
     private @LazyInit @Nullable ImmutableList<Range> ranges;
     private @LazyInit @Nullable Optional<ZonedDateTime> ifModifiedSince;
@@ -248,6 +251,22 @@ public final class Request {
     public @Nullable Long getContentLength() {
         final var length = handle.getInternals().getRequest().getLength();
         return length == -1 ? null : length;
+    }
+
+    /**
+     * @return internally-cached {@link #getHeader(Header)} {@link Header#ACCEPT} {@link Accept#parse(String)}
+     */
+    public @Nullable Accept getAccept() throws StatusException {
+        if (accept == null) {
+            final var accept = getHeader(ACCEPT);
+            try {
+                this.accept = Optional.ofNullable(accept == null ? null : Accept.parse(accept));
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse `%s` header".formatted(ACCEPT),
+                        exception);
+            }
+        }
+        return accept.orElse(null);
     }
 
     /**
