@@ -12,6 +12,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public final class StrictTransportSecurityTest {
 
     @Test
+    public void staticOneYear() {
+        assertEquals("max-age=31536000",
+                StrictTransportSecurity.ONE_YEAR.toString());
+    }
+
+    @Test
+    public void staticOneYearIncludeSubdomains() {
+        assertEquals("max-age=31536000; includeSubDomains",
+                StrictTransportSecurity.ONE_YEAR_INCLUDE_SUBDOMAINS.toString());
+    }
+
+    @Test
+    public void staticOneYearIncludeSubdomainsPreload() {
+        assertEquals("max-age=31536000; includeSubDomains; preload",
+                StrictTransportSecurity.ONE_YEAR_INCLUDE_SUBDOMAINS_PRELOAD.toString());
+    }
+
+    @Test
     public void parse() {
         {
             final var strictTransportSecurity = StrictTransportSecurity.parse("max-age=1");

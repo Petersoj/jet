@@ -42,8 +42,8 @@ public final class StringUtil {
      *
      * @return <code>true</code> for plain text likely, <code>false</code> otherwise
      */
-    public static boolean isLikelyPlainText(final Charset charset,
-            final byte[] bytes, final int offset, final int length) {
+    public static boolean isLikelyPlainText(final Charset charset, final byte[] bytes,
+            final int offset, final int length) {
         final var decoder = charset.newDecoder();
         decoder.onMalformedInput(REPORT);
         decoder.onUnmappableCharacter(REPORT);
@@ -55,7 +55,7 @@ public final class StringUtil {
         }
         while (decoded.hasRemaining()) {
             final var c = decoded.get();
-            if (c != '\n' && c != '\r' && c != '\t' && (c < 0x20 || c == 0x7F)) {
+            if (c != '\r' && c != '\n' && c != '\t' && (c < 0x20 || c == 0x7F)) {
                 return false;
             }
         }

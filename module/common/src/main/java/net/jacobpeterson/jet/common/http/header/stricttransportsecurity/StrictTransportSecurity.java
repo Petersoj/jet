@@ -66,7 +66,7 @@ public final class StrictTransportSecurity {
     public static final String PRELOAD_FLAG = "preload";
 
     /**
-     * The number of seconds in one year: 31,536,000
+     * The number of seconds in one year: <code>31,536,000</code>
      */
     public static final long SECONDS_IN_ONE_YEAR = 31536000;
 
