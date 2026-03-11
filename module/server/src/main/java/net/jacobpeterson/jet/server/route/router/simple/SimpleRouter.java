@@ -58,6 +58,7 @@ public class SimpleRouter implements Router {
         }
     }
 
+    @SuppressWarnings("NullAway") // TODO remove once NullAway false positives are fixed
     @Override
     public void route(final Handle handle) {
         Entry<Route, Handler> matchedHandlerOfRoute = null;
