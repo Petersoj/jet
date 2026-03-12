@@ -13,8 +13,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * {@link Handle} is a class that represents a web server request and response.
  * <p>
@@ -70,7 +68,6 @@ public class Handle {
      * @return {@link Jet#getSessionStore()} {@link SessionStore#getOrCreate(Handle)}
      */
     public Session getSession() {
-        return requireNonNull(internals.getJet().getSessionStore(),
-                "`Jet` `SessionStore` must be set in order to use `getSession()`").getOrCreate(this);
+        return internals.getJet().getSessionStore().getOrCreate(this);
     }
 }
