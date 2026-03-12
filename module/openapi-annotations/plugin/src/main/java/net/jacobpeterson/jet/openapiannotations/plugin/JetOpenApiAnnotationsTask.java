@@ -51,12 +51,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
@@ -77,8 +75,8 @@ import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.networknt.schema.InputFormat.JSON;
 import static java.lang.Math.max;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.readString;
 import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.Files.writeString;
 import static java.util.Locale.ROOT;
@@ -424,13 +422,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     checkArgument($schema.equals(DEFAULT_$SCHEMA),
                             "Validation for custom `@OpenApi.$schema` of `%s` is unsupported.", $schema);
                     if (schema == null) {
-                        try {
-                            schema = SchemaRegistry.withDefaultDialectId(null, null)
-                                    .getSchema(readString(Paths.get(requireNonNull(
-                                            getClass().getResource("oas-3.2-schema-2025-09-17.json")).toURI())));
-                        } catch (final IOException | URISyntaxException exception) {
-                            throw new RuntimeException(exception);
-                        }
+                        schema = SchemaRegistry.withDefaultDialectId(null, null)
+                                .getSchema(new String(requireNonNull(getClass()
+                                        .getResourceAsStream("oas-3.2-schema-2025-09-17.json")).readAllBytes(), UTF_8));
                     }
                     final var errors = schema.validate(openApiJsonString, JSON, executionContext -> executionContext
                             .executionConfig(executionConfig -> executionConfig
@@ -445,12 +439,8 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                                 .collect(joining("\n")));
                     }
                 }
-                try {
-                    writeString(outputDirectory.resolve("openapi%s.json"
-                            .formatted(!groupName.isEmpty() ? "-" + groupName : "")), openApiJsonString);
-                } catch (final IOException ioException) {
-                    throw new RuntimeException(ioException);
-                }
+                writeString(outputDirectory.resolve("openapi%s.json"
+                        .formatted(!groupName.isEmpty() ? "-" + groupName : "")), openApiJsonString);
             }
         } catch (final IOException ioException) {
             throw new RuntimeException(ioException);

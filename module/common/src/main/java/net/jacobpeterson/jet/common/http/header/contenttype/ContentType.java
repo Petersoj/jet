@@ -18,10 +18,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,7 +27,6 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSetMultimap.flatteningToImmutableSetMultimap;
 import static com.google.common.io.Files.getFileExtension;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.Files.readAllLines;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
@@ -79,9 +75,13 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 @RequiredArgsConstructor(access = PRIVATE) @EqualsAndHashCode(cacheStrategy = LAZY)
 public final class ContentType {
 
-    /** The {@link #getType()}-{@link #getSubtype()} delimiter: <code>"/"</code> */
+    /**
+     * The {@link #getType()}-{@link #getSubtype()} delimiter: <code>"/"</code>
+     */
     public static final String TYPE_DELIMITER = "/";
-    /** The wildcard token: <code>"*"</code> */
+    /**
+     * The wildcard token: <code>"*"</code>
+     */
     public static final String WILDCARD_TOKEN = "*";
     public static final String WILDCARD_WILDCARD_STRING = WILDCARD_TOKEN + TYPE_DELIMITER + WILDCARD_TOKEN;
     public static final ContentType WILDCARD_WILDCARD = create(WILDCARD_TOKEN, WILDCARD_TOKEN);
@@ -536,14 +536,14 @@ public final class ContentType {
     public static final ImmutableMap<String, ContentType> CONTENT_TYPE_OF_FILE_EXTENSIONS;
 
     static {
-        final List<String> tsvLines;
+        final String tsvFile;
         try {
-            tsvLines = readAllLines(Path.of(requireNonNull(
-                    ContentType.class.getResource("file-extensions-of-mime-types.tsv")).toURI()), UTF_8);
-        } catch (final IOException | URISyntaxException exception) {
-            throw new RuntimeException(exception);
+            tsvFile = new String(requireNonNull(ContentType.class
+                    .getResourceAsStream("file-extensions-of-mime-types.tsv")).readAllBytes(), UTF_8);
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
         }
-        FILE_EXTENSIONS_OF_CONTENT_TYPES = tsvLines.stream()
+        FILE_EXTENSIONS_OF_CONTENT_TYPES = tsvFile.lines()
                 .filter(line -> !line.isBlank() && !line.startsWith("#"))
                 .map(line -> Splitter.on('\t').limit(2).splitToList(line))
                 .collect(flatteningToImmutableSetMultimap(tsv -> parse(tsv.getFirst()),
