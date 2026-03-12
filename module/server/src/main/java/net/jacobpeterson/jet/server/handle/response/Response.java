@@ -91,7 +91,7 @@ public final class Response {
      * <p>
      * Defaults to {@link Status#OK_200} {@link Status#getCode()}.
      */
-    private @Getter Integer statusCode = OK_200.getCode();
+    private @Getter int statusCode = OK_200.getCode();
 
     /**
      * The {@link Status}.

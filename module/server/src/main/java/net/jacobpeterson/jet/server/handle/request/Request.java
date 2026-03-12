@@ -427,16 +427,14 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyInputStream(Long, OnBoundCount)} with <code>boundCount</code> set to <code>null</code>
-     * and <code>onBoundCount</code> set to <code>null</code>
+     * @return {@link #getBodyInputStream(Long)} with {@link Jet#getDefaultRequestBodyBoundCount()}
      */
     public BoundedInputStream getBodyInputStream() {
-        return getBodyInputStream(null, null);
+        return getBodyInputStream((long) handle.getInternals().getJet().getDefaultRequestBodyBoundCount());
     }
 
     /**
-     * @return {@link #getBodyInputStream(Long, OnBoundCount)} with <code>onBoundCount</code> set to
-     * {@link OnBoundCount#THROW}
+     * @return {@link #getBodyInputStream(Long, OnBoundCount)} with {@link OnBoundCount#THROW}
      */
     public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount) {
         return getBodyInputStream(boundCount, OnBoundCount.THROW);
@@ -453,6 +451,14 @@ public final class Request {
     public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount,
             final @Nullable OnBoundCount onBoundCount) {
         return new BoundedInputStream(asInputStream(handle.getInternals().getRequest()), boundCount, onBoundCount);
+    }
+
+    /**
+     * @return {@link #getBodyInputStream(Long, OnBoundCount)} with <code>boundCount</code> set to <code>null</code>
+     * and <code>onBoundCount</code> set to <code>null</code>
+     */
+    public BoundedInputStream getBodyInputStreamUnbounded() {
+        return getBodyInputStream(null, null);
     }
 
     /**
