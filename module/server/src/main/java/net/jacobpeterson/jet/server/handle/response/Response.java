@@ -100,7 +100,9 @@ public final class Response {
      */
     private @Getter @Nullable Status status = OK_200;
 
-    /** The headers {@link String} {@link ListMultimap}. */
+    /**
+     * The headers {@link String} {@link ListMultimap}.
+     */
     private final @Getter ListMultimap<String, String> headers = MultimapBuilder.ListMultimapBuilder
             .hashKeys()
             .arrayListValues(1)
@@ -330,6 +332,14 @@ public final class Response {
             contentSecurityPolicyBuilder = ContentSecurityPolicy.builder();
         }
         return contentSecurityPolicyBuilder;
+    }
+
+    /**
+     * @return <code>true</code> if {@link #getContentSecurityPolicyBuilder()} has been called, <code>false</code>
+     * otherwise
+     */
+    public boolean hasContentSecurityPolicyBuilder() {
+        return contentSecurityPolicyBuilder != null;
     }
 
     /**
