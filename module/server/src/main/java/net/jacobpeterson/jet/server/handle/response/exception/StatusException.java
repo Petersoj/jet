@@ -4,56 +4,95 @@ import lombok.Getter;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
- * {@link StatusException} is a {@link RuntimeException} for {@link Handler}s to respond with a given {@link Status}.
+ * {@link StatusException} is a {@link RuntimeException} for {@link Handler}s to respond with a given {@link Status}
+ * code.
  */
 @NullMarked
 public class StatusException extends RuntimeException {
 
-    /** The response {@link Status}. */
-    private final @Getter Status status;
+    /**
+     * The response {@link Status} code.
+     */
+    private final @Getter int statusCode;
 
     /**
-     * Instantiates a new {@link StatusException}.
-     *
-     * @param status the status
+     * Calls {@link #StatusException(int)} with {@link Status#getCode()}.
      */
     public StatusException(final Status status) {
-        this.status = status;
+        this(status.getCode());
     }
 
     /**
-     * Instantiates a new {@link StatusException}.
-     *
-     * @param status  the {@link #getStatus()}
-     * @param message the {@link #getMessage()}
+     * Calls {@link #StatusException(int, String)} with {@link Status#getCode()}.
      */
     public StatusException(final Status status, final String message) {
-        super(message);
-        this.status = status;
+        this(status.getCode(), message);
     }
 
     /**
-     * Instantiates a new {@link StatusException}.
-     *
-     * @param status  the {@link #getStatus()}
-     * @param message the {@link #getMessage()}
-     * @param cause   the {@link #getCause()}
+     * Calls {@link #StatusException(int, String, Throwable)} with {@link Status#getCode()}.
      */
     public StatusException(final Status status, final String message, final Throwable cause) {
-        super(message, cause);
-        this.status = status;
+        this(status.getCode(), message, cause);
+    }
+
+    /**
+     * Calls {@link #StatusException(int, Throwable)} with {@link Status#getCode()}.
+     */
+    public StatusException(final Status status, final Throwable cause) {
+        this(status.getCode(), cause);
     }
 
     /**
      * Instantiates a new {@link StatusException}.
      *
-     * @param status the {@link #getStatus()}
-     * @param cause  the {@link #getCause()}
+     * @param statusCode the {@link #getStatusCode()}
      */
-    public StatusException(final Status status, final Throwable cause) {
+    public StatusException(final int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * Instantiates a new {@link StatusException}.
+     *
+     * @param statusCode the {@link #getStatusCode()}
+     * @param message    the {@link #getMessage()}
+     */
+    public StatusException(final int statusCode, final String message) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * Instantiates a new {@link StatusException}.
+     *
+     * @param statusCode the {@link #getStatusCode()}
+     * @param message    the {@link #getMessage()}
+     * @param cause      the {@link #getCause()}
+     */
+    public StatusException(final int statusCode, final String message, final Throwable cause) {
+        super(message, cause);
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * Instantiates a new {@link StatusException}.
+     *
+     * @param statusCode the {@link #getStatusCode()}
+     * @param cause      the {@link #getCause()}
+     */
+    public StatusException(final int statusCode, final Throwable cause) {
         super(cause);
-        this.status = status;
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * @return {@link Status#forCode(int)} with {@link #getStatusCode()}
+     */
+    public @Nullable Status getStatus() {
+        return Status.forCode(statusCode);
     }
 }
