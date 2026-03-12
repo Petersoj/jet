@@ -206,10 +206,11 @@ public final class Response {
 
     /**
      * Calls {@link #setHeader(Header, String)} {@link Header#LAST_MODIFIED}
-     * {@link DateTimeFormatter#RFC_1123_DATE_TIME} {@link DateTimeFormatter#format(TemporalAccessor)}.
+     * {@link DateTimeFormatter#RFC_1123_DATE_TIME} {@link DateTimeFormatter#format(TemporalAccessor)}
+     * {@link Instant#atZone(ZoneId)} {@link ZoneOffset#UTC}.
      */
     public void setLastModified(final Instant lastModified) {
-        setHeader(LAST_MODIFIED, RFC_1123_DATE_TIME.format(lastModified));
+        setHeader(LAST_MODIFIED, RFC_1123_DATE_TIME.format(lastModified.atZone(UTC)));
     }
 
     /**
