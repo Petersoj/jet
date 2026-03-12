@@ -2,13 +2,11 @@ package net.jacobpeterson.jet.server.handle.response.exception;
 
 import lombok.Getter;
 import net.jacobpeterson.jet.common.http.status.Status;
-import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * {@link StatusException} is a {@link RuntimeException} for {@link Handler}s to respond with a given {@link Status}
- * code.
+ * {@link StatusException} is a {@link RuntimeException} with an associated {@link Status} code.
  */
 @NullMarked
 public class StatusException extends RuntimeException {

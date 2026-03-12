@@ -2,7 +2,7 @@ package net.jacobpeterson.jet.server.route.router;
 
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
-import net.jacobpeterson.jet.server.handler.Handler;
+import net.jacobpeterson.jet.server.handler.handler.Handler;
 import net.jacobpeterson.jet.server.route.route.Route;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
 import org.jspecify.annotations.NullMarked;
