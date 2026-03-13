@@ -12,9 +12,9 @@ import org.jspecify.annotations.NullMarked;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * {@link HostRedirectHandler} is a {@link Handler} to redirect a {@link Request#getUrl()} to {@link Url#getHost()} set
- * to the given {@link #getHost()}. If {@link Request#getUrl()} {@link Url#getHost()} is equal to {@link #getHost()}, an
- * exception is thrown to expose the infinite redirect.
+ * {@link HostRedirectHandler} is a {@link Handler} to redirect {@link Request#getUrl()} to {@link Url#getHost()} set to
+ * {@link #getHost()}. If {@link Request#getUrl()} {@link Url#getHost()} is equal to {@link #getHost()}, an exception is
+ * thrown to expose the infinite redirect.
  */
 @NullMarked
 @Getter @RequiredArgsConstructor

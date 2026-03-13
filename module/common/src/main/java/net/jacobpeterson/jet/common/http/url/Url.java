@@ -913,6 +913,7 @@ public final class Url {
     /**
      * @return internally-cached {@link #decode(String)} {@link #getEncodedNormalizedPath()}
      */
+    @EqualsAndHashCode.Include
     public String getNormalizedPath() {
         if (normalizedPath == null) {
             normalizedPath = decode(getEncodedNormalizedPath());
@@ -933,7 +934,6 @@ public final class Url {
     /**
      * @return internally-cached {@link #encodedPathSegmentsToDecodedList(String)} {@link #getEncodedNormalizedPath()}
      */
-    @EqualsAndHashCode.Include
     public ImmutableList<String> getNormalizedPathSegments() {
         if (normalizedPathSegments == null) {
             normalizedPathSegments = encodedPathSegmentsToDecodedList(getEncodedNormalizedPath());

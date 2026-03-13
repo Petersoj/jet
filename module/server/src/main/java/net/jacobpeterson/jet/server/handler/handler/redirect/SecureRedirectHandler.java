@@ -15,9 +15,9 @@ import static net.jacobpeterson.jet.common.http.url.Scheme.HTTP;
 import static net.jacobpeterson.jet.common.http.url.Scheme.HTTPS;
 
 /**
- * {@link SecureRedirectHandler} is a {@link Handler} to redirect a {@link Request#getUrl()} to {@link Scheme#HTTPS}.
- * If {@link Request#getUrl()} {@link Url#getSchemeEnum()} is not equal to {@link Scheme#HTTP}, an exception is thrown
- * to expose the infinite redirect.
+ * {@link SecureRedirectHandler} is a {@link Handler} to redirect {@link Request#getUrl()} to {@link Scheme#HTTPS}. If
+ * {@link Request#getUrl()} {@link Url#getSchemeEnum()} is not equal to {@link Scheme#HTTP}, an exception is thrown to
+ * expose the infinite redirect.
  */
 @NullMarked
 @Getter @RequiredArgsConstructor
