@@ -387,12 +387,11 @@ public final class JetServer {
 
                     final var response = handle.getResponse();
 
-                    if (preventMimeSniffing && response.getHeaders().keySet().stream()
-                            .noneMatch(header -> header.equalsIgnoreCase(X_CONTENT_TYPE_OPTIONS.toString()))) {
+                    if (preventMimeSniffing && !response.getHeaders().containsKey(X_CONTENT_TYPE_OPTIONS.toString())) {
                         response.setHeader(X_CONTENT_TYPE_OPTIONS, "nosniff");
                     }
-                    if (preventAmbiguousResponseCacheControl && response.getHeaders().keySet().stream()
-                            .noneMatch(header -> header.equalsIgnoreCase(CACHE_CONTROL.toString()))) {
+                    if (preventAmbiguousResponseCacheControl &&
+                            !response.getHeaders().containsKey(CACHE_CONTROL.toString())) {
                         response.setHeader(CACHE_CONTROL, NO_CACHE.toString());
                     }
 
