@@ -108,19 +108,18 @@ import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.Res
 public final class ResponseCacheControl {
 
     /**
-     * A {@link ResponseCacheControl} with {@link #isNoCache()} set to <code>true</code>.
-     */
-    public static final ResponseCacheControl NO_CACHE = builder().noCache().build();
-
-    /**
-     * A {@link ResponseCacheControl} with {@link #isNoStore()} set to <code>true</code>.
-     */
-    public static final ResponseCacheControl NO_STORE = builder().noStore().build();
-
-    /**
      * The number of seconds in one year: 31,536,000
      */
     public static final long SECONDS_IN_ONE_YEAR = 31536000;
+
+    /**
+     * A {@link ResponseCacheControl} with {@link #getMaxAge()} set to {@link #SECONDS_IN_ONE_YEAR},
+     * {@link #isImmutable()} set to <code>true</code>.
+     */
+    public static final ResponseCacheControl MAX_AGE_1_YEAR_IMMUTABLE = builder()
+            .maxAge(SECONDS_IN_ONE_YEAR)
+            .immutable()
+            .build();
 
     /**
      * A {@link ResponseCacheControl} with {@link #getMaxAge()} set to {@link #SECONDS_IN_ONE_YEAR},
@@ -141,6 +140,16 @@ public final class ResponseCacheControl {
             .immutable()
             .private_()
             .build();
+
+    /**
+     * A {@link ResponseCacheControl} with {@link #isNoCache()} set to <code>true</code>.
+     */
+    public static final ResponseCacheControl NO_CACHE = builder().noCache().build();
+
+    /**
+     * A {@link ResponseCacheControl} with {@link #isNoStore()} set to <code>true</code>.
+     */
+    public static final ResponseCacheControl NO_STORE = builder().noStore().build();
 
     /**
      * Parses the given response {@link Header#CACHE_CONTROL} value {@link String} into a {@link ResponseCacheControl}.
