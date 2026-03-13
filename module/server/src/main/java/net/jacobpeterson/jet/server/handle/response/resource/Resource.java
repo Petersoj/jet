@@ -189,8 +189,8 @@ public final class Resource {
 
     /**
      * Creates a {@link Resource} instance from the given {@link File}, with various {@link Resource} headers set using
-     * the metadata of the given {@link File}, and {@link #getContent()} set using {@link FileInputStream} or
-     * {@link ContentRange#forFile(File)}.
+     * the metadata of the given {@link File}, and {@link #getContent()} set using {@link FileInputStream} with
+     * {@link ContentRange#forInputStream(InputStream)} as needed.
      *
      * @param file           the {@link File}
      * @param immutable      <code>true</code> if the given {@link File} is immutable (the path, name, metadata, and
@@ -233,7 +233,7 @@ public final class Resource {
                 .contentRange(contentRange)
                 .content(() -> {
                     try {
-                        return contentRange.forFile(file);
+                        return contentRange.forInputStream(new FileInputStream(file));
                     } catch (final FileNotFoundException fileNotFoundException) {
                         throw new StatusException(NOT_FOUND_404, fileNotFoundException);
                     } catch (final IOException ioException) {

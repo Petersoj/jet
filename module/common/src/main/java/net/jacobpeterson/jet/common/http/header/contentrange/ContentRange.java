@@ -13,8 +13,6 @@ import net.jacobpeterson.jet.common.io.bounded.OnBoundCount;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -260,13 +258,6 @@ public final class ContentRange {
         } else {
             return inputStream;
         }
-    }
-
-    /**
-     * @return {@link #forInputStream(InputStream)} with {@link FileInputStream#FileInputStream(File)}
-     */
-    public InputStream forFile(final File file) throws IOException {
-        return forInputStream(new FileInputStream(file));
     }
 
     /**
