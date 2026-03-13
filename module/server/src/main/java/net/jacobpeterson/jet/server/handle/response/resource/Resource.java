@@ -232,12 +232,21 @@ public final class Resource {
                 .contentLength(contentRange.getContentLength())
                 .contentRange(contentRange)
                 .content(() -> {
+                    final FileInputStream fileInputStream;
                     try {
-                        return contentRange.forInputStream(new FileInputStream(file));
+                        fileInputStream = new FileInputStream(file);
                     } catch (final FileNotFoundException fileNotFoundException) {
                         throw new StatusException(NOT_FOUND_404, fileNotFoundException);
-                    } catch (final IOException ioException) {
-                        throw new StatusException(RANGE_NOT_SATISFIABLE_416, ioException);
+                    }
+                    try {
+                        return contentRange.forInputStream(fileInputStream);
+                    } catch (final Throwable throwable) {
+                        try {
+                            fileInputStream.close();
+                        } catch (final Throwable closeThrowable) {
+                            throwable.addSuppressed(closeThrowable);
+                        }
+                        throw new StatusException(RANGE_NOT_SATISFIABLE_416, throwable);
                     }
                 }).build();
     }
