@@ -1,7 +1,7 @@
 package net.jacobpeterson.jet.server.handler.throwable.simple;
 
 import lombok.extern.slf4j.Slf4j;
-import net.jacobpeterson.jet.server.Jet;
+import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handler.throwable.ThrowableHandler;
@@ -13,7 +13,7 @@ import static org.slf4j.event.Level.ERROR;
 
 /**
  * {@link SimpleRouterThrowableHandler} is a simple {@link ThrowableHandler} implementation for
- * {@link Jet#getRouterThrowableHandler()}.
+ * {@link JetServer#getRouterThrowableHandler()}.
  */
 @NullMarked
 @Slf4j
@@ -32,9 +32,9 @@ public class SimpleRouterThrowableHandler implements ThrowableHandler {
         if (!isStatusException || LOGGER.isDebugEnabled()) {
             final var request = handle.getRequest();
             final var responseStatus = response.getStatus();
-            LOGGER.atLevel(!isStatusException ? ERROR : DEBUG).log("{} {} {} - {}",
-                    request.getVersion(), request.getMethod(), request.getUrl(),
-                    responseStatus != null ? responseStatus : response.getStatusCode(), throwable);
+            LOGGER.atLevel(!isStatusException ? ERROR : DEBUG).log("Router threw with status {} for request: {} {} {}",
+                    responseStatus != null ? responseStatus : response.getStatusCode(),
+                    request.getVersion(), request.getMethod(), request.getUrl(), throwable);
         }
     }
 }

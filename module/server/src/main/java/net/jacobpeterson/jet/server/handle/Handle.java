@@ -3,7 +3,7 @@ package net.jacobpeterson.jet.server.handle;
 import com.google.common.base.Stopwatch;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.jacobpeterson.jet.server.Jet;
+import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.session.Session;
@@ -65,9 +65,9 @@ public class Handle {
     }
 
     /**
-     * @return {@link Jet#getSessionStore()} {@link SessionStore#getOrCreate(Handle)}
+     * @return {@link JetServer#getSessionStore()} {@link SessionStore#getOrCreate(Handle)}
      */
     public Session getSession() {
-        return internals.getJet().getSessionStore().getOrCreate(this);
+        return internals.getJetServer().getSessionStore().getOrCreate(this);
     }
 }

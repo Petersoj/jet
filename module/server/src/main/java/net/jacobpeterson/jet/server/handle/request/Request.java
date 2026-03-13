@@ -20,7 +20,7 @@ import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.common.io.bounded.BoundException;
 import net.jacobpeterson.jet.common.io.bounded.BoundedInputStream;
-import net.jacobpeterson.jet.server.Jet;
+import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
@@ -426,10 +426,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyInputStream(Long)} with {@link Jet#getDefaultRequestBodyBoundCount()}
+     * @return {@link #getBodyInputStream(Long)} with {@link JetServer#getDefaultRequestBodyBoundCount()}
      */
     public BoundedInputStream getBodyInputStream() {
-        return getBodyInputStream((long) handle.getInternals().getJet().getDefaultRequestBodyBoundCount());
+        return getBodyInputStream((long) handle.getInternals().getJetServer().getDefaultRequestBodyBoundCount());
     }
 
     /**
@@ -460,10 +460,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyBytes(Integer)} with {@link Jet#getDefaultRequestBodyBoundCount()}
+     * @return {@link #getBodyBytes(Integer)} with {@link JetServer#getDefaultRequestBodyBoundCount()}
      */
     public byte[] getBodyBytes() {
-        return getBodyBytes(handle.getInternals().getJet().getDefaultRequestBodyBoundCount());
+        return getBodyBytes(handle.getInternals().getJetServer().getDefaultRequestBodyBoundCount());
     }
 
     /**
@@ -493,10 +493,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyString(Integer)} with {@link Jet#getDefaultRequestBodyBoundCount()}
+     * @return {@link #getBodyString(Integer)} with {@link JetServer#getDefaultRequestBodyBoundCount()}
      */
     public String getBodyString() {
-        return getBodyString(handle.getInternals().getJet().getDefaultRequestBodyBoundCount());
+        return getBodyString(handle.getInternals().getJetServer().getDefaultRequestBodyBoundCount());
     }
 
     /**
@@ -513,11 +513,12 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyMultiParts(MultipartConfig)} with {@link Jet#getDefaultMultipartConfig()}
+     * @return {@link #getBodyMultiParts(MultipartConfig)} with {@link JetServer#getDefaultMultipartConfig()}
      */
     public ImmutableList<MultiPart> getBodyMultiParts() {
         if (defaultMultiPartConfig == null) { // Racy cache access is fine here due to immutable idempotency
-            defaultMultiPartConfig = multipartConfigToJetty(handle.getInternals().getJet().getDefaultMultipartConfig());
+            defaultMultiPartConfig = multipartConfigToJetty(handle.getInternals().getJetServer()
+                    .getDefaultMultipartConfig());
         }
         return getBodyMultiParts(defaultMultiPartConfig);
     }

@@ -2,7 +2,7 @@ package net.jacobpeterson.jet.server.handle;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.jacobpeterson.jet.server.Jet;
+import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.route.route.Route;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
 import org.eclipse.jetty.server.Request;
@@ -26,7 +26,7 @@ import static java.util.Objects.requireNonNull;
 public final class HandleInternals {
 
     /** FOR INTERNAL USE ONLY. */
-    private final @Getter Jet jet;
+    private final @Getter JetServer jetServer;
 
     /** FOR INTERNAL USE ONLY. */
     private final @Getter Request request;
