@@ -780,193 +780,319 @@ public enum Status {
      */
     public static final class Code {
 
-        /** @see Status#CONTINUE_100 */
+        /**
+         * @see Status#CONTINUE_100
+         */
         public static final int CONTINUE_100 = 100;
 
-        /** @see Status#SWITCHING_PROTOCOLS_101 */
+        /**
+         * @see Status#SWITCHING_PROTOCOLS_101
+         */
         public static final int SWITCHING_PROTOCOLS_101 = 101;
 
-        /** @see Status#PROCESSING_102 */
+        /**
+         * @see Status#PROCESSING_102
+         */
         public static final int PROCESSING_102 = 102;
 
-        /** @see Status#EARLY_HINTS_103 */
+        /**
+         * @see Status#EARLY_HINTS_103
+         */
         public static final int EARLY_HINTS_103 = 103;
 
-        /** @see Status#OK_200 */
+        /**
+         * @see Status#OK_200
+         */
         public static final int OK_200 = 200;
 
-        /** @see Status#CREATED_201 */
+        /**
+         * @see Status#CREATED_201
+         */
         public static final int CREATED_201 = 201;
 
-        /** @see Status#ACCEPTED_202 */
+        /**
+         * @see Status#ACCEPTED_202
+         */
         public static final int ACCEPTED_202 = 202;
 
-        /** @see Status#NON_AUTHORITATIVE_INFORMATION_203 */
+        /**
+         * @see Status#NON_AUTHORITATIVE_INFORMATION_203
+         */
         public static final int NON_AUTHORITATIVE_INFORMATION_203 = 203;
 
-        /** @see Status#NO_CONTENT_204 */
+        /**
+         * @see Status#NO_CONTENT_204
+         */
         public static final int NO_CONTENT_204 = 204;
 
-        /** @see Status#RESET_CONTENT_205 */
+        /**
+         * @see Status#RESET_CONTENT_205
+         */
         public static final int RESET_CONTENT_205 = 205;
 
-        /** @see Status#PARTIAL_CONTENT_206 */
+        /**
+         * @see Status#PARTIAL_CONTENT_206
+         */
         public static final int PARTIAL_CONTENT_206 = 206;
 
-        /** @see Status#MULTI_STATUS_207 */
+        /**
+         * @see Status#MULTI_STATUS_207
+         */
         public static final int MULTI_STATUS_207 = 207;
 
-        /** @see Status#ALREADY_REPORTED_208 */
+        /**
+         * @see Status#ALREADY_REPORTED_208
+         */
         public static final int ALREADY_REPORTED_208 = 208;
 
-        /** @see Status#IM_USED_226 */
+        /**
+         * @see Status#IM_USED_226
+         */
         public static final int IM_USED_226 = 226;
 
-        /** @see Status#MULTIPLE_CHOICES_300 */
+        /**
+         * @see Status#MULTIPLE_CHOICES_300
+         */
         public static final int MULTIPLE_CHOICES_300 = 300;
 
-        /** @see Status#MOVED_PERMANENTLY_301 */
+        /**
+         * @see Status#MOVED_PERMANENTLY_301
+         */
         public static final int MOVED_PERMANENTLY_301 = 301;
 
-        /** @see Status#FOUND_302 */
+        /**
+         * @see Status#FOUND_302
+         */
         public static final int FOUND_302 = 302;
 
-        /** @see Status#SEE_OTHER_303 */
+        /**
+         * @see Status#SEE_OTHER_303
+         */
         public static final int SEE_OTHER_303 = 303;
 
-        /** @see Status#NOT_MODIFIED_304 */
+        /**
+         * @see Status#NOT_MODIFIED_304
+         */
         public static final int NOT_MODIFIED_304 = 304;
 
-        /** @see Status#USE_PROXY_305 */
+        /**
+         * @see Status#USE_PROXY_305
+         */
         public static final int USE_PROXY_305 = 305;
 
-        /** @see Status#UNUSED_306 */
+        /**
+         * @see Status#UNUSED_306
+         */
         public static final int UNUSED_306 = 306;
 
-        /** @see Status#TEMPORARY_REDIRECT_307 */
+        /**
+         * @see Status#TEMPORARY_REDIRECT_307
+         */
         public static final int TEMPORARY_REDIRECT_307 = 307;
 
-        /** @see Status#PERMANENT_REDIRECT_308 */
+        /**
+         * @see Status#PERMANENT_REDIRECT_308
+         */
         public static final int PERMANENT_REDIRECT_308 = 308;
 
-        /** @see Status#BAD_REQUEST_400 */
+        /**
+         * @see Status#BAD_REQUEST_400
+         */
         public static final int BAD_REQUEST_400 = 400;
 
-        /** @see Status#UNAUTHORIZED_401 */
+        /**
+         * @see Status#UNAUTHORIZED_401
+         */
         public static final int UNAUTHORIZED_401 = 401;
 
-        /** @see Status#PAYMENT_REQUIRED_402 */
+        /**
+         * @see Status#PAYMENT_REQUIRED_402
+         */
         public static final int PAYMENT_REQUIRED_402 = 402;
 
-        /** @see Status#FORBIDDEN_403 */
+        /**
+         * @see Status#FORBIDDEN_403
+         */
         public static final int FORBIDDEN_403 = 403;
 
-        /** @see Status#NOT_FOUND_404 */
+        /**
+         * @see Status#NOT_FOUND_404
+         */
         public static final int NOT_FOUND_404 = 404;
 
-        /** @see Status#METHOD_NOT_ALLOWED_405 */
+        /**
+         * @see Status#METHOD_NOT_ALLOWED_405
+         */
         public static final int METHOD_NOT_ALLOWED_405 = 405;
 
-        /** @see Status#NOT_ACCEPTABLE_406 */
+        /**
+         * @see Status#NOT_ACCEPTABLE_406
+         */
         public static final int NOT_ACCEPTABLE_406 = 406;
 
-        /** @see Status#PROXY_AUTHENTICATION_REQUIRED_407 */
+        /**
+         * @see Status#PROXY_AUTHENTICATION_REQUIRED_407
+         */
         public static final int PROXY_AUTHENTICATION_REQUIRED_407 = 407;
 
-        /** @see Status#REQUEST_TIMEOUT_408 */
+        /**
+         * @see Status#REQUEST_TIMEOUT_408
+         */
         public static final int REQUEST_TIMEOUT_408 = 408;
 
-        /** @see Status#CONFLICT_409 */
+        /**
+         * @see Status#CONFLICT_409
+         */
         public static final int CONFLICT_409 = 409;
 
-        /** @see Status#GONE_410 */
+        /**
+         * @see Status#GONE_410
+         */
         public static final int GONE_410 = 410;
 
-        /** @see Status#LENGTH_REQUIRED_411 */
+        /**
+         * @see Status#LENGTH_REQUIRED_411
+         */
         public static final int LENGTH_REQUIRED_411 = 411;
 
-        /** @see Status#PRECONDITION_FAILED_412 */
+        /**
+         * @see Status#PRECONDITION_FAILED_412
+         */
         public static final int PRECONDITION_FAILED_412 = 412;
 
-        /** @see Status#CONTENT_TOO_LARGE_413 */
+        /**
+         * @see Status#CONTENT_TOO_LARGE_413
+         */
         public static final int CONTENT_TOO_LARGE_413 = 413;
 
-        /** @see Status#URI_TOO_LONG_414 */
+        /**
+         * @see Status#URI_TOO_LONG_414
+         */
         public static final int URI_TOO_LONG_414 = 414;
 
-        /** @see Status#UNSUPPORTED_MEDIA_TYPE_415 */
+        /**
+         * @see Status#UNSUPPORTED_MEDIA_TYPE_415
+         */
         public static final int UNSUPPORTED_MEDIA_TYPE_415 = 415;
 
-        /** @see Status#RANGE_NOT_SATISFIABLE_416 */
+        /**
+         * @see Status#RANGE_NOT_SATISFIABLE_416
+         */
         public static final int RANGE_NOT_SATISFIABLE_416 = 416;
 
-        /** @see Status#EXPECTATION_FAILED_417 */
+        /**
+         * @see Status#EXPECTATION_FAILED_417
+         */
         public static final int EXPECTATION_FAILED_417 = 417;
 
-        /** @see Status#IM_A_TEAPOT_418 */
+        /**
+         * @see Status#IM_A_TEAPOT_418
+         */
         public static final int IM_A_TEAPOT_418 = 418;
 
-        /** @see Status#MISDIRECTED_REQUEST_421 */
+        /**
+         * @see Status#MISDIRECTED_REQUEST_421
+         */
         public static final int MISDIRECTED_REQUEST_421 = 421;
 
-        /** @see Status#UNPROCESSABLE_CONTENT_422 */
+        /**
+         * @see Status#UNPROCESSABLE_CONTENT_422
+         */
         public static final int UNPROCESSABLE_CONTENT_422 = 422;
 
-        /** @see Status#LOCKED_423 */
+        /**
+         * @see Status#LOCKED_423
+         */
         public static final int LOCKED_423 = 423;
 
-        /** @see Status#FAILED_DEPENDENCY_424 */
+        /**
+         * @see Status#FAILED_DEPENDENCY_424
+         */
         public static final int FAILED_DEPENDENCY_424 = 424;
 
-        /** @see Status#TOO_EARLY_425 */
+        /**
+         * @see Status#TOO_EARLY_425
+         */
         public static final int TOO_EARLY_425 = 425;
 
-        /** @see Status#UPGRADE_REQUIRED_426 */
+        /**
+         * @see Status#UPGRADE_REQUIRED_426
+         */
         public static final int UPGRADE_REQUIRED_426 = 426;
 
-        /** @see Status#PRECONDITION_REQUIRED_428 */
+        /**
+         * @see Status#PRECONDITION_REQUIRED_428
+         */
         public static final int PRECONDITION_REQUIRED_428 = 428;
 
-        /** @see Status#TOO_MANY_REQUESTS_429 */
+        /**
+         * @see Status#TOO_MANY_REQUESTS_429
+         */
         public static final int TOO_MANY_REQUESTS_429 = 429;
 
-        /** @see Status#REQUEST_HEADER_FIELDS_TOO_LARGE_431 */
+        /**
+         * @see Status#REQUEST_HEADER_FIELDS_TOO_LARGE_431
+         */
         public static final int REQUEST_HEADER_FIELDS_TOO_LARGE_431 = 431;
 
-        /** @see Status#UNAVAILABLE_FOR_LEGAL_REASONS_451 */
+        /**
+         * @see Status#UNAVAILABLE_FOR_LEGAL_REASONS_451
+         */
         public static final int UNAVAILABLE_FOR_LEGAL_REASONS_451 = 451;
 
-        /** @see Status#INTERNAL_SERVER_ERROR_500 */
+        /**
+         * @see Status#INTERNAL_SERVER_ERROR_500
+         */
         public static final int INTERNAL_SERVER_ERROR_500 = 500;
 
-        /** @see Status#NOT_IMPLEMENTED_501 */
+        /**
+         * @see Status#NOT_IMPLEMENTED_501
+         */
         public static final int NOT_IMPLEMENTED_501 = 501;
 
-        /** @see Status#BAD_GATEWAY_502 */
+        /**
+         * @see Status#BAD_GATEWAY_502
+         */
         public static final int BAD_GATEWAY_502 = 502;
 
-        /** @see Status#SERVICE_UNAVAILABLE_503 */
+        /**
+         * @see Status#SERVICE_UNAVAILABLE_503
+         */
         public static final int SERVICE_UNAVAILABLE_503 = 503;
 
-        /** @see Status#GATEWAY_TIMEOUT_504 */
+        /**
+         * @see Status#GATEWAY_TIMEOUT_504
+         */
         public static final int GATEWAY_TIMEOUT_504 = 504;
 
-        /** @see Status#HTTP_VERSION_NOT_SUPPORTED_505 */
+        /**
+         * @see Status#HTTP_VERSION_NOT_SUPPORTED_505
+         */
         public static final int HTTP_VERSION_NOT_SUPPORTED_505 = 505;
 
-        /** @see Status#VARIANT_ALSO_NEGOTIATES_506 */
+        /**
+         * @see Status#VARIANT_ALSO_NEGOTIATES_506
+         */
         public static final int VARIANT_ALSO_NEGOTIATES_506 = 506;
 
-        /** @see Status#INSUFFICIENT_STORAGE_507 */
+        /**
+         * @see Status#INSUFFICIENT_STORAGE_507
+         */
         public static final int INSUFFICIENT_STORAGE_507 = 507;
 
-        /** @see Status#LOOP_DETECTED_508 */
+        /**
+         * @see Status#LOOP_DETECTED_508
+         */
         public static final int LOOP_DETECTED_508 = 508;
 
-        /** @see Status#NOT_EXTENDED_510 */
+        /**
+         * @see Status#NOT_EXTENDED_510
+         */
         public static final int NOT_EXTENDED_510 = 510;
 
-        /** @see Status#NETWORK_AUTHENTICATION_REQUIRED_511 */
+        /**
+         * @see Status#NETWORK_AUTHENTICATION_REQUIRED_511
+         */
         public static final int NETWORK_AUTHENTICATION_REQUIRED_511 = 511;
     }
 
@@ -976,193 +1102,319 @@ public enum Status {
      */
     public static final class Description {
 
-        /** @see Status#CONTINUE_100 */
+        /**
+         * @see Status#CONTINUE_100
+         */
         public static final String CONTINUE_100 = "Continue";
 
-        /** @see Status#SWITCHING_PROTOCOLS_101 */
+        /**
+         * @see Status#SWITCHING_PROTOCOLS_101
+         */
         public static final String SWITCHING_PROTOCOLS_101 = "Switching Protocols";
 
-        /** @see Status#PROCESSING_102 */
+        /**
+         * @see Status#PROCESSING_102
+         */
         public static final String PROCESSING_102 = "Processing";
 
-        /** @see Status#EARLY_HINTS_103 */
+        /**
+         * @see Status#EARLY_HINTS_103
+         */
         public static final String EARLY_HINTS_103 = "Early Hints";
 
-        /** @see Status#OK_200 */
+        /**
+         * @see Status#OK_200
+         */
         public static final String OK_200 = "OK";
 
-        /** @see Status#CREATED_201 */
+        /**
+         * @see Status#CREATED_201
+         */
         public static final String CREATED_201 = "Created";
 
-        /** @see Status#ACCEPTED_202 */
+        /**
+         * @see Status#ACCEPTED_202
+         */
         public static final String ACCEPTED_202 = "Accepted";
 
-        /** @see Status#NON_AUTHORITATIVE_INFORMATION_203 */
+        /**
+         * @see Status#NON_AUTHORITATIVE_INFORMATION_203
+         */
         public static final String NON_AUTHORITATIVE_INFORMATION_203 = "Non-Authoritative Information";
 
-        /** @see Status#NO_CONTENT_204 */
+        /**
+         * @see Status#NO_CONTENT_204
+         */
         public static final String NO_CONTENT_204 = "No Content";
 
-        /** @see Status#RESET_CONTENT_205 */
+        /**
+         * @see Status#RESET_CONTENT_205
+         */
         public static final String RESET_CONTENT_205 = "Reset Content";
 
-        /** @see Status#PARTIAL_CONTENT_206 */
+        /**
+         * @see Status#PARTIAL_CONTENT_206
+         */
         public static final String PARTIAL_CONTENT_206 = "Partial Content";
 
-        /** @see Status#MULTI_STATUS_207 */
+        /**
+         * @see Status#MULTI_STATUS_207
+         */
         public static final String MULTI_STATUS_207 = "Multi-Status";
 
-        /** @see Status#ALREADY_REPORTED_208 */
+        /**
+         * @see Status#ALREADY_REPORTED_208
+         */
         public static final String ALREADY_REPORTED_208 = "Already Reported";
 
-        /** @see Status#IM_USED_226 */
+        /**
+         * @see Status#IM_USED_226
+         */
         public static final String IM_USED_226 = "IM Used";
 
-        /** @see Status#MULTIPLE_CHOICES_300 */
+        /**
+         * @see Status#MULTIPLE_CHOICES_300
+         */
         public static final String MULTIPLE_CHOICES_300 = "Multiple Choices";
 
-        /** @see Status#MOVED_PERMANENTLY_301 */
+        /**
+         * @see Status#MOVED_PERMANENTLY_301
+         */
         public static final String MOVED_PERMANENTLY_301 = "Moved Permanently";
 
-        /** @see Status#FOUND_302 */
+        /**
+         * @see Status#FOUND_302
+         */
         public static final String FOUND_302 = "Found";
 
-        /** @see Status#SEE_OTHER_303 */
+        /**
+         * @see Status#SEE_OTHER_303
+         */
         public static final String SEE_OTHER_303 = "See Other";
 
-        /** @see Status#NOT_MODIFIED_304 */
+        /**
+         * @see Status#NOT_MODIFIED_304
+         */
         public static final String NOT_MODIFIED_304 = "Not Modified";
 
-        /** @see Status#USE_PROXY_305 */
+        /**
+         * @see Status#USE_PROXY_305
+         */
         public static final String USE_PROXY_305 = "Use Proxy";
 
-        /** @see Status#UNUSED_306 */
+        /**
+         * @see Status#UNUSED_306
+         */
         public static final String UNUSED_306 = "Unused";
 
-        /** @see Status#TEMPORARY_REDIRECT_307 */
+        /**
+         * @see Status#TEMPORARY_REDIRECT_307
+         */
         public static final String TEMPORARY_REDIRECT_307 = "Temporary Redirect";
 
-        /** @see Status#PERMANENT_REDIRECT_308 */
+        /**
+         * @see Status#PERMANENT_REDIRECT_308
+         */
         public static final String PERMANENT_REDIRECT_308 = "Permanent Redirect";
 
-        /** @see Status#BAD_REQUEST_400 */
+        /**
+         * @see Status#BAD_REQUEST_400
+         */
         public static final String BAD_REQUEST_400 = "Bad Request";
 
-        /** @see Status#UNAUTHORIZED_401 */
+        /**
+         * @see Status#UNAUTHORIZED_401
+         */
         public static final String UNAUTHORIZED_401 = "Unauthorized";
 
-        /** @see Status#PAYMENT_REQUIRED_402 */
+        /**
+         * @see Status#PAYMENT_REQUIRED_402
+         */
         public static final String PAYMENT_REQUIRED_402 = "Payment Required";
 
-        /** @see Status#FORBIDDEN_403 */
+        /**
+         * @see Status#FORBIDDEN_403
+         */
         public static final String FORBIDDEN_403 = "Forbidden";
 
-        /** @see Status#NOT_FOUND_404 */
+        /**
+         * @see Status#NOT_FOUND_404
+         */
         public static final String NOT_FOUND_404 = "Not Found";
 
-        /** @see Status#METHOD_NOT_ALLOWED_405 */
+        /**
+         * @see Status#METHOD_NOT_ALLOWED_405
+         */
         public static final String METHOD_NOT_ALLOWED_405 = "Method Not Allowed";
 
-        /** @see Status#NOT_ACCEPTABLE_406 */
+        /**
+         * @see Status#NOT_ACCEPTABLE_406
+         */
         public static final String NOT_ACCEPTABLE_406 = "Not Acceptable";
 
-        /** @see Status#PROXY_AUTHENTICATION_REQUIRED_407 */
+        /**
+         * @see Status#PROXY_AUTHENTICATION_REQUIRED_407
+         */
         public static final String PROXY_AUTHENTICATION_REQUIRED_407 = "Proxy Authentication Required";
 
-        /** @see Status#REQUEST_TIMEOUT_408 */
+        /**
+         * @see Status#REQUEST_TIMEOUT_408
+         */
         public static final String REQUEST_TIMEOUT_408 = "Request Timeout";
 
-        /** @see Status#CONFLICT_409 */
+        /**
+         * @see Status#CONFLICT_409
+         */
         public static final String CONFLICT_409 = "Conflict";
 
-        /** @see Status#GONE_410 */
+        /**
+         * @see Status#GONE_410
+         */
         public static final String GONE_410 = "Gone";
 
-        /** @see Status#LENGTH_REQUIRED_411 */
+        /**
+         * @see Status#LENGTH_REQUIRED_411
+         */
         public static final String LENGTH_REQUIRED_411 = "Length Required";
 
-        /** @see Status#PRECONDITION_FAILED_412 */
+        /**
+         * @see Status#PRECONDITION_FAILED_412
+         */
         public static final String PRECONDITION_FAILED_412 = "Precondition Failed";
 
-        /** @see Status#CONTENT_TOO_LARGE_413 */
+        /**
+         * @see Status#CONTENT_TOO_LARGE_413
+         */
         public static final String CONTENT_TOO_LARGE_413 = "Content Too Large";
 
-        /** @see Status#URI_TOO_LONG_414 */
+        /**
+         * @see Status#URI_TOO_LONG_414
+         */
         public static final String URI_TOO_LONG_414 = "URI Too Long";
 
-        /** @see Status#UNSUPPORTED_MEDIA_TYPE_415 */
+        /**
+         * @see Status#UNSUPPORTED_MEDIA_TYPE_415
+         */
         public static final String UNSUPPORTED_MEDIA_TYPE_415 = "Unsupported Media Type";
 
-        /** @see Status#RANGE_NOT_SATISFIABLE_416 */
+        /**
+         * @see Status#RANGE_NOT_SATISFIABLE_416
+         */
         public static final String RANGE_NOT_SATISFIABLE_416 = "Range Not Satisfiable";
 
-        /** @see Status#EXPECTATION_FAILED_417 */
+        /**
+         * @see Status#EXPECTATION_FAILED_417
+         */
         public static final String EXPECTATION_FAILED_417 = "Expectation Failed";
 
-        /** @see Status#IM_A_TEAPOT_418 */
+        /**
+         * @see Status#IM_A_TEAPOT_418
+         */
         public static final String IM_A_TEAPOT_418 = "I'm a teapot";
 
-        /** @see Status#MISDIRECTED_REQUEST_421 */
+        /**
+         * @see Status#MISDIRECTED_REQUEST_421
+         */
         public static final String MISDIRECTED_REQUEST_421 = "Misdirected Request";
 
-        /** @see Status#UNPROCESSABLE_CONTENT_422 */
+        /**
+         * @see Status#UNPROCESSABLE_CONTENT_422
+         */
         public static final String UNPROCESSABLE_CONTENT_422 = "Unprocessable Content";
 
-        /** @see Status#LOCKED_423 */
+        /**
+         * @see Status#LOCKED_423
+         */
         public static final String LOCKED_423 = "Locked";
 
-        /** @see Status#FAILED_DEPENDENCY_424 */
+        /**
+         * @see Status#FAILED_DEPENDENCY_424
+         */
         public static final String FAILED_DEPENDENCY_424 = "Failed Dependency";
 
-        /** @see Status#TOO_EARLY_425 */
+        /**
+         * @see Status#TOO_EARLY_425
+         */
         public static final String TOO_EARLY_425 = "Too Early";
 
-        /** @see Status#UPGRADE_REQUIRED_426 */
+        /**
+         * @see Status#UPGRADE_REQUIRED_426
+         */
         public static final String UPGRADE_REQUIRED_426 = "Upgrade Required";
 
-        /** @see Status#PRECONDITION_REQUIRED_428 */
+        /**
+         * @see Status#PRECONDITION_REQUIRED_428
+         */
         public static final String PRECONDITION_REQUIRED_428 = "Precondition Required";
 
-        /** @see Status#TOO_MANY_REQUESTS_429 */
+        /**
+         * @see Status#TOO_MANY_REQUESTS_429
+         */
         public static final String TOO_MANY_REQUESTS_429 = "Too Many Requests";
 
-        /** @see Status#REQUEST_HEADER_FIELDS_TOO_LARGE_431 */
+        /**
+         * @see Status#REQUEST_HEADER_FIELDS_TOO_LARGE_431
+         */
         public static final String REQUEST_HEADER_FIELDS_TOO_LARGE_431 = "Request Header Fields Too Large";
 
-        /** @see Status#UNAVAILABLE_FOR_LEGAL_REASONS_451 */
+        /**
+         * @see Status#UNAVAILABLE_FOR_LEGAL_REASONS_451
+         */
         public static final String UNAVAILABLE_FOR_LEGAL_REASONS_451 = "Unavailable For Legal Reasons";
 
-        /** @see Status#INTERNAL_SERVER_ERROR_500 */
+        /**
+         * @see Status#INTERNAL_SERVER_ERROR_500
+         */
         public static final String INTERNAL_SERVER_ERROR_500 = "Internal Server Error";
 
-        /** @see Status#NOT_IMPLEMENTED_501 */
+        /**
+         * @see Status#NOT_IMPLEMENTED_501
+         */
         public static final String NOT_IMPLEMENTED_501 = "Not Implemented";
 
-        /** @see Status#BAD_GATEWAY_502 */
+        /**
+         * @see Status#BAD_GATEWAY_502
+         */
         public static final String BAD_GATEWAY_502 = "Bad Gateway";
 
-        /** @see Status#SERVICE_UNAVAILABLE_503 */
+        /**
+         * @see Status#SERVICE_UNAVAILABLE_503
+         */
         public static final String SERVICE_UNAVAILABLE_503 = "Service Unavailable";
 
-        /** @see Status#GATEWAY_TIMEOUT_504 */
+        /**
+         * @see Status#GATEWAY_TIMEOUT_504
+         */
         public static final String GATEWAY_TIMEOUT_504 = "Gateway Timeout";
 
-        /** @see Status#HTTP_VERSION_NOT_SUPPORTED_505 */
+        /**
+         * @see Status#HTTP_VERSION_NOT_SUPPORTED_505
+         */
         public static final String HTTP_VERSION_NOT_SUPPORTED_505 = "HTTP Version Not Supported";
 
-        /** @see Status#VARIANT_ALSO_NEGOTIATES_506 */
+        /**
+         * @see Status#VARIANT_ALSO_NEGOTIATES_506
+         */
         public static final String VARIANT_ALSO_NEGOTIATES_506 = "Variant Also Negotiates";
 
-        /** @see Status#INSUFFICIENT_STORAGE_507 */
+        /**
+         * @see Status#INSUFFICIENT_STORAGE_507
+         */
         public static final String INSUFFICIENT_STORAGE_507 = "Insufficient Storage";
 
-        /** @see Status#LOOP_DETECTED_508 */
+        /**
+         * @see Status#LOOP_DETECTED_508
+         */
         public static final String LOOP_DETECTED_508 = "Loop Detected";
 
-        /** @see Status#NOT_EXTENDED_510 */
+        /**
+         * @see Status#NOT_EXTENDED_510
+         */
         public static final String NOT_EXTENDED_510 = "Not Extended";
 
-        /** @see Status#NETWORK_AUTHENTICATION_REQUIRED_511 */
+        /**
+         * @see Status#NETWORK_AUTHENTICATION_REQUIRED_511
+         */
         public static final String NETWORK_AUTHENTICATION_REQUIRED_511 = "Network Authentication Required";
     }
 

@@ -84,8 +84,11 @@ public final class NonceSourceExpression implements SourceExpression {
         return new NonceSourceExpression(nonce);
     }
 
-    /** The nonce value {@link String} (without {@link #PREFIX}). */
+    /**
+     * The nonce value {@link String} (without {@link #PREFIX}).
+     */
     private final @Getter String nonce;
+
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;
 
     /**

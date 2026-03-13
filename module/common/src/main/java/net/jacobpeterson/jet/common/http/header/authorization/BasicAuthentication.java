@@ -121,11 +121,19 @@ public final class BasicAuthentication {
                 .build();
     }
 
-    /** The username. */
+    /**
+     * The username.
+     */
     private final @Getter String username;
-    /** The password. */
+
+    /**
+     * The password.
+     */
     private final @Getter String password;
-    /** The {@link Charset} of {@link #getUsername()} and {@link #getPassword()}. */
+
+    /**
+     * The {@link Charset} of {@link #getUsername()} and {@link #getPassword()}.
+     */
     private final @Getter Charset charset;
 
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;

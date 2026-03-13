@@ -279,25 +279,39 @@ public final class Resource {
                 }).build();
     }
 
-    /** The {@link Header#CONTENT_LENGTH} {@link Long}, or <code>null</code> if unknown. */
+    /**
+     * The {@link Header#CONTENT_LENGTH} {@link Long}, or <code>null</code> if unknown.
+     */
     private final @Nullable Long contentLength;
 
-    /** The {@link Header#LAST_MODIFIED} {@link Instant}, or <code>null</code> if unknown. */
+    /**
+     * The {@link Header#LAST_MODIFIED} {@link Instant}, or <code>null</code> if unknown.
+     */
     private final @Nullable Instant lastModified;
 
-    /** The {@link ETag}, or <code>null</code>. */
+    /**
+     * The {@link ETag}, or <code>null</code>.
+     */
     private final @Nullable ETag etag;
 
-    /** The {@link ContentType}, or <code>null</code>. */
+    /**
+     * The {@link ContentType}, or <code>null</code>.
+     */
     private final @Nullable ContentType contentType;
 
-    /** The {@link ContentEncoding}, or <code>null</code>. */
+    /**
+     * The {@link ContentEncoding}, or <code>null</code>.
+     */
     private final @Nullable ContentEncoding contentEncoding;
 
-    /** The {@link ContentDisposition}, or <code>null</code>. */
+    /**
+     * The {@link ContentDisposition}, or <code>null</code>.
+     */
     private final @Nullable ContentDisposition contentDisposition;
 
-    /** The {@link ContentRange}, or <code>null</code>. */
+    /**
+     * The {@link ContentRange}, or <code>null</code>.
+     */
     private final @Nullable ContentRange contentRange;
 
     /**

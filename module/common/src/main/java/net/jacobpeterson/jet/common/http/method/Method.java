@@ -159,31 +159,49 @@ public enum Method {
      */
     public static final class ToString {
 
-        /** @see Method#GET */
+        /**
+         * @see Method#GET
+         */
         public static final String GET = "GET";
 
-        /** @see Method#HEAD */
+        /**
+         * @see Method#HEAD
+         */
         public static final String HEAD = "HEAD";
 
-        /** @see Method#POST */
+        /**
+         * @see Method#POST
+         */
         public static final String POST = "POST";
 
-        /** @see Method#PUT */
+        /**
+         * @see Method#PUT
+         */
         public static final String PUT = "PUT";
 
-        /** @see Method#DELETE */
+        /**
+         * @see Method#DELETE
+         */
         public static final String DELETE = "DELETE";
 
-        /** @see Method#CONNECT */
+        /**
+         * @see Method#CONNECT
+         */
         public static final String CONNECT = "CONNECT";
 
-        /** @see Method#OPTIONS */
+        /**
+         * @see Method#OPTIONS
+         */
         public static final String OPTIONS = "OPTIONS";
 
-        /** @see Method#TRACE */
+        /**
+         * @see Method#TRACE
+         */
         public static final String TRACE = "TRACE";
 
-        /** @see Method#PATCH */
+        /**
+         * @see Method#PATCH
+         */
         public static final String PATCH = "PATCH";
     }
 

@@ -1668,508 +1668,844 @@ public enum Header {
      */
     public static final class ToString {
 
-        /** @see Header#WWW_AUTHENTICATE */
+        /**
+         * @see Header#WWW_AUTHENTICATE
+         */
         public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
-        /** @see Header#AUTHORIZATION */
+        /**
+         * @see Header#AUTHORIZATION
+         */
         public static final String AUTHORIZATION = "Authorization";
 
-        /** @see Header#PROXY_AUTHENTICATE */
+        /**
+         * @see Header#PROXY_AUTHENTICATE
+         */
         public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
 
-        /** @see Header#PROXY_AUTHORIZATION */
+        /**
+         * @see Header#PROXY_AUTHORIZATION
+         */
         public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
 
-        /** @see Header#AGE */
+        /**
+         * @see Header#AGE
+         */
         public static final String AGE = "Age";
 
-        /** @see Header#CACHE_CONTROL */
+        /**
+         * @see Header#CACHE_CONTROL
+         */
         public static final String CACHE_CONTROL = "Cache-Control";
 
-        /** @see Header#CLEAR_SITE_DATA */
+        /**
+         * @see Header#CLEAR_SITE_DATA
+         */
         public static final String CLEAR_SITE_DATA = "Clear-Site-Data";
 
-        /** @see Header#EXPIRES */
+        /**
+         * @see Header#EXPIRES
+         */
         public static final String EXPIRES = "Expires";
 
-        /** @see Header#NO_VARY_SEARCH */
+        /**
+         * @see Header#NO_VARY_SEARCH
+         */
         public static final String NO_VARY_SEARCH = "No-Vary-Search";
 
-        /** @see Header#LAST_MODIFIED */
+        /**
+         * @see Header#LAST_MODIFIED
+         */
         public static final String LAST_MODIFIED = "Last-Modified";
 
-        /** @see Header#ETAG */
+        /**
+         * @see Header#ETAG
+         */
         public static final String ETAG = "ETag";
 
-        /** @see Header#IF_MATCH */
+        /**
+         * @see Header#IF_MATCH
+         */
         public static final String IF_MATCH = "If-Match";
 
-        /** @see Header#IF_NONE_MATCH */
+        /**
+         * @see Header#IF_NONE_MATCH
+         */
         public static final String IF_NONE_MATCH = "If-None-Match";
 
-        /** @see Header#IF_MODIFIED_SINCE */
+        /**
+         * @see Header#IF_MODIFIED_SINCE
+         */
         public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
-        /** @see Header#IF_UNMODIFIED_SINCE */
+        /**
+         * @see Header#IF_UNMODIFIED_SINCE
+         */
         public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 
-        /** @see Header#VARY */
+        /**
+         * @see Header#VARY
+         */
         public static final String VARY = "Vary";
 
-        /** @see Header#CONNECTION */
+        /**
+         * @see Header#CONNECTION
+         */
         public static final String CONNECTION = "Connection";
 
-        /** @see Header#KEEP_ALIVE */
+        /**
+         * @see Header#KEEP_ALIVE
+         */
         public static final String KEEP_ALIVE = "Keep-Alive";
 
-        /** @see Header#ACCEPT */
+        /**
+         * @see Header#ACCEPT
+         */
         public static final String ACCEPT = "Accept";
 
-        /** @see Header#ACCEPT_ENCODING */
+        /**
+         * @see Header#ACCEPT_ENCODING
+         */
         public static final String ACCEPT_ENCODING = "Accept-Encoding";
 
-        /** @see Header#ACCEPT_LANGUAGE */
+        /**
+         * @see Header#ACCEPT_LANGUAGE
+         */
         public static final String ACCEPT_LANGUAGE = "Accept-Language";
 
-        /** @see Header#ACCEPT_PATCH */
+        /**
+         * @see Header#ACCEPT_PATCH
+         */
         public static final String ACCEPT_PATCH = "Accept-Patch";
 
-        /** @see Header#ACCEPT_POST */
+        /**
+         * @see Header#ACCEPT_POST
+         */
         public static final String ACCEPT_POST = "Accept-Post";
 
-        /** @see Header#EXPECT */
+        /**
+         * @see Header#EXPECT
+         */
         public static final String EXPECT = "Expect";
 
-        /** @see Header#MAX_FORWARDS */
+        /**
+         * @see Header#MAX_FORWARDS
+         */
         public static final String MAX_FORWARDS = "Max-Forwards";
 
-        /** @see Header#COOKIE */
+        /**
+         * @see Header#COOKIE
+         */
         public static final String COOKIE = "Cookie";
 
-        /** @see Header#SET_COOKIE */
+        /**
+         * @see Header#SET_COOKIE
+         */
         public static final String SET_COOKIE = "Set-Cookie";
 
-        /** @see Header#ACCESS_CONTROL_ALLOW_CREDENTIALS */
+        /**
+         * @see Header#ACCESS_CONTROL_ALLOW_CREDENTIALS
+         */
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
-        /** @see Header#ACCESS_CONTROL_ALLOW_HEADERS */
+        /**
+         * @see Header#ACCESS_CONTROL_ALLOW_HEADERS
+         */
         public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 
-        /** @see Header#ACCESS_CONTROL_ALLOW_METHODS */
+        /**
+         * @see Header#ACCESS_CONTROL_ALLOW_METHODS
+         */
         public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
 
-        /** @see Header#ACCESS_CONTROL_ALLOW_ORIGIN */
+        /**
+         * @see Header#ACCESS_CONTROL_ALLOW_ORIGIN
+         */
         public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 
-        /** @see Header#ACCESS_CONTROL_EXPOSE_HEADERS */
+        /**
+         * @see Header#ACCESS_CONTROL_EXPOSE_HEADERS
+         */
         public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 
-        /** @see Header#ACCESS_CONTROL_MAX_AGE */
+        /**
+         * @see Header#ACCESS_CONTROL_MAX_AGE
+         */
         public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 
-        /** @see Header#ACCESS_CONTROL_REQUEST_HEADERS */
+        /**
+         * @see Header#ACCESS_CONTROL_REQUEST_HEADERS
+         */
         public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
 
-        /** @see Header#ACCESS_CONTROL_REQUEST_METHOD */
+        /**
+         * @see Header#ACCESS_CONTROL_REQUEST_METHOD
+         */
         public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
 
-        /** @see Header#ORIGIN */
+        /**
+         * @see Header#ORIGIN
+         */
         public static final String ORIGIN = "Origin";
 
-        /** @see Header#TIMING_ALLOW_ORIGIN */
+        /**
+         * @see Header#TIMING_ALLOW_ORIGIN
+         */
         public static final String TIMING_ALLOW_ORIGIN = "Timing-Allow-Origin";
 
-        /** @see Header#CONTENT_DISPOSITION */
+        /**
+         * @see Header#CONTENT_DISPOSITION
+         */
         public static final String CONTENT_DISPOSITION = "Content-Disposition";
 
-        /** @see Header#CONTENT_DIGEST */
+        /**
+         * @see Header#CONTENT_DIGEST
+         */
         public static final String CONTENT_DIGEST = "Content-Digest";
 
-        /** @see Header#REPR_DIGEST */
+        /**
+         * @see Header#REPR_DIGEST
+         */
         public static final String REPR_DIGEST = "Repr-Digest";
 
-        /** @see Header#WANT_CONTENT_DIGEST */
+        /**
+         * @see Header#WANT_CONTENT_DIGEST
+         */
         public static final String WANT_CONTENT_DIGEST = "Want-Content-Digest";
 
-        /** @see Header#WANT_REPR_DIGEST */
+        /**
+         * @see Header#WANT_REPR_DIGEST
+         */
         public static final String WANT_REPR_DIGEST = "Want-Repr-Digest";
 
-        /** @see Header#INTEGRITY_POLICY */
+        /**
+         * @see Header#INTEGRITY_POLICY
+         */
         public static final String INTEGRITY_POLICY = "Integrity-Policy";
 
-        /** @see Header#INTEGRITY_POLICY_REPORT_ONLY */
+        /**
+         * @see Header#INTEGRITY_POLICY_REPORT_ONLY
+         */
         public static final String INTEGRITY_POLICY_REPORT_ONLY = "Integrity-Policy-Report-Only";
 
-        /** @see Header#CONTENT_LENGTH */
+        /**
+         * @see Header#CONTENT_LENGTH
+         */
         public static final String CONTENT_LENGTH = "Content-Length";
 
-        /** @see Header#CONTENT_TYPE */
+        /**
+         * @see Header#CONTENT_TYPE
+         */
         public static final String CONTENT_TYPE = "Content-Type";
 
-        /** @see Header#CONTENT_ENCODING */
+        /**
+         * @see Header#CONTENT_ENCODING
+         */
         public static final String CONTENT_ENCODING = "Content-Encoding";
 
-        /** @see Header#CONTENT_LANGUAGE */
+        /**
+         * @see Header#CONTENT_LANGUAGE
+         */
         public static final String CONTENT_LANGUAGE = "Content-Language";
 
-        /** @see Header#CONTENT_LOCATION */
+        /**
+         * @see Header#CONTENT_LOCATION
+         */
         public static final String CONTENT_LOCATION = "Content-Location";
 
-        /** @see Header#PREFER */
+        /**
+         * @see Header#PREFER
+         */
         public static final String PREFER = "Prefer";
 
-        /** @see Header#PREFERENCE_APPLIED */
+        /**
+         * @see Header#PREFERENCE_APPLIED
+         */
         public static final String PREFERENCE_APPLIED = "Preference-Applied";
 
-        /** @see Header#FORWARDED */
+        /**
+         * @see Header#FORWARDED
+         */
         public static final String FORWARDED = "Forwarded";
 
-        /** @see Header#VIA */
+        /**
+         * @see Header#VIA
+         */
         public static final String VIA = "Via";
 
-        /** @see Header#ACCEPT_RANGES */
+        /**
+         * @see Header#ACCEPT_RANGES
+         */
         public static final String ACCEPT_RANGES = "Accept-Ranges";
 
-        /** @see Header#RANGE */
+        /**
+         * @see Header#RANGE
+         */
         public static final String RANGE = "Range";
 
-        /** @see Header#IF_RANGE */
+        /**
+         * @see Header#IF_RANGE
+         */
         public static final String IF_RANGE = "If-Range";
 
-        /** @see Header#CONTENT_RANGE */
+        /**
+         * @see Header#CONTENT_RANGE
+         */
         public static final String CONTENT_RANGE = "Content-Range";
 
-        /** @see Header#LOCATION */
+        /**
+         * @see Header#LOCATION
+         */
         public static final String LOCATION = "Location";
 
-        /** @see Header#REFRESH */
+        /**
+         * @see Header#REFRESH
+         */
         public static final String REFRESH = "Refresh";
 
-        /** @see Header#FROM */
+        /**
+         * @see Header#FROM
+         */
         public static final String FROM = "From";
 
-        /** @see Header#HOST */
+        /**
+         * @see Header#HOST
+         */
         public static final String HOST = "Host";
 
-        /** @see Header#REFERER */
+        /**
+         * @see Header#REFERER
+         */
         public static final String REFERER = "Referer";
 
-        /** @see Header#REFERRER_POLICY */
+        /**
+         * @see Header#REFERRER_POLICY
+         */
         public static final String REFERRER_POLICY = "Referrer-Policy";
 
-        /** @see Header#USER_AGENT */
+        /**
+         * @see Header#USER_AGENT
+         */
         public static final String USER_AGENT = "User-Agent";
 
-        /** @see Header#ALLOW */
+        /**
+         * @see Header#ALLOW
+         */
         public static final String ALLOW = "Allow";
 
-        /** @see Header#SERVER */
+        /**
+         * @see Header#SERVER
+         */
         public static final String SERVER = "Server";
 
-        /** @see Header#CROSS_ORIGIN_EMBEDDER_POLICY */
+        /**
+         * @see Header#CROSS_ORIGIN_EMBEDDER_POLICY
+         */
         public static final String CROSS_ORIGIN_EMBEDDER_POLICY = "Cross-Origin-Embedder-Policy";
 
-        /** @see Header#CROSS_ORIGIN_OPENER_POLICY */
+        /**
+         * @see Header#CROSS_ORIGIN_OPENER_POLICY
+         */
         public static final String CROSS_ORIGIN_OPENER_POLICY = "Cross-Origin-Opener-Policy";
 
-        /** @see Header#CROSS_ORIGIN_RESOURCE_POLICY */
+        /**
+         * @see Header#CROSS_ORIGIN_RESOURCE_POLICY
+         */
         public static final String CROSS_ORIGIN_RESOURCE_POLICY = "Cross-Origin-Resource-Policy";
 
-        /** @see Header#CONTENT_SECURITY_POLICY */
+        /**
+         * @see Header#CONTENT_SECURITY_POLICY
+         */
         public static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
 
-        /** @see Header#CONTENT_SECURITY_POLICY_REPORT_ONLY */
+        /**
+         * @see Header#CONTENT_SECURITY_POLICY_REPORT_ONLY
+         */
         public static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
 
-        /** @see Header#EXPECT_CT */
+        /**
+         * @see Header#EXPECT_CT
+         */
         public static final String EXPECT_CT = "Expect-CT";
 
-        /** @see Header#PERMISSIONS_POLICY */
+        /**
+         * @see Header#PERMISSIONS_POLICY
+         */
         public static final String PERMISSIONS_POLICY = "Permissions-Policy";
 
-        /** @see Header#REPORTING_ENDPOINTS */
+        /**
+         * @see Header#REPORTING_ENDPOINTS
+         */
         public static final String REPORTING_ENDPOINTS = "Reporting-Endpoints";
 
-        /** @see Header#STRICT_TRANSPORT_SECURITY */
+        /**
+         * @see Header#STRICT_TRANSPORT_SECURITY
+         */
         public static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
 
-        /** @see Header#UPGRADE_INSECURE_REQUESTS */
+        /**
+         * @see Header#UPGRADE_INSECURE_REQUESTS
+         */
         public static final String UPGRADE_INSECURE_REQUESTS = "Upgrade-Insecure-Requests";
 
-        /** @see Header#X_CONTENT_TYPE_OPTIONS */
+        /**
+         * @see Header#X_CONTENT_TYPE_OPTIONS
+         */
         public static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
 
-        /** @see Header#X_FRAME_OPTIONS */
+        /**
+         * @see Header#X_FRAME_OPTIONS
+         */
         public static final String X_FRAME_OPTIONS = "X-Frame-Options";
 
-        /** @see Header#X_PERMITTED_CROSS_DOMAIN_POLICIES */
+        /**
+         * @see Header#X_PERMITTED_CROSS_DOMAIN_POLICIES
+         */
         public static final String X_PERMITTED_CROSS_DOMAIN_POLICIES = "X-Permitted-Cross-Domain-Policies";
 
-        /** @see Header#X_POWERED_BY */
+        /**
+         * @see Header#X_POWERED_BY
+         */
         public static final String X_POWERED_BY = "X-Powered-By";
 
-        /** @see Header#X_XSS_PROTECTION */
+        /**
+         * @see Header#X_XSS_PROTECTION
+         */
         public static final String X_XSS_PROTECTION = "X-XSS-Protection";
 
-        /** @see Header#SEC_FETCH_SITE */
+        /**
+         * @see Header#SEC_FETCH_SITE
+         */
         public static final String SEC_FETCH_SITE = "Sec-Fetch-Site";
 
-        /** @see Header#SEC_FETCH_MODE */
+        /**
+         * @see Header#SEC_FETCH_MODE
+         */
         public static final String SEC_FETCH_MODE = "Sec-Fetch-Mode";
 
-        /** @see Header#SEC_FETCH_USER */
+        /**
+         * @see Header#SEC_FETCH_USER
+         */
         public static final String SEC_FETCH_USER = "Sec-Fetch-User";
 
-        /** @see Header#SEC_FETCH_DEST */
+        /**
+         * @see Header#SEC_FETCH_DEST
+         */
         public static final String SEC_FETCH_DEST = "Sec-Fetch-Dest";
 
-        /** @see Header#SEC_PURPOSE */
+        /**
+         * @see Header#SEC_PURPOSE
+         */
         public static final String SEC_PURPOSE = "Sec-Purpose";
 
-        /** @see Header#SERVICE_WORKER_NAVIGATION_PRELOAD */
+        /**
+         * @see Header#SERVICE_WORKER_NAVIGATION_PRELOAD
+         */
         public static final String SERVICE_WORKER_NAVIGATION_PRELOAD = "Service-Worker-Navigation-Preload";
 
-        /** @see Header#SEC_FETCH_STORAGE_ACCESS */
+        /**
+         * @see Header#SEC_FETCH_STORAGE_ACCESS
+         */
         public static final String SEC_FETCH_STORAGE_ACCESS = "Sec-Fetch-Storage-Access";
 
-        /** @see Header#ACTIVATE_STORAGE_ACCESS */
+        /**
+         * @see Header#ACTIVATE_STORAGE_ACCESS
+         */
         public static final String ACTIVATE_STORAGE_ACCESS = "Activate-Storage-Access";
 
-        /** @see Header#REPORT_TO */
+        /**
+         * @see Header#REPORT_TO
+         */
         public static final String REPORT_TO = "Report-To";
 
-        /** @see Header#TRANSFER_ENCODING */
+        /**
+         * @see Header#TRANSFER_ENCODING
+         */
         public static final String TRANSFER_ENCODING = "Transfer-Encoding";
 
-        /** @see Header#TE */
+        /**
+         * @see Header#TE
+         */
         public static final String TE = "TE";
 
-        /** @see Header#TRAILER */
+        /**
+         * @see Header#TRAILER
+         */
         public static final String TRAILER = "Trailer";
 
-        /** @see Header#SEC_WEBSOCKET_ACCEPT */
+        /**
+         * @see Header#SEC_WEBSOCKET_ACCEPT
+         */
         public static final String SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
 
-        /** @see Header#SEC_WEBSOCKET_EXTENSIONS */
+        /**
+         * @see Header#SEC_WEBSOCKET_EXTENSIONS
+         */
         public static final String SEC_WEBSOCKET_EXTENSIONS = "Sec-WebSocket-Extensions";
 
-        /** @see Header#SEC_WEBSOCKET_KEY */
+        /**
+         * @see Header#SEC_WEBSOCKET_KEY
+         */
         public static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
 
-        /** @see Header#SEC_WEBSOCKET_PROTOCOL */
+        /**
+         * @see Header#SEC_WEBSOCKET_PROTOCOL
+         */
         public static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
-        /** @see Header#SEC_WEBSOCKET_VERSION */
+        /**
+         * @see Header#SEC_WEBSOCKET_VERSION
+         */
         public static final String SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
 
-        /** @see Header#ALT_SVC */
+        /**
+         * @see Header#ALT_SVC
+         */
         public static final String ALT_SVC = "Alt-Svc";
 
-        /** @see Header#ALT_USED */
+        /**
+         * @see Header#ALT_USED
+         */
         public static final String ALT_USED = "Alt-Used";
 
-        /** @see Header#DATE */
+        /**
+         * @see Header#DATE
+         */
         public static final String DATE = "Date";
 
-        /** @see Header#LINK */
+        /**
+         * @see Header#LINK
+         */
         public static final String LINK = "Link";
 
-        /** @see Header#RETRY_AFTER */
+        /**
+         * @see Header#RETRY_AFTER
+         */
         public static final String RETRY_AFTER = "Retry-After";
 
-        /** @see Header#SERVER_TIMING */
+        /**
+         * @see Header#SERVER_TIMING
+         */
         public static final String SERVER_TIMING = "Server-Timing";
 
-        /** @see Header#SERVICE_WORKER */
+        /**
+         * @see Header#SERVICE_WORKER
+         */
         public static final String SERVICE_WORKER = "Service-Worker";
 
-        /** @see Header#SERVICE_WORKER_ALLOWED */
+        /**
+         * @see Header#SERVICE_WORKER_ALLOWED
+         */
         public static final String SERVICE_WORKER_ALLOWED = "Service-Worker-Allowed";
 
-        /** @see Header#SOURCEMAP */
+        /**
+         * @see Header#SOURCEMAP
+         */
         public static final String SOURCEMAP = "SourceMap";
 
-        /** @see Header#UPGRADE */
+        /**
+         * @see Header#UPGRADE
+         */
         public static final String UPGRADE = "Upgrade";
 
-        /** @see Header#PRIORITY */
+        /**
+         * @see Header#PRIORITY
+         */
         public static final String PRIORITY = "Priority";
 
-        /** @see Header#ATTRIBUTION_REPORTING_ELIGIBLE */
+        /**
+         * @see Header#ATTRIBUTION_REPORTING_ELIGIBLE
+         */
         public static final String ATTRIBUTION_REPORTING_ELIGIBLE = "Attribution-Reporting-Eligible";
 
-        /** @see Header#ATTRIBUTION_REPORTING_REGISTER_SOURCE */
+        /**
+         * @see Header#ATTRIBUTION_REPORTING_REGISTER_SOURCE
+         */
         public static final String ATTRIBUTION_REPORTING_REGISTER_SOURCE = "Attribution-Reporting-Register-Source";
 
-        /** @see Header#ATTRIBUTION_REPORTING_REGISTER_TRIGGER */
+        /**
+         * @see Header#ATTRIBUTION_REPORTING_REGISTER_TRIGGER
+         */
         public static final String ATTRIBUTION_REPORTING_REGISTER_TRIGGER = "Attribution-Reporting-Register-Trigger";
 
-        /** @see Header#ACCEPT_CH */
+        /**
+         * @see Header#ACCEPT_CH
+         */
         public static final String ACCEPT_CH = "Accept-CH";
 
-        /** @see Header#CRITICAL_CH */
+        /**
+         * @see Header#CRITICAL_CH
+         */
         public static final String CRITICAL_CH = "Critical-CH";
 
-        /** @see Header#SEC_CH_UA */
+        /**
+         * @see Header#SEC_CH_UA
+         */
         public static final String SEC_CH_UA = "Sec-CH-UA";
 
-        /** @see Header#SEC_CH_UA_ARCH */
+        /**
+         * @see Header#SEC_CH_UA_ARCH
+         */
         public static final String SEC_CH_UA_ARCH = "Sec-CH-UA-Arch";
 
-        /** @see Header#SEC_CH_UA_BITNESS */
+        /**
+         * @see Header#SEC_CH_UA_BITNESS
+         */
         public static final String SEC_CH_UA_BITNESS = "Sec-CH-UA-Bitness";
 
-        /** @see Header#SEC_CH_UA_FORM_FACTORS */
+        /**
+         * @see Header#SEC_CH_UA_FORM_FACTORS
+         */
         public static final String SEC_CH_UA_FORM_FACTORS = "Sec-CH-UA-Form-Factors";
 
-        /** @see Header#SEC_CH_UA_FULL_VERSION */
+        /**
+         * @see Header#SEC_CH_UA_FULL_VERSION
+         */
         public static final String SEC_CH_UA_FULL_VERSION = "Sec-CH-UA-Full-Version";
 
-        /** @see Header#SEC_CH_UA_FULL_VERSION_LIST */
+        /**
+         * @see Header#SEC_CH_UA_FULL_VERSION_LIST
+         */
         public static final String SEC_CH_UA_FULL_VERSION_LIST = "Sec-CH-UA-Full-Version-List";
 
-        /** @see Header#SEC_CH_UA_MOBILE */
+        /**
+         * @see Header#SEC_CH_UA_MOBILE
+         */
         public static final String SEC_CH_UA_MOBILE = "Sec-CH-UA-Mobile";
 
-        /** @see Header#SEC_CH_UA_MODEL */
+        /**
+         * @see Header#SEC_CH_UA_MODEL
+         */
         public static final String SEC_CH_UA_MODEL = "Sec-CH-UA-Model";
 
-        /** @see Header#SEC_CH_UA_PLATFORM */
+        /**
+         * @see Header#SEC_CH_UA_PLATFORM
+         */
         public static final String SEC_CH_UA_PLATFORM = "Sec-CH-UA-Platform";
 
-        /** @see Header#SEC_CH_UA_PLATFORM_VERSION */
+        /**
+         * @see Header#SEC_CH_UA_PLATFORM_VERSION
+         */
         public static final String SEC_CH_UA_PLATFORM_VERSION = "Sec-CH-UA-Platform-Version";
 
-        /** @see Header#SEC_CH_UA_WOW64 */
+        /**
+         * @see Header#SEC_CH_UA_WOW64
+         */
         public static final String SEC_CH_UA_WOW64 = "Sec-CH-UA-WoW64";
 
-        /** @see Header#SEC_CH_PREFERS_COLOR_SCHEME */
+        /**
+         * @see Header#SEC_CH_PREFERS_COLOR_SCHEME
+         */
         public static final String SEC_CH_PREFERS_COLOR_SCHEME = "Sec-CH-Prefers-Color-Scheme";
 
-        /** @see Header#SEC_CH_PREFERS_REDUCED_MOTION */
+        /**
+         * @see Header#SEC_CH_PREFERS_REDUCED_MOTION
+         */
         public static final String SEC_CH_PREFERS_REDUCED_MOTION = "Sec-CH-Prefers-Reduced-Motion";
 
-        /** @see Header#SEC_CH_PREFERS_REDUCED_TRANSPARENCY */
+        /**
+         * @see Header#SEC_CH_PREFERS_REDUCED_TRANSPARENCY
+         */
         public static final String SEC_CH_PREFERS_REDUCED_TRANSPARENCY = "Sec-CH-Prefers-Reduced-Transparency";
 
-        /** @see Header#CONTENT_DPR */
+        /**
+         * @see Header#CONTENT_DPR
+         */
         public static final String CONTENT_DPR = "Content-DPR";
 
-        /** @see Header#DEVICE_MEMORY */
+        /**
+         * @see Header#DEVICE_MEMORY
+         */
         public static final String DEVICE_MEMORY = "Device-Memory";
 
-        /** @see Header#DPR */
+        /**
+         * @see Header#DPR
+         */
         public static final String DPR = "DPR";
 
-        /** @see Header#VIEWPORT_WIDTH */
+        /**
+         * @see Header#VIEWPORT_WIDTH
+         */
         public static final String VIEWPORT_WIDTH = "Viewport-Width";
 
-        /** @see Header#WIDTH */
+        /**
+         * @see Header#WIDTH
+         */
         public static final String WIDTH = "Width";
 
-        /** @see Header#DOWNLINK */
+        /**
+         * @see Header#DOWNLINK
+         */
         public static final String DOWNLINK = "Downlink";
 
-        /** @see Header#ECT */
+        /**
+         * @see Header#ECT
+         */
         public static final String ECT = "ECT";
 
-        /** @see Header#RTT */
+        /**
+         * @see Header#RTT
+         */
         public static final String RTT = "RTT";
 
-        /** @see Header#SAVE_DATA */
+        /**
+         * @see Header#SAVE_DATA
+         */
         public static final String SAVE_DATA = "Save-Data";
 
-        /** @see Header#AVAILABLE_DICTIONARY */
+        /**
+         * @see Header#AVAILABLE_DICTIONARY
+         */
         public static final String AVAILABLE_DICTIONARY = "Available-Dictionary";
 
-        /** @see Header#DICTIONARY_ID */
+        /**
+         * @see Header#DICTIONARY_ID
+         */
         public static final String DICTIONARY_ID = "Dictionary-ID";
 
-        /** @see Header#USE_AS_DICTIONARY */
+        /**
+         * @see Header#USE_AS_DICTIONARY
+         */
         public static final String USE_AS_DICTIONARY = "Use-As-Dictionary";
 
-        /** @see Header#DNT */
+        /**
+         * @see Header#DNT
+         */
         public static final String DNT = "DNT";
 
-        /** @see Header#TK */
+        /**
+         * @see Header#TK
+         */
         public static final String TK = "Tk";
 
-        /** @see Header#SEC_GPC */
+        /**
+         * @see Header#SEC_GPC
+         */
         public static final String SEC_GPC = "Sec-GPC";
 
-        /** @see Header#ORIGIN_AGENT_CLUSTER */
+        /**
+         * @see Header#ORIGIN_AGENT_CLUSTER
+         */
         public static final String ORIGIN_AGENT_CLUSTER = "Origin-Agent-Cluster";
 
-        /** @see Header#NEL */
+        /**
+         * @see Header#NEL
+         */
         public static final String NEL = "NEL";
 
-        /** @see Header#OBSERVE_BROWSING_TOPICS */
+        /**
+         * @see Header#OBSERVE_BROWSING_TOPICS
+         */
         public static final String OBSERVE_BROWSING_TOPICS = "Observe-Browsing-Topics";
 
-        /** @see Header#SEC_BROWSING_TOPICS */
+        /**
+         * @see Header#SEC_BROWSING_TOPICS
+         */
         public static final String SEC_BROWSING_TOPICS = "Sec-Browsing-Topics";
 
-        /** @see Header#ACCEPT_SIGNATURE */
+        /**
+         * @see Header#ACCEPT_SIGNATURE
+         */
         public static final String ACCEPT_SIGNATURE = "Accept-Signature";
 
-        /** @see Header#EARLY_DATA */
+        /**
+         * @see Header#EARLY_DATA
+         */
         public static final String EARLY_DATA = "Early-Data";
 
-        /** @see Header#IDEMPOTENCY_KEY */
+        /**
+         * @see Header#IDEMPOTENCY_KEY
+         */
         public static final String IDEMPOTENCY_KEY = "Idempotency-Key";
 
-        /** @see Header#SET_LOGIN */
+        /**
+         * @see Header#SET_LOGIN
+         */
         public static final String SET_LOGIN = "Set-Login";
 
-        /** @see Header#SIGNATURE */
+        /**
+         * @see Header#SIGNATURE
+         */
         public static final String SIGNATURE = "Signature";
 
-        /** @see Header#SIGNED_HEADERS */
+        /**
+         * @see Header#SIGNED_HEADERS
+         */
         public static final String SIGNED_HEADERS = "Signed-Headers";
 
-        /** @see Header#SPECULATION_RULES */
+        /**
+         * @see Header#SPECULATION_RULES
+         */
         public static final String SPECULATION_RULES = "Speculation-Rules";
 
-        /** @see Header#SEC_SPECULATION_TAGS */
+        /**
+         * @see Header#SEC_SPECULATION_TAGS
+         */
         public static final String SEC_SPECULATION_TAGS = "Sec-Speculation-Tags";
 
-        /** @see Header#SUPPORTS_LOADING_MODE */
+        /**
+         * @see Header#SUPPORTS_LOADING_MODE
+         */
         public static final String SUPPORTS_LOADING_MODE = "Supports-Loading-Mode";
 
-        /** @see Header#X_FORWARDED_FOR */
+        /**
+         * @see Header#X_FORWARDED_FOR
+         */
         public static final String X_FORWARDED_FOR = "X-Forwarded-For";
 
-        /** @see Header#X_FORWARDED_HOST */
+        /**
+         * @see Header#X_FORWARDED_HOST
+         */
         public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
 
-        /** @see Header#X_FORWARDED_PROTO */
+        /**
+         * @see Header#X_FORWARDED_PROTO
+         */
         public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
 
-        /** @see Header#X_DNS_PREFETCH_CONTROL */
+        /**
+         * @see Header#X_DNS_PREFETCH_CONTROL
+         */
         public static final String X_DNS_PREFETCH_CONTROL = "X-DNS-Prefetch-Control";
 
-        /** @see Header#X_ROBOTS_TAG */
+        /**
+         * @see Header#X_ROBOTS_TAG
+         */
         public static final String X_ROBOTS_TAG = "X-Robots-Tag";
 
-        /** @see Header#PRAGMA */
+        /**
+         * @see Header#PRAGMA
+         */
         public static final String PRAGMA = "Pragma";
 
-        /** @see Header#WARNING */
+        /**
+         * @see Header#WARNING
+         */
         public static final String WARNING = "Warning";
 
-        /** @see Header#X_ACCEL_EXPIRES */
+        /**
+         * @see Header#X_ACCEL_EXPIRES
+         */
         public static final String X_ACCEL_EXPIRES = "X-Accel-Expires";
 
-        /** @see Header#X_ACCEL_REDIRECT */
+        /**
+         * @see Header#X_ACCEL_REDIRECT
+         */
         public static final String X_ACCEL_REDIRECT = "X-Accel-Redirect";
 
-        /** @see Header#X_ACCEL_LIMIT_RATE */
+        /**
+         * @see Header#X_ACCEL_LIMIT_RATE
+         */
         public static final String X_ACCEL_LIMIT_RATE = "X-Accel-Limit-Rate";
 
-        /** @see Header#X_ACCEL_BUFFERING */
+        /**
+         * @see Header#X_ACCEL_BUFFERING
+         */
         public static final String X_ACCEL_BUFFERING = "X-Accel-Buffering";
 
-        /** @see Header#X_ACCEL_CHARSET */
+        /**
+         * @see Header#X_ACCEL_CHARSET
+         */
         public static final String X_ACCEL_CHARSET = "X-Accel-Charset";
     }
 

@@ -25,35 +25,49 @@ import static java.util.Objects.requireNonNull;
 @RequiredArgsConstructor
 public final class HandleInternals {
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     private final @Getter JetServer jetServer;
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     private final @Getter Request request;
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     private final @Getter Response response;
 
     private @Nullable Route routeOfMatch;
     private @Nullable RouteMatch routeMatch;
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     public Route getRouteOfMatch() {
         return requireNonNull(routeOfMatch);
     }
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     public void setRouteOfMatch(final Route routeOfMatch) {
         checkState(this.routeOfMatch == null);
         this.routeOfMatch = routeOfMatch;
     }
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     public RouteMatch getRouteMatch() {
         return requireNonNull(routeMatch);
     }
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     public void setRouteMatch(final RouteMatch routeMatch) {
         checkState(this.routeMatch == null);
         this.routeMatch = routeMatch;

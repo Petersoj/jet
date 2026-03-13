@@ -42,7 +42,10 @@ public enum HashAlgorithm {
     SHA_512("sha512", sha512());
 
     private final String string;
-    /** The {@link Function} to return the Base64-encoded hash {@link String} a given <code>byte[]</code>. */
+
+    /**
+     * The {@link Function} to return the Base64-encoded hash {@link String} a given <code>byte[]</code>.
+     */
     private final @SuppressWarnings("ImmutableEnumChecker") @Getter Function<byte[], String> function;
 
     HashAlgorithm(final String string, final HashFunction hashFunction) {

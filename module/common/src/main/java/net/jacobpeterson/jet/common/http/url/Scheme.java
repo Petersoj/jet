@@ -127,7 +127,10 @@ public enum Scheme {
     WSS(ToString.WSS, 443);
 
     private final String string;
-    /** The default port, or <code>null</code> if there is no well-known default port. */
+
+    /**
+     * The default port, or <code>null</code> if there is no well-known default port.
+     */
     private final @Getter @Nullable Integer defaultPort;
 
     @Override
@@ -141,46 +144,74 @@ public enum Scheme {
      */
     public static final class ToString {
 
-        /** @see Scheme#BLOB */
+        /**
+         * @see Scheme#BLOB
+         */
         public static final String BLOB = "blob";
 
-        /** @see Scheme#DATA */
+        /**
+         * @see Scheme#DATA
+         */
         public static final String DATA = "data";
 
-        /** @see Scheme#FILE */
+        /**
+         * @see Scheme#FILE
+         */
         public static final String FILE = "file";
 
-        /** @see Scheme#FTP */
+        /**
+         * @see Scheme#FTP
+         */
         public static final String FTP = "ftp";
 
-        /** @see Scheme#HTTP */
+        /**
+         * @see Scheme#HTTP
+         */
         public static final String HTTP = "http";
 
-        /** @see Scheme#HTTPS */
+        /**
+         * @see Scheme#HTTPS
+         */
         public static final String HTTPS = "https";
 
-        /** @see Scheme#JAVASCRIPT */
+        /**
+         * @see Scheme#JAVASCRIPT
+         */
         public static final String JAVASCRIPT = "javascript";
 
-        /** @see Scheme#MAILTO */
+        /**
+         * @see Scheme#MAILTO
+         */
         public static final String MAILTO = "mailto";
 
-        /** @see Scheme#SSH */
+        /**
+         * @see Scheme#SSH
+         */
         public static final String SSH = "ssh";
 
-        /** @see Scheme#TEL */
+        /**
+         * @see Scheme#TEL
+         */
         public static final String TEL = "tel";
 
-        /** @see Scheme#URN */
+        /**
+         * @see Scheme#URN
+         */
         public static final String URN = "urn";
 
-        /** @see Scheme#VIEW_SOURCE */
+        /**
+         * @see Scheme#VIEW_SOURCE
+         */
         public static final String VIEW_SOURCE = "view-source";
 
-        /** @see Scheme#WS */
+        /**
+         * @see Scheme#WS
+         */
         public static final String WS = "ws";
 
-        /** @see Scheme#WSS */
+        /**
+         * @see Scheme#WSS
+         */
         public static final String WSS = "wss";
     }
 

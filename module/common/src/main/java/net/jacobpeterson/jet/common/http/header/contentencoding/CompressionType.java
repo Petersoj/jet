@@ -123,10 +123,14 @@ public enum CompressionType {
 
     private final String string;
 
-    /** The minimum compression level. */
+    /**
+     * The minimum compression level.
+     */
     private final @Getter int minimumLevel;
 
-    /** The maximum compression level. */
+    /**
+     * The maximum compression level.
+     */
     private final @Getter int maximumLevel;
 
     /**

@@ -22,16 +22,24 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class Handle {
 
-    /** FOR INTERNAL USE ONLY. */
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
     private final @Getter HandleInternals internals;
 
-    /** A {@link Stopwatch} to measure the request and response lifecycle elapsed time. */
+    /**
+     * A {@link Stopwatch} to measure the request and response lifecycle elapsed time.
+     */
     private final @Getter Stopwatch stopwatch = Stopwatch.createStarted();
 
-    /** The {@link Request}. */
+    /**
+     * The {@link Request}.
+     */
     private final @Getter Request request = new Request(this);
 
-    /** The {@link Response}. */
+    /**
+     * The {@link Response}.
+     */
     private final @Getter Response response = new Response(this);
 
     /**

@@ -68,7 +68,10 @@ public enum Version {
     HTTP_3(Version.PREFIX + "3.0", 30);
 
     private final String string;
-    /** The version as an <code>int</code>. */
+
+    /**
+     * The version as an <code>int</code>.
+     */
     private final @Getter int integer;
 
     @Override

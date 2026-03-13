@@ -89,8 +89,11 @@ public final class HashSourceExpression implements SourceExpression {
     }
 
     private final @Getter HashAlgorithm algorithm;
-    /** The Base64-encoded hash {@link String} (without {@link #getPrefix()}). */
+    /**
+     * The Base64-encoded hash {@link String} (without {@link #getPrefix()}).
+     */
     private final @Getter String hash;
+
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;
 
     /**

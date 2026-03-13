@@ -59,8 +59,11 @@ public final class SchemeSourceExpression implements SourceExpression {
         return new SchemeSourceExpression(scheme);
     }
 
-    /** The scheme value {@link String} (without {@link #SUFFIX}). */
+    /**
+     * The scheme value {@link String} (without {@link #SUFFIX}).
+     */
     private final @Getter String scheme;
+
     private @LazyInit @EqualsAndHashCode.Exclude @Nullable String string;
 
     /**

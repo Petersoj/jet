@@ -17,7 +17,7 @@ public class SimpleResponseBodyThrowableHandler implements ThrowableHandler {
     @Override
     public void handle(final Handle handle, final Throwable throwable) {
         final var request = handle.getRequest();
-        LOGGER.error("Failed to write response body for request: {} {} {}",
+        LOGGER.error("Writing response body threw for request: {} {} {}",
                 request.getVersion(), request.getMethod(), request.getUrl(), throwable);
     }
 }

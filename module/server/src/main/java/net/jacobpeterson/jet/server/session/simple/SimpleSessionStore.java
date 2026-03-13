@@ -52,7 +52,9 @@ public class SimpleSessionStore implements SessionStore {
      */
     private final int idTokenLength;
 
-    /** The session {@link Cookie#getName()}. */
+    /**
+     * The session {@link Cookie#getName()}.
+     */
     private final String cookieName;
 
     /**
@@ -62,7 +64,9 @@ public class SimpleSessionStore implements SessionStore {
      */
     private final @Nullable Consumer<Cookie.Builder> cookieModifier;
 
-    /** The session {@link Cache}. */
+    /**
+     * The session {@link Cache}.
+     */
     private final Cache<String, Session> sessionsOfIds;
 
     /**
