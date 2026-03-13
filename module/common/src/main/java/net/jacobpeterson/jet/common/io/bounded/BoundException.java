@@ -5,7 +5,7 @@ import org.jspecify.annotations.NullMarked;
 import java.io.IOException;
 
 /**
- * {@link BoundException} is an {@link IOException} for {@link OnBoundCount#THROW}.
+ * {@link BoundException} is an {@link IOException} for {@link BoundedInputStream}.
  */
 @NullMarked
 public class BoundException extends IOException {
@@ -16,7 +16,6 @@ public class BoundException extends IOException {
      * @param boundedInputStream the {@link BoundedInputStream}
      */
     public BoundException(final BoundedInputStream boundedInputStream) {
-        final var boundCount = boundedInputStream.getBoundCount();
-        super(boundCount == null ? "Unbound" : "Exceeded bound count of %d bytes".formatted(boundCount));
+        super("Exceeded bound count of %d bytes".formatted(boundedInputStream.getBoundCount()));
     }
 }

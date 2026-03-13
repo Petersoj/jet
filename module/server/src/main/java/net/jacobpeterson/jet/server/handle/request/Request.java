@@ -20,7 +20,6 @@ import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.common.io.bounded.BoundException;
 import net.jacobpeterson.jet.common.io.bounded.BoundedInputStream;
-import net.jacobpeterson.jet.common.io.bounded.OnBoundCount;
 import net.jacobpeterson.jet.server.Jet;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
@@ -434,31 +433,30 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyInputStream(Long, OnBoundCount)} with {@link OnBoundCount#THROW}
+     * @return {@link #getBodyInputStream(Long, boolean)} with <code>throwOnClose</code> set to <code>true</code>
      */
     public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount) {
-        return getBodyInputStream(boundCount, OnBoundCount.THROW);
+        return getBodyInputStream(boundCount, true);
     }
 
     /**
      * Gets the body {@link InputStream} wrapped in a {@link BoundedInputStream}.
      *
-     * @param boundCount   see {@link BoundedInputStream#BoundedInputStream(InputStream, Long, OnBoundCount)}
-     * @param onBoundCount see {@link BoundedInputStream#BoundedInputStream(InputStream, Long, OnBoundCount)}
+     * @param boundCount   see {@link BoundedInputStream#BoundedInputStream(InputStream, Long, boolean)}
+     * @param throwOnClose see {@link BoundedInputStream#BoundedInputStream(InputStream, Long, boolean)}
      *
      * @return the body {@link BoundedInputStream}
      */
-    public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount,
-            final @Nullable OnBoundCount onBoundCount) {
-        return new BoundedInputStream(asInputStream(handle.getInternals().getRequest()), boundCount, onBoundCount);
+    public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount, final boolean throwOnClose) {
+        return new BoundedInputStream(asInputStream(handle.getInternals().getRequest()), boundCount, throwOnClose);
     }
 
     /**
-     * @return {@link #getBodyInputStream(Long, OnBoundCount)} with <code>boundCount</code> set to <code>null</code>
-     * and <code>onBoundCount</code> set to <code>null</code>
+     * @return {@link #getBodyInputStream(Long, boolean)} with <code>boundCount</code> set to <code>null</code> and
+     * <code>throwOnClose</code> set to <code>false</code>
      */
     public BoundedInputStream getBodyInputStreamUnbounded() {
-        return getBodyInputStream(null, null);
+        return getBodyInputStream(null, false);
     }
 
     /**

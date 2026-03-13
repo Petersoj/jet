@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.common.io.bounded;
 
+import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -15,53 +16,58 @@ import static java.lang.Math.min;
  * {@link BoundedInputStream} is a {@link FilterInputStream} that limits the number of bytes that can be read from a
  * given {@link InputStream}. This is useful for reading {@link InputStream}s of an unknown length, such as a chunked
  * file upload from a web client or a chunked file download from a web server. {@link BoundedInputStream} can also be
- * used to count the number of bytes read instead of imposing a bound.
+ * used to only count the number of bytes read instead of also imposing a bound.
  *
  * @see
  * <a href="https://github.com/apache/commons-io/blob/5e39dd4778d58bf0c6314eae3da3781b809f5285/src/main/java/org/apache/commons/io/input/BoundedInputStream.java">
  * github.com/apache/commons-io/.../BoundedInputStream.java</a>
+ * @see ByteStreams#limit(InputStream, long)
  */
 @NullMarked
 public class BoundedInputStream extends FilterInputStream {
 
-    /** The maximum number of bytes that can be read, or <code>null</code> for no bound. */
+    /**
+     * The maximum number of bytes that can be read, or <code>null</code> for no bound.
+     */
     private final @Getter @Nullable Long boundCount;
-    /** The current number of bytes read. */
+
+    /**
+     * <code>true</code> to throw {@link BoundException} on the first call to {@link #close()} if {@link #isBound()},
+     * <code>false</code> to not throw.
+     */
+    private final @Getter boolean throwOnClose;
+
+    /**
+     * The current number of bytes read.
+     */
     private @Getter long currentCount;
-    private final @Nullable OnBoundCount onBoundCount;
+
+    private boolean thrownOnClose;
     private long mark;
 
     /**
-     * Calls {@link #BoundedInputStream(InputStream, Long, OnBoundCount)} with <code>boundCount</code> set to
-     * <code>null</code> and <code>onBoundCount</code> set to <code>null</code>.
-     */
-    public BoundedInputStream(final InputStream inputStream) {
-        this(inputStream, null, null);
-    }
-
-    /**
-     * Calls {@link #BoundedInputStream(InputStream, Long, OnBoundCount)} with <code>onBoundCount</code> set to
-     * {@link OnBoundCount#THROW}.
+     * Calls {@link #BoundedInputStream(InputStream, Long, boolean)} with <code>throwOnClose</code> set to
+     * <code>true</code>.
      */
     public BoundedInputStream(final InputStream inputStream, final @Nullable Long boundCount) {
-        this(inputStream, boundCount, OnBoundCount.THROW);
+        this(inputStream, boundCount, true);
     }
 
     /**
-     * Calls {@link #BoundedInputStream(InputStream, Long, long, OnBoundCount)} with <code>onBoundCount</code> set to
-     * {@link OnBoundCount#THROW}.
+     * Calls {@link #BoundedInputStream(InputStream, Long, long, boolean)} with <code>throwOnClose</code> set to
+     * <code>true</code>.
      */
     public BoundedInputStream(final InputStream inputStream, final @Nullable Long boundCount, final long initialCount) {
-        this(inputStream, boundCount, initialCount, OnBoundCount.THROW);
+        this(inputStream, boundCount, initialCount, true);
     }
 
     /**
-     * Calls {@link #BoundedInputStream(InputStream, Long, long, OnBoundCount)} with <code>initialCount</code> set to
+     * Calls {@link #BoundedInputStream(InputStream, Long, long, boolean)} with <code>initialCount</code> set to
      * <code>0</code>.
      */
     public BoundedInputStream(final InputStream inputStream, final @Nullable Long boundCount,
-            final @Nullable OnBoundCount onBoundCount) {
-        this(inputStream, boundCount, 0, onBoundCount);
+            final boolean throwOnClose) {
+        this(inputStream, boundCount, 0, throwOnClose);
     }
 
     /**
@@ -70,13 +76,13 @@ public class BoundedInputStream extends FilterInputStream {
      * @param inputStream  the {@link InputStream}
      * @param boundCount   the {@link #getBoundCount()} (a negative number is equivalent to <code>null</code>)
      * @param initialCount the initial count to set {@link #getCurrentCount()} to
-     * @param onBoundCount the {@link OnBoundCount} or <code>null</code>
+     * @param throwOnClose the {@link #isThrowOnClose()}
      */
     public BoundedInputStream(final InputStream inputStream, final @Nullable Long boundCount, final long initialCount,
-            final @Nullable OnBoundCount onBoundCount) {
+            final boolean throwOnClose) {
         super(inputStream);
         this.boundCount = boundCount != null && boundCount >= 0 ? boundCount : null;
-        this.onBoundCount = onBoundCount;
+        this.throwOnClose = throwOnClose;
         currentCount = initialCount;
     }
 
@@ -91,9 +97,6 @@ public class BoundedInputStream extends FilterInputStream {
     @Override
     public int read() throws IOException {
         if (isBound()) {
-            if (onBoundCount != null) {
-                onBoundCount.onBoundCount(this);
-            }
             return -1;
         }
         final var read = super.read();
@@ -106,16 +109,13 @@ public class BoundedInputStream extends FilterInputStream {
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
         if (isBound()) {
-            if (onBoundCount != null) {
-                onBoundCount.onBoundCount(this);
-            }
             return -1;
         }
-        final var count = super.read(b, off, (int) lengthToRead(len));
-        if (count != -1) {
-            currentCount += count;
+        final var read = super.read(b, off, (int) lengthToRead(len));
+        if (read != -1) {
+            currentCount += read;
         }
-        return count;
+        return read;
     }
 
     @Override
@@ -131,7 +131,7 @@ public class BoundedInputStream extends FilterInputStream {
 
     /**
      * @return the number of bytes that can be read before {@link #isBound()} becomes <code>true</code>, or
-     * {@link Long#MAX_VALUE} for no bound
+     * {@link Long#MAX_VALUE} if {@link #getBoundCount()} is <code>null</code>
      *
      * @see #available()
      */
@@ -142,6 +142,15 @@ public class BoundedInputStream extends FilterInputStream {
     @Override
     public int available() throws IOException {
         return min(super.available(), (int) min(availableBeforeBound(), Integer.MAX_VALUE));
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        if (throwOnClose && isBound() && !thrownOnClose) {
+            thrownOnClose = true;
+            throw new BoundException(this);
+        }
     }
 
     @Override

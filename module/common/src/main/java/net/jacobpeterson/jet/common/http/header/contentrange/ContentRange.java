@@ -9,7 +9,6 @@ import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.io.bounded.BoundedInputStream;
-import net.jacobpeterson.jet.common.io.bounded.OnBoundCount;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -241,8 +240,8 @@ public final class ContentRange {
 
     /**
      * If {@link #getContentLength()} is non-<code>null</code>, then {@link InputStream#skipNBytes(long)} with
-     * {@link #getStart()} is called and a {@link BoundedInputStream} with {@link #getContentLength()} and
-     * {@link OnBoundCount#CLOSE} is returned, otherwise the given {@link InputStream} is returned without modification.
+     * {@link #getStart()} is called and a {@link BoundedInputStream} with {@link #getContentLength()} is returned,
+     * otherwise the given {@link InputStream} is returned without modification.
      *
      * @param inputStream the {@link InputStream}
      *
@@ -254,7 +253,7 @@ public final class ContentRange {
         final var contentLength = getContentLength();
         if (contentLength != null) {
             inputStream.skipNBytes(start);
-            return new BoundedInputStream(inputStream, contentLength, OnBoundCount.CLOSE);
+            return new BoundedInputStream(inputStream, contentLength, false);
         } else {
             return inputStream;
         }

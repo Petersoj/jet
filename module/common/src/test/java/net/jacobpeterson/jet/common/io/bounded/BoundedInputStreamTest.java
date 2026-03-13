@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,27 +23,8 @@ public final class BoundedInputStreamTest {
             final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
             assertEquals('a', boundedInputStream.read());
             assertEquals('b', boundedInputStream.read());
-            assertThrows(BoundException.class, boundedInputStream::read);
-        }
-        {
-            final var inputStream = stringStream("abcdefg");
-            assertEquals('a', inputStream.read());
-            final var boundedInputStream = new BoundedInputStream(inputStream, 2L, 1L);
-            assertEquals('b', boundedInputStream.read());
-            assertThrows(BoundException.class, boundedInputStream::read);
-        }
-        {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, OnBoundCount.CLOSE);
-            assertEquals('a', boundedInputStream.read());
-            assertEquals('b', boundedInputStream.read());
             assertEquals(-1, boundedInputStream.read());
-        }
-        {
-            final var inputStream = stringStream("abcdefg");
-            assertEquals('a', inputStream.read());
-            final var boundedInputStream = new BoundedInputStream(inputStream, 2L, 1L, OnBoundCount.CLOSE);
-            assertEquals('b', boundedInputStream.read());
-            assertEquals(-1, boundedInputStream.read());
+            assertThrows(BoundException.class, boundedInputStream::close);
         }
         {
             final var boundedInputStream = new BoundedInputStream(stringStream("abc"), null);
@@ -50,6 +32,7 @@ public final class BoundedInputStreamTest {
             assertEquals('b', boundedInputStream.read());
             assertEquals('c', boundedInputStream.read());
             assertEquals(-1, boundedInputStream.read());
+            assertDoesNotThrow(boundedInputStream::close);
         }
         {
             final var boundedInputStream = new BoundedInputStream(stringStream("abc"), -1L);
@@ -57,12 +40,30 @@ public final class BoundedInputStreamTest {
             assertEquals('b', boundedInputStream.read());
             assertEquals('c', boundedInputStream.read());
             assertEquals(-1, boundedInputStream.read());
+            assertDoesNotThrow(boundedInputStream::close);
         }
         {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, null);
+            final var inputStream = stringStream("abcdefg");
+            assertEquals('a', inputStream.read());
+            final var boundedInputStream = new BoundedInputStream(inputStream, 2L, 1L);
+            assertEquals('b', boundedInputStream.read());
+            assertEquals(-1, boundedInputStream.read());
+            assertThrows(BoundException.class, boundedInputStream::close);
+        }
+        {
+            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, false);
             assertEquals('a', boundedInputStream.read());
             assertEquals('b', boundedInputStream.read());
             assertEquals(-1, boundedInputStream.read());
+            assertDoesNotThrow(boundedInputStream::close);
+        }
+        {
+            final var inputStream = stringStream("abcdefg");
+            assertEquals('a', inputStream.read());
+            final var boundedInputStream = new BoundedInputStream(inputStream, 2L, 1L, false);
+            assertEquals('b', boundedInputStream.read());
+            assertEquals(-1, boundedInputStream.read());
+            assertDoesNotThrow(boundedInputStream::close);
         }
     }
 
@@ -70,58 +71,49 @@ public final class BoundedInputStreamTest {
     public void readByteArray() throws IOException {
         {
             final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
-            final var bytes = new byte[2];
-            assertEquals(bytes.length, boundedInputStream.read(bytes));
-            assertArrayEquals(new byte[]{'a', 'b'}, bytes);
-            assertThrows(BoundException.class, () -> boundedInputStream.read(bytes));
-        }
-        {
-            final var inputStream = stringStream("abcdefg");
-            assertEquals('a', inputStream.read());
-            final var boundedInputStream = new BoundedInputStream(inputStream, 3L, 1L);
-            final var bytes = new byte[2];
-            assertEquals(bytes.length, boundedInputStream.read(bytes));
-            assertArrayEquals(new byte[]{'b', 'c'}, bytes);
-            assertThrows(BoundException.class, () -> boundedInputStream.read(bytes));
-        }
-        {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, OnBoundCount.CLOSE);
-            final var bytes = new byte[2];
-            assertEquals(bytes.length, boundedInputStream.read(bytes));
-            assertArrayEquals(new byte[]{'a', 'b'}, bytes);
-            assertEquals(-1, boundedInputStream.read(bytes));
-        }
-        {
-            final var inputStream = stringStream("abcdefg");
-            assertEquals('a', inputStream.read());
-            final var boundedInputStream = new BoundedInputStream(inputStream, 3L, 1L, OnBoundCount.CLOSE);
-            final var bytes = new byte[2];
-            assertEquals(bytes.length, boundedInputStream.read(bytes));
-            assertArrayEquals(new byte[]{'b', 'c'}, bytes);
-            assertEquals(-1, boundedInputStream.read(bytes));
+            final var bytes = new byte[3];
+            assertEquals(2, boundedInputStream.read(bytes));
+            assertArrayEquals(new byte[]{'a', 'b', 0}, bytes);
+            assertThrows(BoundException.class, boundedInputStream::close);
         }
         {
             final var boundedInputStream = new BoundedInputStream(stringStream("abc"), null);
             final var bytes = new byte[3];
-            assertEquals(bytes.length, boundedInputStream.read(bytes));
+            assertEquals(3, boundedInputStream.read(bytes));
             assertArrayEquals(new byte[]{'a', 'b', 'c'}, bytes);
-            assertEquals(-1, boundedInputStream.read(bytes));
+            assertDoesNotThrow(boundedInputStream::close);
         }
         {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, null);
+            final var boundedInputStream = new BoundedInputStream(stringStream("abc"), -1L);
+            final var bytes = new byte[3];
+            assertEquals(3, boundedInputStream.read(bytes));
+            assertArrayEquals(new byte[]{'a', 'b', 'c'}, bytes);
+            assertDoesNotThrow(boundedInputStream::close);
+        }
+        {
+            final var inputStream = stringStream("abcdefg");
+            assertEquals('a', inputStream.read());
+            final var boundedInputStream = new BoundedInputStream(inputStream, 2L, 1L);
             final var bytes = new byte[2];
-            assertEquals(bytes.length, boundedInputStream.read(bytes));
-            assertArrayEquals(new byte[]{'a', 'b'}, bytes);
-            assertEquals(-1, boundedInputStream.read(bytes));
+            assertEquals(1, boundedInputStream.read(bytes));
+            assertArrayEquals(new byte[]{'b', 0}, bytes);
+            assertThrows(BoundException.class, boundedInputStream::close);
         }
         {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, null);
-            assertArrayEquals(new byte[]{'a', 'b'}, boundedInputStream.readAllBytes());
-            assertArrayEquals(new byte[]{}, boundedInputStream.readAllBytes());
+            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L, false);
+            final var bytes = new byte[3];
+            assertEquals(2, boundedInputStream.read(bytes));
+            assertArrayEquals(new byte[]{'a', 'b', 0}, bytes);
+            assertDoesNotThrow(boundedInputStream::close);
         }
         {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"));
-            assertArrayEquals("abcdefg".getBytes(UTF_8), boundedInputStream.readAllBytes());
+            final var inputStream = stringStream("abcdefg");
+            assertEquals('a', inputStream.read());
+            final var boundedInputStream = new BoundedInputStream(inputStream, 2L, 1L, false);
+            final var bytes = new byte[2];
+            assertEquals(1, boundedInputStream.read(bytes));
+            assertArrayEquals(new byte[]{'b', 0}, bytes);
+            assertDoesNotThrow(boundedInputStream::close);
         }
     }
 
@@ -132,12 +124,14 @@ public final class BoundedInputStreamTest {
             assertEquals('a', boundedInputStream.read());
             assertEquals(1, boundedInputStream.skip(1));
             assertEquals('c', boundedInputStream.read());
-            assertThrows(BoundException.class, boundedInputStream::read);
+            assertEquals(-1, boundedInputStream.read());
+            assertThrows(BoundException.class, boundedInputStream::close);
         }
         {
             final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), 2L);
             assertEquals(2, boundedInputStream.skip(10));
-            assertThrows(BoundException.class, boundedInputStream::read);
+            assertEquals(-1, boundedInputStream.read());
+            assertThrows(BoundException.class, boundedInputStream::close);
         }
     }
 
@@ -150,10 +144,13 @@ public final class BoundedInputStreamTest {
             assertEquals(1, boundedInputStream.availableBeforeBound());
             assertEquals('b', boundedInputStream.read());
             assertEquals(0, boundedInputStream.availableBeforeBound());
+            assertEquals(-1, boundedInputStream.read());
+            assertThrows(BoundException.class, boundedInputStream::close);
         }
         {
-            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"));
+            final var boundedInputStream = new BoundedInputStream(stringStream("abcdefg"), null);
             assertEquals(Long.MAX_VALUE, boundedInputStream.availableBeforeBound());
+            assertDoesNotThrow(boundedInputStream::close);
         }
     }
 
@@ -165,6 +162,8 @@ public final class BoundedInputStreamTest {
         assertTrue(boundedInputStream.available() > 0);
         assertEquals('b', boundedInputStream.read());
         assertEquals(0, boundedInputStream.available());
+        assertEquals(-1, boundedInputStream.read());
+        assertThrows(BoundException.class, boundedInputStream::close);
     }
 
     @Test
@@ -179,7 +178,8 @@ public final class BoundedInputStreamTest {
         assertFalse(boundedInputStream.isBound());
         assertEquals('b', boundedInputStream.read());
         assertTrue(boundedInputStream.isBound());
-        assertThrows(BoundException.class, boundedInputStream::read);
+        assertEquals(-1, boundedInputStream.read());
+        assertThrows(BoundException.class, boundedInputStream::close);
     }
 
     private ByteArrayInputStream stringStream(final String string) {
