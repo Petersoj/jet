@@ -1,15 +1,14 @@
 package net.jacobpeterson.jet.server.handle.request.multipart;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.io.ByteStreams;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
-import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.MultiPart.Part;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -18,9 +17,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static com.google.common.io.ByteStreams.readFully;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_DISPOSITION;
@@ -40,7 +41,7 @@ import static org.eclipse.jetty.io.Content.Source.asInputStream;
 public final class MultiPart {
 
     private final Part part;
-    private @LazyInit @Nullable ImmutableListMultimap<String, String> headers;
+    private @LazyInit @Nullable ImmutableHeaders headers;
     private @LazyInit @Nullable Optional<ContentDisposition> contentDisposition;
     private @LazyInit @Nullable Optional<ContentType> contentType;
 
@@ -54,17 +55,12 @@ public final class MultiPart {
     }
 
     /**
-     * @return internally-cached headers {@link String} {@link ImmutableListMultimap}
+     * @return internally-cached {@link ImmutableHeaders}
      */
-    public ImmutableListMultimap<String, String> getHeaders() {
+    public ImmutableHeaders getHeaders() {
         if (headers == null) {
-            final var headers = ImmutableListMultimap.<String, String>builder();
-            for (final var headerValues : HttpFields.asMap(part.getHeaders()).entrySet()) {
-                for (final var headerValue : headerValues.getValue()) {
-                    headers.put(headerValues.getKey(), headerValue);
-                }
-            }
-            this.headers = headers.build();
+            headers = ImmutableHeaders.create(part.getHeaders().stream()
+                    .collect(toImmutableListMultimap(HttpField::getName, HttpField::getValue)));
         }
         return headers;
     }
@@ -77,8 +73,7 @@ public final class MultiPart {
     }
 
     /**
-     * @return {@link #getHeaders()} {@link ImmutableListMultimap#get(Object)} {@link ImmutableList#getFirst()} or
-     * <code>null</code>
+     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link List#getFirst()} or <code>null</code>
      */
     public @Nullable String getHeader(final String header) {
         final var headers = getHeaders().get(header);

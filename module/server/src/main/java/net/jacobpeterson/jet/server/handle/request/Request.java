@@ -1,12 +1,12 @@
 package net.jacobpeterson.jet.server.handle.request;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.accept.Accept;
 import net.jacobpeterson.jet.common.http.header.authorization.BasicAuthentication;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCacheControl;
@@ -31,7 +31,7 @@ import net.jacobpeterson.jet.server.route.route.simple.exact.PathRouteMatch;
 import net.jacobpeterson.jet.server.route.route.simple.pathparameters.PathParametersRouteMatch;
 import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRouteMatch;
 import net.jacobpeterson.jet.server.route.route.simple.pathstartswith.PathStartsWithRouteMatch;
-import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.MultiPartConfig;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -42,11 +42,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static com.google.common.io.ByteStreams.readFully;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
@@ -82,7 +84,7 @@ public final class Request {
     private @LazyInit @Nullable Version version;
     private @LazyInit @Nullable Optional<Method> methodEnum;
     private @LazyInit @Nullable Url url;
-    private @LazyInit @Nullable ImmutableListMultimap<String, String> headers;
+    private @LazyInit @Nullable ImmutableHeaders headers;
     private @LazyInit @Nullable ImmutableMap<String, String> cookies;
     private @LazyInit @Nullable Optional<Accept> accept;
     private @LazyInit @Nullable Optional<ContentType> contentType;
@@ -214,18 +216,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached headers {@link String} {@link ImmutableListMultimap}
+     * @return internally-cached {@link ImmutableHeaders}
      */
-    public ImmutableListMultimap<String, String> getHeaders() {
+    public ImmutableHeaders getHeaders() {
         if (headers == null) {
-            final var headers = ImmutableListMultimap.<String, String>builder();
-            for (final var headerValues : HttpFields.asMap(handle.getInternals().getRequest().getHeaders())
-                    .entrySet()) {
-                for (final var headerValue : headerValues.getValue()) {
-                    headers.put(headerValues.getKey(), headerValue);
-                }
-            }
-            this.headers = headers.build();
+            headers = ImmutableHeaders.create(handle.getInternals().getRequest().getHeaders().stream()
+                    .collect(toImmutableListMultimap(HttpField::getName, HttpField::getValue)));
         }
         return headers;
     }
@@ -238,8 +234,7 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getHeaders()} {@link ImmutableListMultimap#get(Object)} {@link ImmutableList#getFirst()} or
-     * <code>null</code>
+     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link List#getFirst()} or <code>null</code>
      */
     public @Nullable String getHeader(final String header) {
         final var headers = getHeaders().get(header);

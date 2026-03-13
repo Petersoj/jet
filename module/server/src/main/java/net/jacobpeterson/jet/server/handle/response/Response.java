@@ -1,13 +1,11 @@
 package net.jacobpeterson.jet.server.handle.response;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.Headers;
+import net.jacobpeterson.jet.common.http.header.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
@@ -43,6 +41,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -101,12 +100,9 @@ public final class Response {
     private @Getter @Nullable Status status = OK_200;
 
     /**
-     * The headers {@link String} {@link ListMultimap}.
+     * The {@link Headers}.
      */
-    private final @Getter ListMultimap<String, String> headers = MultimapBuilder.ListMultimapBuilder
-            .hashKeys()
-            .arrayListValues(1)
-            .build();
+    private final @Getter Headers headers = Headers.create();
 
     private ContentSecurityPolicy.@Nullable Builder contentSecurityPolicyBuilder;
 
@@ -150,11 +146,10 @@ public final class Response {
     }
 
     /**
-     * @return {@link #getHeaders()} {@link ImmutableListMultimap#get(Object)} {@link ImmutableList#getFirst()} or
-     * <code>null</code>
+     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link List#getFirst()} or <code>null</code>
      */
     public @Nullable String getHeader(final String header) {
-        final var headers = this.headers.get(header);
+        final var headers = getHeaders().get(header);
         return headers.isEmpty() ? null : headers.getFirst();
     }
 
@@ -166,8 +161,8 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #getHeaders()} {@link ListMultimap#removeAll(Object)} with the given <code>key</code>, then
-     * calls {@link #getHeaders()} {@link ListMultimap#put(Object, Object)}.
+     * Calls {@link #getHeaders()} {@link Headers#removeAll(Object)} with the given <code>key</code>, then
+     * calls {@link #getHeaders()} {@link Headers#put(Object, Object)}.
      */
     public void setHeader(final String key, final String value) {
         headers.removeAll(key);
@@ -182,7 +177,7 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #getHeaders()} {@link ListMultimap#put(Object, Object)}.
+     * Calls {@link #getHeaders()} {@link Headers#put(Object, Object)}.
      */
     public void addHeader(final String key, final String value) {
         headers.put(key, value);
@@ -601,11 +596,12 @@ public final class Response {
     public void responseResource(final Resource resource, final boolean acceptRanges, final boolean trustedContentType,
             final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
             boolean setBodyInputStream) {
+        final var request = handle.getRequest();
         var notModified = false;
         final var lastModified = resource.getLastModified();
         if (lastModified != null) {
             setLastModified(lastModified);
-            final var ifModifiedSince = handle.getRequest().getIfModifiedSince();
+            final var ifModifiedSince = request.getIfModifiedSince();
             if (ifModifiedSince != null && !lastModified.isAfter(ifModifiedSince.toInstant())) {
                 notModified = true;
             }
@@ -613,7 +609,7 @@ public final class Response {
         final var etag = resource.getEtag();
         if (etag != null) {
             setETag(etag);
-            final var ifNoneMatch = handle.getRequest().getHeader(IF_NONE_MATCH);
+            final var ifNoneMatch = request.getHeader(IF_NONE_MATCH);
             if (ifNoneMatch != null && ifNoneMatch.equals(etag.getValueQuoted())) {
                 notModified = true;
             }
