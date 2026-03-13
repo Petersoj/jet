@@ -207,15 +207,8 @@ public final class Resource {
      */
     public static Resource ofFile(final File file, final boolean immutable, final boolean exposeFilename,
             final @Nullable Range range) throws StatusException {
-        if (!file.exists()) {
-            if (immutable) {
-                OF_FILE_CACHE.invalidate(new OfFileCacheKey(file.getPath(), exposeFilename));
-            }
-            throw new StatusException(NOT_FOUND_404, "Nonexistent file: " + file);
-        }
-        final var resource = !immutable ? ofFileNoRange(file, true, exposeFilename) :
-                OF_FILE_CACHE.get(new OfFileCacheKey(file.getPath(), exposeFilename), _ ->
-                        ofFileNoRange(file, false, exposeFilename));
+        final var resource = immutable ? OF_FILE_CACHE.get(new OfFileCacheKey(file.getPath(), exposeFilename), _ ->
+                ofFileNoRange(file, true, exposeFilename)) : ofFileNoRange(file, false, exposeFilename);
         if (range == null) {
             return resource;
         }
@@ -236,6 +229,9 @@ public final class Resource {
                     try {
                         fileInputStream = new FileInputStream(file);
                     } catch (final FileNotFoundException fileNotFoundException) {
+                        if (immutable) {
+                            OF_FILE_CACHE.invalidate(new OfFileCacheKey(file.getPath(), exposeFilename));
+                        }
                         throw new StatusException(NOT_FOUND_404, fileNotFoundException);
                     }
                     try {
@@ -251,7 +247,10 @@ public final class Resource {
                 }).build();
     }
 
-    private static Resource ofFileNoRange(final File file, final boolean weakETag, final boolean exposeFilename) {
+    private static Resource ofFileNoRange(final File file, final boolean immutable, final boolean exposeFilename) {
+        if (!file.exists()) {
+            throw new StatusException(NOT_FOUND_404, "Nonexistent file: " + file);
+        }
         if (!file.canRead()) {
             throw new StatusException(NOT_FOUND_404, "Unreadable file: " + file);
         }
@@ -267,13 +266,16 @@ public final class Resource {
         return builder()
                 .contentLength(fileLength)
                 .lastModified(Instant.ofEpochMilli(fileLastModified))
-                .etag(weakETag ? ETag.computeWeak(filename, fileLength, fileLastModified) : ETag.computeStrong(file))
+                .etag(immutable ? ETag.computeStrong(file) : ETag.computeWeak(filename, fileLength, fileLastModified))
                 .contentType(contentType)
                 .contentDisposition(contentDisposition.build())
                 .content(() -> {
                     try {
                         return new FileInputStream(file);
                     } catch (final FileNotFoundException fileNotFoundException) {
+                        if (immutable) {
+                            OF_FILE_CACHE.invalidate(new OfFileCacheKey(file.getPath(), exposeFilename));
+                        }
                         throw new StatusException(NOT_FOUND_404, fileNotFoundException);
                     }
                 }).build();
@@ -317,8 +319,7 @@ public final class Resource {
     /**
      * The content {@link InputStream} {@link Supplier}.
      * <p>
-     * Note: this {@link Supplier#get()} is not guaranteed to be called, but {@link InputStream#close()} is guaranteed
-     * to be called if this {@link Supplier#get()} is called.
+     * Note: {@link Supplier#get()} of this {@link Supplier} is not guaranteed to be called.
      */
     private final @SuppressWarnings("Immutable") @ToString.Exclude Supplier<InputStream> content;
 }
