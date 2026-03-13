@@ -138,6 +138,7 @@ public final class Resource {
             throw new StatusException(RANGE_NOT_SATISFIABLE_416, exception);
         }
         return resource.toBuilder()
+                .contentLength(contentRange.getContentLength())
                 .contentRange(contentRange)
                 .content(() -> {
                     final var resourceAsStream = requireNonNull(clazz.getResourceAsStream(resourceName));
@@ -228,6 +229,7 @@ public final class Resource {
             throw new StatusException(RANGE_NOT_SATISFIABLE_416, exception);
         }
         return resource.toBuilder()
+                .contentLength(contentRange.getContentLength())
                 .contentRange(contentRange)
                 .content(() -> {
                     try {

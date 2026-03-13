@@ -190,6 +190,23 @@ public final class ContentRangeTest {
     }
 
     @Test
+    public void getContentLength() {
+        assertNull(ContentRange.builder().build().getContentLength());
+        assertEquals(1, ContentRange.builder()
+                .start(0L)
+                .end(0L)
+                .build().getContentLength());
+        assertEquals(1, ContentRange.builder()
+                .start(2L)
+                .end(2L)
+                .build().getContentLength());
+        assertEquals(2, ContentRange.builder()
+                .start(1L)
+                .end(2L)
+                .build().getContentLength());
+    }
+
+    @Test
     public void isRedundant() {
         assertFalse(ContentRange.builder().build().isRedundant());
         assertFalse(ContentRange.builder()

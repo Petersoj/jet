@@ -234,6 +234,14 @@ public final class ContentRange {
     }
 
     /**
+     * @return <code>{@link #getEnd()} - {@link #getStart()} + 1</code> if {@link #getStart()} and {@link #getEnd()} are
+     * non-<code>null</code>, <code>null</code> otherwise
+     */
+    public @Nullable Long getContentLength() {
+        return start != null && end != null ? end - start + 1 : null;
+    }
+
+    /**
      * @return <code>true</code> if {@link #getStart()} equals <code>0</code> and {@link #getEnd()} equals
      * {@link #getSize()} minus one.
      */
@@ -243,8 +251,9 @@ public final class ContentRange {
 
     /**
      * If not {@link #isRedundant()} and {@link #getStart()} and {@link #getEnd()} are non-<code>null</code>, then
-     * {@link InputStream#skipNBytes(long)} with {@link #getStart()} is called and a {@link BoundedInputStream} is
-     * returned, otherwise the given {@link InputStream} is returned without modification.
+     * {@link InputStream#skipNBytes(long)} with {@link #getStart()} is called and a {@link BoundedInputStream} with
+     * {@link #getContentLength()} and {@link OnBoundCount#CLOSE} is returned, otherwise the given {@link InputStream}
+     * is returned without modification.
      *
      * @param inputStream the {@link InputStream}
      *
@@ -255,7 +264,7 @@ public final class ContentRange {
     public InputStream forInputStream(final InputStream inputStream) throws IOException {
         if (!isRedundant() && start != null && end != null) {
             inputStream.skipNBytes(start);
-            return new BoundedInputStream(inputStream, end - start + 1, OnBoundCount.CLOSE);
+            return new BoundedInputStream(inputStream, getContentLength(), OnBoundCount.CLOSE);
         } else {
             return inputStream;
         }
