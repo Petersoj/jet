@@ -84,29 +84,29 @@ public final class ETag {
     }
 
     /**
-     * @return {@link #computeWeak(String, long, long)} with {@link File#getName()}, {@link File#lastModified()}, and
-     * {@link File#length()}
+     * @return {@link #computeWeak(String, long, long)} with {@link File#getName()}, {@link File#length()}, and
+     * {@link File#lastModified()}
      */
     public static ETag computeWeak(final File file) {
-        return computeWeak(file.getName(), file.lastModified(), file.length());
+        return computeWeak(file.getName(), file.length(), file.lastModified());
     }
 
     /**
      * Computes a weak {@link ETag} for the given entity attributes.
      *
      * @param name         the name
-     * @param lastModified the last modified epoch
      * @param size         the size
+     * @param lastModified the last modified epoch
      *
      * @return the weak {@link ETag}
      */
-    public static ETag computeWeak(final String name, final long lastModified, final long size) {
+    public static ETag computeWeak(final String name, final long size, final long lastModified) {
         // Based on the same algorithm as `org.eclipse.jetty.http.EtagUtils.computeWeakEtag()`.
         final var hashBytes = allocate(Integer.BYTES + Long.BYTES + Long.BYTES);
         final var nameHashcode = name.hashCode();
         hashBytes.putInt(nameHashcode);
-        hashBytes.putLong(lastModified ^ nameHashcode);
         hashBytes.putLong(size ^ nameHashcode);
+        hashBytes.putLong(lastModified ^ nameHashcode);
         return builder()
                 .weak()
                 .value(Base64.getEncoder().withoutPadding().encodeToString(hashBytes.array()))

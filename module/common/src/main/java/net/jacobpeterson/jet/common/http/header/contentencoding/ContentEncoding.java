@@ -139,9 +139,9 @@ public final class ContentEncoding {
      * @throws IllegalArgumentException thrown upon parsing failure
      */
     public static ContentEncoding parse(final String contentEncoding) throws IllegalArgumentException {
-        final var commonContentType = COMMON_CONTENT_ENCODINGS.get(contentEncoding.trim().toLowerCase(ROOT));
-        if (commonContentType != null) {
-            return commonContentType;
+        final var commonContentEncoding = COMMON_CONTENT_ENCODINGS.get(contentEncoding.trim().toLowerCase(ROOT));
+        if (commonContentEncoding != null) {
+            return commonContentEncoding;
         }
         final var builder = builder();
         for (final var type : PARSE_TYPES_SPLITTER.split(contentEncoding)) {

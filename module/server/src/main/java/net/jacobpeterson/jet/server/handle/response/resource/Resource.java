@@ -14,7 +14,9 @@ import net.jacobpeterson.jet.common.http.header.contentrange.ContentRange;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.range.Range;
+import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
+import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -24,18 +26,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
 import static net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDispositionType.ATTACHMENT;
 import static net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDispositionType.INLINE;
-import static net.jacobpeterson.jet.common.http.header.contentrange.ContentRange.forRange;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.APPLICATION_OCTET_STREAM;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_PLAIN_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.range.Range.BYTES_UNIT;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
+import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainText;
 
 /**
  * {@link Resource} is a class that represents arbitrary data with associated metadata (e.g. a file) to serve as a web
@@ -46,236 +53,224 @@ import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIA
 @Getter @Builder(toBuilder = true) @ToString
 public final class Resource {
 
-    private static <T> Cache<T, Resource> newCache() {
-        return Caffeine.newBuilder()
-                // Long enough that the cost of recomputing a strong ETag is negligible, but short enough to reduce
-                // memory usage and evict unusable entries that reference a deleted file.
-                .expireAfterAccess(7, DAYS)
-                .softValues()
-                .build();
-    }
+    /**
+     * The default peek length in bytes: <code>1024</code>
+     */
+    public static final int DEFAULT_PEEK_LENGTH = 1024;
 
     @Immutable
     @Value
     private static class OfClasspathCacheKey {
 
         Class<?> clazz;
-        String resourceName;
+        String resourcePath;
+        boolean trustedContentType;
+        @Nullable ContentType untrustedContentType;
+        @Nullable Integer peekLength;
+        @Nullable ContentEncoding contentEncoding;
         boolean exposeFilename;
     }
 
-    private static final Cache<OfClasspathCacheKey, Resource> OF_CLASSPATH_CACHE = newCache();
+    private static final Cache<OfClasspathCacheKey, Resource> OF_CLASSPATH_CACHE = Caffeine.newBuilder()
+            // Long enough that the cost of recomputing a strong ETag is negligible, but short enough to reduce
+            // long-term memory usage.
+            .expireAfterAccess(7, DAYS)
+            .softValues()
+            .build();
 
     /**
-     * @return {@link #ofClasspath(Class, String, boolean, Range)} with <code>exposeFilename</code> set to
-     * <code>true</code>
+     * @return {@link #ofClasspath(Class, String, boolean, ContentType, Integer, ContentEncoding, boolean)} with
+     * <code>trustedContentType</code> set to <code>true</code>,
+     * <code>untrustedContentType</code> set to <code>null</code>,
+     * <code>peekLength</code> set to {@link #DEFAULT_PEEK_LENGTH},
+     * <code>contentEncoding</code> set to <code>null</code>,
+     * and <code>exposeFilename</code> set to <code>true</code>
      */
-    public static Resource ofClasspath(final Class<?> clazz, final String resourceName, final @Nullable Range range) {
-        return ofClasspath(clazz, resourceName, true, range);
+    public static Resource ofClasspath(final Class<?> clazz, final String resourcePath) {
+        return ofClasspath(clazz, resourcePath, true, null, DEFAULT_PEEK_LENGTH, null, true);
     }
 
     /**
-     * Creates a {@link Resource} instance from the given {@link Class#getResource(String)}, with various
-     * {@link Resource} headers set using the metadata of the given {@link Class#getResource(String)}, and
-     * {@link #getContent()} set using {@link Class#getResourceAsStream(String)} with
-     * {@link ContentRange#forInputStream(InputStream)} as needed.
+     * Gets a {@link Resource} instance for the given {@link Class#getResource(String)}, with various
+     * {@link Resource} fields set using the metadata of the given {@link Class#getResource(String)}, and
+     * {@link #getContent()} set using {@link Class#getResourceAsStream(String)}.
      * <p>
-     * Note: classpath resources are immutable and cannot be deleted, so this method internally caches the computed
-     * {@link Resource} and uses {@link ETag#computeStrong(InputStream)}.
+     * Note: a classpath resource is immutable and cannot be deleted, so this method internally caches the computed
+     * {@link Resource} instance and uses {@link ETag#computeStrong(InputStream)}.
      *
-     * @param clazz          the {@link Class} to call {@link Class#getResource(String)} on
-     * @param resourceName   the {@link String} to pass to {@link Class#getResource(String)}
-     * @param exposeFilename <code>true</code> to set {@link ContentDisposition#getFilename()} to
-     *                       {@link File#getName()}, <code>false</code> to not set
-     *                       {@link ContentDisposition#getFilename()}
-     * @param range          the {@link Range}, or <code>null</code> to not set {@link #getContentRange()}
+     * @param clazz                the {@link Class} to call {@link Class#getResource(String)} on
+     * @param resourcePath         the {@link String} to pass to {@link Class#getResource(String)}
+     * @param trustedContentType   for the {@link ContentType} returned from {@link ContentType#forFilename(String)}
+     *                             with <code>resourcePath</code>, <code>true</code> will designate it as trusted and
+     *                             apply it if non-<code>null</code>, <code>false</code> will designate it as untrusted
+     *                             and apply it if non-<code>null</code> and {@link ContentType#isXssSafeHtmlTag()}.
+     *                             <p>
+     *                             For example, a user might upload a file named "code.js" that contains safe or unsafe
+     *                             JavaScript code, but user-uploaded files are always untrusted, so
+     *                             {@link ContentType#APPLICATION_JAVASCRIPT} should never be used, and a safe
+     *                             {@link ContentType} like {@link ContentType#TEXT_PLAIN} should be used instead.
+     * @param untrustedContentType if non-<code>null</code> and the logic described by the
+     *                             <code>trustedContentType</code> argument is not applied, then apply this
+     *                             {@link ContentType} instead
+     * @param peekLength           if non-<code>null</code> and the logic described by the
+     *                             <code>trustedContentType</code> and <code>untrustedContentType</code> arguments are
+     *                             not applied, then peek this many bytes into {@link #getContent()} and use
+     *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
+     * @param contentEncoding      the {@link ContentEncoding} of the classpath resource, or <code>null</code> for none
+     * @param exposeFilename       <code>true</code> to set {@link ContentDisposition#getFilename()} to
+     *                             the filename defined in <code>resourcePath</code>, <code>false</code> to not set
+     *                             {@link ContentDisposition#getFilename()}
      *
      * @return the {@link Resource} instance
      */
-    public static Resource ofClasspath(final Class<?> clazz, final String resourceName, final boolean exposeFilename,
-            final @Nullable Range range) throws StatusException {
-        final var resource = OF_CLASSPATH_CACHE.get(new OfClasspathCacheKey(clazz, resourceName, exposeFilename), _ -> {
-            final var url = clazz.getResource(resourceName);
+    public static Resource ofClasspath(final Class<?> clazz, final String resourcePath,
+            final boolean trustedContentType, final @Nullable ContentType untrustedContentType,
+            final @Nullable Integer peekLength, final @Nullable ContentEncoding contentEncoding,
+            final boolean exposeFilename) throws StatusException {
+        return OF_CLASSPATH_CACHE.get(new OfClasspathCacheKey(clazz, resourcePath, trustedContentType,
+                untrustedContentType, peekLength, contentEncoding, exposeFilename), _ -> {
+            final var url = clazz.getResource(resourcePath);
             if (url == null) {
                 throw new StatusException(NOT_FOUND_404, "`%s` class resource not found: %s"
-                        .formatted(clazz.getName(), resourceName));
+                        .formatted(clazz.getName(), resourcePath));
             }
-            final var lastIndexOfSlash = resourceName.lastIndexOf('/');
-            final var filename = lastIndexOfSlash != -1 ? resourceName.substring(lastIndexOfSlash + 1) : resourceName;
+            final var lastIndexOfSlash = resourcePath.lastIndexOf('/');
+            final var filename = lastIndexOfSlash != -1 ? resourcePath.substring(lastIndexOfSlash + 1) : resourcePath;
             final URLConnection urlConnection;
             try {
                 urlConnection = url.openConnection();
             } catch (final IOException ioException) {
                 throw new RuntimeException(ioException);
             }
-            final var fileLength = urlConnection.getContentLengthLong();
-            final var fileLastModified = urlConnection.getLastModified();
-            final var contentType = ContentType.forFilename(filename);
+            final var contentTypeForFilename = ContentType.forFilename(filename);
+            final ContentType contentType;
+            if (contentTypeForFilename != null && (trustedContentType || contentTypeForFilename.isXssSafeHtmlTag())) {
+                contentType = contentTypeForFilename;
+            } else if (untrustedContentType != null) {
+                contentType = untrustedContentType;
+            } else if (peekLength != null &&
+                    (contentEncoding == null || !contentEncoding.getType().isDictionaryRequired())) {
+                try (final var content = requireNonNull(clazz.getResourceAsStream(resourcePath))) {
+                    final byte[] peekedBytes;
+                    if (contentEncoding != null) {
+                        try (final var decompressed = contentEncoding.getType().decompress(content)) {
+                            peekedBytes = decompressed.readNBytes(peekLength);
+                        }
+                    } else {
+                        peekedBytes = content.readNBytes(peekLength);
+                    }
+                    contentType = isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
+                } catch (final IOException ioException) {
+                    throw new RuntimeException(ioException);
+                }
+            } else {
+                contentType = APPLICATION_OCTET_STREAM;
+            }
             final var contentDisposition = ContentDisposition.builder()
-                    .type(contentType != null && contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
+                    .type(contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
             if (exposeFilename) {
                 contentDisposition.filename(filename);
             }
             return builder()
-                    .contentLength(fileLength)
-                    .lastModified(Instant.ofEpochMilli(fileLastModified))
-                    .etag(ETag.computeStrong(requireNonNull(clazz.getResourceAsStream(resourceName))))
+                    .contentLength(urlConnection.getContentLengthLong())
+                    .lastModified(Instant.ofEpochMilli(urlConnection.getLastModified()))
+                    .etag(ETag.computeStrong(requireNonNull(clazz.getResourceAsStream(resourcePath))))
                     .contentType(contentType)
+                    .contentEncoding(contentEncoding)
                     .contentDisposition(contentDisposition.build())
-                    .content(() -> requireNonNull(clazz.getResourceAsStream(resourceName)))
+                    .content(() -> requireNonNull(clazz.getResourceAsStream(resourcePath)))
                     .build();
         });
-        if (range == null) {
-            return resource;
-        }
-        if (!range.getUnit().equals(BYTES_UNIT)) {
-            throw new StatusException(RANGE_NOT_SATISFIABLE_416, "`%s` unit must be: %s".formatted(RANGE, BYTES_UNIT));
-        }
-        final ContentRange contentRange;
-        try {
-            contentRange = forRange(range, requireNonNull(resource.getContentLength()));
-        } catch (final Exception exception) {
-            throw new StatusException(RANGE_NOT_SATISFIABLE_416, exception);
-        }
-        return resource.toBuilder()
-                .contentLength(contentRange.getContentLength())
-                .contentRange(contentRange)
-                .content(() -> {
-                    final var resourceAsStream = requireNonNull(clazz.getResourceAsStream(resourceName));
-                    try {
-                        return contentRange.forInputStream(resourceAsStream);
-                    } catch (final Throwable throwable) {
-                        try {
-                            resourceAsStream.close();
-                        } catch (final Throwable closeThrowable) {
-                            throwable.addSuppressed(closeThrowable);
-                        }
-                        throw new StatusException(RANGE_NOT_SATISFIABLE_416, throwable);
-                    }
-                }).build();
     }
-
-    @Immutable
-    @Value
-    private static class OfFileCacheKey {
-
-        String filePath;
-        boolean exposeFilename;
-    }
-
-    private static final Cache<OfFileCacheKey, Resource> OF_FILE_CACHE = newCache();
 
     /**
-     * If a {@link File} that was previously given to {@link #ofFile(File, boolean, boolean, Range)} with
-     * <code>immutable</code> set to <code>true</code> has been deleted, it should be removed from the internal cache
-     * by calling this method. The cache entry will eventually expire automatically, but it's a good idea to invalidate
-     * it as soon as possible so that the entry doesn't needlessly consume memory.
+     * Gets a {@link Resource} instance for the given {@link File}, with various {@link Resource} fields set using the
+     * metadata of the given {@link File}, and {@link #getContent()} set using {@link FileInputStream}.
+     * <p>
+     * Note: it is strongly encouraged to use {@link FileDirectoryHandler} instead of calling this method directly.
      *
-     * @param file the {@link File}
-     */
-    public static void ofFileImmutableCacheInvalidate(final File file) {
-        final var filePath = file.getPath();
-        // Invalidate all cache entry variants.
-        OF_FILE_CACHE.invalidate(new OfFileCacheKey(filePath, true));
-        OF_FILE_CACHE.invalidate(new OfFileCacheKey(filePath, false));
-    }
-
-    /**
-     * @return {@link #ofFile(File, boolean, boolean, Range)} with <code>exposeFilename</code> set to <code>true</code>
-     */
-    public static Resource ofFile(final File file, final boolean immutable, final @Nullable Range range) {
-        return ofFile(file, immutable, true, range);
-    }
-
-    /**
-     * Creates a {@link Resource} instance from the given {@link File}, with various {@link Resource} headers set using
-     * the metadata of the given {@link File}, and {@link #getContent()} set using {@link FileInputStream} with
-     * {@link ContentRange#forInputStream(InputStream)} as needed.
-     *
-     * @param file           the {@link File}
-     * @param immutable      <code>true</code> if the given {@link File} is immutable (the path, name, metadata, and
-     *                       content will never change while the JVM is running) and the computed {@link Resource}
-     *                       should be internally cached and use {@link ETag#computeStrong(File)}, <code>false</code>
-     *                       otherwise. Call {@link #ofFileImmutableCacheInvalidate(File)} when the immutable
-     *                       {@link File} is deleted.
-     * @param exposeFilename <code>true</code> to set {@link ContentDisposition#getFilename()} to
-     *                       {@link File#getName()}, <code>false</code> to not set
-     *                       {@link ContentDisposition#getFilename()}
-     * @param range          the {@link Range}, or <code>null</code> to not set {@link #getContentRange()}
+     * @param file                 the {@link File}
+     * @param strongETag           <code>true</code> to use {@link ETag#computeStrong(File)}, <code>false</code> to
+     *                             use {@link ETag#computeWeak(File)}
+     * @param trustedContentType   for the {@link ContentType} returned from {@link ContentType#forFilename(String)}
+     *                             with {@link File#getName()}, <code>true</code> will designate it as trusted and
+     *                             apply it if non-<code>null</code>, <code>false</code> will designate it as untrusted
+     *                             and apply it if non-<code>null</code> and {@link ContentType#isXssSafeHtmlTag()}.
+     *                             <p>
+     *                             For example, a user might upload a file named "code.js" that contains safe or unsafe
+     *                             JavaScript code, but user-uploaded files are always untrusted, so
+     *                             {@link ContentType#APPLICATION_JAVASCRIPT} should never be used, and a safe
+     *                             {@link ContentType} like {@link ContentType#TEXT_PLAIN} should be used instead.
+     * @param untrustedContentType if non-<code>null</code> and the logic described by the
+     *                             <code>trustedContentType</code> argument is not applied, then apply this
+     *                             {@link ContentType} instead
+     * @param peekLength           if non-<code>null</code> and the logic described by the
+     *                             <code>trustedContentType</code> and <code>untrustedContentType</code> arguments are
+     *                             not applied, then peek this many bytes into {@link #getContent()} and use
+     *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
+     * @param contentEncoding      the {@link ContentEncoding} of the {@link File}, or <code>null</code> for none
+     * @param exposeFilename       <code>true</code> to set {@link ContentDisposition#getFilename()} to
+     *                             {@link File#getName()}, <code>false</code> to not set
+     *                             {@link ContentDisposition#getFilename()}
      *
      * @return the {@link Resource} instance
      */
-    public static Resource ofFile(final File file, final boolean immutable, final boolean exposeFilename,
-            final @Nullable Range range) throws StatusException {
-        final var resource = immutable ? OF_FILE_CACHE.get(new OfFileCacheKey(file.getPath(), exposeFilename), _ ->
-                ofFileNoRange(file, true, exposeFilename)) : ofFileNoRange(file, false, exposeFilename);
-        if (range == null) {
-            return resource;
-        }
-        if (!range.getUnit().equals(BYTES_UNIT)) {
-            throw new StatusException(RANGE_NOT_SATISFIABLE_416, "`%s` unit must be: %s".formatted(RANGE, BYTES_UNIT));
-        }
-        final ContentRange contentRange;
-        try {
-            contentRange = forRange(range, requireNonNull(resource.getContentLength()));
-        } catch (final Exception exception) {
-            throw new StatusException(RANGE_NOT_SATISFIABLE_416, exception);
-        }
-        return resource.toBuilder()
-                .contentLength(contentRange.getContentLength())
-                .contentRange(contentRange)
-                .content(() -> {
-                    final FileInputStream fileInputStream;
-                    try {
-                        fileInputStream = new FileInputStream(file);
-                    } catch (final FileNotFoundException fileNotFoundException) {
-                        if (immutable) {
-                            OF_FILE_CACHE.invalidate(new OfFileCacheKey(file.getPath(), exposeFilename));
-                        }
-                        throw new StatusException(NOT_FOUND_404, fileNotFoundException);
-                    }
-                    try {
-                        return contentRange.forInputStream(fileInputStream);
-                    } catch (final Throwable throwable) {
-                        try {
-                            fileInputStream.close();
-                        } catch (final Throwable closeThrowable) {
-                            throwable.addSuppressed(closeThrowable);
-                        }
-                        throw new StatusException(RANGE_NOT_SATISFIABLE_416, throwable);
-                    }
-                }).build();
-    }
-
-    private static Resource ofFileNoRange(final File file, final boolean immutable, final boolean exposeFilename) {
+    public static Resource ofFile(final File file, final boolean strongETag, final boolean trustedContentType,
+            final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
+            final @Nullable ContentEncoding contentEncoding, final boolean exposeFilename) throws StatusException {
         if (!file.exists()) {
             throw new StatusException(NOT_FOUND_404, "Nonexistent file: " + file);
         }
         if (!file.canRead()) {
             throw new StatusException(NOT_FOUND_404, "Unreadable file: " + file);
         }
+        if (!file.isFile()) {
+            throw new StatusException(NOT_FOUND_404, "Not a file: " + file);
+        }
         final var filename = file.getName();
         final var fileLength = file.length();
         final var fileLastModified = file.lastModified();
-        final var contentType = ContentType.forFilename(filename);
+        final var contentTypeForFilename = ContentType.forFilename(filename);
+        final ContentType contentType;
+        if (contentTypeForFilename != null && (trustedContentType || contentTypeForFilename.isXssSafeHtmlTag())) {
+            contentType = contentTypeForFilename;
+        } else if (untrustedContentType != null) {
+            contentType = untrustedContentType;
+        } else if (peekLength != null &&
+                (contentEncoding == null || !contentEncoding.getType().isDictionaryRequired())) {
+            try (final var content = new FileInputStream(file)) {
+                final byte[] peekedBytes;
+                if (contentEncoding != null) {
+                    try (final var decompressed = contentEncoding.getType().decompress(content)) {
+                        peekedBytes = decompressed.readNBytes(peekLength);
+                    }
+                } else {
+                    peekedBytes = content.readNBytes(peekLength);
+                }
+                contentType = isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
+            } catch (final IOException ioException) {
+                throw new RuntimeException(ioException);
+            }
+        } else {
+            contentType = APPLICATION_OCTET_STREAM;
+        }
         final var contentDisposition = ContentDisposition.builder()
-                .type(contentType != null && contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
+                .type(contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
         if (exposeFilename) {
             contentDisposition.filename(filename);
         }
         return builder()
                 .contentLength(fileLength)
                 .lastModified(Instant.ofEpochMilli(fileLastModified))
-                .etag(immutable ? ETag.computeStrong(file) : ETag.computeWeak(filename, fileLength, fileLastModified))
+                .etag(strongETag ? ETag.computeStrong(file) : ETag.computeWeak(filename, fileLength, fileLastModified))
                 .contentType(contentType)
                 .contentDisposition(contentDisposition.build())
                 .content(() -> {
                     try {
                         return new FileInputStream(file);
                     } catch (final FileNotFoundException fileNotFoundException) {
-                        if (immutable) {
-                            OF_FILE_CACHE.invalidate(new OfFileCacheKey(file.getPath(), exposeFilename));
-                        }
                         throw new StatusException(NOT_FOUND_404, fileNotFoundException);
                     }
                 }).build();
@@ -322,4 +317,44 @@ public final class Resource {
      * Note: {@link Supplier#get()} of this {@link Supplier} is not guaranteed to be called.
      */
     private final @SuppressWarnings("Immutable") @ToString.Exclude Supplier<InputStream> content;
+
+    /**
+     * Returns a copy of this {@link Resource}, with {@link #getContentRange()} set to
+     * {@link ContentRange#forRange(Range, long)} using the given {@link Range} and this {@link #getContentLength()}
+     * (which must be non-<code>null</code>), and {@link #getContent()} set to
+     * {@link ContentRange#forInputStream(InputStream)} using this {@link #getContent()}. If this
+     * {@link #getContentRange()} is already set, an {@link IllegalArgumentException} is thrown.
+     *
+     * @param range the {@link Range}
+     *
+     * @return this {@link Resource} with the given {@link Range}
+     */
+    public Resource withRange(final Range range) throws StatusException, IllegalArgumentException {
+        checkArgument(contentRange == null, "`contentRange` cannot already be set");
+        if (!range.getUnit().equals(BYTES_UNIT)) {
+            throw new StatusException(RANGE_NOT_SATISFIABLE_416, "`%s` unit must be: %s".formatted(RANGE, BYTES_UNIT));
+        }
+        final ContentRange contentRange;
+        try {
+            contentRange = ContentRange.forRange(range, requireNonNull(contentLength));
+        } catch (final Exception exception) {
+            throw new StatusException(RANGE_NOT_SATISFIABLE_416, exception);
+        }
+        return toBuilder()
+                .contentLength(contentRange.getContentLength())
+                .contentRange(contentRange)
+                .content(() -> {
+                    final var content = this.content.get();
+                    try {
+                        return contentRange.forInputStream(content);
+                    } catch (final Throwable throwable) {
+                        try {
+                            content.close();
+                        } catch (final Throwable closeThrowable) {
+                            throwable.addSuppressed(closeThrowable);
+                        }
+                        throw new StatusException(RANGE_NOT_SATISFIABLE_416, throwable);
+                    }
+                }).build();
+    }
 }

@@ -23,6 +23,7 @@ import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
+import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -149,7 +150,7 @@ public final class Response {
      * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link List#getFirst()} or <code>null</code>
      */
     public @Nullable String getHeader(final String header) {
-        final var headers = getHeaders().get(header);
+        final var headers = this.headers.get(header);
         return headers.isEmpty() ? null : headers.getFirst();
     }
 
@@ -554,48 +555,34 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #responseResource(Resource, boolean, boolean, ContentType, Integer, boolean)} with
-     * <code>acceptRanges</code> set to <code>true</code>, <code>untrustedContentType</code> set to <code>null</code>,
-     * <code>peekLength</code> set to <code>1024</code>, and <code>setBodyInputStream</code> to the negation of
-     * {@link Request#getMethodEnum()} {@link Method#hasNoResponseBody()}.
+     * Calls {@link #responseResource(Resource, boolean, Integer, boolean)} with
+     * <code>acceptRanges</code> set to <code>true</code>,
+     * <code>contentTypePeekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH},
+     * and <code>setBodyInputStream</code> to the negation of {@link Request#getMethodEnum()}
+     * {@link Method#hasNoResponseBody()}.
      */
-    public void responseResource(final Resource resource, final boolean trustedContentType) {
+    public void responseResource(final Resource resource) {
         final var requestMethod = handle.getRequest().getMethodEnum();
-        responseResource(resource, true, trustedContentType, null, 1024,
+        responseResource(resource, true, Resource.DEFAULT_PEEK_LENGTH,
                 requestMethod == null || !requestMethod.hasNoResponseBody());
     }
 
     /**
      * Applies the given {@link Resource} to this {@link Response}.
      *
-     * @param resource             the {@link Resource}
-     * @param acceptRanges         <code>true</code> to {@link #setHeader(Header, String)} {@link Header#ACCEPT_RANGES}
-     *                             {@link Range#BYTES_UNIT}, <code>false</code> otherwise
-     * @param trustedContentType   <code>true</code> to designate the {@link Resource#getContentType()} as trusted and
-     *                             apply it if non-<code>null</code>, <code>false</code> to designate the given
-     *                             {@link Resource#getContentType()} as untrusted and apply it if non-<code>null</code>
-     *                             and {@link ContentType#isXssSafeHtmlTag()}.
-     *                             <p>
-     *                             For example, a user might upload a file named "code.js" that contains safe or unsafe
-     *                             Javascript code, but user-uploaded files are untrusted, so
-     *                             {@link #setContentType(ContentType)} should never be set to
-     *                             {@link ContentType#APPLICATION_JAVASCRIPT}, but should instead be safely set to
-     *                             {@link ContentType#TEXT_PLAIN}.
-     * @param untrustedContentType if non-<code>null</code> and the logic described by the
-     *                             <code>trustedContentType</code> argument is not applied, then apply this
-     *                             {@link ContentType} instead
-     * @param peekLength           if non-<code>null</code> and the logic described by the
-     *                             <code>trustedContentType</code> and <code>untrustedContentType</code> arguments are
-     *                             not applied, then peek this many bytes into {@link Resource#getContent()} and use
-     *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
-     *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
-     * @param setBodyInputStream   <code>true</code> to {@link #setBodyInputStream(InputStream)} to
-     *                             {@link Resource#getContent()}, <code>false</code> to not
-     *                             {@link #setBodyInputStream(InputStream)}
+     * @param resource              the {@link Resource}
+     * @param acceptRanges          <code>true</code> to {@link #setHeader(Header, String)} {@link Header#ACCEPT_RANGES}
+     *                              {@link Range#BYTES_UNIT}, <code>false</code> otherwise
+     * @param contentTypePeekLength if non-<code>null</code> and the given {@link Resource#getContentType()} is
+     *                              <code>null</code>, then peek this many bytes into {@link Resource#getContent()} and
+     *                              use {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                              {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
+     * @param setBodyInputStream    <code>true</code> to {@link #setBodyInputStream(InputStream)} to
+     *                              {@link Resource#getContent()}, <code>false</code> to not
+     *                              {@link #setBodyInputStream(InputStream)}
      */
-    public void responseResource(final Resource resource, final boolean acceptRanges, final boolean trustedContentType,
-            final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
-            boolean setBodyInputStream) {
+    public void responseResource(final Resource resource, final boolean acceptRanges,
+            final @Nullable Integer contentTypePeekLength, boolean setBodyInputStream) {
         final var request = handle.getRequest();
         var notModified = false;
         final var lastModified = resource.getLastModified();
@@ -633,11 +620,9 @@ public final class Response {
         }
 
         final var contentType = resource.getContentType();
-        if (contentType != null && (trustedContentType || contentType.isXssSafeHtmlTag())) {
+        if (contentType != null) {
             setContentType(contentType);
-        } else if (untrustedContentType != null) {
-            setContentType(untrustedContentType);
-        } else if (peekLength != null &&
+        } else if (contentTypePeekLength != null &&
                 (contentEncoding == null || !contentEncoding.getType().isDictionaryRequired())) {
             final byte[] peekedBytes;
             final var content = resource.getContent().get();
@@ -651,10 +636,10 @@ public final class Response {
                                 // Close decompression stream, but do not close underlying stream.
                                 @Override public void close() {}
                             })) {
-                        peekedBytes = decompressed.readNBytes(peekLength);
+                        peekedBytes = decompressed.readNBytes(contentTypePeekLength);
                     }
                 } else {
-                    peekedBytes = contentMarkable.readNBytes(peekLength);
+                    peekedBytes = contentMarkable.readNBytes(contentTypePeekLength);
                 }
                 if (setBodyInputStream) {
                     setBodyInputStream = false;
@@ -693,54 +678,34 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #responseClasspath(Class, String, boolean)} with <code>exposeFilename</code> set to
-     * <code>true</code>.
+     * Calls {@link #responseResource(Resource)} with {@link Resource#ofClasspath(Class, String)}.
      */
-    public void responseClasspath(final Class<?> clazz, final String resourceName) {
-        responseClasspath(clazz, resourceName, true);
+    public void responseClasspath(final Class<?> clazz, final String resourcePath) {
+        responseResource(Resource.ofClasspath(clazz, resourcePath));
     }
 
     /**
-     * Calls {@link #responseResource(Resource, boolean)} with <code>trustedContentType</code> set to <code>true</code>
-     * and {@link Resource#ofClasspath(Class, String, boolean, Range)} with <code>range</code> set to
-     * {@link Request#getRange()}.
+     * Calls {@link #responseResource(Resource)} with
+     * {@link Resource#ofClasspath(Class, String, boolean, ContentType, Integer, ContentEncoding, boolean)}.
      */
-    public void responseClasspath(final Class<?> clazz, final String resourceName, final boolean exposeFilename) {
-        responseResource(Resource.ofClasspath(clazz, resourceName, exposeFilename, handle.getRequest().getRange()),
-                true);
+    public void responseClasspath(final Class<?> clazz, final String resourcePath,
+            final boolean trustedContentType, final @Nullable ContentType untrustedContentType,
+            final @Nullable Integer peekLength, final @Nullable ContentEncoding contentEncoding,
+            final boolean exposeFilename) {
+        responseResource(Resource.ofClasspath(clazz, resourcePath, trustedContentType, untrustedContentType, peekLength,
+                contentEncoding, exposeFilename));
     }
 
     /**
-     * Calls {@link #responseFileMutable(File, boolean, boolean)} with <code>exposeFilename</code> set to
-     * <code>true</code>.
+     * Calls {@link #responseResource(Resource)} with
+     * {@link Resource#ofFile(File, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
+     * <p>
+     * Note: it is strongly encouraged to use {@link FileDirectoryHandler} instead of calling this method directly.
      */
-    public void responseFileMutable(final File file, final boolean trustedContentType) {
-        responseFileImmutable(file, true, trustedContentType);
-    }
-
-    /**
-     * Calls {@link #responseResource(Resource, boolean)} with {@link Resource#ofFile(File, boolean, Range)} with
-     * <code>immutable</code> set to <code>false</code> and <code>range</code> set to {@link Request#getRange()}.
-     */
-    public void responseFileMutable(final File file, final boolean exposeFilename, final boolean trustedContentType) {
-        responseResource(Resource.ofFile(file, false, exposeFilename, handle.getRequest().getRange()),
-                trustedContentType);
-    }
-
-    /**
-     * Calls {@link #responseFileImmutable(File, boolean, boolean)} with <code>exposeFilename</code> set to
-     * <code>true</code>.
-     */
-    public void responseFileImmutable(final File file, final boolean trustedContentType) {
-        responseFileImmutable(file, true, trustedContentType);
-    }
-
-    /**
-     * Calls {@link #responseResource(Resource, boolean)} with {@link Resource#ofFile(File, boolean, Range)} with
-     * <code>immutable</code> set to <code>true</code> and <code>range</code> set to {@link Request#getRange()}.
-     */
-    public void responseFileImmutable(final File file, final boolean exposeFilename, final boolean trustedContentType) {
-        responseResource(Resource.ofFile(file, true, exposeFilename, handle.getRequest().getRange()),
-                trustedContentType);
+    public void ofFile(final File file, final boolean strongETag, final boolean trustedContentType,
+            final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
+            final @Nullable ContentEncoding contentEncoding, final boolean exposeFilename) {
+        responseResource(Resource.ofFile(file, strongETag, trustedContentType, untrustedContentType, peekLength,
+                contentEncoding, exposeFilename));
     }
 }
