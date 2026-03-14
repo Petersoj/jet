@@ -381,7 +381,7 @@ public final class Response {
     /**
      * Sets {@link #getBodyInputStream()}.
      */
-    public void setBodyInputStream(final InputStream bodyInputStream) {
+    public void setBodyInputStream(final @Nullable InputStream bodyInputStream) {
         if (this.bodyInputStream != null) {
             try {
                 this.bodyInputStream.close();

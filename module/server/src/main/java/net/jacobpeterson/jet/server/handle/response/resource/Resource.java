@@ -166,10 +166,10 @@ public final class Resource {
                     throw new RuntimeException(ioException);
                 }
             } else {
-                contentType = APPLICATION_OCTET_STREAM;
+                contentType = null;
             }
             final var contentDisposition = ContentDisposition.builder()
-                    .type(contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
+                    .type(contentType != null && contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
             if (exposeFilename) {
                 contentDisposition.filename(filename);
             }
@@ -266,10 +266,10 @@ public final class Resource {
                 throw new RuntimeException(ioException);
             }
         } else {
-            contentType = APPLICATION_OCTET_STREAM;
+            contentType = null;
         }
         final var contentDisposition = ContentDisposition.builder()
-                .type(contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
+                .type(contentType != null && contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
         if (exposeFilename) {
             contentDisposition.filename(filename);
         }
