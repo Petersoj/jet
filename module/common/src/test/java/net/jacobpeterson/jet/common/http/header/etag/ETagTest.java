@@ -2,12 +2,11 @@ package net.jacobpeterson.jet.common.http.header.etag;
 
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
-import static java.nio.file.Files.writeString;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.Instant.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,17 +16,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public final class ETagTest {
 
     @Test
-    public void computeStrong(final @TempDir File tempDir) throws IOException {
-        final var testFile = new File(tempDir, "test.txt");
-        writeString(testFile.toPath(), "abc");
-        final var etag = ETag.computeStrong(testFile);
+    public void computeStrong() {
+        final var etag = ETag.computeStrong(new ByteArrayInputStream("abc".getBytes(UTF_8)));
         assertFalse(etag.isWeak());
         assertFalse(etag.getValue().isEmpty());
     }
 
     @Test
-    public void computeWeak(final @TempDir File tempDir) {
-        final var etag = ETag.computeWeak(tempDir);
+    public void computeWeak() {
+        final var etag = ETag.computeWeak("abc", 123, now().toEpochMilli());
         assertTrue(etag.isWeak());
         assertFalse(etag.getValue().isEmpty());
     }

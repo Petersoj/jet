@@ -11,8 +11,6 @@ import net.jacobpeterson.jet.common.http.header.Header;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -53,17 +51,6 @@ public final class ETag {
     public static final String WEAK_PREFIX = "W/";
 
     /**
-     * @return {@link #computeStrong(InputStream)} with {@link FileInputStream#FileInputStream(File)}
-     */
-    public static ETag computeStrong(final File file) {
-        try (final var fileInputStream = new FileInputStream(file)) {
-            return computeStrong(fileInputStream);
-        } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
-        }
-    }
-
-    /**
      * Computes a strong {@link ETag} for the given entity content using {@link HashingInputStream} with
      * {@link Hashing#murmur3_128()}.
      *
@@ -84,19 +71,11 @@ public final class ETag {
     }
 
     /**
-     * @return {@link #computeWeak(String, long, long)} with {@link File#getName()}, {@link File#length()}, and
-     * {@link File#lastModified()}
-     */
-    public static ETag computeWeak(final File file) {
-        return computeWeak(file.getName(), file.length(), file.lastModified());
-    }
-
-    /**
      * Computes a weak {@link ETag} for the given entity attributes.
      *
      * @param name         the name
      * @param size         the size
-     * @param lastModified the last modified epoch
+     * @param lastModified the last modified epoch millis
      *
      * @return the weak {@link ETag}
      */
