@@ -29,13 +29,13 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -702,11 +702,11 @@ public final class Response {
 
     /**
      * Calls {@link #responseResource(Resource)} with
-     * {@link Resource#ofFile(File, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
+     * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
      * <p>
-     * Note: it is strongly encouraged to use {@link FileDirectoryHandler} instead of calling this method directly.
+     * Note: it is recommended to use {@link FileDirectoryHandler} instead of calling this method directly.
      */
-    public void ofFile(final File file, final boolean strongETag, final boolean trustedContentType,
+    public void ofFile(final Path file, final boolean strongETag, final boolean trustedContentType,
             final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding, final boolean exposeFilename) {
         responseResource(Resource.ofFile(file, strongETag, trustedContentType, untrustedContentType, peekLength,

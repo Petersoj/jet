@@ -20,13 +20,14 @@ import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandl
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.Supplier;
 
@@ -185,16 +186,17 @@ public final class Resource {
     }
 
     /**
-     * Gets a {@link Resource} instance for the given {@link File}, with various {@link Resource} fields set using the
-     * metadata of the given {@link File}, and {@link #getContent()} set using {@link FileInputStream}.
+     * Gets a {@link Resource} instance for the given file {@link Path}, with various {@link Resource} fields set using
+     * the metadata of the given file {@link Path}, and {@link #getContent()} set using
+     * {@link Files#newInputStream(Path, OpenOption...)}.
      * <p>
-     * Note: it is strongly encouraged to use {@link FileDirectoryHandler} instead of calling this method directly.
+     * Note: it is recommended to use {@link FileDirectoryHandler} instead of calling this method directly.
      *
-     * @param file                 the {@link File}
-     * @param strongETag           <code>true</code> to use {@link ETag#computeStrong(File)}, <code>false</code> to
-     *                             use {@link ETag#computeWeak(File)}
+     * @param file                 the file {@link Path}
+     * @param strongETag           <code>true</code> to use {@link ETag#computeStrong(InputStream)}, <code>false</code>
+     *                             to use {@link ETag#computeWeak(String, long, long)}
      * @param trustedContentType   for the {@link ContentType} returned from {@link ContentType#forFilename(String)}
-     *                             with {@link File#getName()}, <code>true</code> will designate it as trusted and
+     *                             with {@link Path#getFileName()}, <code>true</code> will designate it as trusted and
      *                             apply it if non-<code>null</code>, <code>false</code> will designate it as untrusted
      *                             and apply it if non-<code>null</code> and {@link ContentType#isXssSafeHtmlTag()}.
      *                             <p>
@@ -210,28 +212,38 @@ public final class Resource {
      *                             not applied, then peek this many bytes into {@link #getContent()} and use
      *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
      *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
-     * @param contentEncoding      the {@link ContentEncoding} of the {@link File}, or <code>null</code> for none
+     * @param contentEncoding      the {@link ContentEncoding} of the file {@link Path}, or <code>null</code> for none
      * @param exposeFilename       <code>true</code> to set {@link ContentDisposition#getFilename()} to
-     *                             {@link File#getName()}, <code>false</code> to not set
+     *                             {@link Path#getFileName()}, <code>false</code> to not set
      *                             {@link ContentDisposition#getFilename()}
      *
      * @return the {@link Resource} instance
      */
-    public static Resource ofFile(final File file, final boolean strongETag, final boolean trustedContentType,
+    public static Resource ofFile(final Path file, final boolean strongETag, final boolean trustedContentType,
             final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding, final boolean exposeFilename) throws StatusException {
-        if (!file.exists()) {
-            throw new StatusException(NOT_FOUND_404, "Nonexistent file: " + file);
+        if (!Files.isRegularFile(file)) {
+            throw new StatusException(NOT_FOUND_404, "Invalid file: " + file);
         }
-        if (!file.canRead()) {
-            throw new StatusException(NOT_FOUND_404, "Unreadable file: " + file);
+        final var filename = file.getFileName().toString();
+        final long fileLength;
+        final long fileLastModified;
+        try {
+            fileLength = Files.size(file);
+            fileLastModified = Files.getLastModifiedTime(file).toMillis();
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
         }
-        if (!file.isFile()) {
-            throw new StatusException(NOT_FOUND_404, "Not a file: " + file);
+        final ETag etag;
+        if (strongETag) {
+            try (final var content = Files.newInputStream(file)) {
+                etag = ETag.computeStrong(content);
+            } catch (final IOException ioException) {
+                throw new RuntimeException(ioException);
+            }
+        } else {
+            etag = ETag.computeWeak(filename, fileLength, fileLastModified);
         }
-        final var filename = file.getName();
-        final var fileLength = file.length();
-        final var fileLastModified = file.lastModified();
         final var contentTypeForFilename = ContentType.forFilename(filename);
         final ContentType contentType;
         if (contentTypeForFilename != null && (trustedContentType || contentTypeForFilename.isXssSafeHtmlTag())) {
@@ -240,7 +252,7 @@ public final class Resource {
             contentType = untrustedContentType;
         } else if (peekLength != null &&
                 (contentEncoding == null || !contentEncoding.getType().isDictionaryRequired())) {
-            try (final var content = new FileInputStream(file)) {
+            try (final var content = Files.newInputStream(file)) {
                 final byte[] peekedBytes;
                 if (contentEncoding != null) {
                     try (final var decompressed = contentEncoding.getType().decompress(content)) {
@@ -264,14 +276,16 @@ public final class Resource {
         return builder()
                 .contentLength(fileLength)
                 .lastModified(Instant.ofEpochMilli(fileLastModified))
-                .etag(strongETag ? ETag.computeStrong(file) : ETag.computeWeak(filename, fileLength, fileLastModified))
+                .etag(etag)
                 .contentType(contentType)
                 .contentDisposition(contentDisposition.build())
                 .content(() -> {
                     try {
-                        return new FileInputStream(file);
-                    } catch (final FileNotFoundException fileNotFoundException) {
-                        throw new StatusException(NOT_FOUND_404, fileNotFoundException);
+                        return Files.newInputStream(file);
+                    } catch (final NoSuchFileException noSuchFileException) {
+                        throw new StatusException(NOT_FOUND_404, noSuchFileException);
+                    } catch (final IOException ioException) {
+                        throw new RuntimeException(ioException);
                     }
                 }).build();
     }
