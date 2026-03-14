@@ -46,7 +46,6 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
 import tools.jackson.databind.node.ObjectNode;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
@@ -181,7 +180,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
                             if (file.getFileName().toString().endsWith(CLASS_FILE_SUFFIX)) {
                                 final var packageClass = javaCompileOutputPath.relativize(file)
-                                        .toString().replace(File.separatorChar, '.');
+                                        .toString().replace(file.getFileSystem().getSeparator(), ".");
                                 javaCompileClassNames.add(packageClass.substring(0,
                                         packageClass.length() - CLASS_FILE_SUFFIX.length()));
                             }
