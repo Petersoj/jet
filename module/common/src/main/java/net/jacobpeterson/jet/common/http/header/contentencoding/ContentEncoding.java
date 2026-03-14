@@ -2,6 +2,8 @@ package net.jacobpeterson.jet.common.http.header.contentencoding;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.EqualsAndHashCode;
@@ -12,6 +14,9 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Locale.ROOT;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
@@ -57,11 +62,75 @@ public final class ContentEncoding {
      */
     public static final String TYPES_DELIMITER = ",";
 
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#GZIP}.
+     */
+    public static final ContentEncoding GZIP = ContentEncoding.builder()
+            .type(CompressionType.GZIP)
+            .build();
+
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#COMPRESS}.
+     */
+    public static final ContentEncoding COMPRESS = ContentEncoding.builder()
+            .type(CompressionType.COMPRESS)
+            .build();
+
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#DEFLATE}.
+     */
+    public static final ContentEncoding DEFLATE = ContentEncoding.builder()
+            .type(CompressionType.DEFLATE)
+            .build();
+
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#BROTLI}.
+     */
+    public static final ContentEncoding BROTLI = ContentEncoding.builder()
+            .type(CompressionType.BROTLI)
+            .build();
+
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#ZSTANDARD}.
+     */
+    public static final ContentEncoding ZSTANDARD = ContentEncoding.builder()
+            .type(CompressionType.ZSTANDARD)
+            .build();
+
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#DICTIONARY_COMPRESSED_BROTLI}.
+     */
+    public static final ContentEncoding DICTIONARY_COMPRESSED_BROTLI = ContentEncoding.builder()
+            .type(CompressionType.DICTIONARY_COMPRESSED_BROTLI)
+            .build();
+
+    /**
+     * Constant with {@link #getType()} as {@link CompressionType#DICTIONARY_COMPRESSED_ZSTANDARD}.
+     */
+    public static final ContentEncoding DICTIONARY_COMPRESSED_ZSTANDARD = ContentEncoding.builder()
+            .type(CompressionType.DICTIONARY_COMPRESSED_ZSTANDARD)
+            .build();
+
+    /**
+     * An {@link ImmutableMap} of all the public static {@link ContentEncoding}s declared in this class with
+     * {@link ContentEncoding#toString()} as the key.
+     */
+    public static final ImmutableMap<String, ContentEncoding> COMMON_CONTENT_ENCODINGS = ImmutableSet.of(
+                    GZIP,
+                    COMPRESS,
+                    DEFLATE,
+                    BROTLI,
+                    ZSTANDARD,
+                    DICTIONARY_COMPRESSED_BROTLI,
+                    DICTIONARY_COMPRESSED_ZSTANDARD)
+            .stream().collect(toImmutableMap(ContentEncoding::toString, identity()));
+
     private static final Splitter PARSE_TYPES_SPLITTER =
             Splitter.on(TYPES_DELIMITER).trimResults().omitEmptyStrings();
 
     /**
-     * Parses the given {@link Header#CONTENT_ENCODING} value {@link String} into a {@link ContentEncoding}.
+     * Parses the given {@link Header#CONTENT_ENCODING} value {@link String} into a {@link ContentEncoding}, firstly
+     * checking {@link #COMMON_CONTENT_ENCODINGS} {@link ImmutableMap#get(Object)}.
      *
      * @param contentEncoding the {@link Header#CONTENT_ENCODING} value {@link String}
      *
@@ -70,6 +139,10 @@ public final class ContentEncoding {
      * @throws IllegalArgumentException thrown upon parsing failure
      */
     public static ContentEncoding parse(final String contentEncoding) throws IllegalArgumentException {
+        final var commonContentType = COMMON_CONTENT_ENCODINGS.get(contentEncoding.trim().toLowerCase(ROOT));
+        if (commonContentType != null) {
+            return commonContentType;
+        }
         final var builder = builder();
         for (final var type : PARSE_TYPES_SPLITTER.split(contentEncoding)) {
             final var typeEnum = CompressionType.forString(type);

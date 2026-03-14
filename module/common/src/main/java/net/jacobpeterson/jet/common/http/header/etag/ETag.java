@@ -67,7 +67,7 @@ public final class ETag {
      * Computes a strong {@link ETag} for the given entity content using {@link HashingInputStream} with
      * {@link Hashing#murmur3_128()}.
      *
-     * @param content the content {@link InputStream}
+     * @param content the content {@link InputStream} (always closed by this method)
      *
      * @return the strong {@link ETag}
      */
