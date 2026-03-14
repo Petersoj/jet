@@ -83,8 +83,8 @@ public final class Resource {
      * <code>trustedContentType</code> set to <code>true</code>,
      * <code>untrustedContentType</code> set to <code>null</code>,
      * <code>peekLength</code> set to {@link #DEFAULT_PEEK_LENGTH},
-     * <code>contentEncoding</code> set to <code>null</code>,
-     * and <code>exposeFilename</code> set to <code>true</code>
+     * <code>contentEncoding</code> set to <code>null</code>, and
+     * <code>exposeFilename</code> set to <code>true</code>
      */
     public static Resource ofClasspath(final Class<?> clazz, final String resourcePath) {
         return ofClasspath(clazz, resourcePath, true, null, DEFAULT_PEEK_LENGTH, null, true);

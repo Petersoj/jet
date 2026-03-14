@@ -556,15 +556,19 @@ public final class Response {
 
     /**
      * Calls {@link #responseResource(Resource, boolean, Integer, boolean)} with
+     * <code>resource</code> set to the given {@link Resource#withRange(Range)} with {@link Request#getRange()} if
+     * non-<code>null</code>,
      * <code>acceptRanges</code> set to <code>true</code>,
-     * <code>contentTypePeekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH},
-     * and <code>setBodyInputStream</code> to the negation of {@link Request#getMethodEnum()}
+     * <code>contentTypePeekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH}, and
+     * <code>setBodyInputStream</code> to the negation of {@link Request#getMethodEnum()}
      * {@link Method#hasNoResponseBody()}.
      */
     public void responseResource(final Resource resource) {
-        final var requestMethod = handle.getRequest().getMethodEnum();
-        responseResource(resource, true, Resource.DEFAULT_PEEK_LENGTH,
-                requestMethod == null || !requestMethod.hasNoResponseBody());
+        final var request = handle.getRequest();
+        final var requestRange = request.getRange();
+        final var requestMethod = request.getMethodEnum();
+        responseResource(requestRange != null ? resource.withRange(requestRange) : resource, true,
+                Resource.DEFAULT_PEEK_LENGTH, requestMethod == null || !requestMethod.hasNoResponseBody());
     }
 
     /**
