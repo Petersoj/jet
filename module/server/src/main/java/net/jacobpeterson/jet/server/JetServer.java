@@ -396,9 +396,6 @@ public final class JetServer {
                     }
 
                     jettyResponse.setStatus(response.getStatusCode());
-                    if (response.hasContentSecurityPolicyBuilder()) {
-                        response.setContentSecurityPolicy(response.getContentSecurityPolicyBuilder().build());
-                    }
                     response.getHeaders().forEach(jettyResponse.getHeaders()::add);
 
                     final var bodyInputStream = response.getBodyInputStream();

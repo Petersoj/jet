@@ -105,8 +105,6 @@ public final class Response {
      */
     private final @Getter Headers headers = Headers.create();
 
-    private ContentSecurityPolicy.@Nullable Builder contentSecurityPolicyBuilder;
-
     /**
      * The body {@link InputStream}.
      * <p>
@@ -319,24 +317,6 @@ public final class Response {
      */
     public void setContentSecurityPolicy(final String contentSecurityPolicy) {
         setHeader(CONTENT_SECURITY_POLICY, contentSecurityPolicy);
-    }
-
-    /**
-     * @return internally-cached {@link ContentSecurityPolicy.Builder}
-     */
-    public ContentSecurityPolicy.Builder getContentSecurityPolicyBuilder() {
-        if (contentSecurityPolicyBuilder == null) {
-            contentSecurityPolicyBuilder = ContentSecurityPolicy.builder();
-        }
-        return contentSecurityPolicyBuilder;
-    }
-
-    /**
-     * @return <code>true</code> if {@link #getContentSecurityPolicyBuilder()} has been called, <code>false</code>
-     * otherwise
-     */
-    public boolean hasContentSecurityPolicyBuilder() {
-        return contentSecurityPolicyBuilder != null;
     }
 
     /**
