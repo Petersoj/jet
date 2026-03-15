@@ -27,6 +27,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -67,11 +68,11 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
     private final @Getter Path directory;
 
     /**
-     * Serve files in {@link #getDirectory()} relative to {@link Request#getUrl()} {@link Url#getNormalizedPath()} with
-     * this {@link String} removed from the beginning, or <code>null</code> to not substring {@link Request#getUrl()}
+     * A {@link String} {@link UnaryOperator} that transforms {@link Request#getUrl()} {@link Url#getNormalizedPath()}
+     * into a path relative to {@link #getDirectory()}, or <code>null</code> to not transform {@link Request#getUrl()}
      * {@link Url#getNormalizedPath()}.
      */
-    private final @Getter @Nullable String requestPathStartsWith;
+    private final @Getter @Nullable UnaryOperator<String> requestPathRelativizer;
 
     /**
      * If the request path represents a directory, attempt to serve a file in that directory with this filename.
@@ -114,25 +115,25 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
     /**
      * Instantiates a new {@link FileDirectoryHandler}.
      *
-     * @param directory             the {@link #getDirectory()}
-     * @param requestPathStartsWith the {@link #getRequestPathStartsWith()}
-     * @param defaultFilename       the {@link #getDefaultFilename()}
-     * @param cacheControl          the {@link #getCacheControl()}
-     * @param strongETag            the {@link #isStrongETag()}
-     * @param trustedContentType    the {@link #isTrustedContentType()}
-     * @param peekLength            the {@link #getPeekLength()}
-     * @param contentEncoding       the {@link #getContentEncoding()}
-     * @param resourcesOfPathsCache the {@link Resource} {@link Cache}
-     * @param enableWatchService    the {@link #isWatchServiceEnabled()}
+     * @param directory              the {@link #getDirectory()}
+     * @param requestPathRelativizer the {@link #getRequestPathRelativizer()}
+     * @param defaultFilename        the {@link #getDefaultFilename()}
+     * @param cacheControl           the {@link #getCacheControl()}
+     * @param strongETag             the {@link #isStrongETag()}
+     * @param trustedContentType     the {@link #isTrustedContentType()}
+     * @param peekLength             the {@link #getPeekLength()}
+     * @param contentEncoding        the {@link #getContentEncoding()}
+     * @param resourcesOfPathsCache  the {@link Resource} {@link Cache}
+     * @param enableWatchService     the {@link #isWatchServiceEnabled()}
      */
-    public FileDirectoryHandler(final Path directory, final @Nullable String requestPathStartsWith,
+    public FileDirectoryHandler(final Path directory, final @Nullable UnaryOperator<String> requestPathRelativizer,
             final @Nullable String defaultFilename, final @Nullable ResponseCacheControl cacheControl,
             final boolean strongETag, final boolean trustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding,
             final @Nullable Cache<String, Resource> resourcesOfPathsCache, final boolean enableWatchService) {
         checkArgument(Files.isDirectory(directory), "Not a directory: %s", directory);
         this.directory = directory.toAbsolutePath();
-        this.requestPathStartsWith = requestPathStartsWith;
+        this.requestPathRelativizer = requestPathRelativizer;
         this.defaultFilename = defaultFilename != null ? pathTrimLeading(defaultFilename) : null;
         this.cacheControl = cacheControl;
         this.strongETag = strongETag;
@@ -211,17 +212,8 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
     @Override
     public void handle(final Handle handle) {
         final var requestPath = handle.getRequest().getUrl().getNormalizedPath();
-        final String requestPathNoStartsWith;
-        if (requestPathStartsWith != null) {
-            if (!requestPath.startsWith(requestPathStartsWith)) {
-                throw new StatusException(NOT_FOUND_404,
-                        "Request path does not start with \"%s\": %s".formatted(requestPathStartsWith, requestPath));
-            }
-            requestPathNoStartsWith = requestPath.substring(requestPathStartsWith.length() + 1);
-        } else {
-            requestPathNoStartsWith = requestPath;
-        }
-        final var requestFile = directory.resolve(pathTrimLeading(requestPathNoStartsWith)).normalize();
+        final var requestFile = directory.resolve(pathTrimLeading(requestPathRelativizer == null ? requestPath :
+                requestPathRelativizer.apply(requestPath))).normalize();
         if (!requestFile.startsWith(directory)) {
             throw new StatusException(NOT_FOUND_404,
                     "Request file does not start with \"%s\": %s".formatted(directory, requestFile));
