@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
@@ -151,7 +150,7 @@ public final class JetOpenApiAnnotationsPluginTest {
 
     private Path getTestProjectPath(final String relativePath) {
         try {
-            return Paths.get(requireNonNull(getClass().getResource("testproject/" + relativePath)).toURI());
+            return Path.of(requireNonNull(getClass().getResource("testproject/" + relativePath)).toURI());
         } catch (final URISyntaxException uriSyntaxException) {
             throw new RuntimeException(uriSyntaxException);
         }

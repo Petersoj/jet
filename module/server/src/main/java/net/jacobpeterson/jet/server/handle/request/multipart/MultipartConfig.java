@@ -7,7 +7,6 @@ import lombok.Value;
 import org.jspecify.annotations.NullMarked;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * {@link MultipartConfig} is an immutable class that represents the configuration for handling a multipart web
@@ -21,7 +20,7 @@ public class MultipartConfig {
     /**
      * The default for {@link #getTemporaryDirectory()}: <code>System.getProperty("java.io.tmpdir")</code>
      */
-    public static final Path DEFAULT_TEMPORARY_DIRECTORY = Paths.get(System.getProperty("java.io.tmpdir"));
+    public static final Path DEFAULT_TEMPORARY_DIRECTORY = Path.of(System.getProperty("java.io.tmpdir"));
 
     /**
      * The maximum total size (in bytes) of the multipart request.
