@@ -196,42 +196,42 @@ public final class Url {
     }
 
     /**
-     * Removes all prepended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>encodedPath</code>.
+     * Removes all prepended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>path</code>.
      *
-     * @param encodedPath the encoded path
+     * @param path the path
      *
-     * @return the trimmed encoded path
+     * @return the trimmed path
      */
-    public static String encodedPathTrimLeading(final String encodedPath) {
+    public static String pathTrimLeading(final String path) {
         var startIndex = 0;
-        final var endIndex = encodedPath.length() - 1;
-        while (startIndex <= endIndex && encodedPath.charAt(startIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
+        final var endIndex = path.length() - 1;
+        while (startIndex <= endIndex && path.charAt(startIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
             startIndex++;
         }
-        return encodedPath.substring(startIndex, endIndex + 1);
+        return path.substring(startIndex, endIndex + 1);
     }
 
     /**
-     * Removes all appended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>encodedPath</code>.
+     * Removes all appended {@link #PATH_SEGMENT_DELIMITER}s from the given <code>path</code>.
      *
-     * @param encodedPath the encoded path
+     * @param path the path
      *
-     * @return the trimmed encoded path
+     * @return the trimmed path
      */
-    public static String encodedPathTrimTrailing(final String encodedPath) {
+    public static String pathTrimTrailing(final String path) {
         final var startIndex = 0;
-        var endIndex = encodedPath.length() - 1;
-        while (endIndex >= startIndex && encodedPath.charAt(endIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
+        var endIndex = path.length() - 1;
+        while (endIndex >= startIndex && path.charAt(endIndex) == PATH_SEGMENT_DELIMITER_CHAR) {
             endIndex--;
         }
-        return encodedPath.substring(startIndex, endIndex + 1);
+        return path.substring(startIndex, endIndex + 1);
     }
 
     /**
-     * @return {@link #encodedPathTrimLeading(String)} {@link #encodedPathTrimTrailing(String)}
+     * @return {@link #pathTrimLeading(String)} {@link #pathTrimTrailing(String)}
      */
-    public static String encodedPathTrim(final String encodedPath) {
-        return encodedPathTrimLeading(encodedPathTrimTrailing(encodedPath));
+    public static String pathTrim(final String path) {
+        return pathTrimLeading(pathTrimTrailing(path));
     }
 
     /**
@@ -260,7 +260,7 @@ public final class Url {
      * <ol>
      * <li>Collapse sequential {@link #PATH_SEGMENT_DELIMITER}s (e.g. <code>/a/b///</code> to <code>/a/b/</code>)</li>
      * <li>Resolve relative paths (e.g. <code>/a/b/..</code> to <code>/a</code>)</li>
-     * <li>{@link #encodedPathTrimTrailing(String)} (unless the previous steps result in
+     * <li>{@link #pathTrimTrailing(String)} (unless the previous steps result in
      * {@link #PATH_SEGMENT_DELIMITER})</li>
      * </ol>
      *
@@ -273,7 +273,7 @@ public final class Url {
         if (normalized == null) {
             return encodedPath.startsWith(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : "";
         }
-        return normalized.equals(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : encodedPathTrimTrailing(normalized);
+        return normalized.equals(PATH_SEGMENT_DELIMITER) ? PATH_SEGMENT_DELIMITER : pathTrimTrailing(normalized);
     }
 
     /**

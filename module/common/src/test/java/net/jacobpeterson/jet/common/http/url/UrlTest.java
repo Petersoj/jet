@@ -60,51 +60,51 @@ public final class UrlTest {
     }
 
     @Test
-    public void encodedPathTrimLeading() {
-        assertEquals("", Url.encodedPathTrimLeading(""));
-        assertEquals(" ", Url.encodedPathTrimLeading(" "));
-        assertEquals("a", Url.encodedPathTrimLeading("a"));
-        assertEquals("a", Url.encodedPathTrimLeading("/a"));
-        assertEquals("a/", Url.encodedPathTrimLeading("a/"));
-        assertEquals("a", Url.encodedPathTrimLeading("//a"));
-        assertEquals("a//", Url.encodedPathTrimLeading("a//"));
-        assertEquals("a/a", Url.encodedPathTrimLeading("a/a"));
-        assertEquals("a//a", Url.encodedPathTrimLeading("a//a"));
-        assertEquals("a/a/", Url.encodedPathTrimLeading("/a/a/"));
-        assertEquals("a/a//", Url.encodedPathTrimLeading("//a/a//"));
-        assertEquals("a/a///", Url.encodedPathTrimLeading("///a/a///"));
+    public void pathTrimLeading() {
+        assertEquals("", Url.pathTrimLeading(""));
+        assertEquals(" ", Url.pathTrimLeading(" "));
+        assertEquals("a", Url.pathTrimLeading("a"));
+        assertEquals("a", Url.pathTrimLeading("/a"));
+        assertEquals("a/", Url.pathTrimLeading("a/"));
+        assertEquals("a", Url.pathTrimLeading("//a"));
+        assertEquals("a//", Url.pathTrimLeading("a//"));
+        assertEquals("a/a", Url.pathTrimLeading("a/a"));
+        assertEquals("a//a", Url.pathTrimLeading("a//a"));
+        assertEquals("a/a/", Url.pathTrimLeading("/a/a/"));
+        assertEquals("a/a//", Url.pathTrimLeading("//a/a//"));
+        assertEquals("a/a///", Url.pathTrimLeading("///a/a///"));
     }
 
     @Test
-    public void encodedPathTrimTrailing() {
-        assertEquals("", Url.encodedPathTrimTrailing(""));
-        assertEquals(" ", Url.encodedPathTrimTrailing(" "));
-        assertEquals("a", Url.encodedPathTrimTrailing("a"));
-        assertEquals("/a", Url.encodedPathTrimTrailing("/a"));
-        assertEquals("a", Url.encodedPathTrimTrailing("a/"));
-        assertEquals("//a", Url.encodedPathTrimTrailing("//a"));
-        assertEquals("a", Url.encodedPathTrimTrailing("a//"));
-        assertEquals("a/a", Url.encodedPathTrimTrailing("a/a"));
-        assertEquals("a//a", Url.encodedPathTrimTrailing("a//a"));
-        assertEquals("/a/a", Url.encodedPathTrimTrailing("/a/a/"));
-        assertEquals("//a/a", Url.encodedPathTrimTrailing("//a/a//"));
-        assertEquals("///a/a", Url.encodedPathTrimTrailing("///a/a///"));
+    public void pathTrimTrailing() {
+        assertEquals("", Url.pathTrimTrailing(""));
+        assertEquals(" ", Url.pathTrimTrailing(" "));
+        assertEquals("a", Url.pathTrimTrailing("a"));
+        assertEquals("/a", Url.pathTrimTrailing("/a"));
+        assertEquals("a", Url.pathTrimTrailing("a/"));
+        assertEquals("//a", Url.pathTrimTrailing("//a"));
+        assertEquals("a", Url.pathTrimTrailing("a//"));
+        assertEquals("a/a", Url.pathTrimTrailing("a/a"));
+        assertEquals("a//a", Url.pathTrimTrailing("a//a"));
+        assertEquals("/a/a", Url.pathTrimTrailing("/a/a/"));
+        assertEquals("//a/a", Url.pathTrimTrailing("//a/a//"));
+        assertEquals("///a/a", Url.pathTrimTrailing("///a/a///"));
     }
 
     @Test
-    public void encodedPathTrim() {
-        assertEquals("", Url.encodedPathTrim(""));
-        assertEquals(" ", Url.encodedPathTrim(" "));
-        assertEquals("a", Url.encodedPathTrim("a"));
-        assertEquals("a", Url.encodedPathTrim("/a"));
-        assertEquals("a", Url.encodedPathTrim("a/"));
-        assertEquals("a", Url.encodedPathTrim("//a"));
-        assertEquals("a", Url.encodedPathTrim("a//"));
-        assertEquals("a/a", Url.encodedPathTrim("a/a"));
-        assertEquals("a//a", Url.encodedPathTrim("a//a"));
-        assertEquals("a/a", Url.encodedPathTrim("/a/a/"));
-        assertEquals("a/a", Url.encodedPathTrim("//a/a//"));
-        assertEquals("a/a", Url.encodedPathTrim("///a/a///"));
+    public void pathTrim() {
+        assertEquals("", Url.pathTrim(""));
+        assertEquals(" ", Url.pathTrim(" "));
+        assertEquals("a", Url.pathTrim("a"));
+        assertEquals("a", Url.pathTrim("/a"));
+        assertEquals("a", Url.pathTrim("a/"));
+        assertEquals("a", Url.pathTrim("//a"));
+        assertEquals("a", Url.pathTrim("a//"));
+        assertEquals("a/a", Url.pathTrim("a/a"));
+        assertEquals("a//a", Url.pathTrim("a//a"));
+        assertEquals("a/a", Url.pathTrim("/a/a/"));
+        assertEquals("a/a", Url.pathTrim("//a/a//"));
+        assertEquals("a/a", Url.pathTrim("///a/a///"));
     }
 
     @Test
