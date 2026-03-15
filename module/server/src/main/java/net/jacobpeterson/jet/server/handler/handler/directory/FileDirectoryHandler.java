@@ -1,12 +1,11 @@
 package net.jacobpeterson.jet.server.handler.handler.directory;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
-import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
@@ -17,94 +16,50 @@ import net.jacobpeterson.jet.server.handler.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.concurrent.TimeUnit.DAYS;
-import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.MAX_AGE_1_YEAR_IMMUTABLE;
-import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
+import static com.google.common.base.Preconditions.checkState;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.Files.walkFileTree;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+import static java.util.Objects.requireNonNull;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
-import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
+import static net.jacobpeterson.jet.common.http.url.Url.pathTrimLeading;
 
 /**
- * {@link FileDirectoryHandler} is a {@link Handler} for serving
- * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}
- * from files in a given directory {@link Path} using {@link Response#responseResource(Resource)}, with support for
- * relativizing request paths, caching {@link Resource} instances of immutable files, and applying a
- * {@link ResponseCacheControl}.
+ * {@link FileDirectoryHandler} is a {@link Handler} for serving files in a given directory {@link Path} using
+ * {@link Response#responseResource(Resource)} with
+ * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}, with support for
+ * relativizing request paths, serving a default file (like <code>index.html</code>) for request paths representing a
+ * directory, applying a {@link ResponseCacheControl}, caching {@link Resource} instances from with automatic cache
+ * invalidation using {@link WatchService}, and applying a {@link ResponseCacheControl}.
+ * <p>
+ * Note: this class implements {@link AutoCloseable}, but calling {@link #close()} is not necessary if
+ * {@link #isWatchServiceEnabled()} is <code>false</code>.
  */
 @NullMarked
-public class FileDirectoryHandler implements Handler {
+@Slf4j
+public class FileDirectoryHandler implements Handler, AutoCloseable {
 
     /**
      * The default {@link #getDefaultFilename()}: <code>"index.html"</code>
      */
-    public static final String DEFAULT_DEFAULT_FILENAME = "index.html";
-
-    public static FileDirectoryHandler forMutableFiles(final Path directory,
-            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
-        return forMutableFiles(directory, requestPathStartsWith, DEFAULT_DEFAULT_FILENAME, NO_CACHE, trustedContentType,
-                null, null);
-    }
-
-    /**
-     * Creates a new {@link FileDirectoryHandler} instance for mutable files (see {@link #isImmutableFiles()}).
-     *
-     * @param directory             the {@link #getDirectory()}
-     * @param requestPathStartsWith the {@link #getRequestPathStartsWith()}
-     * @param defaultFilename       the {@link #getDefaultFilename()}
-     * @param cacheControl          the {@link #getCacheControl()}
-     * @param trustedContentType    see {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer,
-     *                              ContentEncoding, boolean)}
-     * @param peekLength            see {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer,
-     *                              ContentEncoding, boolean)}
-     * @param contentEncoding       see {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer,
-     *                              ContentEncoding, boolean)}
-     *
-     * @return the new {@link FileDirectoryHandler} instance
-     */
-    public static FileDirectoryHandler forMutableFiles(final Path directory,
-            final @Nullable String requestPathStartsWith, final @Nullable String defaultFilename,
-            final @Nullable ResponseCacheControl cacheControl, final boolean trustedContentType,
-            final @Nullable Integer peekLength, final @Nullable ContentEncoding contentEncoding) {
-        return new FileDirectoryHandler(directory, requestPathStartsWith, defaultFilename, cacheControl, false, null,
-                trustedContentType, peekLength, contentEncoding);
-    }
-
-    public static FileDirectoryHandler forImmutableFiles(final Path directory,
-            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
-        return forImmutableFiles(directory, requestPathStartsWith, DEFAULT_DEFAULT_FILENAME, MAX_AGE_1_YEAR_IMMUTABLE,
-                Caffeine.newBuilder().expireAfterAccess(7, DAYS).softValues().build(), trustedContentType,
-                DEFAULT_PEEK_LENGTH, null);
-    }
-
-    /**
-     * Creates a new {@link FileDirectoryHandler} instance for immutable files (see {@link #isImmutableFiles()}).
-     *
-     * @param directory              the {@link #getDirectory()}
-     * @param requestPathStartsWith  the {@link #getRequestPathStartsWith()}
-     * @param defaultFilename        the {@link #getDefaultFilename()}
-     * @param cacheControl           the {@link #getCacheControl()}
-     * @param cacheForImmutableFiles the {@link Resource} {@link Cache}
-     * @param trustedContentType     see {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer,
-     *                               ContentEncoding, boolean)}
-     * @param peekLength             see {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer,
-     *                               ContentEncoding, boolean)}
-     * @param contentEncoding        see {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer,
-     *                               ContentEncoding, boolean)}
-     *
-     * @return the new {@link FileDirectoryHandler} instance
-     */
-    public static FileDirectoryHandler forImmutableFiles(final Path directory,
-            final @Nullable String requestPathStartsWith, final @Nullable String defaultFilename,
-            final @Nullable ResponseCacheControl cacheControl,
-            final @Nullable Cache<String, Resource> cacheForImmutableFiles, final boolean trustedContentType,
-            final @Nullable Integer peekLength, final @Nullable ContentEncoding contentEncoding) {
-        return new FileDirectoryHandler(directory, requestPathStartsWith, defaultFilename, cacheControl, true,
-                cacheForImmutableFiles, trustedContentType, peekLength, contentEncoding);
-    }
+    public static final String INDEX_HTML_FILENAME = "index.html";
 
     /**
      * The directory {@link Path} to serve files from.
@@ -124,41 +79,132 @@ public class FileDirectoryHandler implements Handler {
     private final @Getter @Nullable String defaultFilename;
 
     /**
-     * The {@link ResponseCacheControl} to set for files served from {@link #getDirectory()}.
+     * The {@link ResponseCacheControl} for {@link Response#setCacheControl(ResponseCacheControl)}, or <code>null</code>
+     * to not call {@link Response#setCacheControl(ResponseCacheControl)}.
      */
     private final @Getter @Nullable ResponseCacheControl cacheControl;
 
     /**
-     * <code>true</code> if all files in {@link #getDirectory()} are immutable (the path, name, metadata, and content
-     * will never change while the JVM is running) and computed {@link Resource}s should be internally cached and use
-     * a strong {@link ETag}, <code>false</code> otherwise.
-     * <p>
-     * Note: Call {@link #immutableCacheInvalidate(Path)} when the immutable {@link File} is deleted.
+     * The <code>strongETag</code> argument for
+     * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
      */
-    private final @Getter boolean immutableFiles;
+    private final @Getter boolean strongETag;
 
-    private final @Nullable Cache<String, Resource> cacheForImmutableFiles;
-    private final boolean trustedContentType;
-    private final @Nullable Integer peekLength;
-    private final @Nullable ContentEncoding contentEncoding;
+    /**
+     * The <code>trustedContentType</code> argument for
+     * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
+     */
+    private final @Getter boolean trustedContentType;
 
-    private FileDirectoryHandler(final Path directory, final @Nullable String requestPathStartsWith,
+    /**
+     * The <code>peekLength</code> argument for
+     * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
+     */
+    private final @Getter @Nullable Integer peekLength;
+
+    /**
+     * The <code>contentEncoding</code> argument for
+     * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}.
+     */
+    private final @Getter @Nullable ContentEncoding contentEncoding;
+
+    private final @Nullable Cache<String, Resource> resourcesOfPathsCache;
+    private final @Getter @Nullable WatchService watchService;
+
+    /**
+     * Instantiates a new {@link FileDirectoryHandler}.
+     *
+     * @param directory             the {@link #getDirectory()}
+     * @param requestPathStartsWith the {@link #getRequestPathStartsWith()}
+     * @param defaultFilename       the {@link #getDefaultFilename()}
+     * @param cacheControl          the {@link #getCacheControl()}
+     * @param strongETag            the {@link #isStrongETag()}
+     * @param trustedContentType    the {@link #isTrustedContentType()}
+     * @param peekLength            the {@link #getPeekLength()}
+     * @param contentEncoding       the {@link #getContentEncoding()}
+     * @param resourcesOfPathsCache the {@link Resource} {@link Cache}
+     * @param enableWatchService    the {@link #isWatchServiceEnabled()}
+     */
+    public FileDirectoryHandler(final Path directory, final @Nullable String requestPathStartsWith,
             final @Nullable String defaultFilename, final @Nullable ResponseCacheControl cacheControl,
-            final boolean immutableFiles, final @Nullable Cache<String, Resource> cacheForImmutableFiles,
-            final boolean trustedContentType, final @Nullable Integer peekLength,
-            final @Nullable ContentEncoding contentEncoding) {
+            final boolean strongETag, final boolean trustedContentType, final @Nullable Integer peekLength,
+            final @Nullable ContentEncoding contentEncoding,
+            final @Nullable Cache<String, Resource> resourcesOfPathsCache, final boolean enableWatchService) {
         checkArgument(Files.isDirectory(directory), "Not a directory: %s", directory);
         this.directory = directory.toAbsolutePath();
         this.requestPathStartsWith = requestPathStartsWith;
-        this.defaultFilename = defaultFilename;
+        this.defaultFilename = defaultFilename != null ? pathTrimLeading(defaultFilename) : null;
         this.cacheControl = cacheControl;
-        this.immutableFiles = immutableFiles;
-        this.cacheForImmutableFiles = cacheForImmutableFiles;
-        checkArgument(immutableFiles == (cacheForImmutableFiles != null),
-                "A cache must be provided if `immutableFiles` is `true`");
+        this.strongETag = strongETag;
         this.trustedContentType = trustedContentType;
         this.peekLength = peekLength;
         this.contentEncoding = contentEncoding;
+        this.resourcesOfPathsCache = resourcesOfPathsCache;
+        if (resourcesOfPathsCache != null && enableWatchService) {
+            try {
+                watchService = directory.getFileSystem().newWatchService();
+            } catch (final IOException ioException) {
+                throw new RuntimeException(ioException);
+            }
+            Thread.ofVirtual().start(new Runnable() {
+
+                private final Map<WatchKey, Path> directoriesOfWatchKeys = new HashMap<>();
+
+                @Override
+                public void run() {
+                    try (watchService) {
+                        registerRecursively(requireNonNull(watchService), directory);
+                        while (true) {
+                            final WatchKey watchKey;
+                            try {
+                                watchKey = watchService.take();
+                            } catch (final ClosedWatchServiceException | InterruptedException exception) {
+                                return;
+                            }
+                            for (final var pollEvent : watchKey.pollEvents()) {
+                                final var eventKind = pollEvent.kind();
+                                if (eventKind == OVERFLOW) {
+                                    LOGGER.warn("`WatchService` `OVERFLOW` event occurred: {}", directory);
+                                    continue;
+                                }
+                                final var directoryOfWatchKey = directoriesOfWatchKeys.get(watchKey);
+                                if (directoryOfWatchKey == null) {
+                                    continue;
+                                }
+                                final var eventPath = directoryOfWatchKey.resolve((Path) pollEvent.context());
+                                final var isDirectory = Files.isDirectory(eventPath, NOFOLLOW_LINKS);
+                                if (isDirectory && eventKind == ENTRY_CREATE) {
+                                    registerRecursively(watchService, eventPath);
+                                } else if (!isDirectory && (eventKind == ENTRY_MODIFY || eventKind == ENTRY_DELETE)) {
+                                    resourcesOfPathsCache.invalidate(eventPath.toString());
+                                }
+                            }
+                            if (!watchKey.reset()) {
+                                directoriesOfWatchKeys.remove(watchKey);
+                                checkState(!directoriesOfWatchKeys.isEmpty());
+                            }
+                        }
+                    } catch (final Throwable throwable) {
+                        LOGGER.error("`FileDirectoryHandler` `WatchService` threw", throwable);
+                    }
+                }
+
+                private void registerRecursively(final WatchService watchService, final Path startDirectory)
+                        throws IOException {
+                    walkFileTree(startDirectory, new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult preVisitDirectory(final Path directory, final BasicFileAttributes attrs)
+                                throws IOException {
+                            directoriesOfWatchKeys.put(directory.register(watchService,
+                                    ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE), directory);
+                            return CONTINUE;
+                        }
+                    });
+                }
+            });
+        } else {
+            watchService = null;
+        }
     }
 
     @Override
@@ -174,14 +220,14 @@ public class FileDirectoryHandler implements Handler {
         } else {
             requestPathNoStartsWith = requestPath;
         }
-        final var requestFile = directory.resolve(requestPathNoStartsWith).normalize();
+        final var requestFile = directory.resolve(pathTrimLeading(requestPathNoStartsWith)).normalize();
         if (!requestFile.startsWith(directory)) {
             throw new StatusException(NOT_FOUND_404,
                     "Request file does not start with \"%s\": %s".formatted(directory, requestFile));
         }
         final Path requestFileOrDefault;
         if (defaultFilename != null && Files.isDirectory(requestFile)) {
-            requestFileOrDefault = directory.resolve(defaultFilename);
+            requestFileOrDefault = requestFile.resolve(defaultFilename);
         } else {
             requestFileOrDefault = requestFile;
         }
@@ -189,29 +235,43 @@ public class FileDirectoryHandler implements Handler {
             throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFileOrDefault);
         }
         final var response = handle.getResponse();
-        final Resource resource;
-        if (cacheForImmutableFiles != null) {
-            resource = cacheForImmutableFiles.get(requestFileOrDefault.toString(), _ -> Resource.ofFile(
-                    requestFileOrDefault, true, trustedContentType, null, peekLength, contentEncoding, true));
-        } else {
-            resource = Resource.ofFile(
-                    requestFileOrDefault, false, trustedContentType, null, peekLength, contentEncoding, true);
-        }
-        response.responseResource(resource);
+        response.responseResource(resourcesOfPathsCache != null ?
+                resourcesOfPathsCache.get(requestFileOrDefault.toString(), _ ->
+                        Resource.ofFile(requestFileOrDefault, strongETag, trustedContentType, null, peekLength,
+                                contentEncoding, true)) :
+                Resource.ofFile(requestFileOrDefault, strongETag, trustedContentType, null, peekLength,
+                        contentEncoding, true));
         if (cacheControl != null) {
             response.setCacheControl(cacheControl);
         }
     }
 
     /**
-     * If this {@link FileDirectoryHandler} is for immutable files, this method will invalidate the {@link Resource}
-     * cache entry for the given file {@link Path}. This should be called when an immutable file previously served by
-     * this {@link FileDirectoryHandler} is deleted.
+     * If this {@link FileDirectoryHandler} has a {@link Resource} cache, this method will invalidate the
+     * {@link Resource} cache entry for the given file {@link Path}. This should be called when a file previously served
+     * by this {@link FileDirectoryHandler} is modified or deleted, although this may already be done automatically if
+     * {@link #isWatchServiceEnabled()}.
      *
      * @param file the file {@link Path}
      */
-    public void immutableCacheInvalidate(final Path file) {
-        checkArgument(cacheForImmutableFiles != null, "This `FileDirectoryHandler` doesn't cache immutable files");
-        cacheForImmutableFiles.invalidate(file.toString());
+    public void cacheInvalidate(final Path file) {
+        checkArgument(resourcesOfPathsCache != null, "This `FileDirectoryHandler` does not have a `Resource` cache");
+        resourcesOfPathsCache.invalidate(file.toString());
+    }
+
+    /**
+     * @return <code>true</code> if {@link WatchService} is used to automatically call {@link #cacheInvalidate(Path)}
+     * on file modification or deletion (and {@link #close()} must be called to release {@link WatchService} resources
+     * when no longer using this {@link FileDirectoryHandler} instance), <code>false</code> otherwise
+     */
+    public boolean isWatchServiceEnabled() {
+        return watchService != null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (watchService != null) {
+            watchService.close();
+        }
     }
 }
