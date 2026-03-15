@@ -71,23 +71,24 @@ public final class PathStartsWithRoute implements Route {
 
     /**
      * Whether to require {@link #getPath()} ends with a <code>/</code>.
+     * <p>
+     * Defaults to <code>true</code>.
      */
     private final boolean requirePathEndsWithSlash;
 
     /**
      * Whether to use the decoded path from {@link Request#getUrl()}.
+     * <p>
+     * Defaults to <code>true</code>.
      */
     private final boolean useDecodedRequestPath;
 
     /**
      * Whether to use the normalized path from {@link Request#getUrl()}.
+     * <p>
+     * Defaults to <code>true</code>.
      */
     private final boolean useNormalizedRequestPath;
-
-    /**
-     * Whether to use case-insensitive matching against {@link #getPath()}.
-     */
-    private final boolean ignoreCase;
 
     /**
      * Instantiates a new Path starts with route.
@@ -98,17 +99,15 @@ public final class PathStartsWithRoute implements Route {
      * @param schemeEnum               the {@link #getSchemeEnum()}
      * @param host                     the {@link #getHost()}
      * @param path                     the {@link #getPath()}
-     * @param requirePathEndsWithSlash the {@link #isRequirePathEndsWithSlash()}. Defaults to <code>true</code>
-     * @param useDecodedRequestPath    the {@link #isUseDecodedRequestPath()}. Defaults to <code>true</code>
-     * @param useNormalizedRequestPath the {@link #isUseNormalizedRequestPath()}. Defaults to <code>true</code>
-     * @param ignoreCase               the {@link #isIgnoreCase()}. Defaults to <code>true</code>
+     * @param requirePathEndsWithSlash the {@link #isRequirePathEndsWithSlash()}
+     * @param useDecodedRequestPath    the {@link #isUseDecodedRequestPath()}
+     * @param useNormalizedRequestPath the {@link #isUseNormalizedRequestPath()}
      */
     @lombok.Builder(toBuilder = true)
     private PathStartsWithRoute(final @Nullable String method, final @Nullable Method methodEnum,
             final @Nullable String scheme, final @Nullable Scheme schemeEnum, final @Nullable String host,
             final String path, final @Nullable Boolean requirePathEndsWithSlash,
-            final @Nullable Boolean useDecodedRequestPath, final @Nullable Boolean useNormalizedRequestPath,
-            final @Nullable Boolean ignoreCase) {
+            final @Nullable Boolean useDecodedRequestPath, final @Nullable Boolean useNormalizedRequestPath) {
         this.method = method;
         this.methodEnum = methodEnum;
         this.scheme = scheme;
@@ -122,7 +121,6 @@ public final class PathStartsWithRoute implements Route {
                 "`requirePathEndsWithSlash` is `true`, but the given `path` doesn't end with `/`");
         this.useDecodedRequestPath = useDecodedRequestPath == null || useDecodedRequestPath;
         this.useNormalizedRequestPath = useNormalizedRequestPath == null || useNormalizedRequestPath;
-        this.ignoreCase = ignoreCase == null || ignoreCase;
     }
 
     @Override
@@ -151,10 +149,7 @@ public final class PathStartsWithRoute implements Route {
         } else {
             requestPath = useDecodedRequestPath ? requestUrl.getPath() : requestUrl.getEncodedPath();
         }
-        if (requestPath.regionMatches(ignoreCase, 0, path, 0, path.length()) || (pathEndsWithSlash && (ignoreCase ?
-                pathWithoutEndingSlash.equalsIgnoreCase(requestPath) : pathWithoutEndingSlash.equals(requestPath)))) {
-            return new PathStartsWithRouteMatch(requestPath);
-        }
-        return null;
+        return requestPath.startsWith(path) || (pathEndsWithSlash && pathWithoutEndingSlash.equals(requestPath)) ?
+                new PathStartsWithRouteMatch(requestPath) : null;
     }
 }

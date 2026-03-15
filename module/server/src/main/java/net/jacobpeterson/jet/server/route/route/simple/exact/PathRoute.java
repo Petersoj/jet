@@ -68,13 +68,6 @@ public final class PathRoute implements Route {
      */
     private final @Default boolean useNormalizedRequestPath = true;
 
-    /**
-     * Whether to use case-insensitive matching against {@link #getPath()}.
-     * <p>
-     * Defaults to <code>true</code>.
-     */
-    private final @Default boolean ignoreCase = true;
-
     @Override
     public @Nullable PathRouteMatch match(final Handle handle) {
         final var request = handle.getRequest();
@@ -101,9 +94,6 @@ public final class PathRoute implements Route {
         } else {
             requestPath = useDecodedRequestPath ? requestUrl.getPath() : requestUrl.getEncodedPath();
         }
-        if (ignoreCase ? path.equalsIgnoreCase(requestPath) : path.equals(requestPath)) {
-            return new PathRouteMatch(requestPath);
-        }
-        return null;
+        return path.equals(requestPath) ? new PathRouteMatch(requestPath) : null;
     }
 }
