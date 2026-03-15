@@ -108,7 +108,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      */
     private final @Getter @Nullable ContentEncoding contentEncoding;
 
-    private final @Nullable Cache<String, Resource> resourcesOfPathsCache;
+    private @Nullable Cache<String, Resource> resourcesOfPathsCache;
     private final @Getter @Nullable WatchService watchService;
 
     /**
@@ -186,6 +186,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                         }
                     } catch (final Throwable throwable) {
                         LOGGER.error("`FileDirectoryHandler` `WatchService` threw", throwable);
+                        FileDirectoryHandler.this.resourcesOfPathsCache = null;
                     }
                 }
 
@@ -235,6 +236,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
             throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFileOrDefault);
         }
         final var response = handle.getResponse();
+        // `resourcesOfPathsCache` null-check is racy, but NPE is unlikely and is better than using invalid `Resource`.
         response.responseResource(resourcesOfPathsCache != null ?
                 resourcesOfPathsCache.get(requestFileOrDefault.toString(), _ ->
                         Resource.ofFile(requestFileOrDefault, strongETag, trustedContentType, null, peekLength,
@@ -272,6 +274,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
     public void close() throws Exception {
         if (watchService != null) {
             watchService.close();
+            resourcesOfPathsCache = null;
         }
     }
 }
