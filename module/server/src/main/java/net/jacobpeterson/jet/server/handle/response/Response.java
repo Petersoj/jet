@@ -74,6 +74,7 @@ import static net.jacobpeterson.jet.common.http.status.Status.NOT_MODIFIED_304;
 import static net.jacobpeterson.jet.common.http.status.Status.OK_200;
 import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_206;
 import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainText;
+import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
 /**
  * {@link Response} is a class that represents a web server request.
@@ -359,7 +360,7 @@ public final class Response {
     }
 
     /**
-     * Sets {@link #getBodyInputStream()}.
+     * Sets {@link #getBodyInputStream()}, closing the existing {@link #getBodyInputStream()} if any.
      */
     public void setBodyInputStream(final @Nullable InputStream bodyInputStream) {
         if (this.bodyInputStream != null) {
@@ -536,27 +537,25 @@ public final class Response {
 
     /**
      * Calls {@link #responseResource(Resource, boolean, Integer, boolean)} with
-     * <code>resource</code> set to the given {@link Resource#withRange(Range)} with {@link Request#getRange()} if
-     * non-<code>null</code>,
      * <code>acceptRanges</code> set to <code>true</code>,
      * <code>contentTypePeekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH}, and
      * <code>setBodyInputStream</code> to the negation of {@link Request#getMethodEnum()}
      * {@link Method#hasNoResponseBody()}.
      */
     public void responseResource(final Resource resource) {
-        final var request = handle.getRequest();
-        final var requestRange = request.getRange();
-        final var requestMethod = request.getMethodEnum();
-        responseResource(requestRange != null ? resource.withRange(requestRange) : resource, true,
-                Resource.DEFAULT_PEEK_LENGTH, requestMethod == null || !requestMethod.hasNoResponseBody());
+        final var requestMethod = handle.getRequest().getMethodEnum();
+        responseResource(resource, true, DEFAULT_PEEK_LENGTH,
+                requestMethod == null || !requestMethod.hasNoResponseBody());
     }
 
     /**
-     * Applies the given {@link Resource} to this {@link Response}.
+     * Applies the given {@link Resource} to this {@link Response}, with logic for applying
+     * {@link Status#NOT_MODIFIED_304}.
      *
      * @param resource              the {@link Resource}
      * @param acceptRanges          <code>true</code> to {@link #setHeader(Header, String)} {@link Header#ACCEPT_RANGES}
-     *                              {@link Range#BYTES_UNIT}, <code>false</code> otherwise
+     *                              {@link Range#BYTES_UNIT} and to use {@link Resource#withRange(Range)} with
+     *                              {@link Request#getRange()} if non-<code>null</code>, <code>false</code> otherwise
      * @param contentTypePeekLength if non-<code>null</code> and the given {@link Resource#getContentType()} is
      *                              <code>null</code>, then peek this many bytes into {@link Resource#getContent()} and
      *                              use {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
@@ -565,9 +564,16 @@ public final class Response {
      *                              {@link Resource#getContent()}, <code>false</code> to not
      *                              {@link #setBodyInputStream(InputStream)}
      */
-    public void responseResource(final Resource resource, final boolean acceptRanges,
+    public void responseResource(Resource resource, final boolean acceptRanges,
             final @Nullable Integer contentTypePeekLength, boolean setBodyInputStream) {
         final var request = handle.getRequest();
+        if (acceptRanges) {
+            setHeader(ACCEPT_RANGES, BYTES_UNIT);
+            final var requestRange = request.getRange();
+            if (requestRange != null && resource.getContentRange() == null && resource.getContentLength() != null) {
+                resource = resource.withRange(requestRange);
+            }
+        }
         var notModified = false;
         final var lastModified = resource.getLastModified();
         if (lastModified != null) {
@@ -585,24 +591,14 @@ public final class Response {
                 notModified = true;
             }
         }
-        if (notModified) {
-            setStatus(NOT_MODIFIED_304);
-            return;
-        }
-        if (acceptRanges) {
-            setHeader(ACCEPT_RANGES, BYTES_UNIT);
-        }
-
         final var contentLength = resource.getContentLength();
-        if (contentLength != null) {
+        if (contentLength != null && !notModified) {
             setContentLength(contentLength);
         }
-
         final var contentEncoding = resource.getContentEncoding();
         if (contentEncoding != null) {
             setContentEncoding(contentEncoding);
         }
-
         final var contentType = resource.getContentType();
         if (contentType != null) {
             setContentType(contentType);
@@ -644,18 +640,20 @@ public final class Response {
         } else {
             setContentType(APPLICATION_OCTET_STREAM);
         }
-
         final var contentRange = resource.getContentRange();
         if (contentRange != null) {
             setContentRange(contentRange);
             setStatus(PARTIAL_CONTENT_206);
         }
-
         final var contentDisposition = resource.getContentDisposition();
         if (contentDisposition != null) {
             setContentDisposition(contentDisposition);
         }
-
+        if (notModified) {
+            setStatus(NOT_MODIFIED_304);
+            setBodyInputStream(null);
+            return;
+        }
         if (setBodyInputStream) {
             setBodyInputStream(resource.getContent().get());
         }
