@@ -360,7 +360,8 @@ public final class Response {
     }
 
     /**
-     * Sets {@link #getBodyInputStream()}, closing the existing {@link #getBodyInputStream()} if any.
+     * Sets {@link #getBodyInputStream()}, closing the existing {@link #getBodyInputStream()} if any. Also calls
+     * {@link #setBodyOutputStreamApplier(Consumer)} with <code>null</code>.
      */
     public void setBodyInputStream(final @Nullable InputStream bodyInputStream) {
         if (this.bodyInputStream != null) {
@@ -371,6 +372,7 @@ public final class Response {
             }
         }
         this.bodyInputStream = bodyInputStream;
+        bodyOutputStreamApplier = null;
     }
 
     /**
