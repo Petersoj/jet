@@ -1,6 +1,5 @@
 package net.jacobpeterson.jet.server;
 
-import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +13,7 @@ import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handler.handler.Handler;
 import net.jacobpeterson.jet.server.handler.throwable.ThrowableHandler;
-import net.jacobpeterson.jet.server.handler.throwable.simple.SimpleResponseBodyThrowableHandler;
-import net.jacobpeterson.jet.server.handler.throwable.simple.SimpleRouterThrowableHandler;
+import net.jacobpeterson.jet.server.handler.throwable.simple.SimpleThrowableHandler;
 import net.jacobpeterson.jet.server.route.router.Router;
 import net.jacobpeterson.jet.server.route.router.simple.SimpleRouter;
 import net.jacobpeterson.jet.server.session.SessionStore;
@@ -37,6 +35,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.getCausalChain;
 import static java.time.Duration.ofMinutes;
 import static lombok.AccessLevel.PRIVATE;
@@ -212,7 +211,7 @@ public final class JetServer {
          * @return the built {@link JetServer} instance
          */
         public JetServer build() {
-            Preconditions.checkArgument(defaultRequestBodyBoundCount >= 0,
+            checkArgument(defaultRequestBodyBoundCount >= 0,
                     "`defaultRequestBodyBoundCount` must be positive or zero");
             return new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
@@ -222,9 +221,8 @@ public final class JetServer {
                     preventAmbiguousResponseCacheControl,
                     sessionStore != null ? sessionStore : new SimpleSessionStore(),
                     router != null ? router : new SimpleRouter(),
-                    routerThrowableHandler != null ? routerThrowableHandler : new SimpleRouterThrowableHandler(),
-                    responseBodyThrowableHandler != null ? responseBodyThrowableHandler :
-                            new SimpleResponseBodyThrowableHandler(),
+                    routerThrowableHandler != null ? routerThrowableHandler : new SimpleThrowableHandler(),
+                    responseBodyThrowableHandler != null ? responseBodyThrowableHandler : new SimpleThrowableHandler(),
                     afterHandler,
                     serverGracefulStopTimeout != null ? serverGracefulStopTimeout : ofMinutes(1),
                     serverBindAddress,
@@ -288,14 +286,14 @@ public final class JetServer {
     /**
      * The {@link ThrowableHandler} for {@link Throwable}s thrown by {@link Router#route(Handle)}.
      * <p>
-     * Defaults to {@link SimpleRouterThrowableHandler}.
+     * Defaults to {@link SimpleThrowableHandler}.
      */
     private final @Getter ThrowableHandler routerThrowableHandler;
 
     /**
      * The {@link ThrowableHandler} for {@link Throwable}s thrown by writing a response body.
      * <p>
-     * Defaults to {@link SimpleResponseBodyThrowableHandler}.
+     * Defaults to {@link SimpleThrowableHandler}.
      */
     private final @Getter ThrowableHandler responseBodyThrowableHandler;
 
@@ -361,15 +359,6 @@ public final class JetServer {
         httpConnector.setPort(serverHttpPort);
         server.addConnector(httpConnector);
 
-        // Do not serve error info, as this causes information leakage and Jetty already logs errors.
-        server.setErrorHandler(new Abstract() {
-            @Override
-            public boolean handle(final org.eclipse.jetty.server.Request request,
-                    final org.eclipse.jetty.server.Response response, final Callback callback) {
-                callback.succeeded();
-                return true;
-            }
-        });
         // https://jetty.org/docs/jetty/12.1/programming-guide/server/http.html#handler-use-graceful
         server.setHandler(new GracefulHandler(new Abstract() {
             @Override
@@ -384,20 +373,8 @@ public final class JetServer {
                     } catch (final Throwable throwable) {
                         routerThrowableHandler.handle(handle, throwable);
                     }
-
                     final var response = handle.getResponse();
-
-                    if (preventMimeSniffing && !response.getHeaders().containsKey(X_CONTENT_TYPE_OPTIONS.toString())) {
-                        response.setHeader(X_CONTENT_TYPE_OPTIONS, "nosniff");
-                    }
-                    if (preventAmbiguousResponseCacheControl &&
-                            !response.getHeaders().containsKey(CACHE_CONTROL.toString())) {
-                        response.setHeader(CACHE_CONTROL, NO_CACHE.toString());
-                    }
-
-                    jettyResponse.setStatus(response.getStatusCode());
-                    response.getHeaders().forEach(jettyResponse.getHeaders()::add);
-
+                    applyStatusAndHeaders(jettyResponse, response);
                     final var bodyInputStream = response.getBodyInputStream();
                     var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
                     if (bodyInputStream != null && bodyOutputStreamApplier != null) {
@@ -427,6 +404,9 @@ public final class JetServer {
                                 } catch (final Throwable handleThrowable) {
                                     LOGGER.error("`Jet.getResponseBodyThrowableHandler().handle()` threw",
                                             handleThrowable);
+                                }
+                                if (!jettyResponse.isCommitted()) {
+                                    applyStatusAndHeaders(jettyResponse, response);
                                 }
                             } else if (LOGGER.isDebugEnabled()) {
                                 // Above if-statement prevents superfluous `Object[]` creation from varargs.
@@ -460,7 +440,30 @@ public final class JetServer {
                 callback.succeeded();
                 return true;
             }
+
+            private void applyStatusAndHeaders(final org.eclipse.jetty.server.Response jettyResponse,
+                    final Response response) {
+                if (preventMimeSniffing && !response.getHeaders().containsKey(X_CONTENT_TYPE_OPTIONS.toString())) {
+                    response.setHeader(X_CONTENT_TYPE_OPTIONS, "nosniff");
+                }
+                if (preventAmbiguousResponseCacheControl &&
+                        !response.getHeaders().containsKey(CACHE_CONTROL.toString())) {
+                    response.setHeader(CACHE_CONTROL, NO_CACHE.toString());
+                }
+                jettyResponse.setStatus(response.getStatusCode());
+                jettyResponse.getHeaders().clear();
+                response.getHeaders().forEach(jettyResponse.getHeaders()::add);
+            }
         }));
+        // Do not serve error info, as this causes information leakage and Jetty already logs errors.
+        server.setErrorHandler(new Abstract() {
+            @Override
+            public boolean handle(final org.eclipse.jetty.server.Request request,
+                    final org.eclipse.jetty.server.Response response, final Callback callback) {
+                callback.succeeded();
+                return true;
+            }
+        });
         try {
             server.start();
         } catch (final Exception exception) {
