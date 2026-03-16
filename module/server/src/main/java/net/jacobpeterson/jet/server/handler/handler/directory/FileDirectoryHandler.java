@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.server.handler.handler.directory;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
@@ -27,6 +28,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -39,8 +41,12 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.MAX_AGE_1_YEAR_IMMUTABLE;
+import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.url.Url.pathTrimLeading;
+import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
 /**
  * {@link FileDirectoryHandler} is a {@link Handler} for serving files in a given directory {@link Path} using
@@ -61,6 +67,61 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * The default {@link #getDefaultFilename()}: <code>"index.html"</code>
      */
     public static final String INDEX_HTML_FILENAME = "index.html";
+
+    /**
+     * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
+     * {@link ResponseCacheControl#NO_CACHE}
+     */
+    public static FileDirectoryHandler simpleMutable(final Path directory, final @Nullable String requestPathStartsWith,
+            final boolean trustedContentType) {
+        return simple(directory, requestPathStartsWith, NO_CACHE, trustedContentType);
+    }
+
+    /**
+     * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
+     * {@link ResponseCacheControl#MAX_AGE_1_YEAR_IMMUTABLE}
+     */
+    public static FileDirectoryHandler simpleImmutable(final Path directory,
+            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
+        return simple(directory, requestPathStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
+    }
+
+    /**
+     * @return a new {@link FileDirectoryHandler} with
+     * <code>requestPathRelativizer</code> set to a {@link String} {@link UnaryOperator} that removes the given
+     * <code>requestPathStartsWith</code> from the start of the given request path,
+     * <code>defaultFilename</code> set to {@link #INDEX_HTML_FILENAME},
+     * <code>strongETag</code> set to <code>true</code>,
+     * <code>peekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH},
+     * <code>contentEncoding</code> set to <code>null</code>,
+     * <code>resourcesOfPathsCache</code> set to {@link Caffeine#expireAfterAccess(long, TimeUnit)} with 7 days and
+     * {@link Caffeine#softValues()}, and
+     * <code>enableWatchService</code> set to <code>true</code>
+     */
+    public static FileDirectoryHandler simple(final Path directory, final @Nullable String requestPathStartsWith,
+            final ResponseCacheControl cacheControl, final boolean trustedContentType) {
+        return builder()
+                .directory(directory)
+                .requestPathRelativizer(requestPathStartsWith == null ? null : requestPath -> {
+                    if (!requestPath.startsWith(requestPathStartsWith)) {
+                        throw new StatusException(NOT_FOUND_404, "Request path does not start with \"%s\": %s"
+                                .formatted(requestPathStartsWith, requestPath));
+                    }
+                    return requestPath.substring(requestPathStartsWith.length() + 1);
+                })
+                .defaultFilename(INDEX_HTML_FILENAME)
+                .cacheControl(cacheControl)
+                .strongETag(true)
+                .trustedContentType(trustedContentType)
+                .peekLength(DEFAULT_PEEK_LENGTH)
+                .contentEncoding(null)
+                .resourcesOfPathsCache(Caffeine.newBuilder()
+                        .expireAfterAccess(7, DAYS)
+                        .softValues()
+                        .build())
+                .enableWatchService(true)
+                .build();
+    }
 
     /**
      * The directory {@link Path} to serve files from.
