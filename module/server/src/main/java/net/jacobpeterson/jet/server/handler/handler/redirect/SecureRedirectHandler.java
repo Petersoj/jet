@@ -1,7 +1,7 @@
 package net.jacobpeterson.jet.server.handler.handler.redirect;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -20,7 +20,7 @@ import static net.jacobpeterson.jet.common.http.url.Scheme.HTTPS;
  * expose the infinite redirect.
  */
 @NullMarked
-@Getter @RequiredArgsConstructor
+@Getter @Builder(toBuilder = true)
 public class SecureRedirectHandler implements Handler {
 
     /**

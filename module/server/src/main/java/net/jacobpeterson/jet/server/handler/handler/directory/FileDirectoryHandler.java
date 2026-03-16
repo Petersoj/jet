@@ -123,10 +123,11 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * @param trustedContentType     the {@link #isTrustedContentType()}
      * @param peekLength             the {@link #getPeekLength()}
      * @param contentEncoding        the {@link #getContentEncoding()}
-     * @param resourcesOfPathsCache  the {@link Resource} {@link Cache}
+     * @param resourcesOfPathsCache  the {@link Resource} {@link Cache}, or <code>null</code> to disable caching
      * @param enableWatchService     the {@link #isWatchServiceEnabled()}
      */
-    public FileDirectoryHandler(final Path directory, final @Nullable UnaryOperator<String> requestPathRelativizer,
+    @lombok.Builder
+    private FileDirectoryHandler(final Path directory, final @Nullable UnaryOperator<String> requestPathRelativizer,
             final @Nullable String defaultFilename, final @Nullable ResponseCacheControl cacheControl,
             final boolean strongETag, final boolean trustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding,
@@ -162,14 +163,14 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                             } catch (final ClosedWatchServiceException | InterruptedException exception) {
                                 return;
                             }
+                            final var directoryOfWatchKey = directoriesOfWatchKeys.get(watchKey);
+                            if (directoryOfWatchKey == null) {
+                                continue;
+                            }
                             for (final var pollEvent : watchKey.pollEvents()) {
                                 final var eventKind = pollEvent.kind();
                                 if (eventKind == OVERFLOW) {
                                     LOGGER.warn("`WatchService` `OVERFLOW` event occurred: {}", directory);
-                                    continue;
-                                }
-                                final var directoryOfWatchKey = directoriesOfWatchKeys.get(watchKey);
-                                if (directoryOfWatchKey == null) {
                                     continue;
                                 }
                                 final var eventPath = directoryOfWatchKey.resolve((Path) pollEvent.context());
