@@ -169,7 +169,8 @@ public final class Resource {
                 contentType = null;
             }
             final var contentDisposition = ContentDisposition.builder()
-                    .type(contentType != null && contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
+                    .type(trustedContentType ||
+                            (contentType != null && contentType.isXssSafeHtmlTag()) ? INLINE : ATTACHMENT);
             if (exposeFilename) {
                 contentDisposition.filename(filename);
             }
@@ -269,7 +270,8 @@ public final class Resource {
             contentType = null;
         }
         final var contentDisposition = ContentDisposition.builder()
-                .type(contentType != null && contentType.isXssSafeHtmlTag() ? INLINE : ATTACHMENT);
+                .type(trustedContentType ||
+                        (contentType != null && contentType.isXssSafeHtmlTag()) ? INLINE : ATTACHMENT);
         if (exposeFilename) {
             contentDisposition.filename(filename);
         }
