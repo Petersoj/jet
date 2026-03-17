@@ -68,6 +68,7 @@ import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.A
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_HTML_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_PLAIN_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.range.Range.BYTES_UNIT;
+import static net.jacobpeterson.jet.common.http.method.Method.HEAD;
 import static net.jacobpeterson.jet.common.http.status.Status.FOUND_302;
 import static net.jacobpeterson.jet.common.http.status.Status.MOVED_PERMANENTLY_301;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_MODIFIED_304;
@@ -594,7 +595,7 @@ public final class Response {
             }
         }
         final var contentLength = resource.getContentLength();
-        if (contentLength != null && !notModified) {
+        if (contentLength != null && (setBodyInputStream || request.getMethodEnum() == HEAD) && !notModified) {
             setContentLength(contentLength);
         }
         final var contentEncoding = resource.getContentEncoding();
