@@ -90,7 +90,7 @@ public class ClasspathDirectoryHandler implements Handler {
                 .clazz(clazz)
                 .directory(directory)
                 .requestPathRelativizer(requestPathAlwaysStartsWith == null ? null : requestPath ->
-                        requestPath.substring(requestPathAlwaysStartsWith.length() + 1))
+                        requestPath.substring(requestPathAlwaysStartsWith.length()))
                 .defaultFilename("index.html")
                 .defaultExtension(".html")
                 .redirectToDefault(true)

@@ -108,7 +108,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
         return builder()
                 .directory(directory)
                 .requestPathRelativizer(requestPathAlwaysStartsWith == null ? null : requestPath ->
-                        requestPath.substring(requestPathAlwaysStartsWith.length() + 1))
+                        requestPath.substring(requestPathAlwaysStartsWith.length()))
                 .defaultFilename("index.html")
                 .defaultExtension(".html")
                 .redirectToDefault(true)
