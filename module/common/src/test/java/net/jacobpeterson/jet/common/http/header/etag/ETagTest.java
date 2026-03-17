@@ -50,13 +50,6 @@ public final class ETagTest {
     }
 
     @Test
-    public void getValueQuoted() {
-        assertEquals("\"abc\"", ETag.builder()
-                .value("abc")
-                .build().getValueQuoted());
-    }
-
-    @Test
     public void _toString() {
         assertEquals("\"abc\"", ETag.builder()
                 .value("abc")

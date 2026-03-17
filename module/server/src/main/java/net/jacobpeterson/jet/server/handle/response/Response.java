@@ -590,7 +590,7 @@ public final class Response {
         if (etag != null) {
             setETag(etag);
             final var ifNoneMatch = request.getHeader(IF_NONE_MATCH);
-            if (ifNoneMatch != null && ifNoneMatch.equals(etag.getValueQuoted())) {
+            if (ifNoneMatch != null && ifNoneMatch.equals(etag.toString())) {
                 notModified = true;
             }
         }
