@@ -28,6 +28,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
 
@@ -42,6 +43,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.DAYS;
+import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.MAX_AGE_1_YEAR_IMMUTABLE;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.url.Url.pathTrimLeading;
@@ -51,9 +53,10 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
  * {@link FileDirectoryHandler} is a {@link Handler} for serving files in a given directory {@link Path} using
  * {@link Response#responseResource(Resource)} with
  * {@link Resource#ofFile(Path, boolean, boolean, ContentType, Integer, ContentEncoding, boolean)}, with support for
- * relativizing request paths, serving a default file (like <code>index.html</code>) for request paths representing a
- * directory, applying a {@link ResponseCacheControl}, caching {@link Resource} instances from with automatic cache
- * invalidation using {@link WatchService}, and applying a {@link ResponseCacheControl}.
+ * relativizing request paths, serving a default file (like <code>/index.html</code>) for request paths representing a
+ * directory, serving a default file for requests paths representing a file without an extension (like
+ * <code>/index</code>), redirecting to default files or default extensions, applying a {@link ResponseCacheControl},
+ * and caching {@link Resource} instances from with automatic cache invalidation using {@link WatchService}.
  * <p>
  * Note: this class implements {@link AutoCloseable}, but calling {@link #close()} is not necessary if
  * {@link #isWatchServiceEnabled()} is <code>false</code>.
@@ -63,13 +66,36 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
 public class FileDirectoryHandler implements Handler, AutoCloseable {
 
     /**
+     * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
+     * {@link ResponseCacheControl#NO_CACHE}
+     */
+    public static FileDirectoryHandler simpleMutable(final Path directory, final @Nullable String requestPathStartsWith,
+            final boolean trustedContentType) {
+        return simple(directory, requestPathStartsWith, NO_CACHE, trustedContentType);
+    }
+
+    /**
+     * Note: only use this method if a given request path will <strong>always</strong> return the same file
+     * {@link Resource}. This should typically only be used for directories that contain public immutable files with a
+     * tokenized filename e.g. a random {@link UUID} or a cache-busting version number, such as from a Vite build.
+     * {@link ResponseCacheControl#MAX_AGE_1_YEAR_IMMUTABLE} requires that both the request path is static
+     * <strong>and</strong> the file is immutable.
+     *
+     * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
+     * {@link ResponseCacheControl#MAX_AGE_1_YEAR_IMMUTABLE}
+     */
+    public static FileDirectoryHandler simpleImmutable(final Path directory,
+            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
+        return simple(directory, requestPathStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
+    }
+
+    /**
      * @return a new {@link FileDirectoryHandler} with
      * <code>requestPathRelativizer</code> set to a {@link String} {@link UnaryOperator} that removes the given
      * <code>requestPathAlwaysStartsWith</code> from the start of the given request path,
      * <code>defaultFilename</code> set to <code>"index.html"</code>,
      * <code>defaultExtension</code> set to <code>".html"</code>,
      * <code>redirectToDefault</code> set to <code>true</code>,
-     * <code>cacheControl</code> set to {@link ResponseCacheControl#NO_CACHE},
      * <code>strongETag</code> set to <code>true</code>,
      * <code>peekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH},
      * <code>contentEncoding</code> set to <code>null</code>,
@@ -78,7 +104,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * <code>enableWatchService</code> set to <code>true</code>
      */
     public static FileDirectoryHandler simple(final Path directory, final @Nullable String requestPathAlwaysStartsWith,
-            final boolean trustedContentType) {
+            final @Nullable ResponseCacheControl cacheControl, final boolean trustedContentType) {
         return builder()
                 .directory(directory)
                 .requestPathRelativizer(requestPathAlwaysStartsWith == null ? null : requestPath ->
@@ -86,7 +112,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                 .defaultFilename("index.html")
                 .defaultExtension(".html")
                 .redirectToDefault(true)
-                .cacheControl(NO_CACHE)
+                .cacheControl(cacheControl)
                 .strongETag(true)
                 .trustedContentType(trustedContentType)
                 .peekLength(DEFAULT_PEEK_LENGTH)
