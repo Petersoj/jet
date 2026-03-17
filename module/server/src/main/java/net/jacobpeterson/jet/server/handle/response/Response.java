@@ -22,6 +22,7 @@ import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
+import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
 import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandler;
 import org.jspecify.annotations.NullMarked;
@@ -74,6 +75,7 @@ import static net.jacobpeterson.jet.common.http.status.Status.MOVED_PERMANENTLY_
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_MODIFIED_304;
 import static net.jacobpeterson.jet.common.http.status.Status.OK_200;
 import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_206;
+import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
 import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainText;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
@@ -586,7 +588,7 @@ public final class Response {
                 notModified = true;
             }
         }
-        final var eTag = resource.geteTag();
+        final var eTag = resource.getETag();
         if (eTag != null) {
             setETag(eTag);
             final var ifNoneMatch = request.getHeader(IF_NONE_MATCH);
@@ -645,6 +647,18 @@ public final class Response {
         }
         final var contentRange = resource.getContentRange();
         if (contentRange != null) {
+            final var ifRange = handle.getRequest().getIfRange();
+            if (ifRange != null) {
+                final var ifRangeDateTime = ifRange.getDateTime();
+                if (ifRangeDateTime != null && lastModified != null &&
+                        lastModified.isAfter(ifRangeDateTime.toInstant())) {
+                    throw new StatusException(RANGE_NOT_SATISFIABLE_416);
+                }
+                final var ifRangeETag = ifRange.getETag();
+                if (ifRangeETag != null && eTag != null && !ifRangeETag.equals(eTag)) {
+                    throw new StatusException(RANGE_NOT_SATISFIABLE_416);
+                }
+            }
             setContentRange(contentRange);
             setStatus(PARTIAL_CONTENT_206);
         }
