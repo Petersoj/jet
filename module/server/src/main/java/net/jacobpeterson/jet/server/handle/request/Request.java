@@ -66,7 +66,6 @@ import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
 import static net.jacobpeterson.jet.common.http.status.Status.BAD_REQUEST_400;
 import static net.jacobpeterson.jet.common.http.status.Status.CONTENT_TOO_LARGE_413;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
-import static net.jacobpeterson.jet.common.http.url.Scheme.HTTP;
 import static org.eclipse.jetty.http.MultiPartFormData.getParts;
 import static org.eclipse.jetty.io.Content.Source.asInputStream;
 
@@ -179,41 +178,12 @@ public final class Request {
      */
     public Url getUrl() {
         if (url == null) {
-            final var uri = handle.getInternals().getRequest().getHttpURI();
-            final var url = Url.builder();
-
-            final var scheme = uri.getScheme();
-            url.scheme(scheme != null ? scheme : HTTP.toString());
-
-            final var user = uri.getUser();
-            if (user != null) {
-                url.encodedUserInfo(user);
+            final var requestUri = handle.getInternals().getRequest().getHttpURI().toString();
+            try {
+                url = Url.parse(requestUri);
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse request URL: " + requestUri);
             }
-
-            final var host = uri.getHost();
-            url.host(host != null ? host : "localhost");
-
-            final var port = uri.getPort();
-            if (port != -1) {
-                url.port(port);
-            }
-
-            final var path = uri.getPath();
-            if (path != null) {
-                url.encodedPath(path);
-            }
-
-            final var query = uri.getQuery();
-            if (query != null) {
-                url.encodedQuery(query);
-            }
-
-            final var fragment = uri.getFragment();
-            if (fragment != null) {
-                url.encodedFragment(fragment);
-            }
-
-            this.url = url.build();
         }
         return url;
     }

@@ -11,7 +11,8 @@ import org.jspecify.annotations.NullMarked;
 
 /**
  * {@link NormalizedPathRedirectHandlerWrapper} is a {@link Handler} wrapper to redirect {@link Request#getUrl()} to
- * {@link Url#getNormalizedPath()}, if the request path is not already normalized.
+ * {@link Url#getNormalizedPath()}, if the request path is not already normalized. This prevents multiple requests paths
+ * from serving the same content e.g. helps establish the canonical request path of a resource.
  */
 @NullMarked
 @Getter @Builder(toBuilder = true)
