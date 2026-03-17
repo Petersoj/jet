@@ -8,7 +8,7 @@ plugins {
     `java-gradle-plugin`
     signing
     id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
-    id("com.gradle.plugin-publish") version "2.0.0"
+    id("com.gradle.plugin-publish") version "2.1.0"
 }
 
 dependencies {
@@ -18,7 +18,7 @@ dependencies {
     api("com.github.victools:jsonschema-generator:$jsonschemaGeneratorVersion")
     api("com.github.victools:jsonschema-module-jackson:$jsonschemaGeneratorVersion")
 
-    api("com.networknt:json-schema-validator:3.0.0")
+    api("com.networknt:json-schema-validator:3.0.1")
 }
 
 // Gradle Test Kit already provides an SLF4j binding.

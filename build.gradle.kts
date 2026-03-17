@@ -3,7 +3,7 @@ import org.jreleaser.model.Active.NEVER
 
 plugins {
     base
-    id("org.jreleaser") version "1.22.0"
+    id("org.jreleaser") version "1.23.0"
 }
 
 jreleaser {
