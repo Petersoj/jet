@@ -82,6 +82,10 @@ public final class Request {
     private static @Nullable MultiPartConfig defaultMultiPartConfig;
 
     private final Handle handle;
+    private @LazyInit @Nullable String localAddress;
+    private @LazyInit @Nullable Integer localPort;
+    private @LazyInit @Nullable String remoteAddress;
+    private @LazyInit @Nullable Integer remotePort;
     private @LazyInit @Nullable Version version;
     private @LazyInit @Nullable Optional<Method> methodEnum;
     private @LazyInit @Nullable Url url;
@@ -137,6 +141,46 @@ public final class Request {
      */
     public PathParametersRouteMatch getRoutePathParameters() {
         return (PathParametersRouteMatch) getRouteMatch();
+    }
+
+    /**
+     * @return internally-cached local address (usually an IP address of the server)
+     */
+    public String getLocalAddress() {
+        if (localAddress == null) {
+            localAddress = org.eclipse.jetty.server.Request.getLocalAddr(handle.getInternals().getRequest());
+        }
+        return localAddress;
+    }
+
+    /**
+     * @return internally-cached local port (usually an IP port of the server)
+     */
+    public int getLocalPort() {
+        if (localPort == null) {
+            localPort = org.eclipse.jetty.server.Request.getLocalPort(handle.getInternals().getRequest());
+        }
+        return localPort;
+    }
+
+    /**
+     * @return internally-cached remote address (usually an IP address of the client)
+     */
+    public String getRemoteAddress() {
+        if (remoteAddress == null) {
+            remoteAddress = org.eclipse.jetty.server.Request.getRemoteAddr(handle.getInternals().getRequest());
+        }
+        return remoteAddress;
+    }
+
+    /**
+     * @return internally-cached remote port (usually an IP port of the client)
+     */
+    public int getRemotePort() {
+        if (remotePort == null) {
+            remotePort = org.eclipse.jetty.server.Request.getRemotePort(handle.getInternals().getRequest());
+        }
+        return remotePort;
     }
 
     /**
