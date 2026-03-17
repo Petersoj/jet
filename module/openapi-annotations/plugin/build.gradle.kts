@@ -1,3 +1,4 @@
+import org.gradle.plugin.compatibility.compatibility
 import org.jreleaser.model.api.signing.Signing.GPG_PASSPHRASE
 import org.jreleaser.model.api.signing.Signing.GPG_SECRET_KEY
 import org.jreleaser.util.Env.JRELEASER_ENV_PREFIX
@@ -7,8 +8,9 @@ plugins {
     id("module-common")
     `java-gradle-plugin`
     signing
-    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
     id("com.gradle.plugin-publish") version "2.1.0"
+    id("org.gradle.plugin-compatibility") version "1.0.0"
+    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
 }
 
 dependencies {
@@ -37,6 +39,7 @@ gradlePlugin {
         website = "https://$GITHUB_PROJECT_DOMAIN_PATH"
         vcsUrl = website.map { "$it.git" }
         tags = listOf("jet", "openapi", "annotations")
+        compatibility { features.configurationCache = true }
     }
 }
 
@@ -48,4 +51,8 @@ signing {
     useInMemoryPgpKeys(getenv(JRELEASER_ENV_PREFIX + GPG_SECRET_KEY),
             getenv(JRELEASER_ENV_PREFIX + GPG_PASSPHRASE))
     sign(publishing.publications)
+}
+
+tasks.withType<AbstractPublishToMaven> {
+    dependsOn(tasks.withType<Sign>())
 }
