@@ -443,6 +443,7 @@ public final class JetServer {
 
             private void applyStatusAndHeaders(final org.eclipse.jetty.server.Response jettyResponse,
                     final Response response) {
+                jettyResponse.setStatus(response.getStatusCode());
                 if (preventMimeSniffing && !response.getHeaders().containsKey(X_CONTENT_TYPE_OPTIONS.toString())) {
                     response.setHeader(X_CONTENT_TYPE_OPTIONS, "nosniff");
                 }
@@ -450,7 +451,6 @@ public final class JetServer {
                         !response.getHeaders().containsKey(CACHE_CONTROL.toString())) {
                     response.setHeader(CACHE_CONTROL, NO_CACHE.toString());
                 }
-                jettyResponse.setStatus(response.getStatusCode());
                 jettyResponse.getHeaders().clear();
                 response.getHeaders().forEach(jettyResponse.getHeaders()::add);
             }
