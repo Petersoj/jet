@@ -42,7 +42,6 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.DAYS;
-import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.MAX_AGE_1_YEAR_IMMUTABLE;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.url.Url.pathTrimLeading;
@@ -64,33 +63,13 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
 public class FileDirectoryHandler implements Handler, AutoCloseable {
 
     /**
-     * The default {@link #getDefaultFilename()}: <code>"index.html"</code>
-     */
-    public static final String INDEX_HTML_FILENAME = "index.html";
-
-    /**
-     * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
-     * {@link ResponseCacheControl#NO_CACHE}
-     */
-    public static FileDirectoryHandler simpleMutable(final Path directory, final @Nullable String requestPathStartsWith,
-            final boolean trustedContentType) {
-        return simple(directory, requestPathStartsWith, NO_CACHE, trustedContentType);
-    }
-
-    /**
-     * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
-     * {@link ResponseCacheControl#MAX_AGE_1_YEAR_IMMUTABLE}
-     */
-    public static FileDirectoryHandler simpleImmutable(final Path directory,
-            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
-        return simple(directory, requestPathStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
-    }
-
-    /**
      * @return a new {@link FileDirectoryHandler} with
      * <code>requestPathRelativizer</code> set to a {@link String} {@link UnaryOperator} that removes the given
-     * <code>requestPathStartsWith</code> from the start of the given request path,
-     * <code>defaultFilename</code> set to {@link #INDEX_HTML_FILENAME},
+     * <code>requestPathAlwaysStartsWith</code> from the start of the given request path,
+     * <code>defaultFilename</code> set to <code>"index.html"</code>,
+     * <code>defaultExtension</code> set to <code>".html"</code>,
+     * <code>redirectToDefault</code> set to <code>true</code>,
+     * <code>cacheControl</code> set to {@link ResponseCacheControl#NO_CACHE},
      * <code>strongETag</code> set to <code>true</code>,
      * <code>peekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH},
      * <code>contentEncoding</code> set to <code>null</code>,
@@ -98,19 +77,16 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * {@link Caffeine#softValues()}, and
      * <code>enableWatchService</code> set to <code>true</code>
      */
-    public static FileDirectoryHandler simple(final Path directory, final @Nullable String requestPathStartsWith,
-            final ResponseCacheControl cacheControl, final boolean trustedContentType) {
+    public static FileDirectoryHandler simple(final Path directory, final @Nullable String requestPathAlwaysStartsWith,
+            final boolean trustedContentType) {
         return builder()
                 .directory(directory)
-                .requestPathRelativizer(requestPathStartsWith == null ? null : requestPath -> {
-                    if (!requestPath.startsWith(requestPathStartsWith)) {
-                        throw new StatusException(NOT_FOUND_404, "Request path does not start with \"%s\": %s"
-                                .formatted(requestPathStartsWith, requestPath));
-                    }
-                    return requestPath.substring(requestPathStartsWith.length() + 1);
-                })
-                .defaultFilename(INDEX_HTML_FILENAME)
-                .cacheControl(cacheControl)
+                .requestPathRelativizer(requestPathAlwaysStartsWith == null ? null : requestPath ->
+                        requestPath.substring(requestPathAlwaysStartsWith.length() + 1))
+                .defaultFilename("index.html")
+                .defaultExtension(".html")
+                .redirectToDefault(true)
+                .cacheControl(NO_CACHE)
                 .strongETag(true)
                 .trustedContentType(trustedContentType)
                 .peekLength(DEFAULT_PEEK_LENGTH)
@@ -136,9 +112,23 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
     private final @Getter @Nullable UnaryOperator<String> requestPathRelativizer;
 
     /**
-     * If the request path represents a directory, attempt to serve a file in that directory with this filename.
+     * If a request path represents a directory, attempt to serve a file in that directory with this filename e.g.
+     * <code>/blog</code> serves <code>/blog/index.html</code>.
      */
     private final @Getter @Nullable String defaultFilename;
+
+    /**
+     * If a request path represents a non-existent file, attempt to serve a file with this extension appended (include
+     * the dot) e.g. <code>/blog/post</code> serves <code>/blog/post.html</code>.
+     */
+    private final @Getter @Nullable String defaultExtension;
+
+    /**
+     * Whether to call {@link Response#redirectTemporarily(Url)} to the request path with {@link #getDefaultFilename()}
+     * or {@link #getDefaultExtension()}. This prevents multiple requests paths from serving the same content e.g.
+     * helps establish the canonical request path of a file.
+     */
+    private final @Getter boolean redirectToDefault;
 
     /**
      * The {@link ResponseCacheControl} for {@link Response#setCacheControl(ResponseCacheControl)}, or <code>null</code>
@@ -170,8 +160,9 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      */
     private final @Getter @Nullable ContentEncoding contentEncoding;
 
-    private @Nullable Cache<String, Resource> resourcesOfPathsCache;
+    private final @Nullable String defaultFilenameWithoutDefaultExtension;
     private final @Getter @Nullable WatchService watchService;
+    private @Nullable Cache<String, Resource> resourcesOfPathsCache;
 
     /**
      * Instantiates a new {@link FileDirectoryHandler}.
@@ -179,6 +170,8 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * @param directory              the {@link #getDirectory()}
      * @param requestPathRelativizer the {@link #getRequestPathRelativizer()}
      * @param defaultFilename        the {@link #getDefaultFilename()}
+     * @param defaultExtension       the {@link #getDefaultExtension()}
+     * @param redirectToDefault      the {@link #isRedirectToDefault()}
      * @param cacheControl           the {@link #getCacheControl()}
      * @param strongETag             the {@link #isStrongETag()}
      * @param trustedContentType     the {@link #isTrustedContentType()}
@@ -189,7 +182,8 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      */
     @lombok.Builder
     private FileDirectoryHandler(final Path directory, final @Nullable UnaryOperator<String> requestPathRelativizer,
-            final @Nullable String defaultFilename, final @Nullable ResponseCacheControl cacheControl,
+            final @Nullable String defaultFilename, final @Nullable String defaultExtension,
+            final boolean redirectToDefault, final @Nullable ResponseCacheControl cacheControl,
             final boolean strongETag, final boolean trustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding,
             final @Nullable Cache<String, Resource> resourcesOfPathsCache, final boolean enableWatchService) {
@@ -197,6 +191,11 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
         this.directory = directory.toAbsolutePath();
         this.requestPathRelativizer = requestPathRelativizer;
         this.defaultFilename = defaultFilename != null ? pathTrimLeading(defaultFilename) : null;
+        this.defaultExtension = defaultExtension;
+        defaultFilenameWithoutDefaultExtension = defaultFilename != null && defaultExtension != null &&
+                defaultFilename.endsWith(defaultExtension) ?
+                defaultFilename.substring(0, defaultFilename.length() - defaultExtension.length()) : null;
+        this.redirectToDefault = redirectToDefault;
         this.cacheControl = cacheControl;
         this.strongETag = strongETag;
         this.trustedContentType = trustedContentType;
@@ -273,30 +272,52 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
 
     @Override
     public void handle(final Handle handle) {
-        final var requestPath = handle.getRequest().getUrl().getNormalizedPath();
-        final var requestFile = directory.resolve(pathTrimLeading(requestPathRelativizer == null ? requestPath :
+        final var requestUrl = handle.getRequest().getUrl();
+        final var requestPath = requestUrl.getNormalizedPath();
+        var requestFile = directory.resolve(pathTrimLeading(requestPathRelativizer == null ? requestPath :
                 requestPathRelativizer.apply(requestPath))).normalize();
         if (!requestFile.startsWith(directory)) {
             throw new StatusException(NOT_FOUND_404,
                     "Request file does not start with \"%s\": %s".formatted(directory, requestFile));
         }
-        final Path requestFileOrDefault;
-        if (defaultFilename != null && Files.isDirectory(requestFile)) {
-            requestFileOrDefault = requestFile.resolve(defaultFilename);
-        } else {
-            requestFileOrDefault = requestFile;
+        if (!Files.isRegularFile(requestFile)) {
+            if (defaultFilename != null && Files.isDirectory(requestFile)) {
+                requestFile = requestFile.resolve(defaultFilename);
+            } else if (defaultExtension != null) {
+                requestFile = requestFile.resolveSibling(requestFile.getFileName().toString() + defaultExtension);
+            } else {
+                throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFile);
+            }
+            if (!Files.isRegularFile(requestFile)) {
+                throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFile);
+            }
         }
-        if (!Files.isRegularFile(requestFileOrDefault)) {
-            throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFileOrDefault);
+        if (redirectToDefault) {
+            final Integer redirectRemoveLength;
+            if (defaultFilename != null && requestPath.endsWith(defaultFilename)) {
+                redirectRemoveLength = defaultFilename.length();
+            } else if (defaultExtension != null && requestPath.endsWith(defaultExtension)) {
+                redirectRemoveLength = defaultExtension.length();
+            } else if (defaultFilenameWithoutDefaultExtension != null &&
+                    requestPath.endsWith(defaultFilenameWithoutDefaultExtension)) {
+                redirectRemoveLength = defaultFilenameWithoutDefaultExtension.length();
+            } else {
+                redirectRemoveLength = null;
+            }
+            if (redirectRemoveLength != null) {
+                handle.getResponse().redirectTemporarily(requestUrl.toBuilder()
+                        .path(requestPath.substring(0, requestPath.length() - redirectRemoveLength))
+                        .build());
+                return;
+            }
         }
         final var response = handle.getResponse();
+        final var fRequestFile = requestFile;
         // `resourcesOfPathsCache` null-check is racy, but NPE is unlikely and is better than using invalid `Resource`.
         response.responseResource(resourcesOfPathsCache != null ?
-                resourcesOfPathsCache.get(requestFileOrDefault.toString(), _ ->
-                        Resource.ofFile(requestFileOrDefault, strongETag, trustedContentType, null, peekLength,
-                                contentEncoding, true)) :
-                Resource.ofFile(requestFileOrDefault, strongETag, trustedContentType, null, peekLength,
-                        contentEncoding, true));
+                resourcesOfPathsCache.get(fRequestFile.toString(), _ -> Resource.ofFile(
+                        fRequestFile, strongETag, trustedContentType, null, peekLength, contentEncoding, true)) :
+                Resource.ofFile(fRequestFile, strongETag, trustedContentType, null, peekLength, contentEncoding, true));
         if (cacheControl != null) {
             response.setCacheControl(cacheControl);
         }
