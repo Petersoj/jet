@@ -490,6 +490,7 @@ public final class ContentType {
      * {@link #forFileExtension(String)}.
      */
     public static final ImmutableSet<ContentType> XSS_SAFE_HTML_TAG_CONTENT_TYPES = ImmutableSet.of(
+            TEXT_CSV, TEXT_PLAIN, TEXT_TSV,
             IMAGE_BMP, IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIC,
             IMAGE_HEIF,
             AUDIO_MP4, AUDIO_MPEG, AUDIO_OGG, AUDIO_WEBM, AUDIO_AAC, AUDIO_VORBIS, AUDIO_VND_WAVE,
