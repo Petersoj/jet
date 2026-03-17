@@ -13,6 +13,7 @@ import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCach
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
+import net.jacobpeterson.jet.common.http.header.ifrange.IfRange;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
@@ -59,6 +60,7 @@ import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
 import static net.jacobpeterson.jet.common.http.header.Header.COOKIE;
 import static net.jacobpeterson.jet.common.http.header.Header.IF_MODIFIED_SINCE;
+import static net.jacobpeterson.jet.common.http.header.Header.IF_RANGE;
 import static net.jacobpeterson.jet.common.http.header.Header.IF_UNMODIFIED_SINCE;
 import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
 import static net.jacobpeterson.jet.common.http.status.Status.BAD_REQUEST_400;
@@ -91,6 +93,7 @@ public final class Request {
     private @LazyInit @Nullable ImmutableList<Range> ranges;
     private @LazyInit @Nullable Optional<ZonedDateTime> ifModifiedSince;
     private @LazyInit @Nullable Optional<ZonedDateTime> ifUnmodifiedSince;
+    private @LazyInit @Nullable Optional<IfRange> ifRange;
     private @LazyInit @Nullable Optional<RequestCacheControl> cacheControl;
     private @LazyInit @Nullable Optional<BasicAuthentication> basicAuthentication;
     private @LazyInit @Nullable ImmutableList<MultiPart> bodyMultiParts;
@@ -363,6 +366,22 @@ public final class Request {
             }
         }
         return ifUnmodifiedSince.orElse(null);
+    }
+
+    /**
+     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_RANGE} {@link IfRange#parse(String)}
+     */
+    public @Nullable IfRange getIfRange() throws StatusException {
+        if (ifRange == null) {
+            final var ifRange = getHeader(IF_RANGE);
+            try {
+                this.ifRange = Optional.ofNullable(ifRange == null ? null : IfRange.parse(ifRange));
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse `%s` header".formatted(IF_RANGE),
+                        exception);
+            }
+        }
+        return ifRange.orElse(null);
     }
 
     /**
