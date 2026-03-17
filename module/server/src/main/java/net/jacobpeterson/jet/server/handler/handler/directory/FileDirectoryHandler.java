@@ -216,7 +216,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
         checkArgument(Files.isDirectory(directory), "Not a directory: %s", directory);
         this.directory = directory.toAbsolutePath();
         this.requestPathRelativizer = requestPathRelativizer;
-        this.defaultFilename = defaultFilename != null ? pathTrimLeading(defaultFilename) : null;
+        this.defaultFilename = defaultFilename;
         this.defaultExtension = defaultExtension;
         defaultFilenameWithoutDefaultExtension = defaultFilename != null && defaultExtension != null &&
                 defaultFilename.endsWith(defaultExtension) ?
@@ -300,24 +300,6 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
     public void handle(final Handle handle) {
         final var requestUrl = handle.getRequest().getUrl();
         final var requestPath = requestUrl.getNormalizedPath();
-        var requestFile = directory.resolve(pathTrimLeading(requestPathRelativizer == null ? requestPath :
-                requestPathRelativizer.apply(requestPath))).normalize();
-        if (!requestFile.startsWith(directory)) {
-            throw new StatusException(NOT_FOUND_404,
-                    "Request file does not start with \"%s\": %s".formatted(directory, requestFile));
-        }
-        if (!Files.isRegularFile(requestFile)) {
-            if (defaultFilename != null && Files.isDirectory(requestFile)) {
-                requestFile = requestFile.resolve(defaultFilename);
-            } else if (defaultExtension != null) {
-                requestFile = requestFile.resolveSibling(requestFile.getFileName().toString() + defaultExtension);
-            } else {
-                throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFile);
-            }
-            if (!Files.isRegularFile(requestFile)) {
-                throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFile);
-            }
-        }
         if (redirectToDefault) {
             final Integer redirectRemoveLength;
             if (defaultFilename != null && requestPath.endsWith(defaultFilename)) {
@@ -336,6 +318,22 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                         .build());
                 return;
             }
+        }
+        var requestFile = directory.resolve(pathTrimLeading(requestPathRelativizer == null ? requestPath :
+                requestPathRelativizer.apply(requestPath))).normalize();
+        if (!Files.isRegularFile(requestFile)) {
+            if (defaultFilename != null && Files.isDirectory(requestFile)) {
+                requestFile = requestFile.resolve(defaultFilename);
+            } else if (defaultExtension != null) {
+                requestFile = requestFile.resolveSibling(requestFile.getFileName().toString() + defaultExtension);
+            } else {
+                throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFile);
+            }
+            // No need to call `Files.isRegularFile()` here since `Resource.ofFile()` will check for file existence.
+        }
+        if (!requestFile.startsWith(directory)) { // Protect against path traversals
+            throw new StatusException(NOT_FOUND_404,
+                    "Request file does not start with \"%s\": %s".formatted(directory, requestFile));
         }
         final var response = handle.getResponse();
         final var fRequestFile = requestFile;
