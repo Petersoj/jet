@@ -95,22 +95,22 @@ public final class ETag {
     /**
      * Parses the given {@link Header#ETAG} value {@link String} into an {@link ETag}.
      *
-     * @param etag the {@link Header#ETAG} value {@link String}
+     * @param eTag the {@link Header#ETAG} value {@link String}
      *
      * @return the {@link ETag}
      *
      * @throws IllegalArgumentException thrown upon parsing failure
      */
-    public static ETag parse(final String etag) throws IllegalArgumentException {
-        final var trimmed = etag.trim();
+    public static ETag parse(final String eTag) throws IllegalArgumentException {
+        final var trimmed = eTag.trim();
         final var builder = builder();
         if (trimmed.startsWith(WEAK_PREFIX)) {
             builder.weak();
         }
         final var firstQuoteIndex = trimmed.indexOf('"');
-        checkArgument(firstQuoteIndex != -1, "Invalid ETag: %s", etag);
+        checkArgument(firstQuoteIndex != -1, "Invalid ETag: %s", eTag);
         final var lastQuoteIndex = trimmed.lastIndexOf('"');
-        checkArgument(firstQuoteIndex != lastQuoteIndex, "Invalid ETag: %s", etag);
+        checkArgument(firstQuoteIndex != lastQuoteIndex, "Invalid ETag: %s", eTag);
         builder.value(trimmed.substring(firstQuoteIndex + 1, lastQuoteIndex));
         return builder.build();
     }

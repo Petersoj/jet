@@ -586,11 +586,11 @@ public final class Response {
                 notModified = true;
             }
         }
-        final var etag = resource.getEtag();
-        if (etag != null) {
-            setETag(etag);
+        final var eTag = resource.geteTag();
+        if (eTag != null) {
+            setETag(eTag);
             final var ifNoneMatch = request.getHeader(IF_NONE_MATCH);
-            if (ifNoneMatch != null && ifNoneMatch.equals(etag.toString())) {
+            if (ifNoneMatch != null && ifNoneMatch.equals(eTag.toString())) {
                 notModified = true;
             }
         }

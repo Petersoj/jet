@@ -17,29 +17,29 @@ public final class ETagTest {
 
     @Test
     public void computeStrong() {
-        final var etag = ETag.computeStrong(new ByteArrayInputStream("abc".getBytes(UTF_8)));
-        assertFalse(etag.isWeak());
-        assertFalse(etag.getValue().isEmpty());
+        final var eTag = ETag.computeStrong(new ByteArrayInputStream("abc".getBytes(UTF_8)));
+        assertFalse(eTag.isWeak());
+        assertFalse(eTag.getValue().isEmpty());
     }
 
     @Test
     public void computeWeak() {
-        final var etag = ETag.computeWeak("abc", 123, now().toEpochMilli());
-        assertTrue(etag.isWeak());
-        assertFalse(etag.getValue().isEmpty());
+        final var eTag = ETag.computeWeak("abc", 123, now().toEpochMilli());
+        assertTrue(eTag.isWeak());
+        assertFalse(eTag.getValue().isEmpty());
     }
 
     @Test
     public void parse() {
         {
-            final var etag = ETag.parse("\"abc\"");
-            assertFalse(etag.isWeak());
-            assertEquals("abc", etag.getValue());
+            final var eTag = ETag.parse("\"abc\"");
+            assertFalse(eTag.isWeak());
+            assertEquals("abc", eTag.getValue());
         }
         {
-            final var etag = ETag.parse(" W/\"abc\" ");
-            assertTrue(etag.isWeak());
-            assertEquals("abc", etag.getValue());
+            final var eTag = ETag.parse(" W/\"abc\" ");
+            assertTrue(eTag.isWeak());
+            assertEquals("abc", eTag.getValue());
         }
         assertThrows(IllegalArgumentException.class, () -> ETag.parse(""));
         assertThrows(IllegalArgumentException.class, () -> ETag.parse(" "));

@@ -177,7 +177,7 @@ public final class Resource {
             return builder()
                     .contentLength(urlConnection.getContentLengthLong())
                     .lastModified(Instant.ofEpochMilli(urlConnection.getLastModified()))
-                    .etag(ETag.computeStrong(requireNonNull(clazz.getResourceAsStream(resourcePath))))
+                    .eTag(ETag.computeStrong(requireNonNull(clazz.getResourceAsStream(resourcePath))))
                     .contentType(contentType)
                     .contentEncoding(contentEncoding)
                     .contentDisposition(contentDisposition.build())
@@ -235,15 +235,15 @@ public final class Resource {
         } catch (final IOException ioException) {
             throw new RuntimeException(ioException);
         }
-        final ETag etag;
+        final ETag eTag;
         if (strongETag) {
             try (final var content = Files.newInputStream(file)) {
-                etag = ETag.computeStrong(content);
+                eTag = ETag.computeStrong(content);
             } catch (final IOException ioException) {
                 throw new RuntimeException(ioException);
             }
         } else {
-            etag = ETag.computeWeak(filename, fileLength, fileLastModified);
+            eTag = ETag.computeWeak(filename, fileLength, fileLastModified);
         }
         final var contentTypeForFilename = ContentType.forFilename(filename);
         final ContentType contentType;
@@ -278,7 +278,7 @@ public final class Resource {
         return builder()
                 .contentLength(fileLength)
                 .lastModified(Instant.ofEpochMilli(fileLastModified))
-                .etag(etag)
+                .eTag(eTag)
                 .contentType(contentType)
                 .contentDisposition(contentDisposition.build())
                 .content(() -> {
@@ -305,7 +305,7 @@ public final class Resource {
     /**
      * The {@link ETag}, or <code>null</code>.
      */
-    private final @Nullable ETag etag;
+    private final @Nullable ETag eTag;
 
     /**
      * The {@link ContentType}, or <code>null</code>.
