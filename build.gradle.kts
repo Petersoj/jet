@@ -50,3 +50,11 @@ jreleaser {
         }
     }
 }
+
+subprojects {
+    tasks.configureEach {
+        rootProject.tasks.jreleaserFullRelease.configure {
+            mustRunAfter(this@configureEach)
+        }
+    }
+}
