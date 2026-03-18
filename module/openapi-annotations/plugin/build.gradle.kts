@@ -57,6 +57,6 @@ signing {
     sign(publishing.publications)
 }
 
-tasks.withType<AbstractPublishToMaven> {
-    dependsOn(tasks.withType<Sign>())
+tasks.withType(AbstractPublishToMaven::class) {
+    dependsOn(tasks.withType(Sign::class))
 }

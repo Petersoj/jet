@@ -2,8 +2,25 @@ import org.jreleaser.model.Active.ALWAYS
 import org.jreleaser.model.Active.NEVER
 
 plugins {
-    base
+    java
+    `jacoco-report-aggregation`
     id("org.jreleaser") version "1.23.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    jacocoAggregation(project(":module:common"))
+    jacocoAggregation(project(":module:client"))
+    jacocoAggregation(project(":module:server"))
+    jacocoAggregation(project(":module:openapi-annotations:annotations"))
+    jacocoAggregation(project(":module:openapi-annotations:plugin"))
+}
+
+tasks.withType(Test::class) {
+    finalizedBy(tasks.testCodeCoverageReport)
 }
 
 jreleaser {
