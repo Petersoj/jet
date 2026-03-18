@@ -18,8 +18,8 @@ dependencies {
     jacocoAggregation(project(":module:common"))
     jacocoAggregation(project(":module:client"))
     jacocoAggregation(project(":module:server"))
-    jacocoAggregation(project(":module:openapi-annotations:annotations"))
-    jacocoAggregation(project(":module:openapi-annotations:plugin"))
+    jacocoAggregation(project(":module:openapi-annotations"))
+    jacocoAggregation(project(":module:openapi-annotations-plugin"))
 }
 
 tasks.withType(Test::class) {
