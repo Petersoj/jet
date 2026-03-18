@@ -6,11 +6,10 @@ import java.lang.System.getenv
 
 plugins {
     id("module-common")
-    `java-gradle-plugin`
+    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
     signing
     id("com.gradle.plugin-publish") version "2.1.0"
     id("org.gradle.plugin-compatibility") version "1.0.0"
-    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
 }
 
 group = "$group.openapi-annotations"
@@ -36,8 +35,9 @@ gradlePlugin {
     website = "https://$GITHUB_PROJECT_DOMAIN_PATH"
     vcsUrl = "https://$GITHUB_PROJECT_DOMAIN_PATH.git"
     plugins.create("openApiAnnotationsPlugin") {
-        id = "net.jacobpeterson.jet.openapiannotations.plugin"
-        implementationClass = "net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsPlugin"
+        val pluginPackage = "$JET_GROUP.openapiannotations.plugin"
+        id = pluginPackage
+        implementationClass = "$pluginPackage.JetOpenApiAnnotationsPlugin"
         displayName = "Jet OpenAPI Annotations Plugin"
         description = projectDescription
         tags = listOf("jet", "openapi", "annotations")
@@ -47,16 +47,8 @@ gradlePlugin {
     }
 }
 
-publishing {
-    publications.getByName<MavenPublication>(MAVEN_PUBLICATION_NAME).pom.description = projectDescription
-}
-
 signing {
     useInMemoryPgpKeys(getenv(JRELEASER_ENV_PREFIX + GPG_SECRET_KEY),
             getenv(JRELEASER_ENV_PREFIX + GPG_PASSPHRASE))
     sign(publishing.publications)
-}
-
-tasks.withType(AbstractPublishToMaven::class) {
-    dependsOn(tasks.withType(Sign::class))
 }

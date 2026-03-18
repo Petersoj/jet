@@ -6,14 +6,13 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     `java-library`
     jacoco
-    `maven-publish`
     id("io.freefair.lombok")
     id("net.ltgt.errorprone")
     id("com.github.ben-manes.versions")
 }
 
-group = "net.jacobpeterson.jet"
-version = "1.0.0"
+group = JET_GROUP
+version = JET_VERSION
 
 java {
     sourceCompatibility = VERSION_25
@@ -98,35 +97,4 @@ tasks.withType(Test::class) {
 tasks.withType(JacocoReport::class) {
     dependsOn(tasks.test)
     reports.xml.required = true
-}
-
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-        pom {
-            name = artifactId
-            url = "https://$GITHUB_PROJECT_DOMAIN_PATH"
-            inceptionYear = "2025"
-            licenses {
-                license {
-                    name = "MIT License"
-                    url = "https://opensource.org/licenses/MIT"
-                }
-            }
-            developers {
-                developer {
-                    id = "Petersoj"
-                    name = "Jacob Peterson"
-                }
-            }
-            scm {
-                connection = "scm:git:https://$GITHUB_PROJECT_DOMAIN_PATH.git"
-                developerConnection = connection
-                url = pom.url
-            }
-        }
-        repositories.maven {
-            url = uri(getJReleaserDeployDirectory(rootProject.layout.buildDirectory))
-        }
-    }
 }

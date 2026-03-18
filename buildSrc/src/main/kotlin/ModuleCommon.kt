@@ -1,5 +1,7 @@
 import org.gradle.api.file.DirectoryProperty
 
+const val JET_GROUP = "net.jacobpeterson.jet"
+const val JET_VERSION = "1.0.0"
 const val GITHUB_PROJECT_DOMAIN_PATH = "github.com/Petersoj/jet"
 const val MAVEN_PUBLICATION_NAME = "maven"
 

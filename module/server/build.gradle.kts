@@ -1,5 +1,6 @@
 plugins {
     id("module-common")
+    id("module-maven-publication-for-jreleaser")
 }
 
 dependencies {
@@ -22,6 +23,6 @@ dependencies {
 }
 
 publishing {
-    publications.getByName<MavenPublication>(MAVEN_PUBLICATION_NAME).pom.description =
+    publications.getByName(MAVEN_PUBLICATION_NAME, MavenPublication::class).pom.description =
             "A simple, modern, turnkey, Java web server library."
 }
