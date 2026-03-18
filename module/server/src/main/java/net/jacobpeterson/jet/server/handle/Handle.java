@@ -9,7 +9,6 @@ import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.session.Session;
 import net.jacobpeterson.jet.server.session.SessionStore;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -43,20 +42,27 @@ public class Handle {
     private final @Getter Response response = new Response(this);
 
     /**
-     * Calls {@link #withPausedStopwatch(Supplier)} with {@link Runnable#run()}.
+     * Calls {@link Stopwatch#stop()}, {@link Runnable#run()}, and finally {@link Stopwatch#start()}.
+     * <p>
+     * This is useful for situations where you want to pause the {@link #getStopwatch()} while running code that should
+     * not influence the {@link Stopwatch#elapsed()} time, such as when reading the request body.
+     *
+     * @param runnable the {@link Runnable}
      */
     public void withPausedStopwatch(final Runnable runnable) {
-        withPausedStopwatch(new Supplier<>() {
-            @Override
-            public @Nullable Object get() {
-                runnable.run();
-                return null;
-            }
-        });
+        stopwatch.stop();
+        try {
+            runnable.run();
+        } finally {
+            stopwatch.start();
+        }
     }
 
     /**
      * Calls {@link Stopwatch#stop()}, {@link Supplier#get()}, and finally {@link Stopwatch#start()}.
+     * <p>
+     * This is useful for situations where you want to pause the {@link #getStopwatch()} while running code that should
+     * not influence the {@link Stopwatch#elapsed()} time, such as when reading the request body.
      *
      * @param <T>      the {@link Supplier} type
      * @param supplier the {@link Supplier}
@@ -64,8 +70,8 @@ public class Handle {
      * @return {@link Supplier#get()}
      */
     public <T> T withPausedStopwatch(final Supplier<T> supplier) {
+        stopwatch.stop();
         try {
-            stopwatch.stop();
             return supplier.get();
         } finally {
             stopwatch.start();
