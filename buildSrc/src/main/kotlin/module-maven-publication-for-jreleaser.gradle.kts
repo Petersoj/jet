@@ -3,7 +3,7 @@ plugins {
 }
 
 publishing {
-    publications.create("maven", MavenPublication::class) {
+    publications.create(MAVEN_PUBLICATION_NAME, MavenPublication::class) {
         from(components["java"])
         pom {
             name = artifactId
