@@ -13,6 +13,8 @@ plugins {
     id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
 }
 
+group = "$group.openapi-annotations"
+
 dependencies {
     api(project(":module:openapi-annotations:annotations"))
 
@@ -31,20 +33,22 @@ configurations.testRuntimeOnly {
 val projectDescription = "A code-first OpenAPI specification annotations processor Gradle plugin."
 
 gradlePlugin {
+    website = "https://$GITHUB_PROJECT_DOMAIN_PATH"
+    vcsUrl = "https://$GITHUB_PROJECT_DOMAIN_PATH.git"
     plugins.create("openApiAnnotationsPlugin") {
         id = "net.jacobpeterson.jet.openapiannotations.plugin"
         implementationClass = "net.jacobpeterson.jet.openapiannotations.plugin.JetOpenApiAnnotationsPlugin"
         displayName = "Jet OpenAPI Annotations Plugin"
         description = projectDescription
-        website = "https://$GITHUB_PROJECT_DOMAIN_PATH"
-        vcsUrl = website.map { "$it.git" }
         tags = listOf("jet", "openapi", "annotations")
-        compatibility { features.configurationCache = true }
+        compatibility {
+            features.configurationCache = true
+        }
     }
 }
 
 publishing {
-    publications.getByName<MavenPublication>("maven").pom.description = projectDescription
+    publications.getByName<MavenPublication>(MAVEN_PUBLICATION_NAME).pom.description = projectDescription
 }
 
 signing {

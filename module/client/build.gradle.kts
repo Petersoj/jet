@@ -7,6 +7,6 @@ dependencies {
 }
 
 publishing {
-    publications.getByName<MavenPublication>("maven").pom.description =
+    publications.getByName<MavenPublication>(MAVEN_PUBLICATION_NAME).pom.description =
             "A simple, modern, turnkey, Java web client library."
 }
