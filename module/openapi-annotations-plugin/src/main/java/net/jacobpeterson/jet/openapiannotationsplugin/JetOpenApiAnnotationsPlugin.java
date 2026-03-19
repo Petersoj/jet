@@ -84,8 +84,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                     jarTask.dependsOn(registeredTask);
                     final var task = registeredTask.get();
                     jarTask.from(task.getOutputDirectory(), copySpec ->
-                            copySpec.into(project.getLayout().getBuildDirectory().get().getAsFile().toPath().relativize(
-                                    task.getOutputDirectory().get().getAsFile().toPath()).toString()));
+                            copySpec.into(project.getLayout().getBuildDirectory().get().getAsFile().toPath()
+                                    .relativize(task.getOutputDirectory().get().getAsFile().toPath()).toString()));
                 });
             }
         });
