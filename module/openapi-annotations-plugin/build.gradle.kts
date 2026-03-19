@@ -66,3 +66,11 @@ tasks.withType(PublishToMavenRepository::class).configureEach {
         predicate.get()
     }
 }
+
+subprojects {
+    tasks.configureEach {
+        tasks.publishPlugins.configure {
+            mustRunAfter(this@configureEach)
+        }
+    }
+}
