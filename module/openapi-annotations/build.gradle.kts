@@ -1,6 +1,5 @@
 plugins {
     id("module-common")
-    id("module-maven-publication-for-jreleaser")
 }
 
 dependencies {
@@ -10,6 +9,6 @@ dependencies {
 }
 
 publishing {
-    publications.getByName(MAVEN_PUBLICATION_NAME, MavenPublication::class).pom.description =
+    publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description =
             "A code-first OpenAPI specification annotations library."
 }

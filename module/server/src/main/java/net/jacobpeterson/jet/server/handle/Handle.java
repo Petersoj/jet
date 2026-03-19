@@ -42,12 +42,7 @@ public class Handle {
     private final @Getter Response response = new Response(this);
 
     /**
-     * Calls {@link Stopwatch#stop()}, {@link Runnable#run()}, and finally {@link Stopwatch#start()}.
-     * <p>
-     * This is useful for situations where you want to pause the {@link #getStopwatch()} while running code that should
-     * not influence the {@link Stopwatch#elapsed()} time, such as when reading the request body.
-     *
-     * @param runnable the {@link Runnable}
+     * Same as {@link #withPausedStopwatch(Supplier)}, but with {@link Runnable#run()}.
      */
     public void withPausedStopwatch(final Runnable runnable) {
         stopwatch.stop();

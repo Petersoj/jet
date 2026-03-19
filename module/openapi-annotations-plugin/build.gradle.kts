@@ -48,5 +48,21 @@ gradlePlugin {
 signing {
     useInMemoryPgpKeys(getenv(JRELEASER_ENV_PREFIX + GPG_SECRET_KEY),
             getenv(JRELEASER_ENV_PREFIX + GPG_PASSPHRASE))
-    sign(publishing.publications)
+}
+
+publishing {
+    publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description = projectDescription
+}
+
+// The `com.gradle.plugin-publish` plugin creates `MavenRepository` publications that should not be published to
+// `JRELEASER_MAVEN_NAME`, so use conditional publishing:
+// https://docs.gradle.org/nightly/userguide/publishing_customization.html#sec:publishing_maven:conditional_publishing
+tasks.withType(PublishToMavenRepository::class).configureEach {
+    val predicate = provider {
+        publication == publishing.publications[JRELEASER_MAVEN_NAME] &&
+                repository == publishing.repositories[JRELEASER_MAVEN_NAME]
+    }
+    onlyIf {
+        predicate.get()
+    }
 }

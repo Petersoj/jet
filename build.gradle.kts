@@ -39,7 +39,7 @@ jreleaser {
                 create("sonatype") {
                     active = ALWAYS
                     url = "https://central.sonatype.com/api/v1/publisher"
-                    stagingRepository(getJReleaserDeployDirectory(layout.buildDirectory).get())
+                    stagingRepository(layout.buildDirectory.dir(JRELEASER_MAVEN_REPOSITORY_DIRECTORY).get())
                 }
             }
         }
