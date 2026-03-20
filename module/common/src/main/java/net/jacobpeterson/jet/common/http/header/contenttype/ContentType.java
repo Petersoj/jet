@@ -18,6 +18,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -542,7 +543,7 @@ public final class ContentType {
             tsvFile = new String(requireNonNull(ContentType.class
                     .getResourceAsStream("file-extensions-of-mime-types.tsv")).readAllBytes(), UTF_8);
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
         FILE_EXTENSIONS_OF_CONTENT_TYPES = tsvFile.lines()
                 .filter(line -> !line.isBlank() && !line.startsWith("#"))

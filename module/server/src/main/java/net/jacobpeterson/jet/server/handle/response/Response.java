@@ -34,6 +34,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -371,7 +372,7 @@ public final class Response {
             try {
                 this.bodyInputStream.close();
             } catch (final IOException ioException) {
-                throw new RuntimeException(ioException);
+                throw new UncheckedIOException(ioException);
             }
         }
         this.bodyInputStream = bodyInputStream;

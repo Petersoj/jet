@@ -32,6 +32,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -386,7 +387,7 @@ public final class JetServer {
                             try (bodyInputStream) {
                                 bodyInputStream.transferTo(outputStream);
                             } catch (final IOException ioException) {
-                                throw new RuntimeException(ioException);
+                                throw new UncheckedIOException(ioException);
                             } finally {
                                 closeResponseBodyInputStream.setPlain(false);
                             }
@@ -425,8 +426,8 @@ public final class JetServer {
                     if (responseBodyInputStream != null) {
                         try {
                             responseBodyInputStream.close();
-                        } catch (final IOException ioException) {
-                            LOGGER.error("`Response.getBodyInputStream().close()` threw", ioException);
+                        } catch (final Throwable throwable) {
+                            LOGGER.error("`Response.getBodyInputStream().close()` threw", throwable);
                         }
                     }
                 }

@@ -47,6 +47,7 @@ import org.jspecify.annotations.NullMarked;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -188,7 +189,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         }
                     });
                 } catch (final IOException ioException) {
-                    throw new RuntimeException(ioException);
+                    throw new UncheckedIOException(ioException);
                 }
             }
         }
@@ -442,7 +443,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         .formatted(!groupName.isEmpty() ? "-" + groupName : "")), openApiJsonString);
             }
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
     }
 }

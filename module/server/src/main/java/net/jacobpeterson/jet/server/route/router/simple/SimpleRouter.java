@@ -18,7 +18,7 @@ import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 
 /**
  * {@link SimpleRouter} is a {@link Router} that uses a priority {@link List} of {@link Route} to {@link Handler}
- * entries. This {@link Router} implementation will only call on {@link Handler} per {@link #route(Handle)} call.
+ * entries. This {@link Router} implementation will only call one {@link Handler} per {@link #route(Handle)} call.
  * <p>
  * This class is thread-safe.
  */

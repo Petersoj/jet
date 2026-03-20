@@ -5,9 +5,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     `java-library`
-    jacoco
     id("io.freefair.lombok")
     id("net.ltgt.errorprone")
+    jacoco
     id("com.github.ben-manes.versions")
     `maven-publish`
 }
@@ -36,7 +36,7 @@ dependencies {
 
     errorprone("com.google.errorprone:error_prone_core:2.48.0")
     errorprone("com.uber.nullaway:nullaway:0.13.1")
-    errorprone("net.jacobpeterson:final-coat:1.2.0")
+    errorprone("net.jacobpeterson:final-coat:1.2.1")
 
     testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")

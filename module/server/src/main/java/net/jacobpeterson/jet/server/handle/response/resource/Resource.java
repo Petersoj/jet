@@ -22,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -142,7 +143,7 @@ public final class Resource {
             try {
                 urlConnection = url.openConnection();
             } catch (final IOException ioException) {
-                throw new RuntimeException(ioException);
+                throw new UncheckedIOException(ioException);
             }
             final var contentTypeForFilename = ContentType.forFilename(filename);
             final ContentType contentType;
@@ -163,7 +164,7 @@ public final class Resource {
                     }
                     contentType = isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
                 } catch (final IOException ioException) {
-                    throw new RuntimeException(ioException);
+                    throw new UncheckedIOException(ioException);
                 }
             } else {
                 contentType = null;
@@ -233,14 +234,14 @@ public final class Resource {
             fileLength = Files.size(file);
             fileLastModified = Files.getLastModifiedTime(file).toMillis();
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
         final ETag eTag;
         if (strongETag) {
             try (final var content = Files.newInputStream(file)) {
                 eTag = ETag.computeStrong(content);
             } catch (final IOException ioException) {
-                throw new RuntimeException(ioException);
+                throw new UncheckedIOException(ioException);
             }
         } else {
             eTag = ETag.computeWeak(filename, fileLength, fileLastModified);
@@ -264,7 +265,7 @@ public final class Resource {
                 }
                 contentType = isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
             } catch (final IOException ioException) {
-                throw new RuntimeException(ioException);
+                throw new UncheckedIOException(ioException);
             }
         } else {
             contentType = null;
@@ -287,7 +288,7 @@ public final class Resource {
                     } catch (final NoSuchFileException noSuchFileException) {
                         throw new StatusException(NOT_FOUND_404, noSuchFileException);
                     } catch (final IOException ioException) {
-                        throw new RuntimeException(ioException);
+                        throw new UncheckedIOException(ioException);
                     }
                 }).build();
     }

@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
@@ -174,7 +175,7 @@ public enum CompressionType {
         try (final var compress = compress(compressed, level, dictionary)) {
             compress.write(bytes);
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
         return compressed.toByteArray();
     }
@@ -262,7 +263,7 @@ public enum CompressionType {
         try (final var decompress = decompress(new ByteArrayInputStream(bytes), dictionary)) {
             return decompress.readAllBytes();
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
     }
 

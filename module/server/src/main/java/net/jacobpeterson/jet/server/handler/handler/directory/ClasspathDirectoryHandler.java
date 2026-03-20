@@ -16,6 +16,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
@@ -214,8 +215,10 @@ public class ClasspathDirectoryHandler implements Handler {
                 throw new UnsupportedOperationException("Scheme: " + scheme);
             }
             this.filePaths = filePaths.build();
-        } catch (final URISyntaxException | IOException exception) {
+        } catch (final URISyntaxException exception) {
             throw new RuntimeException(exception);
+        } catch (final IOException exception) {
+            throw new UncheckedIOException(exception);
         }
     }
 

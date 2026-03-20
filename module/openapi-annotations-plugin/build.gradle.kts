@@ -32,7 +32,7 @@ val projectDescription = "A code-first OpenAPI specification annotations process
 gradlePlugin {
     website = "https://$GITHUB_PROJECT_DOMAIN_PATH"
     vcsUrl = "https://$GITHUB_PROJECT_DOMAIN_PATH.git"
-    plugins.create("openApiAnnotationsPlugin") {
+    plugins.create("jetOpenApiAnnotationsPlugin") {
         val pluginPackage = "$JET_GROUP.openapiannotationsplugin"
         id = pluginPackage
         implementationClass = "$pluginPackage.JetOpenApiAnnotationsPlugin"
@@ -56,7 +56,7 @@ publishing {
 
 // The `com.gradle.plugin-publish` plugin creates `MavenRepository` publications that should not be published to
 // `JRELEASER_MAVEN_NAME`, so use conditional publishing:
-// https://docs.gradle.org/nightly/userguide/publishing_customization.html#sec:publishing_maven:conditional_publishing
+// https://docs.gradle.org/current/userguide/publishing_customization.html#sec:publishing_maven:conditional_publishing
 tasks.withType(PublishToMavenRepository::class).configureEach {
     val predicate = provider {
         publication == publishing.publications[JRELEASER_MAVEN_NAME] &&

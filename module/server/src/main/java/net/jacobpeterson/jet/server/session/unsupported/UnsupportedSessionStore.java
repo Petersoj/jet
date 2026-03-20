@@ -7,7 +7,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * {@link UnsupportedSessionStore} is a {@link SessionStore} that always throws {@link UnsupportedSessionStore}.
+ * {@link UnsupportedSessionStore} is a {@link SessionStore} that always throws {@link UnsupportedOperationException}.
  */
 @NullMarked
 public final class UnsupportedSessionStore implements SessionStore {

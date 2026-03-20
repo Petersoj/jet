@@ -8,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
@@ -101,7 +102,7 @@ public final class JetOpenApiAnnotationsPluginTest {
                 assertEquals(JsonParser.parseString(readString(expectedOutputFile.toPath())),
                         JsonParser.parseString(readString(buildOutputsPath.resolve(expectedOutputFile.getName()))));
             } catch (final IOException ioException) {
-                throw new RuntimeException(ioException);
+                throw new UncheckedIOException(ioException);
             }
             expectedOutputFileCount++;
         }
@@ -137,7 +138,7 @@ public final class JetOpenApiAnnotationsPluginTest {
                 }
             });
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
         final var gradleRunner = GradleRunner.create()
                 .withPluginClasspath();

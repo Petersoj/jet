@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Base64;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -66,7 +67,7 @@ public final class ETag {
                     .value(hashingInputStream.hash().toString())
                     .build();
         } catch (final IOException ioException) {
-            throw new RuntimeException(ioException);
+            throw new UncheckedIOException(ioException);
         }
     }
 

@@ -18,6 +18,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -232,7 +233,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
             try {
                 watchService = directory.getFileSystem().newWatchService();
             } catch (final IOException ioException) {
-                throw new RuntimeException(ioException);
+                throw new UncheckedIOException(ioException);
             }
             Thread.ofVirtual().start(new Runnable() {
 
