@@ -18,17 +18,15 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
-import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.nio.file.FileSystems.newFileSystem;
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.walkFileTree;
+import static java.nio.file.Files.walk;
 import static java.util.Objects.requireNonNull;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.MAX_AGE_1_YEAR_IMMUTABLE;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
@@ -201,20 +199,16 @@ public class ClasspathDirectoryHandler implements Handler {
         this.contentEncoding = contentEncoding;
         try {
             final var directoryUri = requireNonNull(clazz.getResource(directory), directory).toURI();
-            final var filePaths = ImmutableSet.<String>builder();
             final var scheme = directoryUri.getScheme();
             if (scheme.equals("jar")) {
                 try (final var jarFileSystem = newFileSystem(directoryUri, Map.of())) {
-                    final var directoryPath = jarFileSystem.getPath(directory);
-                    walkFileTree(directoryPath, getSimpleFileVisitor(filePaths, directoryPath));
+                    filePaths = getClasspathResourceFiles(jarFileSystem.getPath(directory));
                 }
             } else if (scheme.equals("file")) {
-                final var directoryPath = Path.of(directoryUri);
-                walkFileTree(directoryPath, getSimpleFileVisitor(filePaths, directoryPath));
+                filePaths = getClasspathResourceFiles(Path.of(directoryUri));
             } else {
                 throw new UnsupportedOperationException("Scheme: " + scheme);
             }
-            this.filePaths = filePaths.build();
         } catch (final URISyntaxException exception) {
             throw new RuntimeException(exception);
         } catch (final IOException exception) {
@@ -222,17 +216,13 @@ public class ClasspathDirectoryHandler implements Handler {
         }
     }
 
-    private SimpleFileVisitor<Path> getSimpleFileVisitor(final ImmutableSet.Builder<String> filePaths,
-            final Path directoryPath) {
-        return new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-                if (!file.endsWith(".class")) {
-                    filePaths.add(directory + "/" + directoryPath.relativize(file));
-                }
-                return CONTINUE;
-            }
-        };
+    private ImmutableSet<String> getClasspathResourceFiles(final Path directoryPath) throws IOException {
+        try (final var walk = walk(directoryPath)) {
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> !path.endsWith(".class"))
+                    .map(path -> directory + "/" + directoryPath.relativize(path))
+                    .collect(toImmutableSet());
+        }
     }
 
     @Override
