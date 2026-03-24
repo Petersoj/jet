@@ -78,15 +78,13 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
             task.getOutputDirectory()
                     .set(extension.getOutputDirectory());
         });
-        project.afterEvaluate(evaluatedProject -> {
+        project.getTasks().withType(Jar.class).configureEach(jarTask -> {
             if (extension.getOutputDirectoryIncludeInJar().get()) {
-                evaluatedProject.getTasks().withType(Jar.class).configureEach(jarTask -> {
-                    jarTask.dependsOn(registeredTask);
-                    final var task = registeredTask.get();
-                    jarTask.from(task.getOutputDirectory(), copySpec ->
-                            copySpec.into(project.getLayout().getBuildDirectory().get().getAsFile().toPath()
-                                    .relativize(task.getOutputDirectory().get().getAsFile().toPath()).toString()));
-                });
+                jarTask.dependsOn(registeredTask);
+                final var outputDirectory = registeredTask.get().getOutputDirectory();
+                jarTask.from(outputDirectory, copySpec ->
+                        copySpec.into(project.getLayout().getBuildDirectory().get().getAsFile().toPath()
+                                .relativize(outputDirectory.get().getAsFile().toPath()).toString()));
             }
         });
     }
