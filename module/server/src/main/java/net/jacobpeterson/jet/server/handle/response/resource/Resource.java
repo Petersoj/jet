@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
@@ -33,7 +32,6 @@ import java.time.Instant;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
@@ -44,7 +42,7 @@ import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.T
 import static net.jacobpeterson.jet.common.http.header.range.Range.BYTES_UNIT;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
-import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainText;
+import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
 
 /**
  * {@link Resource} is a class that represents arbitrary data with associated metadata (e.g. a file) to serve as a web
@@ -117,7 +115,7 @@ public final class Resource {
      * @param peekLength           if non-<code>null</code> and the logic described by the
      *                             <code>trustedContentType</code> and <code>untrustedContentType</code> arguments are
      *                             not applied, then peek this many bytes into {@link #getContent()} and use
-     *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                             {@link StringUtil#isLikelyUtf8(byte[])} to apply either
      *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
      * @param contentEncoding      the {@link ContentEncoding} of the classpath resource, or <code>null</code> for none
      * @param exposeFilename       <code>true</code> to set {@link ContentDisposition#getFilename()} to
@@ -162,7 +160,7 @@ public final class Resource {
                     } else {
                         peekedBytes = content.readNBytes(peekLength);
                     }
-                    contentType = isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
+                    contentType = isLikelyUtf8(peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
                 } catch (final IOException ioException) {
                     throw new UncheckedIOException(ioException);
                 }
@@ -212,7 +210,7 @@ public final class Resource {
      * @param peekLength           if non-<code>null</code> and the logic described by the
      *                             <code>trustedContentType</code> and <code>untrustedContentType</code> arguments are
      *                             not applied, then peek this many bytes into {@link #getContent()} and use
-     *                             {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                             {@link StringUtil#isLikelyUtf8(byte[])} to apply either
      *                             {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
      * @param contentEncoding      the {@link ContentEncoding} of the file {@link Path}, or <code>null</code> for none
      * @param exposeFilename       <code>true</code> to set {@link ContentDisposition#getFilename()} to
@@ -263,7 +261,7 @@ public final class Resource {
                 } else {
                     peekedBytes = content.readNBytes(peekLength);
                 }
-                contentType = isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
+                contentType = isLikelyUtf8(peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
             } catch (final IOException ioException) {
                 throw new UncheckedIOException(ioException);
             }

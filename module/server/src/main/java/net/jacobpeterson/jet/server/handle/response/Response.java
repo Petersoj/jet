@@ -77,7 +77,7 @@ import static net.jacobpeterson.jet.common.http.status.Status.NOT_MODIFIED_304;
 import static net.jacobpeterson.jet.common.http.status.Status.OK_200;
 import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_206;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
-import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyPlainText;
+import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
 /**
@@ -564,7 +564,7 @@ public final class Response {
      *                              {@link Request#getRange()} if non-<code>null</code>, <code>false</code> otherwise
      * @param contentTypePeekLength if non-<code>null</code> and the given {@link Resource#getContentType()} is
      *                              <code>null</code>, then peek this many bytes into {@link Resource#getContent()} and
-     *                              use {@link StringUtil#isLikelyPlainText(Charset, byte[])} to apply either
+     *                              use {@link StringUtil#isLikelyUtf8(byte[])} to apply either
      *                              {@link ContentType#TEXT_PLAIN_UTF_8} or {@link ContentType#APPLICATION_OCTET_STREAM}
      * @param setBodyInputStream    <code>true</code> to {@link #setBodyInputStream(InputStream)} to
      *                              {@link Resource#getContent()}, <code>false</code> to not
@@ -642,7 +642,7 @@ public final class Response {
                 }
                 throw new RuntimeException(throwable);
             }
-            setContentType(isLikelyPlainText(UTF_8, peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM);
+            setContentType(isLikelyUtf8(peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM);
         } else {
             setContentType(APPLICATION_OCTET_STREAM);
         }

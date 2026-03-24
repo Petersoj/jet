@@ -32,7 +32,7 @@ val projectDescription = "A code-first OpenAPI specification annotations process
 gradlePlugin {
     website = "https://$GITHUB_PROJECT_DOMAIN_PATH"
     vcsUrl = "https://$GITHUB_PROJECT_DOMAIN_PATH.git"
-    plugins.create("jetOpenApiAnnotationsPlugin") {
+    plugins.create("JetOpenApiAnnotationsPlugin") {
         val pluginPackage = "$JET_GROUP.openapiannotationsplugin"
         id = pluginPackage
         implementationClass = "$pluginPackage.JetOpenApiAnnotationsPlugin"
