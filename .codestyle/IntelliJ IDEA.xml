@@ -250,4 +250,8 @@
     <option name="ENUM_CONSTANTS_WRAP" value="2" />
     <option name="WRAP_ON_TYPING" value="0" />
   </codeStyleSettings>
+  <codeStyleSettings language="yaml">
+    <option name="SPACE_WITHIN_BRACKETS" value="false" />
+    <option name="SPACE_WITHIN_BRACES" value="false" />
+  </codeStyleSettings>
 </code_scheme>
