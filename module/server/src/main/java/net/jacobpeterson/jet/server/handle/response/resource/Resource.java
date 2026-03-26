@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.function.Supplier;
 
@@ -222,18 +223,20 @@ public final class Resource {
     public static Resource ofFile(final Path file, final boolean strongETag, final boolean trustedContentType,
             final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding, final boolean exposeFilename) throws StatusException {
-        if (!Files.isRegularFile(file)) {
-            throw new StatusException(NOT_FOUND_404, "Invalid file: " + file);
-        }
-        final var filename = file.getFileName().toString();
-        final long fileLength;
-        final long fileLastModified;
+        final BasicFileAttributes fileAttributes;
         try {
-            fileLength = Files.size(file);
-            fileLastModified = Files.getLastModifiedTime(file).toMillis();
+            fileAttributes = Files.readAttributes(file, BasicFileAttributes.class);
+        } catch (final NoSuchFileException noSuchFileException) {
+            throw new StatusException(NOT_FOUND_404, noSuchFileException);
         } catch (final IOException ioException) {
             throw new UncheckedIOException(ioException);
         }
+        if (!fileAttributes.isRegularFile()) {
+            throw new StatusException(NOT_FOUND_404, "Invalid file: " + file);
+        }
+        final var filename = file.getFileName().toString();
+        final var fileSize = fileAttributes.size();
+        final var fileLastModified = fileAttributes.lastModifiedTime().toMillis();
         final ETag eTag;
         if (strongETag) {
             try (final var content = Files.newInputStream(file)) {
@@ -242,7 +245,7 @@ public final class Resource {
                 throw new UncheckedIOException(ioException);
             }
         } else {
-            eTag = ETag.computeWeak(filename, fileLength, fileLastModified);
+            eTag = ETag.computeWeak(filename, fileSize, fileLastModified);
         }
         final var contentTypeForFilename = ContentType.forFilename(filename);
         final ContentType contentType;
@@ -275,7 +278,7 @@ public final class Resource {
             contentDisposition.filename(filename);
         }
         return builder()
-                .contentLength(fileLength)
+                .contentLength(fileSize)
                 .lastModified(Instant.ofEpochMilli(fileLastModified))
                 .eTag(eTag)
                 .contentType(contentType)
