@@ -105,7 +105,7 @@ publishing {
         from(components["java"])
         pom {
             name = artifactId
-            url = "https://$GITHUB_PROJECT_DOMAIN_PATH"
+            url = GITHUB_PROJECT_URL
             inceptionYear = "2025"
             licenses {
                 license {
@@ -120,7 +120,7 @@ publishing {
                 }
             }
             scm {
-                connection = "scm:git:https://$GITHUB_PROJECT_DOMAIN_PATH.git"
+                connection = pom.url.map { "scm:git:$it.git" }
                 developerConnection = connection
                 url = pom.url
             }
