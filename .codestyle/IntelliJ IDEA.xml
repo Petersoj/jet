@@ -69,7 +69,6 @@
   </JetCodeStyleSettings>
   <Properties>
     <option name="KEEP_BLANK_LINES" value="true" />
-    <option name="KEY_VALUE_DELIMITER_CODE" value="1" />
   </Properties>
   <SqlCodeStyleSettings version="7">
     <option name="TABLE_ALTER_INSTRUCTION_WRAP" value="2" />
