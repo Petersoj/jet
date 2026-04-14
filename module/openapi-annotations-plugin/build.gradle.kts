@@ -8,7 +8,7 @@ plugins {
     id("module-common")
     id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
     signing
-    id("com.gradle.plugin-publish") version "2.1.0"
+    id("com.gradle.plugin-publish") version "2.1.1"
     id("org.gradle.plugin-compatibility") version "1.0.0"
 }
 

@@ -7,7 +7,7 @@ dependencies {
 
     api("com.github.ben-manes.caffeine:caffeine:3.2.3")
 
-    val jettyVersion = "12.1.7"
+    val jettyVersion = "12.1.8"
     implementation("org.eclipse.jetty:jetty-alpn-java-server:${jettyVersion}")
     implementation("org.eclipse.jetty.http2:jetty-http2-server:${jettyVersion}")
     implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server:${jettyVersion}")

@@ -34,8 +34,8 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:2.0.17")
 
-    errorprone("com.google.errorprone:error_prone_core:2.48.0")
-    errorprone("com.uber.nullaway:nullaway:0.13.1")
+    errorprone("com.google.errorprone:error_prone_core:2.49.0")
+    errorprone("com.uber.nullaway:nullaway:0.13.3")
     errorprone("net.jacobpeterson:final-coat:1.2.1")
 
     testImplementation(platform("org.junit:junit-bom:6.0.3"))
