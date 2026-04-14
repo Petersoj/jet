@@ -358,7 +358,7 @@ public final class CookieTest {
                 .value("b")
                 .maxAge(0)
                 .build().getMaxAge());
-        assertEquals(0, Cookie.builder()
+        assertEquals(-1, Cookie.builder()
                 .name("a")
                 .value("b")
                 .maxAge(-1)

@@ -24,7 +24,6 @@ import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
-import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
@@ -292,14 +291,12 @@ public final class Cookie {
         }
 
         /**
-         * @param maxAge giving a value less than zero will set this to zero and expire the cookie immediately
-         *
          * @see #getMaxAge()
          */
         @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder maxAge(final long maxAge) {
             requireHttpCookieBuilder(true);
-            httpCookieBuilder.maxAge(max(0, maxAge)); // TODO https://github.com/jetty/jetty.project/pull/14311
+            httpCookieBuilder.maxAge(maxAge);
             return this;
         }
 
