@@ -73,17 +73,6 @@ tasks.withType(JavaCompile::class) {
     }
 }
 
-tasks.withType(Javadoc::class) {
-    options {
-        (this as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
-        links = listOf(
-                "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/",
-                "https://jspecify.dev/docs/api/",
-                "https://guava.dev/releases/$guavaVersion/api/docs/",
-                "https://errorprone.info/api/latest/")
-    }
-}
-
 tasks.withType(Test::class) {
     useJUnitPlatform()
     systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "ON_SUCCESS")
@@ -98,6 +87,17 @@ tasks.withType(Test::class) {
 tasks.withType(JacocoReport::class) {
     dependsOn(tasks.test)
     reports.xml.required = true
+}
+
+tasks.withType(Javadoc::class) {
+    options {
+        (this as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
+        links = listOf(
+                "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/",
+                "https://jspecify.dev/docs/api/",
+                "https://guava.dev/releases/$guavaVersion/api/docs/",
+                "https://errorprone.info/api/latest/")
+    }
 }
 
 publishing {
