@@ -72,7 +72,7 @@ public class ClasspathDirectoryHandler implements Handler {
     }
 
     /**
-     * @return a new {@link FileDirectoryHandler} with
+     * @return a new {@link ClasspathDirectoryHandler} with
      * <code>requestPathRelativizer</code> set to a {@link String} {@link UnaryOperator} that removes the given
      * <code>requestPathAlwaysStartsWith</code> from the start of the given request path,
      * <code>defaultFilename</code> set to <code>"index.html"</code>,
@@ -164,7 +164,7 @@ public class ClasspathDirectoryHandler implements Handler {
     private final ImmutableSet<String> filePaths;
 
     /**
-     * Instantiates a new {@link FileDirectoryHandler}.
+     * Instantiates a new {@link ClasspathDirectoryHandler}.
      *
      * @param clazz                  the {@link #getClazz()}
      * @param directory              the {@link #getDirectory()}
@@ -199,15 +199,13 @@ public class ClasspathDirectoryHandler implements Handler {
         this.contentEncoding = contentEncoding;
         try {
             final var directoryUri = requireNonNull(clazz.getResource(directory), directory).toURI();
-            final var scheme = directoryUri.getScheme();
-            if (scheme.equals("jar")) {
+            if (directoryUri.getScheme().equals("jar")) {
                 try (final var jarFileSystem = newFileSystem(directoryUri, Map.of())) {
-                    filePaths = getClasspathResourceFiles(jarFileSystem.getPath(directory));
+                    filePaths = getClasspathResourceFiles(jarFileSystem.getPath(directory.startsWith("/") ? directory :
+                            clazz.getPackageName().replace('.', '/') + "/" + directory));
                 }
-            } else if (scheme.equals("file")) {
-                filePaths = getClasspathResourceFiles(Path.of(directoryUri));
             } else {
-                throw new UnsupportedOperationException("Scheme: " + scheme);
+                filePaths = getClasspathResourceFiles(Path.of(directoryUri));
             }
         } catch (final URISyntaxException exception) {
             throw new RuntimeException(exception);
@@ -219,7 +217,7 @@ public class ClasspathDirectoryHandler implements Handler {
     private ImmutableSet<String> getClasspathResourceFiles(final Path directoryPath) throws IOException {
         try (final var walk = walk(directoryPath)) {
             return walk.filter(Files::isRegularFile)
-                    .filter(path -> !path.endsWith(".class"))
+                    .filter(path -> !path.toString().endsWith(".class"))
                     .map(path -> directory + "/" + directoryPath.relativize(path))
                     .collect(toImmutableSet());
         }
