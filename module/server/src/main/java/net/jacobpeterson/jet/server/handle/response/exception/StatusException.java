@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.server.handle.response.exception;
 
 import lombok.Getter;
+import lombok.ToString;
 import net.jacobpeterson.jet.common.http.status.Status;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -9,6 +10,7 @@ import org.jspecify.annotations.Nullable;
  * {@link StatusException} is a {@link RuntimeException} with an associated {@link Status} code.
  */
 @NullMarked
+@ToString
 public class StatusException extends RuntimeException {
 
     /**
