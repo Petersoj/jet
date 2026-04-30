@@ -26,7 +26,7 @@ repositories {
     mavenCentral()
 }
 
-val guavaVersion = "33.5.0-jre"
+val guavaVersion = "33.6.0-jre"
 
 dependencies {
     api("org.jspecify:jspecify:1.0.0")
@@ -35,8 +35,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
 
     errorprone("com.google.errorprone:error_prone_core:2.49.0")
-    errorprone("com.uber.nullaway:nullaway:0.13.3")
-    errorprone("net.jacobpeterson:final-coat:1.2.1")
+    errorprone("com.uber.nullaway:nullaway:0.13.4")
+    errorprone("net.jacobpeterson:final-coat:1.2.3")
 
     testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")

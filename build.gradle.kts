@@ -4,7 +4,7 @@ import org.jreleaser.model.Active.NEVER
 plugins {
     java
     `jacoco-report-aggregation`
-    id("org.jreleaser") version "1.23.0"
+    id("org.jreleaser") version "1.24.0"
 }
 
 group = JET_GROUP

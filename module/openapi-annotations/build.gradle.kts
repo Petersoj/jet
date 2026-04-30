@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":module:common"))
 
-    api("com.google.code.gson:gson:2.13.2")
+    api("com.google.code.gson:gson:2.14.0")
 }
 
 publishing {

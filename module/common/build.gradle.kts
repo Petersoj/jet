@@ -10,7 +10,7 @@ dependencies {
             "native-linux-x86_64", "native-linux-aarch64",
             "native-osx-x86_64", "native-osx-aarch64",
             "native-windows-x86_64", "native-windows-aarch64")
-            .forEach { implementation("com.aayushatharva.brotli4j:${it}:1.22.0") }
+            .forEach { implementation("com.aayushatharva.brotli4j:${it}:1.23.0") }
 
     setOf("linux_amd64", "linux_aarch64",
             "darwin_x86_64", "darwin_aarch64",
