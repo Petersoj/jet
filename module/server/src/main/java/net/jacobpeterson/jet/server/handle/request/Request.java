@@ -28,7 +28,7 @@ import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.route.route.Route;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
-import net.jacobpeterson.jet.server.route.route.simple.exact.PathRouteMatch;
+import net.jacobpeterson.jet.server.route.route.simple.pathexact.PathExactRouteMatch;
 import net.jacobpeterson.jet.server.route.route.simple.pathparameters.PathParametersRouteMatch;
 import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRouteMatch;
 import net.jacobpeterson.jet.server.route.route.simple.pathstartswith.PathStartsWithRouteMatch;
@@ -116,10 +116,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getRouteMatch()} cast to {@link PathRouteMatch}
+     * @return {@link #getRouteMatch()} cast to {@link PathExactRouteMatch}
      */
-    public PathRouteMatch getRoutePathExact() {
-        return (PathRouteMatch) getRouteMatch();
+    public PathExactRouteMatch getRoutePathExact() {
+        return (PathExactRouteMatch) getRouteMatch();
     }
 
     /**

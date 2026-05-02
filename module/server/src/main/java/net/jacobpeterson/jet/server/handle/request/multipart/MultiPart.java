@@ -142,7 +142,7 @@ public final class MultiPart {
         try (final var inputStream = getInputStream()) {
             final var size = getSize();
             if (size > Integer.MAX_VALUE - 8) {
-                throw new StatusException(CONTENT_TOO_LARGE_413, "Part size is larger than byte array maximum size");
+                throw new StatusException(CONTENT_TOO_LARGE_413);
             }
             final var bytes = new byte[(int) size];
             readFully(inputStream, bytes);

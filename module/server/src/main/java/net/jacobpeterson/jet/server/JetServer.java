@@ -420,22 +420,25 @@ public final class JetServer {
                 } catch (final Throwable throwable) {
                     LOGGER.error("Internal server error", throwable);
                     jettyResponse.setStatus(INTERNAL_SERVER_ERROR_500.getCode());
-                }
-                if (handle != null && closeResponseBodyInputStream.getPlain()) {
-                    final var responseBodyInputStream = handle.getResponse().getBodyInputStream();
-                    if (responseBodyInputStream != null) {
-                        try {
-                            responseBodyInputStream.close();
-                        } catch (final Throwable throwable) {
-                            LOGGER.error("`Response.getBodyInputStream().close()` threw", throwable);
+                } finally {
+                    if (handle != null) {
+                        if (closeResponseBodyInputStream.getPlain()) {
+                            final var responseBodyInputStream = handle.getResponse().getBodyInputStream();
+                            if (responseBodyInputStream != null) {
+                                try {
+                                    responseBodyInputStream.close();
+                                } catch (final Throwable throwable) {
+                                    LOGGER.error("`Response.getBodyInputStream().close()` threw", throwable);
+                                }
+                            }
                         }
-                    }
-                }
-                if (handle != null && afterHandler != null) {
-                    try {
-                        afterHandler.handle(handle);
-                    } catch (final Throwable throwable) {
-                        LOGGER.error("`Jet.getAfterHandler().handle()` threw", throwable);
+                        if (afterHandler != null) {
+                            try {
+                                afterHandler.handle(handle);
+                            } catch (final Throwable throwable) {
+                                LOGGER.error("`Jet.getAfterHandler().handle()` threw", throwable);
+                            }
+                        }
                     }
                 }
                 callback.succeeded();
