@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.route.route.simple.exact;
+package net.jacobpeterson.jet.server.route.route.simple.pathexact;
 
 import com.google.errorprone.annotations.Immutable;
 import lombok.Builder;
@@ -17,12 +17,12 @@ import org.jspecify.annotations.Nullable;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
 /**
- * {@link PathRoute} is a {@link Route} for matching a request path against the given route path.
+ * {@link PathExactRoute} is a {@link Route} for matching a request path exactly against the given route path.
  */
 @NullMarked
 @Immutable
 @Getter @Builder(toBuilder = true) @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
-public final class PathRoute implements Route {
+public final class PathExactRoute implements Route {
 
     /**
      * The method to match the request method against, or <code>null</code> for any.
@@ -69,7 +69,7 @@ public final class PathRoute implements Route {
     private final @Default boolean useNormalizedRequestPath = true;
 
     @Override
-    public @Nullable PathRouteMatch match(final Handle handle) {
+    public @Nullable PathExactRouteMatch match(final Handle handle) {
         final var request = handle.getRequest();
         if (method != null && !method.equalsIgnoreCase(request.getMethod())) {
             return null;
@@ -94,6 +94,6 @@ public final class PathRoute implements Route {
         } else {
             requestPath = useDecodedRequestPath ? requestUrl.getPath() : requestUrl.getEncodedPath();
         }
-        return path.equals(requestPath) ? new PathRouteMatch(requestPath) : null;
+        return path.equals(requestPath) ? new PathExactRouteMatch(requestPath) : null;
     }
 }

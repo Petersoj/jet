@@ -1,15 +1,15 @@
-package net.jacobpeterson.jet.server.route.route.simple.exact;
+package net.jacobpeterson.jet.server.route.route.simple.pathexact;
 
 import lombok.Value;
 import net.jacobpeterson.jet.server.route.route.RouteMatch;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@link PathRouteMatch} is a {@link RouteMatch} for {@link PathRoute}.
+ * {@link PathExactRouteMatch} is a {@link RouteMatch} for {@link PathExactRoute}.
  */
 @NullMarked
 @Value
-public class PathRouteMatch implements RouteMatch {
+public class PathExactRouteMatch implements RouteMatch {
 
     /**
      * The request path used to match against.
