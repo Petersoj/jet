@@ -109,7 +109,7 @@ public final class PathParametersRoute implements Route {
         }
 
         /**
-         * Calls {@link #parameterizedPath(String, int)} with <code>patternFlags</code> set to <code>9</code>.
+         * Calls {@link #parameterizedPath(String, int)} with <code>patternFlags</code> set to <code>0</code>.
          */
         public Builder parameterizedPath(final String parameterizedPath) {
             return parameterizedPath(parameterizedPath, 0);

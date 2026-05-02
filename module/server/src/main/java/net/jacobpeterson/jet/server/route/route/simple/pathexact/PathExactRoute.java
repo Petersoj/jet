@@ -57,16 +57,16 @@ public final class PathExactRoute implements Route {
     /**
      * Whether to use the decoded path from {@link Request#getUrl()}.
      * <p>
-     * Defaults to <code>true</code>.
+     * Defaults to <code>false</code>.
      */
-    private final @Default boolean useDecodedRequestPath = true;
+    private final @Default boolean useDecodedRequestPath = false;
 
     /**
      * Whether to use the normalized path from {@link Request#getUrl()}.
      * <p>
-     * Defaults to <code>true</code>.
+     * Defaults to <code>false</code>.
      */
-    private final @Default boolean useNormalizedRequestPath = true;
+    private final @Default boolean useNormalizedRequestPath = false;
 
     @Override
     public @Nullable PathExactRouteMatch match(final Handle handle) {
