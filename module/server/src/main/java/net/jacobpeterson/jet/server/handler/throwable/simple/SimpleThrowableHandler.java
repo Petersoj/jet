@@ -44,7 +44,7 @@ public class SimpleThrowableHandler implements ThrowableHandler {
         // if-statement prevents superfluous `Object[]` creation from varargs.
         if (isStatusException || LOGGER.isDebugEnabled()) {
             final var request = handle.getRequest();
-            LOGGER.atLevel(isStatusException ? ERROR : DEBUG)
+            LOGGER.atLevel(isStatusException ? DEBUG : ERROR)
                     .log("Handler threw with status {} for request: {} {} {}", statusString,
                             request.getVersion(), request.getMethod(), request.getUrl(), throwable);
         }
