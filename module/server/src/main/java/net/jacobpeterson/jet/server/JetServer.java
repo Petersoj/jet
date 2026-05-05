@@ -34,6 +34,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -398,8 +399,9 @@ public final class JetServer {
                         try (bodyOutputStream) {
                             bodyOutputStreamApplier.accept(bodyOutputStream);
                         } catch (final Throwable throwable) {
-                            // Do not call `responseBodyThrowableHandler` if `throwable` is due to client disconnect.
-                            if (getCausalChain(throwable).stream().noneMatch(cause -> cause instanceof EofException)) {
+                            // Do not call `responseBodyThrowableHandler` for client disconnects or idle timeouts.
+                            if (getCausalChain(throwable).stream().noneMatch(cause ->
+                                    cause instanceof EofException || cause instanceof TimeoutException)) {
                                 try {
                                     responseBodyThrowableHandler.handle(handle, throwable);
                                 } catch (final Throwable handleThrowable) {
@@ -412,13 +414,13 @@ public final class JetServer {
                             } else if (LOGGER.isDebugEnabled()) {
                                 // Above if-statement prevents superfluous `Object[]` creation from varargs.
                                 final var request = handle.getRequest();
-                                LOGGER.debug("Client disconnect for request: {} {} {}",
+                                LOGGER.debug("Client disconnect for request: {} {} {} {}", request.getRemoteAddress(),
                                         request.getVersion(), request.getMethod(), request.getUrl());
                             }
                         }
                     }
                 } catch (final Throwable throwable) {
-                    LOGGER.error("Internal server error", throwable);
+                    LOGGER.error("Internal handler error", throwable);
                     jettyResponse.setStatus(INTERNAL_SERVER_ERROR_500.getCode());
                 } finally {
                     if (handle != null) {
