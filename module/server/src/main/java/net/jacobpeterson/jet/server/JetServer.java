@@ -45,6 +45,7 @@ import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.X_CONTENT_TYPE_OPTIONS;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.INTERNAL_SERVER_ERROR_500;
+import static org.eclipse.jetty.http.UriCompliance.UNSAFE;
 import static org.eclipse.jetty.io.Content.Sink.asOutputStream;
 
 /**
@@ -354,6 +355,7 @@ public final class JetServer {
 
         final var httpConfiguration = new HttpConfiguration();
         httpConfiguration.setSendServerVersion(false);
+        httpConfiguration.setUriCompliance(UNSAFE);
         final var httpConnector = new ServerConnector(server, null, null, null, -1, -1,
                 new HttpConnectionFactory(httpConfiguration));
         httpConnector.setHost(serverBindAddress);
