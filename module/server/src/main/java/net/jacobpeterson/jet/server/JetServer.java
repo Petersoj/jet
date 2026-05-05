@@ -23,6 +23,7 @@ import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.server.Handler.Abstract;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.GracefulHandler;
@@ -365,7 +366,6 @@ public final class JetServer {
         httpConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
         server.addConnector(httpConnector);
 
-        // https://jetty.org/docs/jetty/12.1/programming-guide/server/http.html#handler-use-graceful
         server.setHandler(new GracefulHandler(new Abstract() {
             @Override
             public boolean handle(final org.eclipse.jetty.server.Request jettyRequest,
@@ -415,16 +415,11 @@ public final class JetServer {
                                 if (!jettyResponse.isCommitted()) {
                                     applyStatusAndHeaders(jettyResponse, response);
                                 }
-                            } else if (LOGGER.isDebugEnabled()) {
-                                // Above if-statement prevents superfluous `Object[]` creation from varargs.
-                                final var request = handle.getRequest();
-                                LOGGER.debug("Client disconnect for request: {} {} {} {}", request.getRemoteAddress(),
-                                        request.getVersion(), request.getMethod(), request.getUrl());
                             }
                         }
                     }
                 } catch (final Throwable throwable) {
-                    LOGGER.error("Internal handler error", throwable);
+                    LOGGER.error("Internal handler threw", throwable);
                     jettyResponse.setStatus(INTERNAL_SERVER_ERROR_500.getCode());
                 } finally {
                     if (handle != null) {
@@ -465,15 +460,14 @@ public final class JetServer {
                 response.getHeaders().forEach(jettyResponse.getHeaders()::add);
             }
         }));
-        // Do not serve error info, as this causes information leakage and Jetty already logs errors.
-        server.setErrorHandler(new Abstract() {
+        server.setErrorHandler(new GracefulHandler(new Abstract() {
             @Override
             public boolean handle(final org.eclipse.jetty.server.Request request,
                     final org.eclipse.jetty.server.Response response, final Callback callback) {
                 callback.succeeded();
                 return true;
             }
-        });
+        }));
         try {
             server.start();
         } catch (final Exception exception) {

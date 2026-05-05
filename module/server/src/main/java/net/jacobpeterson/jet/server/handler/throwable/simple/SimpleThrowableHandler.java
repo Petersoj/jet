@@ -14,11 +14,10 @@ import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.ERROR;
 
 /**
- * {@link SimpleThrowableHandler} is a simple {@link ThrowableHandler} implementation that sets
- * {@link Response#setStatusCode(int)} to {@link StatusException#getStatusCode()} or to
- * {@link Status#INTERNAL_SERVER_ERROR_500}, clears {@link Response#getHeaders()}, clears the existing response body
- * and calls {@link Response#setBodyString(String)} to {@link Status#toString()}, and logs the {@link Throwable}
- * with {@link Level#ERROR} if not a {@link StatusException}.
+ * {@link SimpleThrowableHandler} is a simple {@link ThrowableHandler} implementation that clears
+ * {@link Response#getHeaders()}, calls {@link Response#responseText(int, String)} with
+ * {@link StatusException#getStatusCode()} or {@link Status#INTERNAL_SERVER_ERROR_500} and {@link Status#toString()},
+ * and logs the {@link Throwable} with {@link Level#ERROR} if not a {@link StatusException}.
  */
 @NullMarked
 @Slf4j
@@ -43,10 +42,7 @@ public class SimpleThrowableHandler implements ThrowableHandler {
         response.responseText(statusCode, statusString);
         // if-statement prevents superfluous `Object[]` creation from varargs.
         if (isStatusException || LOGGER.isDebugEnabled()) {
-            final var request = handle.getRequest();
-            LOGGER.atLevel(isStatusException ? DEBUG : ERROR).log("Handler threw for request: {} {} {} {} {}",
-                    request.getRemoteAddress(), request.getVersion(), request.getMethod(), request.getUrl(),
-                    statusString, throwable);
+            LOGGER.atLevel(isStatusException ? DEBUG : ERROR).log("Handler threw", throwable);
         }
     }
 }

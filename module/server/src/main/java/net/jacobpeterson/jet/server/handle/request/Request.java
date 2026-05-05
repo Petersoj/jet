@@ -218,15 +218,15 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link Url}
+     * @return internally-cached {@link Url#parse(String)}
      */
-    public Url getUrl() {
+    public Url getUrl() throws StatusException {
         if (url == null) {
             final var requestUri = handle.getInternals().getRequest().getHttpURI().toString();
             try {
                 url = Url.parse(requestUri);
             } catch (final Exception exception) {
-                throw new StatusException(BAD_REQUEST_400, "Failed to parse request URL: " + requestUri);
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse request URL: " + requestUri, exception);
             }
         }
         return url;
