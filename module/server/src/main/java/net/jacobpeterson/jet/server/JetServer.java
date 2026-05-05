@@ -86,7 +86,7 @@ public final class JetServer {
         private @Nullable Duration serverGracefulStopTimeout;
         private @Nullable String serverBindAddress;
         private int serverHttpPort = 8080;
-        private @Nullable Duration requestIdleTimeout;
+        private @Nullable Duration connectionIdleTimeout;
 
         /**
          * @see #getHandleFactory()
@@ -200,10 +200,10 @@ public final class JetServer {
         }
 
         /**
-         * @see #getRequestIdleTimeout()
+         * @see #getConnectionIdleTimeout()
          */
-        public Builder requestIdleTimeout(final Duration requestIdleTimeout) {
-            this.requestIdleTimeout = requestIdleTimeout;
+        public Builder connectionIdleTimeout(final Duration connectionIdleTimeout) {
+            this.connectionIdleTimeout = connectionIdleTimeout;
             return this;
         }
 
@@ -229,7 +229,7 @@ public final class JetServer {
                     serverGracefulStopTimeout != null ? serverGracefulStopTimeout : ofMinutes(1),
                     serverBindAddress,
                     serverHttpPort,
-                    requestIdleTimeout != null ? requestIdleTimeout : ofMinutes(1));
+                    connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1));
         }
     }
 
@@ -308,7 +308,7 @@ public final class JetServer {
     private final @Getter @Nullable Handler afterHandler;
 
     /**
-     * The {@link Duration} to wait for the server gracefully stop.
+     * The {@link Duration} to wait before closing active connections after {@link #stop()} is called.
      * <p>
      * Defaults to <code>1 minute</code>.
      */
@@ -329,11 +329,11 @@ public final class JetServer {
     private final @Getter int serverHttpPort;
 
     /**
-     * The {@link Duration} to wait for in-flight requests to complete.
+     * The {@link Duration} to wait for network data to be sent or received before closing the connection.
      * <p>
      * Defaults to <code>1 minute</code>.
      */
-    private final @Getter Duration requestIdleTimeout;
+    private final @Getter Duration connectionIdleTimeout;
 
     private @Nullable Server server;
 
@@ -354,11 +354,13 @@ public final class JetServer {
 
         final var httpConfiguration = new HttpConfiguration();
         httpConfiguration.setSendServerVersion(false);
-        httpConfiguration.setIdleTimeout(requestIdleTimeout.toMillis());
         final var httpConnector = new ServerConnector(server, null, null, null, -1, -1,
                 new HttpConnectionFactory(httpConfiguration));
         httpConnector.setHost(serverBindAddress);
         httpConnector.setPort(serverHttpPort);
+        final var connectionIdleTimeoutMillis = connectionIdleTimeout.toMillis();
+        httpConnector.setIdleTimeout(connectionIdleTimeoutMillis);
+        httpConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
         server.addConnector(httpConnector);
 
         // https://jetty.org/docs/jetty/12.1/programming-guide/server/http.html#handler-use-graceful
