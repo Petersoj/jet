@@ -19,6 +19,8 @@ dependencies {
     implementation("org.eclipse.jetty.compression:jetty-compression-zstandard:${jettyVersion}") {
         exclude("com.github.luben")
     }
+
+    implementation("dev.scheibelhofer:crypto-tools:0.0.8")
 }
 
 publishing {

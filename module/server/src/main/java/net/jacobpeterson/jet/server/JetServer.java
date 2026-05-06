@@ -1,10 +1,14 @@
 package net.jacobpeterson.jet.server;
 
+import com.google.common.base.Supplier;
+import dev.scheibelhofer.crypto.provider.JctProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
+import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
@@ -19,28 +23,48 @@ import net.jacobpeterson.jet.server.route.router.simple.SimpleRouter;
 import net.jacobpeterson.jet.server.session.SessionStore;
 import net.jacobpeterson.jet.server.session.simple.SimpleSessionStore;
 import net.jacobpeterson.jet.server.session.unsupported.UnsupportedSessionStore;
+import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
+import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
 import org.eclipse.jetty.io.EofException;
+import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Handler.Abstract;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.GracefulHandler;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.getCausalChain;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.time.Duration.ofMinutes;
+import static java.util.Locale.ROOT;
+import static java.util.concurrent.ForkJoinPool.commonPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.X_CONTENT_TYPE_OPTIONS;
@@ -51,6 +75,8 @@ import static org.eclipse.jetty.io.Content.Sink.asOutputStream;
 
 /**
  * {@link JetServer} is a simple, modern, turnkey, Java web server library.
+ * <p>
+ * Note: this class is thread-safe.
  *
  * @see <a href="https://github.com/Petersoj/jet">github.com/Petersoj/jet</a>
  */
@@ -75,6 +101,7 @@ public final class JetServer {
      */
     public static final class Builder {
 
+        private final List<Supplier<List<SslPem>>> sslPemsSuppliers = new ArrayList<>();
         private @Nullable HandleFactory handleFactory;
         private int defaultRequestBodyBoundCount = 8 * 1024 * 1024;
         private @Nullable MultipartConfig defaultMultipartConfig;
@@ -85,9 +112,12 @@ public final class JetServer {
         private @Nullable ThrowableHandler routerThrowableHandler;
         private @Nullable ThrowableHandler responseBodyThrowableHandler;
         private @Nullable Handler afterHandler;
-        private @Nullable Duration serverGracefulStopTimeout;
-        private @Nullable String serverBindAddress;
-        private int serverHttpPort = 8080;
+        private @Nullable Duration gracefulStopTimeout;
+        private @Nullable String host;
+        private int httpPort = 8080;
+        private int httpsPort = 8443;
+        private boolean http2 = true;
+        private @Nullable Duration reloadSslPeriod;
         private @Nullable Duration connectionIdleTimeout;
 
         /**
@@ -178,26 +208,103 @@ public final class JetServer {
         }
 
         /**
-         * @see #getServerGracefulStopTimeout()
+         * @see #getGracefulStopTimeout()
          */
-        public Builder serverGracefulStopTimeout(final Duration serverGracefulStopTimeout) {
-            this.serverGracefulStopTimeout = serverGracefulStopTimeout;
+        public Builder gracefulStopTimeout(final Duration gracefulStopTimeout) {
+            this.gracefulStopTimeout = gracefulStopTimeout;
             return this;
         }
 
         /**
-         * @see #getServerBindAddress()
+         * @see #getHost()
          */
-        public Builder serverBindAddress(final String serverBindAddress) {
-            this.serverBindAddress = serverBindAddress;
+        public Builder host(final String host) {
+            this.host = host;
             return this;
         }
 
         /**
-         * @see #getServerHttpPort()
+         * @see #getHttpPort()
          */
-        public Builder serverHttpPort(final int serverHttpPort) {
-            this.serverHttpPort = serverHttpPort;
+        public Builder httpPort(final int httpPort) {
+            this.httpPort = httpPort;
+            return this;
+        }
+
+        /**
+         * @see #getHttpsPort()
+         */
+        public Builder httpsPort(final int httpsPort) {
+            this.httpsPort = httpsPort;
+            return this;
+        }
+
+        /**
+         * @see #isHttp2()
+         */
+        public Builder http2(final boolean http2) {
+            this.http2 = http2;
+            return this;
+        }
+
+        /**
+         * {@link SslPem} represents SSL certificate data in the PEM {@link String} format.
+         */
+        @Value
+        public static class SslPem {
+
+            /**
+             * The certificate chain {@link String}.
+             */
+            String certificateChain;
+
+            /**
+             * The private key {@link String}.
+             */
+            String privateKey;
+        }
+
+        /**
+         * @return {@link #sslPem(SslPem)} {@link SslPem#SslPem(String, String)}
+         */
+        public Builder sslPem(final String certificateChain, final String privateKey) {
+            return sslPem(new SslPem(certificateChain, privateKey));
+        }
+
+        /**
+         * @return {@link #sslPems(List)}
+         */
+        public Builder sslPem(final SslPem sslPem) {
+            return sslPems(List.of(sslPem));
+        }
+
+        /**
+         * @return {@link #sslPems(Supplier)}
+         */
+        public Builder sslPem(final Supplier<SslPem> sslPem) {
+            return sslPems(() -> List.of(sslPem.get()));
+        }
+
+        /**
+         * @return {@link #sslPems(Supplier)}
+         */
+        public Builder sslPems(final List<SslPem> sslPems) {
+            return sslPems(() -> sslPems);
+        }
+
+        /**
+         * @param sslPems the {@link SslPem} {@link List} {@link Supplier}
+         */
+        public Builder sslPems(final Supplier<List<SslPem>> sslPems) {
+            sslPemsSuppliers.add(sslPems);
+            return this;
+        }
+
+        /**
+         * @see #getReloadSslPeriod()
+         */
+        public Builder reloadSslPeriod(final Duration reloadSslPeriod) {
+            this.reloadSslPeriod = reloadSslPeriod;
             return this;
         }
 
@@ -228,10 +335,14 @@ public final class JetServer {
                     routerThrowableHandler != null ? routerThrowableHandler : new SimpleThrowableHandler(),
                     responseBodyThrowableHandler != null ? responseBodyThrowableHandler : new SimpleThrowableHandler(),
                     afterHandler,
-                    serverGracefulStopTimeout != null ? serverGracefulStopTimeout : ofMinutes(1),
-                    serverBindAddress,
-                    serverHttpPort,
-                    connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1));
+                    gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
+                    host,
+                    httpPort,
+                    httpsPort,
+                    http2,
+                    connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
+                    reloadSslPeriod,
+                    sslPemsSuppliers);
         }
     }
 
@@ -314,21 +425,35 @@ public final class JetServer {
      * <p>
      * Defaults to <code>1 minute</code>.
      */
-    private final @Getter Duration serverGracefulStopTimeout;
+    private final @Getter Duration gracefulStopTimeout;
 
     /**
-     * The internet address the server binds to, or <code>null</code> for all addresses.
+     * The host address to bind to, or <code>null</code> for all addresses.
      * <p>
      * Defaults to <code>null</code>.
      */
-    private final @Getter @Nullable String serverBindAddress;
+    private final @Getter @Nullable String host;
 
     /**
-     * The HTTP port the server binds to.
+     * The HTTP port.
      * <p>
      * Defaults to <code>8080</code>.
      */
-    private final @Getter int serverHttpPort;
+    private final @Getter int httpPort;
+
+    /**
+     * The HTTPS port.
+     * <p>
+     * Defaults to <code>8443</code>.
+     */
+    private final @Getter int httpsPort;
+
+    /**
+     * Whether to enable {@link HttpVersion#HTTP_2}.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    private final @Getter boolean http2;
 
     /**
      * The {@link Duration} to wait for network data to be sent or received before closing the connection.
@@ -337,35 +462,67 @@ public final class JetServer {
      */
     private final @Getter Duration connectionIdleTimeout;
 
-    private @Nullable Server server;
-
     /**
-     * @return {@link #getRouter()} cast as {@link SimpleRouter}
+     * The {@link Duration} period to call {@link #reloadSsl()}, or <code>null</code> to disable.
      */
-    public SimpleRouter getSimpleRouter() {
-        return (SimpleRouter) router;
-    }
+    private final @Getter @Nullable Duration reloadSslPeriod;
+
+    private final List<Supplier<List<SslPem>>> sslPemsSuppliers;
+    private @Nullable Server server;
+    private SslContextFactory.@Nullable Server sslContextFactory;
+    private @Nullable ScheduledFuture<?> reloadSslFuture;
 
     /**
      * Starts this server.
      */
     public synchronized void start() {
+        LOGGER.info("Jet starting...");
         server = new Server(new VirtualThreadPool(Integer.MAX_VALUE));
         server.setStopAtShutdown(true);
-        server.setStopTimeout(serverGracefulStopTimeout.toMillis());
-
+        server.setStopTimeout(gracefulStopTimeout.toMillis());
         final var httpConfiguration = new HttpConfiguration();
         httpConfiguration.setSendServerVersion(false);
         httpConfiguration.setUriCompliance(UNSAFE);
-        final var httpConnector = new ServerConnector(server, null, null, null, -1, -1,
-                new HttpConnectionFactory(httpConfiguration));
-        httpConnector.setHost(serverBindAddress);
-        httpConnector.setPort(serverHttpPort);
-        final var connectionIdleTimeoutMillis = connectionIdleTimeout.toMillis();
-        httpConnector.setIdleTimeout(connectionIdleTimeoutMillis);
-        httpConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
-        server.addConnector(httpConnector);
-
+        {
+            final var http11Factory = new HttpConnectionFactory(httpConfiguration);
+            final var httpFactories = !http2 ? new ConnectionFactory[]{http11Factory} :
+                    new ConnectionFactory[]{http11Factory, new HTTP2CServerConnectionFactory(httpConfiguration)};
+            final var httpConnector = new ServerConnector(server, null, null, null, -1, -1, httpFactories);
+            httpConnector.setHost(host);
+            httpConnector.setPort(httpPort);
+            final var connectionIdleTimeoutMillis = connectionIdleTimeout.toMillis();
+            httpConnector.setIdleTimeout(connectionIdleTimeoutMillis);
+            httpConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
+            server.addConnector(httpConnector);
+        }
+        if (!sslPemsSuppliers.isEmpty()) {
+            final var httpsConfiguration = new HttpConfiguration(httpConfiguration);
+            httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
+            sslContextFactory = new SslContextFactory.Server();
+            setKeyStoreFromSslPemsSuppliers(sslContextFactory);
+            final var http11Factory = new HttpConnectionFactory(httpsConfiguration);
+            final ConnectionFactory[] httpsFactories;
+            if (!http2) {
+                httpsFactories = new ConnectionFactory[]{
+                        new SslConnectionFactory(sslContextFactory, http11Factory.getProtocol()),
+                        http11Factory};
+            } else {
+                final var alpnFactory = new ALPNServerConnectionFactory();
+                alpnFactory.setDefaultProtocol(http11Factory.getProtocol());
+                httpsFactories = new ConnectionFactory[]{
+                        new SslConnectionFactory(sslContextFactory, alpnFactory.getProtocol()),
+                        alpnFactory,
+                        new HTTP2ServerConnectionFactory(httpsConfiguration),
+                        http11Factory};
+            }
+            final var httpsConnector = new ServerConnector(server, null, null, null, -1, -1, httpsFactories);
+            httpsConnector.setHost(host);
+            httpsConnector.setPort(httpsPort);
+            final var connectionIdleTimeoutMillis = connectionIdleTimeout.toMillis();
+            httpsConnector.setIdleTimeout(connectionIdleTimeoutMillis);
+            httpsConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
+            server.addConnector(httpsConnector);
+        }
         server.setHandler(new GracefulHandler(new Abstract() {
             @Override
             public boolean handle(final org.eclipse.jetty.server.Request jettyRequest,
@@ -473,20 +630,77 @@ public final class JetServer {
         } catch (final Exception exception) {
             throw new RuntimeException(exception);
         }
+        LOGGER.info("Jet started!");
+        if (reloadSslPeriod != null) {
+            final var periodSeconds = reloadSslPeriod.toSeconds();
+            reloadSslFuture = commonPool().scheduleAtFixedRate(() -> Thread.ofVirtual().start(() -> {
+                try {
+                    reloadSsl();
+                } catch (final Throwable throwable) {
+                    LOGGER.error("Reload SSL threw", throwable);
+                }
+            }), periodSeconds, periodSeconds, SECONDS);
+            LOGGER.info("Reloading SSL every {}.", reloadSslPeriod.toString().substring(2).toLowerCase(ROOT));
+        }
+    }
+
+    private void setKeyStoreFromSslPemsSuppliers(final SslContextFactory sslContextFactory) {
+        try {
+            final var keyStore = KeyStore.getInstance("pem", JctProvider.getInstance());
+            keyStore.load(new ByteArrayInputStream(sslPemsSuppliers.stream()
+                    .flatMap(supplier -> supplier.get().stream())
+                    .map(sslPem -> sslPem.privateKey + "\n" + sslPem.certificateChain)
+                    .collect(joining()).getBytes(US_ASCII)), null);
+            sslContextFactory.setKeyStore(keyStore);
+        } catch (final KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     /**
      * Stops this server.
      */
     public synchronized void stop() {
-        if (server == null) {
+        LOGGER.info("Jet stopping...");
+        if (reloadSslFuture != null) {
+            reloadSslFuture.cancel(false);
+        }
+        if (server != null) {
+            try {
+                server.stop();
+            } catch (final Exception exception) {
+                throw new RuntimeException(exception);
+            }
+            server = null;
+        }
+        LOGGER.info("Jet stopped");
+    }
+
+    /**
+     * Reloads SSL (hot-swap).
+     */
+    public synchronized void reloadSsl() {
+        if (sslContextFactory == null) {
             return;
         }
         try {
-            server.stop();
+            sslContextFactory.reload(this::setKeyStoreFromSslPemsSuppliers);
         } catch (final Exception exception) {
             throw new RuntimeException(exception);
         }
-        server = null;
+    }
+
+    /**
+     * @return {@link #getRouter()} cast as {@link SimpleRouter}
+     */
+    public SimpleRouter getSimpleRouter() {
+        return (SimpleRouter) router;
+    }
+
+    /**
+     * @return <code>true</code> if HTTPS (SSL/TLS) is enabled, <code>false</code> otherwise
+     */
+    public boolean isHttps() {
+        return sslContextFactory != null;
     }
 }
