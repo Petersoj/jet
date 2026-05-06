@@ -70,9 +70,9 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * @return {@link #simple(Path, String, ResponseCacheControl, boolean)} with <code>cacheControl</code> set to
      * {@link ResponseCacheControl#NO_CACHE}
      */
-    public static FileDirectoryHandler simpleMutable(final Path directory, final @Nullable String requestPathStartsWith,
-            final boolean trustedContentType) {
-        return simple(directory, requestPathStartsWith, NO_CACHE, trustedContentType);
+    public static FileDirectoryHandler simpleMutable(final Path directory,
+            final @Nullable String requestPathAlwaysStartsWith, final boolean trustedContentType) {
+        return simple(directory, requestPathAlwaysStartsWith, NO_CACHE, trustedContentType);
     }
 
     /**
@@ -86,8 +86,8 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      * {@link ResponseCacheControl#MAX_AGE_1_YEAR_IMMUTABLE}
      */
     public static FileDirectoryHandler simpleImmutable(final Path directory,
-            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
-        return simple(directory, requestPathStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
+            final @Nullable String requestPathAlwaysStartsWith, final boolean trustedContentType) {
+        return simple(directory, requestPathAlwaysStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
     }
 
     /**

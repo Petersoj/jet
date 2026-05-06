@@ -6,7 +6,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * {@link Session} is an interface representing a web session.
  * <p>
- * Note: implementations MUST be thread-safe.
+ * Note: implementations must be thread-safe.
  */
 @NullMarked
 public interface Session {

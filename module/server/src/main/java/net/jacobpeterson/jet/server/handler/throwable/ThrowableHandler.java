@@ -13,6 +13,8 @@ public interface ThrowableHandler {
 
     /**
      * Handles the {@link Throwable} thrown in the context of a {@link Handle}.
+     * <p>
+     * Note: this method implementation must be thread-safe.
      *
      * @param handle    the {@link Handle}
      * @param throwable the {@link Throwable}

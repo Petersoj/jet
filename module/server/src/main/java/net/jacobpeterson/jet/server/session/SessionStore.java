@@ -6,6 +6,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * {@link SessionStore} is an interface that represents a store for {@link Session} instances.
+ * <p>
+ * Note: implementations must be thread-safe.
  */
 @NullMarked
 public interface SessionStore {

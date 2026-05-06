@@ -13,6 +13,8 @@ public interface Handler {
 
     /**
      * Handles a web server request and response.
+     * <p>
+     * Note: this method implementation must be thread-safe.
      *
      * @param handle the {@link Handle}
      */

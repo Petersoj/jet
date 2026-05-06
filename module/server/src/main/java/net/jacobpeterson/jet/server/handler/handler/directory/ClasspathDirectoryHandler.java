@@ -52,8 +52,8 @@ public class ClasspathDirectoryHandler implements Handler {
      * to {@link ResponseCacheControl#NO_CACHE}
      */
     public static ClasspathDirectoryHandler simpleMutable(final Class<?> clazz, final String directory,
-            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
-        return simple(clazz, directory, requestPathStartsWith, NO_CACHE, trustedContentType);
+            final @Nullable String requestPathAlwaysStartsWith, final boolean trustedContentType) {
+        return simple(clazz, directory, requestPathAlwaysStartsWith, NO_CACHE, trustedContentType);
     }
 
     /**
@@ -67,8 +67,8 @@ public class ClasspathDirectoryHandler implements Handler {
      * to {@link ResponseCacheControl#MAX_AGE_1_YEAR_IMMUTABLE}
      */
     public static ClasspathDirectoryHandler simpleImmutable(final Class<?> clazz, final String directory,
-            final @Nullable String requestPathStartsWith, final boolean trustedContentType) {
-        return simple(clazz, directory, requestPathStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
+            final @Nullable String requestPathAlwaysStartsWith, final boolean trustedContentType) {
+        return simple(clazz, directory, requestPathAlwaysStartsWith, MAX_AGE_1_YEAR_IMMUTABLE, trustedContentType);
     }
 
     /**
