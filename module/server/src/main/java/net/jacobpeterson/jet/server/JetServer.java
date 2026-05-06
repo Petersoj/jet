@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.server;
 
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import dev.scheibelhofer.crypto.provider.JctProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import net.jacobpeterson.jet.server.handler.handler.Handler;
 import net.jacobpeterson.jet.server.handler.throwable.ThrowableHandler;
 import net.jacobpeterson.jet.server.handler.throwable.simple.SimpleThrowableHandler;
 import net.jacobpeterson.jet.server.route.router.Router;
-import net.jacobpeterson.jet.server.route.router.simple.SimpleRouter;
+import net.jacobpeterson.jet.server.route.router.simple.MutableSimpleRouter;
 import net.jacobpeterson.jet.server.session.SessionStore;
 import net.jacobpeterson.jet.server.session.simple.SimpleSessionStore;
 import net.jacobpeterson.jet.server.session.unsupported.UnsupportedSessionStore;
@@ -109,8 +110,8 @@ public final class JetServer {
         private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
-        private @Nullable ThrowableHandler routerThrowableHandler;
-        private @Nullable ThrowableHandler responseBodyThrowableHandler;
+        private ThrowableHandler routerThrowableHandler = SimpleThrowableHandler.INSTANCE;
+        private ThrowableHandler responseBodyThrowableHandler = SimpleThrowableHandler.INSTANCE;
         private @Nullable Handler afterHandler;
         private @Nullable Duration gracefulStopTimeout;
         private @Nullable String host;
@@ -331,9 +332,9 @@ public final class JetServer {
                     preventMimeSniffing,
                     preventAmbiguousResponseCacheControl,
                     sessionStore != null ? sessionStore : new SimpleSessionStore(),
-                    router != null ? router : new SimpleRouter(),
-                    routerThrowableHandler != null ? routerThrowableHandler : new SimpleThrowableHandler(),
-                    responseBodyThrowableHandler != null ? responseBodyThrowableHandler : new SimpleThrowableHandler(),
+                    router != null ? router : new MutableSimpleRouter(),
+                    routerThrowableHandler,
+                    responseBodyThrowableHandler,
                     afterHandler,
                     gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     host,
@@ -342,7 +343,7 @@ public final class JetServer {
                     http2,
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
                     reloadSslPeriod,
-                    sslPemsSuppliers);
+                    ImmutableList.copyOf(sslPemsSuppliers));
         }
     }
 
@@ -394,7 +395,7 @@ public final class JetServer {
     /**
      * The {@link Router}.
      * <p>
-     * Defaults to {@link SimpleRouter}.
+     * Defaults to {@link MutableSimpleRouter}.
      */
     private final @Getter Router router;
 
@@ -467,7 +468,7 @@ public final class JetServer {
      */
     private final @Getter @Nullable Duration reloadSslPeriod;
 
-    private final List<Supplier<List<SslPem>>> sslPemsSuppliers;
+    private final ImmutableList<Supplier<List<SslPem>>> sslPemsSuppliers;
     private @Nullable Server server;
     private SslContextFactory.@Nullable Server sslContextFactory;
     private @Nullable ScheduledFuture<?> reloadSslFuture;
@@ -658,25 +659,6 @@ public final class JetServer {
     }
 
     /**
-     * Stops this server.
-     */
-    public synchronized void stop() {
-        LOGGER.info("Jet stopping...");
-        if (reloadSslFuture != null) {
-            reloadSslFuture.cancel(false);
-        }
-        if (server != null) {
-            try {
-                server.stop();
-            } catch (final Exception exception) {
-                throw new RuntimeException(exception);
-            }
-            server = null;
-        }
-        LOGGER.info("Jet stopped");
-    }
-
-    /**
      * Reloads SSL (hot-swap).
      */
     public synchronized void reloadSsl() {
@@ -691,10 +673,30 @@ public final class JetServer {
     }
 
     /**
-     * @return {@link #getRouter()} cast as {@link SimpleRouter}
+     * Stops this server.
      */
-    public SimpleRouter getSimpleRouter() {
-        return (SimpleRouter) router;
+    public synchronized void stop() {
+        LOGGER.info("Jet stopping...");
+        if (reloadSslFuture != null) {
+            reloadSslFuture.cancel(false);
+        }
+        if (server != null) {
+            try {
+                server.stop();
+            } catch (final Exception exception) {
+                throw new RuntimeException(exception);
+            } finally {
+                server = null;
+            }
+        }
+        LOGGER.info("Jet stopped");
+    }
+
+    /**
+     * @return <code>true</code> if stopped, <code>false</code> if started and running
+     */
+    public synchronized boolean isStopped() {
+        return server == null || server.isStopped();
     }
 
     /**

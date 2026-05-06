@@ -12,18 +12,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import static java.util.Collections.synchronizedList;
 import static java.util.Map.entry;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 
 /**
- * {@link SimpleRouter} is a {@link Router} that uses a priority {@link List} of {@link Route} to {@link Handler}
- * entries. This {@link Router} implementation will only call one {@link Handler} per {@link #route(Handle)} call.
+ * {@link MutableSimpleRouter} is a mutable {@link Router} that uses a priority {@link List} of {@link Route}s mapped to
+ * {@link Handler}s. This {@link Router} implementation will only call one {@link Handler} per {@link #route(Handle)}
+ * call.
+ * <p>
+ * Note: this class is thread-safe.
  */
 @NullMarked
-public class SimpleRouter implements Router {
+public class MutableSimpleRouter implements Router {
 
-    private final List<Entry<Route, Handler>> handlersOfRoutes = synchronizedList(new ArrayList<>());
+    private final List<Entry<Route, Handler>> handlersOfRoutes = new ArrayList<>();
 
     /**
      * Adds the given {@link Handler} for the given {@link Route} to the beginning of the internal route entry list.
@@ -31,7 +33,7 @@ public class SimpleRouter implements Router {
      * @param route   the {@link Route}
      * @param handler the {@link Handler}
      */
-    public void addFirst(final Route route, final Handler handler) {
+    public synchronized void addFirst(final Route route, final Handler handler) {
         handlersOfRoutes.addFirst(entry(route, handler));
     }
 
@@ -41,7 +43,7 @@ public class SimpleRouter implements Router {
      * @param route   the {@link Route}
      * @param handler the {@link Handler}
      */
-    public void addLast(final Route route, final Handler handler) {
+    public synchronized void addLast(final Route route, final Handler handler) {
         handlersOfRoutes.addLast(entry(route, handler));
     }
 
@@ -50,10 +52,8 @@ public class SimpleRouter implements Router {
      *
      * @param route the {@link Route}
      */
-    public void remove(final Route route) {
-        synchronized (handlersOfRoutes) {
-            handlersOfRoutes.removeIf(entry -> entry.getKey().equals(route));
-        }
+    public synchronized void remove(final Route route) {
+        handlersOfRoutes.removeIf(entry -> entry.getKey().equals(route));
     }
 
     @SuppressWarnings("NullAway") // TODO remove once NullAway false positives are fixed
@@ -61,7 +61,7 @@ public class SimpleRouter implements Router {
     public void route(final Handle handle) {
         Entry<Route, Handler> matchedHandlerOfRoute = null;
         RouteMatch routeMatch = null;
-        synchronized (handlersOfRoutes) {
+        synchronized (this) {
             for (final var handlerOfRoute : handlersOfRoutes) {
                 final var match = handlerOfRoute.getKey().match(handle);
                 if (match != null) {

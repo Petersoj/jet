@@ -23,6 +23,11 @@ import static org.slf4j.event.Level.ERROR;
 @Slf4j
 public class SimpleThrowableHandler implements ThrowableHandler {
 
+    /**
+     * {@link SimpleThrowableHandler} static instance.
+     */
+    public static final SimpleThrowableHandler INSTANCE = new SimpleThrowableHandler();
+
     @Override
     public void handle(final Handle handle, final Throwable throwable) {
         final var response = handle.getResponse();
