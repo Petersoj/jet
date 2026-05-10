@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.server;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import dev.scheibelhofer.crypto.provider.JctProvider;
@@ -47,6 +48,12 @@ import org.jspecify.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -54,13 +61,20 @@ import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
 import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.Files.readString;
+import static java.nio.file.Files.walkFileTree;
+import static java.time.Duration.ofDays;
 import static java.time.Duration.ofMinutes;
 import static java.util.Locale.ROOT;
 import static java.util.concurrent.ForkJoinPool.commonPool;
@@ -263,6 +277,75 @@ public final class JetServer {
              * The private key {@link String}.
              */
             String privateKey;
+        }
+
+        /**
+         * Calls {@link #reloadSslPeriod(Duration)} with a {@link Duration} of <code>1 day</code>. Calls
+         * {@link #sslDirectory(Path, Predicate, Predicate)} with <code>sslDirectory</code> set to
+         * <code>/etc/letsencrypt/live/</code> and <code>isCertificateChain</code> set to test for
+         * <code>fullchain.pem</code> filename and <code>isPrivateKey</code> set to test for <code>privkey.pem</code>
+         * filename.
+         *
+         * @return {@link #sslDirectory(Path, Predicate, Predicate)}
+         */
+        public Builder sslLetsEncrypt() {
+            reloadSslPeriod(ofDays(1));
+            return sslDirectory(Path.of("/etc/letsencrypt/live/"),
+                    path -> path.getFileName().toString().equalsIgnoreCase("fullchain.pem"),
+                    path -> path.getFileName().toString().equalsIgnoreCase("privkey.pem"));
+        }
+
+        /**
+         * Uses {@link Files#walkFileTree(Path, Set, int, FileVisitor)} to discover SSL certificate files in the given
+         * <code>sslDirectory</code>.
+         *
+         * @param sslDirectory       the directory {@link Path} containing SSL certificate files
+         * @param isCertificateChain the {@link Predicate} to test if a {@link Path} is
+         *                           {@link SslPem#getCertificateChain()}
+         * @param isPrivateKey       the {@link Predicate} to test if a {@link Path} is {@link SslPem#getPrivateKey()}
+         *
+         * @return {@link #sslPems(Supplier)}
+         */
+        public Builder sslDirectory(final Path sslDirectory, final Predicate<Path> isCertificateChain,
+                final Predicate<Path> isPrivateKey) {
+            return sslPems(() -> {
+                final var certificateChains = new ArrayList<String>();
+                final var privateKeys = new ArrayList<String>();
+                try {
+                    walkFileTree(sslDirectory, Set.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(final Path file,
+                                final BasicFileAttributes attributes) throws IOException {
+                            if (!attributes.isRegularFile()) {
+                                return CONTINUE;
+                            }
+                            if (isCertificateChain.apply(file)) {
+                                certificateChains.add(readSslFile(file));
+                            }
+                            if (isPrivateKey.apply(file)) {
+                                privateKeys.add(readSslFile(file));
+                            }
+                            return CONTINUE;
+                        }
+
+                        private String readSslFile(final Path file) throws IOException {
+                            return readString(file, US_ASCII);
+                        }
+                    });
+                } catch (final IOException ioException) {
+                    throw new UncheckedIOException(ioException);
+                }
+                final var certificateChainsSize = certificateChains.size();
+                final var privateKeysSize = privateKeys.size();
+                checkState(certificateChainsSize == privateKeysSize, "Found %s certificates, but only %s private keys",
+                        certificateChainsSize, privateKeysSize);
+                final var sslPems = new ArrayList<SslPem>(certificateChainsSize);
+                for (var index = 0; index < certificateChainsSize; index++) {
+                    sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index)));
+                }
+                LOGGER.info("sslPems: " + sslPems.size());
+                return sslPems;
+            });
         }
 
         /**
