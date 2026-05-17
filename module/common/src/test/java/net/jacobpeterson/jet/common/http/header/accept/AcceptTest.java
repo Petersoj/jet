@@ -17,19 +17,13 @@ public final class AcceptTest {
 
     @Test
     public void parse() {
-        {
-            final var accept = Accept.parse("text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8");
-            assertEquals(ImmutableList.of(
-                            TEXT_HTML,
-                            APPLICATION_XHTML,
-                            APPLICATION_XML.withParameter(WEIGHT_PARAMETER_KEY, "0.9"),
-                            WILDCARD_WILDCARD.withParameter(WEIGHT_PARAMETER_KEY, "0.8")),
-                    accept.getContentTypes());
-        }
-        {
-            final var accept = Accept.parse("   */* ");
-            assertEquals(ImmutableList.of(WILDCARD_WILDCARD), accept.getContentTypes());
-        }
+        assertEquals(ImmutableList.of(
+                        TEXT_HTML,
+                        APPLICATION_XHTML,
+                        APPLICATION_XML.withParameter(WEIGHT_PARAMETER_KEY, "0.9"),
+                        WILDCARD_WILDCARD.withParameter(WEIGHT_PARAMETER_KEY, "0.8")),
+                Accept.parse("text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8").getContentTypes());
+        assertEquals(ImmutableList.of(WILDCARD_WILDCARD), Accept.parse("   */* ").getContentTypes());
         assertThrows(IllegalArgumentException.class, () -> Accept.parse(""));
         assertThrows(IllegalArgumentException.class, () -> Accept.parse(" "));
         assertThrows(IllegalArgumentException.class, () -> Accept.parse(" *"));
