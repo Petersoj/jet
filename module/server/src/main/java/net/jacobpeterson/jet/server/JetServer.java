@@ -3,6 +3,7 @@ package net.jacobpeterson.jet.server;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import dev.scheibelhofer.crypto.provider.JctProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -266,6 +267,7 @@ public final class JetServer {
          * {@link SslPem} represents SSL certificate data in the PEM {@link String} format.
          */
         @Value
+        @Immutable
         public static class SslPem {
 
             /**
@@ -343,7 +345,7 @@ public final class JetServer {
                 for (var index = 0; index < certificateChainsSize; index++) {
                     sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index)));
                 }
-                LOGGER.info("sslPems: " + sslPems.size());
+                LOGGER.info("sslPems: {}", sslPems.size());
                 return sslPems;
             });
         }

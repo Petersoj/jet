@@ -149,7 +149,7 @@ public final class PathStartsWithRoute implements Route {
         } else {
             requestPath = useDecodedRequestPath ? requestUrl.getPath() : requestUrl.getEncodedPath();
         }
-        return requestPath.startsWith(path) || (pathEndsWithSlash && pathWithoutEndingSlash.equals(requestPath)) ?
+        return requestPath.startsWith(path) || (pathEndsWithSlash && requestPath.equals(pathWithoutEndingSlash)) ?
                 new PathStartsWithRouteMatch(requestPath) : null;
     }
 }
