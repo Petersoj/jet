@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.accept.Accept;
+import net.jacobpeterson.jet.common.http.header.acceptencoding.AcceptEncoding;
 import net.jacobpeterson.jet.common.http.header.authorization.BasicAuthentication;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
@@ -55,6 +56,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.stream.StreamSupport.stream;
 import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT;
+import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_ENCODING;
 import static net.jacobpeterson.jet.common.http.header.Header.AUTHORIZATION;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
@@ -92,6 +94,7 @@ public final class Request {
     private @LazyInit @Nullable ImmutableHeaders headers;
     private @LazyInit @Nullable ImmutableMap<String, String> cookies;
     private @LazyInit @Nullable Optional<Accept> accept;
+    private @LazyInit @Nullable Optional<AcceptEncoding> acceptEncoding;
     private @LazyInit @Nullable Optional<ContentType> contentType;
     private @LazyInit @Nullable ImmutableList<Range> ranges;
     private @LazyInit @Nullable Optional<ZonedDateTime> ifModifiedSince;
@@ -280,6 +283,24 @@ public final class Request {
             }
         }
         return accept.orElse(null);
+    }
+
+    /**
+     * @return internally-cached {@link #getHeader(Header)} {@link Header#ACCEPT_ENCODING}
+     * {@link AcceptEncoding#parse(String)}
+     */
+    public @Nullable AcceptEncoding getAcceptEncoding() throws StatusException {
+        if (acceptEncoding == null) {
+            final var acceptEncoding = getHeader(ACCEPT_ENCODING);
+            try {
+                this.acceptEncoding = Optional.ofNullable(acceptEncoding == null ? null :
+                        AcceptEncoding.parse(acceptEncoding));
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse `%s` header".formatted(ACCEPT_ENCODING),
+                        exception);
+            }
+        }
+        return acceptEncoding.orElse(null);
     }
 
     /**
