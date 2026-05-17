@@ -12,7 +12,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
  * {@link ListMultimapBuilder#treeKeys()} with {@link String#CASE_INSENSITIVE_ORDER}.
  */
 @NullMarked
-public class Headers extends ForwardingListMultimap<String, String> {
+public final class Headers extends ForwardingListMultimap<String, String> {
 
     /**
      * Create a new {@link Headers} instance.
