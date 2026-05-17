@@ -119,15 +119,11 @@ public final class Range {
             final var end = startEndSplit.get(1);
             final var endIsEmpty = end.isEmpty();
             checkArgument(!startIsEmpty || !endIsEmpty, "Invalid range: %s", range);
-            try {
-                if (!startIsEmpty) {
-                    builder.start(parseLong(start));
-                }
-                if (!endIsEmpty) {
-                    builder.end(parseLong(end));
-                }
-            } catch (final NumberFormatException numberFormatException) {
-                throw new IllegalArgumentException(numberFormatException);
+            if (!startIsEmpty) {
+                builder.start(parseLong(start));
+            }
+            if (!endIsEmpty) {
+                builder.end(parseLong(end));
             }
             ranges.add(builder.build());
         }

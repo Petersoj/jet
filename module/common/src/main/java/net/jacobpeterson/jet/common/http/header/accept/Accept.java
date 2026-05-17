@@ -107,16 +107,16 @@ public final class Accept {
         /**
          * @see #getContentTypes()
          */
-        public Builder addAll(final ContentType... contentType) {
-            contentTypes.add(contentType);
+        public Builder addAll(final ContentType... contentTypes) {
+            this.contentTypes.add(contentTypes);
             return this;
         }
 
         /**
          * @see #getContentTypes()
          */
-        public Builder addAll(final Iterable<ContentType> contentType) {
-            contentTypes.addAll(contentType);
+        public Builder addAll(final Iterable<ContentType> contentTypes) {
+            this.contentTypes.addAll(contentTypes);
             return this;
         }
 
@@ -125,11 +125,12 @@ public final class Accept {
          *
          * @return the built {@link Accept}
          *
-         * @throws IllegalArgumentException thrown if one of the {@link #add(ContentType)} overloads was never called
+         * @throws IllegalArgumentException thrown if {@link #add(ContentType)} one of the
+         *                                  {@link #addAll(ContentType...)} overloads was never called
          */
         public Accept build() throws IllegalArgumentException {
             final var contentTypes = this.contentTypes.build();
-            checkArgument(!contentTypes.isEmpty(), "`accept()` was never called");
+            checkArgument(!contentTypes.isEmpty(), "`add()` or `addAll()` was never called");
             return new Accept(contentTypes);
         }
     }

@@ -325,7 +325,7 @@ public enum CompressionType {
     }
 
     /**
-     * The default buffer size for compression streams: 16 KiB
+     * The default buffer size for compression streams: <code>16 KiB</code>
      *
      * @see <a href="https://bugs.openjdk.org/browse/JDK-8299336">bugs.openjdk.org</a>
      */

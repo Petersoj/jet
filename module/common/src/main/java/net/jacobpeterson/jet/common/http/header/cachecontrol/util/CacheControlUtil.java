@@ -66,14 +66,7 @@ public final class CacheControlUtil {
     public static Optional<Long> parseValueLong(final Map<String, String> directives, final String responseDirectiveKey)
             throws IllegalArgumentException {
         final var directiveValue = directives.get(responseDirectiveKey);
-        if (directiveValue == null) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(parseLong(directiveValue));
-        } catch (final NumberFormatException numberFormatException) {
-            throw new IllegalArgumentException(numberFormatException);
-        }
+        return directiveValue == null ? Optional.empty() : Optional.of(parseLong(directiveValue));
     }
 
     /**

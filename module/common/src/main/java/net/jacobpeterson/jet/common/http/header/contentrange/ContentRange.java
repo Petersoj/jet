@@ -133,20 +133,12 @@ public final class ContentRange {
         if (!range.equals(UNKNOWN_TOKEN)) {
             final var startEndSplit = PARSE_RANGE_START_END_SPLITTER.splitToList(range);
             checkArgument(startEndSplit.size() == 2, "Invalid content range: %s", contentRange);
-            try {
-                builder.start(parseLong(startEndSplit.getFirst()));
-                builder.end(parseLong(startEndSplit.get(1)));
-            } catch (final NumberFormatException numberFormatException) {
-                throw new IllegalArgumentException(numberFormatException);
-            }
+            builder.start(parseLong(startEndSplit.getFirst()));
+            builder.end(parseLong(startEndSplit.get(1)));
         }
         final var size = rangeSizeSplit.get(1);
         if (!size.equals(UNKNOWN_TOKEN)) {
-            try {
-                builder.size(parseLong(size));
-            } catch (final NumberFormatException numberFormatException) {
-                throw new IllegalArgumentException(numberFormatException);
-            }
+            builder.size(parseLong(size));
         }
         return builder.build();
     }

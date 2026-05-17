@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.hash.Hashing.sha256;
 import static com.google.common.io.ByteStreams.nullOutputStream;
 import static java.nio.ByteBuffer.allocate;
+import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 
@@ -160,7 +161,7 @@ public final class ETag {
          */
         public ETag build() throws IllegalArgumentException {
             checkArgument(value != null, "`value()` was never called");
-            return new ETag(weak, value);
+            return new ETag(weak, requireNonNull(value));
         }
     }
 

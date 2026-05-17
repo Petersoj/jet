@@ -119,13 +119,8 @@ public final class StrictTransportSecurity {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid HSTS: " + strictTransportSecurity));
         final var maxAgeValueSplit = PARSE_MAX_AGE_VALUE_SPLITTER.splitToList(maxAgeFlag);
         checkArgument(maxAgeValueSplit.size() == 2, "Invalid HSTS: %s", strictTransportSecurity);
-        final var builder = builder();
-        try {
-            builder.maxAge(parseLong(maxAgeValueSplit.get(1)));
-        } catch (final NumberFormatException numberFormatException) {
-            throw new IllegalArgumentException(numberFormatException);
-        }
-        return builder
+        return builder()
+                .maxAge(parseLong(maxAgeValueSplit.get(1)))
                 .includeSubDomains(flagSplit.contains(INCLUDE_SUB_DOMAINS_FLAG_LOWERCASED))
                 .preload(flagSplit.contains(PRELOAD_FLAG))
                 .build();
