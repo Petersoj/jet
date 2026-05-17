@@ -17,7 +17,7 @@ import java.io.UncheckedIOException;
 import java.util.Base64;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.hash.Hashing.murmur3_128;
+import static com.google.common.hash.Hashing.sha256;
 import static com.google.common.io.ByteStreams.nullOutputStream;
 import static java.nio.ByteBuffer.allocate;
 import static lombok.AccessLevel.PRIVATE;
@@ -53,7 +53,7 @@ public final class ETag {
 
     /**
      * Computes a strong {@link ETag} for the given entity content using {@link HashingInputStream} with
-     * {@link Hashing#murmur3_128()}.
+     * {@link Hashing#sha256()}.
      *
      * @param content the content {@link InputStream} (always closed by this method)
      *
@@ -61,7 +61,7 @@ public final class ETag {
      */
     @SuppressWarnings("UnstableApiUsage")
     public static ETag computeStrong(final InputStream content) {
-        try (final var hashingInputStream = new HashingInputStream(murmur3_128(), content)) {
+        try (final var hashingInputStream = new HashingInputStream(sha256(), content)) {
             hashingInputStream.transferTo(nullOutputStream());
             return builder()
                     .value(hashingInputStream.hash().toString())
