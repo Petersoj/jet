@@ -35,6 +35,7 @@ import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRouteM
 import net.jacobpeterson.jet.server.route.route.simple.pathstartswith.PathStartsWithRouteMatch;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.MultiPartConfig;
+import org.eclipse.jetty.http.MultiPartFormData.Parts;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -80,8 +81,6 @@ import static org.eclipse.jetty.io.Content.Source.asInputStream;
 @RequiredArgsConstructor
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Request {
-
-    private static @Nullable MultiPartConfig defaultMultiPartConfig;
 
     private final Handle handle;
     private @LazyInit @Nullable String localAddress;
@@ -562,66 +561,57 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyMultiParts(MultipartConfig)} with {@link JetServer#getDefaultMultipartConfig()}
+     * @return {@link #getBodyMultiParts(MultipartConfig)} with <code>config</code> set to <code>null</code>
      */
     public ImmutableList<MultiPart> getBodyMultiParts() {
-        if (defaultMultiPartConfig == null) { // Racy cache access is fine here due to immutable idempotency
-            defaultMultiPartConfig = multipartConfigToJetty(handle.getInternals().getJetServer()
-                    .getDefaultMultipartConfig());
-        }
-        return getBodyMultiParts(defaultMultiPartConfig);
+        return getBodyMultiParts(null);
     }
 
     /**
-     * @return the {@link MultiPart} {@link ImmutableList} read from the body
+     * @param config the {@link MultipartConfig}, or <code>null</code> for {@link JetServer#getDefaultMultipartConfig()}
+     *
+     * @return the internally-cached {@link MultiPart} {@link ImmutableList} read from the body
      */
-    public ImmutableList<MultiPart> getBodyMultiParts(final MultipartConfig config) {
-        return getBodyMultiParts(multipartConfigToJetty(config));
-    }
-
-    private MultiPartConfig multipartConfigToJetty(final MultipartConfig config) {
-        return new MultiPartConfig.Builder()
-                .maxSize(config.getMaxTotalSize())
-                .maxParts(config.getMaxPartCount())
-                .maxPartSize(config.getMaxPartSize())
-                .maxMemoryPartSize(config.getPartSizeMemoryToDiskThreshold())
-                .location(config.getTemporaryDirectory())
-                .build();
-    }
-
-    private ImmutableList<MultiPart> getBodyMultiParts(final MultiPartConfig jettyConfig) {
+    public ImmutableList<MultiPart> getBodyMultiParts(final @Nullable MultipartConfig config) {
         if (bodyMultiParts == null) {
+            final var request = handle.getInternals().getRequest();
+            final var contentType = getHeader(CONTENT_TYPE);
+            final var jetConfig = config != null ? config :
+                    handle.getInternals().getJetServer().getDefaultMultipartConfig();
+            final var jettyConfig = new MultiPartConfig.Builder()
+                    .maxSize(jetConfig.getMaxTotalSize())
+                    .maxParts(jetConfig.getMaxPartCount())
+                    .maxPartSize(jetConfig.getMaxPartSize())
+                    .maxMemoryPartSize(jetConfig.getPartSizeMemoryToDiskThreshold())
+                    .location(jetConfig.getTemporaryDirectory())
+                    .build();
+            final Parts parts;
             try {
-                final var request = handle.getInternals().getRequest();
-                bodyMultiParts = stream(getParts(request, request, getHeader(CONTENT_TYPE), jettyConfig)
-                        .spliterator(), false)
-                        .map(MultiPart::new)
-                        .collect(toImmutableList());
+                parts = getParts(request, request, contentType, jettyConfig);
             } catch (final Exception exception) {
                 throw new StatusException(BAD_REQUEST_400, exception);
             }
+            bodyMultiParts = stream(parts.spliterator(), false)
+                    .map(MultiPart::new)
+                    .collect(toImmutableList());
         }
         return bodyMultiParts;
     }
 
     /**
-     * @return {@link #getBodyMultiParts()} {@link Stream#filter(Predicate)}
-     * {@link MultiPart#getContentDisposition()} {@link ContentDisposition#getName()} or <code>null</code>
+     * @return {@link #getBodyMultiPart(MultipartConfig, String)} with <code>config</code> set to <code>null</code>
      */
     public @Nullable MultiPart getBodyMultiPart(final String name) {
-        return getBodyMultiPart(getBodyMultiParts(), name);
+        return getBodyMultiPart(null, name);
     }
 
     /**
-     * @return {@link #getBodyMultiParts(MultipartConfig)} {@link Stream#filter(Predicate)}
-     * {@link MultiPart#getContentDisposition()} {@link ContentDisposition#getName()} or <code>null</code>
+     * @return {@link #getBodyMultiParts(MultipartConfig)} {@link Stream#filter(Predicate)} for
+     * {@link MultiPart#getContentDisposition()} {@link ContentDisposition#getName()} equal to the given
+     * <code>name</code>, or <code>null</code>
      */
-    public @Nullable MultiPart getBodyMultiPart(final MultipartConfig config, final String name) {
-        return getBodyMultiPart(getBodyMultiParts(config), name);
-    }
-
-    private @Nullable MultiPart getBodyMultiPart(final ImmutableList<MultiPart> multiParts, final String name) {
-        return multiParts.stream()
+    public @Nullable MultiPart getBodyMultiPart(final @Nullable MultipartConfig config, final String name) {
+        return getBodyMultiParts(config).stream()
                 .filter(multiPart -> multiPart.getContentDisposition() != null &&
                         name.equals(multiPart.getContentDisposition().getName()))
                 .findFirst()
