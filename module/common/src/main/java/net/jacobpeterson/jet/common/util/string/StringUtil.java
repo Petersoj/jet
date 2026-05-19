@@ -6,6 +6,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 
+import static java.lang.Character.toLowerCase;
+import static java.lang.Character.toUpperCase;
 import static java.lang.Math.min;
 import static java.nio.ByteBuffer.wrap;
 import static java.nio.charset.CodingErrorAction.REPORT;
@@ -16,6 +18,32 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 @NullMarked
 public final class StringUtil {
+
+    /**
+     * @param source the source {@link String}
+     * @param string the {@link String} to check
+     *
+     * @return <code>true</code> if the given <code>string</code> is case-insensitively contained in the given
+     * <code>source</code>, <code>false</code> if not
+     */
+    public static boolean containsIgnoreCase(final String source, final String string) {
+        final var length = string.length();
+        if (length == 0) {
+            return true;
+        }
+        final var firstLowercase = toLowerCase(string.charAt(0));
+        final var firstUppercase = toUpperCase(string.charAt(0));
+        for (var index = source.length() - length; index >= 0; index--) {
+            final var charAt = source.charAt(index);
+            if (charAt != firstLowercase && charAt != firstUppercase) {
+                continue;
+            }
+            if (source.regionMatches(true, index, string, 0, length)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * @return {@link #isLikelyUtf8(byte[], int, int)} with <code>offset</code> set to <code>0</code> and
