@@ -1,11 +1,8 @@
 package net.jacobpeterson.jet.server.handle.response;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.jacobpeterson.jet.common.http.header.Header;
-import net.jacobpeterson.jet.common.http.header.Headers;
-import net.jacobpeterson.jet.common.http.header.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
@@ -14,14 +11,18 @@ import net.jacobpeterson.jet.common.http.header.contentsecuritypolicy.ContentSec
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
+import net.jacobpeterson.jet.common.http.header.headers.Headers;
+import net.jacobpeterson.jet.common.http.header.headers.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.header.stricttransportsecurity.StrictTransportSecurity;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.util.string.StringUtil;
+import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
+import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
 import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandler;
@@ -86,7 +87,6 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
  * Note: this class is not thread-safe.
  */
 @NullMarked
-@RequiredArgsConstructor
 public final class Response {
 
     private final Handle handle;
@@ -111,6 +111,13 @@ public final class Response {
     private final @Getter Headers headers = Headers.create();
 
     /**
+     * The {@link CompressionConfig}, or <code>null</code> to disable response compression.
+     * <p>
+     * Defaults to {@link JetServer#getDefaultCompressionConfig()}.
+     */
+    private @Getter @Setter @Nullable CompressionConfig compressionConfig;
+
+    /**
      * The body {@link InputStream}.
      * <p>
      * {@link InputStream#close()} is guaranteed to be called.
@@ -125,6 +132,16 @@ public final class Response {
      * Cannot be used with {@link #setBodyInputStream(InputStream)}.
      */
     private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
+
+    /**
+     * Instantiates a new {@link Response}.
+     *
+     * @param handle the {@link Handle}
+     */
+    public Response(final Handle handle) {
+        this.handle = handle;
+        compressionConfig = handle.getInternals().getJetServer().getDefaultCompressionConfig();
+    }
 
     /**
      * Sets {@link #getStatusCode()} and {@link #getStatus()} with {@link Status#forCode(int)}.
@@ -361,6 +378,13 @@ public final class Response {
     public void redirectPermanently(final String location) {
         setStatus(MOVED_PERMANENTLY_301);
         setHeader(LOCATION, location);
+    }
+
+    /**
+     * Calls {@link #setCompressionConfig(CompressionConfig)} with <code>null</code>.
+     */
+    public void disableCompression() {
+        setCompressionConfig(null);
     }
 
     /**
