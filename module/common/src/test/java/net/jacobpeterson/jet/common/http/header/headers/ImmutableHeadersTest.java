@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.common.http.header;
+package net.jacobpeterson.jet.common.http.header.headers;
 
 import com.google.common.collect.ImmutableListMultimap;
 import org.jspecify.annotations.NullMarked;

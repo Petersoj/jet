@@ -6,7 +6,6 @@ import com.google.common.io.ByteStreams;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
-import net.jacobpeterson.jet.common.http.header.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.accept.Accept;
 import net.jacobpeterson.jet.common.http.header.acceptencoding.AcceptEncoding;
 import net.jacobpeterson.jet.common.http.header.authorization.BasicAuthentication;
@@ -14,6 +13,7 @@ import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCach
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
+import net.jacobpeterson.jet.common.http.header.headers.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.ifrange.IfRange;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.method.Method;
