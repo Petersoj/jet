@@ -4,11 +4,13 @@ import com.google.common.collect.ForwardingListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
+import net.jacobpeterson.jet.common.util.string.StringUtil;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import static com.google.common.collect.Multimaps.unmodifiableListMultimap;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static net.jacobpeterson.jet.common.util.string.StringUtil.containsIgnoreCase;
 
 /**
  * {@link AbstractHeaders} is a case-insensitive {@link String} {@link ListMultimap} that uses
@@ -36,6 +38,45 @@ public sealed abstract class AbstractHeaders extends ForwardingListMultimap<Stri
             delegate.putAll(headers);
             this.delegate = unmodifiableListMultimap(delegate);
         }
+    }
+
+    /**
+     * @return <code>true</code> if {@link #get(Object)} with the given <code>key</code> contains a value where
+     * {@link String#equalsIgnoreCase(String)} is <code>true</code>, <code>false</code> otherwise
+     */
+    public boolean containsEntryIgnoreCase(final String key, final String value) {
+        for (final var valueOfKey : get(key)) {
+            if (valueOfKey.equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return <code>true</code> if {@link #get(Object)} with the given <code>key</code> contains a value where
+     * {@link String#contains(CharSequence)} is <code>true</code>, <code>false</code> otherwise
+     */
+    public boolean containsEntryContaining(final String key, final String value) {
+        for (final var valueOfKey : get(key)) {
+            if (valueOfKey.contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return <code>true</code> if {@link #get(Object)} with the given <code>key</code> contains a value where
+     * {@link StringUtil#containsIgnoreCase(String, String)} is <code>true</code>, <code>false</code> otherwise
+     */
+    public boolean containsEntryContainingIgnoreCase(final String key, final String value) {
+        for (final var valueOfKey : get(key)) {
+            if (containsIgnoreCase(valueOfKey, value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

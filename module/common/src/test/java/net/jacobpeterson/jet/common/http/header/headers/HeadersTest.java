@@ -21,4 +21,40 @@ public final class HeadersTest {
         assertEquals(List.of("123", "123"), headers.get("ABc"));
         assertEquals(List.of("123", "123"), headers.get("AbC"));
     }
+
+    @Test
+    public void ensureEntry() {
+        final var headers = Headers.create();
+        headers.ensureEntry("abc", "def");
+        assertEquals(List.of("def"), headers.get("abc"));
+        headers.ensureEntry("ABC", "def");
+        assertEquals(List.of("def"), headers.get("abc"));
+    }
+
+    @Test
+    public void ensureEntryIgnoreCase() {
+        final var headers = Headers.create();
+        headers.ensureEntryIgnoreCase("abc", "def");
+        assertEquals(List.of("def"), headers.get("abc"));
+        headers.ensureEntryIgnoreCase("ABC", "DEF");
+        assertEquals(List.of("def"), headers.get("abc"));
+    }
+
+    @Test
+    public void ensureEntryContaining() {
+        final var headers = Headers.create();
+        headers.ensureEntryContaining("abc", "def");
+        assertEquals(List.of("def"), headers.get("abc"));
+        headers.ensureEntryContaining("ABC", "ef");
+        assertEquals(List.of("def"), headers.get("abc"));
+    }
+
+    @Test
+    public void ensureEntryContainingIgnoreCase() {
+        final var headers = Headers.create();
+        headers.ensureEntryContainingIgnoreCase("abc", "def");
+        assertEquals(List.of("def"), headers.get("abc"));
+        headers.ensureEntryContainingIgnoreCase("ABC", "EF");
+        assertEquals(List.of("def"), headers.get("abc"));
+    }
 }
