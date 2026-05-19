@@ -13,6 +13,7 @@ import net.jacobpeterson.jet.common.http.header.cachecontrol.request.RequestCach
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
+import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.headers.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.ifrange.IfRange;
 import net.jacobpeterson.jet.common.http.header.range.Range;
@@ -62,7 +63,9 @@ import static net.jacobpeterson.jet.common.http.header.Header.AUTHORIZATION;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
 import static net.jacobpeterson.jet.common.http.header.Header.COOKIE;
+import static net.jacobpeterson.jet.common.http.header.Header.IF_MATCH;
 import static net.jacobpeterson.jet.common.http.header.Header.IF_MODIFIED_SINCE;
+import static net.jacobpeterson.jet.common.http.header.Header.IF_NONE_MATCH;
 import static net.jacobpeterson.jet.common.http.header.Header.IF_RANGE;
 import static net.jacobpeterson.jet.common.http.header.Header.IF_UNMODIFIED_SINCE;
 import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
@@ -96,6 +99,8 @@ public final class Request {
     private @LazyInit @Nullable Optional<AcceptEncoding> acceptEncoding;
     private @LazyInit @Nullable Optional<ContentType> contentType;
     private @LazyInit @Nullable ImmutableList<Range> ranges;
+    private @LazyInit @Nullable Optional<ETag> ifMatch;
+    private @LazyInit @Nullable Optional<ETag> ifNoneMatch;
     private @LazyInit @Nullable Optional<ZonedDateTime> ifModifiedSince;
     private @LazyInit @Nullable Optional<ZonedDateTime> ifUnmodifiedSince;
     private @LazyInit @Nullable Optional<IfRange> ifRange;
@@ -364,6 +369,38 @@ public final class Request {
             throw new StatusException(RANGE_NOT_SATISFIABLE_416, "Multiple ranges unsupported");
         }
         return ranges.isEmpty() ? null : ranges.getFirst();
+    }
+
+    /**
+     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_MATCH} {@link ETag#parse(String)}
+     */
+    public @Nullable ETag getIfMatch() throws StatusException {
+        if (ifMatch == null) {
+            final var ifMatch = getHeader(IF_MATCH);
+            try {
+                this.ifMatch = Optional.ofNullable(ifMatch == null ? null : ETag.parse(ifMatch));
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse `%s` header".formatted(IF_MATCH),
+                        exception);
+            }
+        }
+        return ifMatch.orElse(null);
+    }
+
+    /**
+     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_NONE_MATCH} {@link ETag#parse(String)}
+     */
+    public @Nullable ETag getIfNoneMatch() throws StatusException {
+        if (ifNoneMatch == null) {
+            final var ifNoneMatch = getHeader(IF_NONE_MATCH);
+            try {
+                this.ifNoneMatch = Optional.ofNullable(ifNoneMatch == null ? null : ETag.parse(ifNoneMatch));
+            } catch (final Exception exception) {
+                throw new StatusException(BAD_REQUEST_400, "Failed to parse `%s` header".formatted(IF_NONE_MATCH),
+                        exception);
+            }
+        }
+        return ifNoneMatch.orElse(null);
     }
 
     /**
