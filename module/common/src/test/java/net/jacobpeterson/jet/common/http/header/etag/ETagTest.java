@@ -69,6 +69,21 @@ public final class ETagTest {
     }
 
     @Test
+    public void equalsWithoutCompressionType() {
+        assertTrue(ETag.parse("\"abc-compression-type-zstd\"")
+                .equalsWithoutCompressionType(ETag.parse("\"abc\"")));
+        assertTrue(ETag.parse("W/\"abc\"")
+                .equalsWithoutCompressionType(ETag.parse("W/\"abc-compression-type-zstd\"")));
+        assertTrue(ETag.parse("\"abc-compression-type-gzip\"")
+                .equalsWithoutCompressionType(ETag.parse("\"abc-compression-type-zstd\"")));
+        assertFalse(ETag.parse("W/\"abc\"")
+                .equalsWithoutCompressionType(ETag.parse("\"abc-compression-type-zstd\"")));
+        assertFalse(ETag.parse("W/\"abc\"")
+                .equalsWithoutCompressionType(ETag.parse("W/\"def-compression-type-zstd\"")));
+        assertFalse(ETag.parse("W/\"abc\"").equalsWithoutCompressionType(new Object()));
+    }
+
+    @Test
     public void _toString() {
         assertEquals("\"abc\"", ETag.builder()
                 .value("abc")

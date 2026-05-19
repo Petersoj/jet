@@ -61,7 +61,6 @@ import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_RANGE;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_SECURITY_POLICY;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
 import static net.jacobpeterson.jet.common.http.header.Header.ETAG;
-import static net.jacobpeterson.jet.common.http.header.Header.IF_NONE_MATCH;
 import static net.jacobpeterson.jet.common.http.header.Header.LAST_MODIFIED;
 import static net.jacobpeterson.jet.common.http.header.Header.LOCATION;
 import static net.jacobpeterson.jet.common.http.header.Header.SET_COOKIE;
@@ -616,8 +615,8 @@ public final class Response {
         final var eTag = resource.getETag();
         if (eTag != null) {
             setETag(eTag);
-            final var ifNoneMatch = request.getHeader(IF_NONE_MATCH);
-            if (ifNoneMatch != null && ifNoneMatch.equals(eTag.toString())) {
+            final var ifNoneMatch = request.getIfNoneMatch();
+            if (ifNoneMatch != null && ifNoneMatch.equalsWithoutCompressionType(eTag)) {
                 notModified = true;
             }
         }
@@ -680,7 +679,7 @@ public final class Response {
                     throw new StatusException(RANGE_NOT_SATISFIABLE_416);
                 }
                 final var ifRangeETag = ifRange.getETag();
-                if (ifRangeETag != null && eTag != null && !ifRangeETag.equals(eTag)) {
+                if (ifRangeETag != null && eTag != null && !ifRangeETag.equalsWithoutCompressionType(eTag)) {
                     throw new StatusException(RANGE_NOT_SATISFIABLE_416);
                 }
             }

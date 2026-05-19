@@ -222,6 +222,17 @@ public final class ETag {
     }
 
     /**
+     * @return same as {@link #equals(Object)}, but uses {@link #getValueWithoutCompressionType()} instead of
+     * {@link #getValue()}
+     */
+    public boolean equalsWithoutCompressionType(final Object o) {
+        if (!(o instanceof final ETag oETag)) {
+            return false;
+        }
+        return weak == oETag.weak && getValueWithoutCompressionType().equals(oETag.getValueWithoutCompressionType());
+    }
+
+    /**
      * @return internally-cached {@link String} value for {@link Header#ETAG}
      *
      * @see #parse(String)
