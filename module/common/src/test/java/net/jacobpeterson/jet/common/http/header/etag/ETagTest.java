@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
+import static net.jacobpeterson.jet.common.http.header.contentencoding.CompressionType.ZSTANDARD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,6 +48,24 @@ public final class ETagTest {
         assertThrows(IllegalArgumentException.class, () -> ETag.parse(" W/\""));
         assertThrows(IllegalArgumentException.class, () -> ETag.parse(" \""));
         assertThrows(IllegalArgumentException.class, () -> ETag.parse("\"W/"));
+    }
+
+    @Test
+    public void getValueWithoutCompressionType() {
+        {
+            final var eTag = ETag.builder()
+                    .value("abc")
+                    .build();
+            assertEquals("abc", eTag.getValue());
+            assertEquals("abc", eTag.getValueWithoutCompressionType());
+        }
+        {
+            final var eTag = ETag.builder()
+                    .value("abc", ZSTANDARD)
+                    .build();
+            assertEquals("abc-compression-type-zstd", eTag.getValue());
+            assertEquals("abc", eTag.getValueWithoutCompressionType());
+        }
     }
 
     @Test

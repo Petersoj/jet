@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.common.http.header.Header;
+import net.jacobpeterson.jet.common.http.header.contentencoding.CompressionType;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -51,6 +52,13 @@ public final class ETag {
      * The "weak" prefix: <code>"W/"</code>
      */
     public static final String WEAK_PREFIX = "W/";
+
+    /**
+     * The suffix for {@link CompressionType}: <code>"-compression-type-"</code>
+     *
+     * @see Builder#value(String, CompressionType)
+     */
+    public static final String COMPRESSION_TYPE_SUFFIX = "-compression-type-";
 
     /**
      * Computes a strong {@link ETag} for the given entity content using {@link HashingInputStream} with
@@ -153,6 +161,14 @@ public final class ETag {
         }
 
         /**
+         * Calls {@link #value(String)} with {@link #COMPRESSION_TYPE_SUFFIX} and {@link CompressionType#toString()}
+         * appended.
+         */
+        public Builder value(final String value, final CompressionType compressionType) {
+            return value(value + COMPRESSION_TYPE_SUFFIX + compressionType);
+        }
+
+        /**
          * Builds this {@link Builder} into a new {@link ETag} instance.
          *
          * @return the built {@link ETag}
@@ -188,7 +204,22 @@ public final class ETag {
      */
     private final @Getter @EqualsAndHashCode.Include String value;
 
+    private @LazyInit @Nullable String valueWithoutCompressionType;
     private @LazyInit @Nullable String string;
+
+    /**
+     * @return internally-cached {@link #getValue()} without {@link #COMPRESSION_TYPE_SUFFIX} and
+     * {@link CompressionType#toString()}
+     *
+     * @see Builder#value(String, CompressionType)
+     */
+    public String getValueWithoutCompressionType() {
+        if (valueWithoutCompressionType == null) {
+            final var indexOf = value.indexOf(COMPRESSION_TYPE_SUFFIX);
+            valueWithoutCompressionType = indexOf == -1 ? value : value.substring(0, indexOf);
+        }
+        return valueWithoutCompressionType;
+    }
 
     /**
      * @return internally-cached {@link String} value for {@link Header#ETAG}
