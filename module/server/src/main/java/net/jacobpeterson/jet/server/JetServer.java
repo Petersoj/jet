@@ -11,6 +11,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
+import net.jacobpeterson.jet.common.http.header.headers.Headers;
 import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
@@ -473,16 +474,16 @@ public final class JetServer {
     private final @Getter CompressionConfig defaultCompressionConfig;
 
     /**
-     * Whether to call {@link Response#setHeader(Header, String)} with {@link Header#X_CONTENT_TYPE_OPTIONS} and
-     * <code>"nosniff"</code> if {@link Header#X_CONTENT_TYPE_OPTIONS} is not already set.
+     * Whether to call {@link Response} {@link Headers#ensureEntryIgnoreCase(String, String)} with
+     * {@link Header#X_CONTENT_TYPE_OPTIONS} and <code>"nosniff"</code>.
      * <p>
      * Defaults to <code>true</code>.
      */
     private final @Getter boolean preventMimeSniffing;
 
     /**
-     * Whether to call {@link Response#setHeader(Header, String)} with {@link Header#CACHE_CONTROL} and
-     * {@link ResponseCacheControl#NO_CACHE} if {@link Header#CACHE_CONTROL} is not already set.
+     * Whether to call {@link Response#setCacheControl(ResponseCacheControl)} with {@link ResponseCacheControl#NO_CACHE}
+     * if {@link Header#CACHE_CONTROL} is not already set.
      * <p>
      * Defaults to <code>true</code>.
      */
@@ -710,15 +711,15 @@ public final class JetServer {
             private void applyStatusAndHeaders(final org.eclipse.jetty.server.Response jettyResponse,
                     final Response response) {
                 jettyResponse.setStatus(response.getStatusCode());
-                if (preventMimeSniffing && !response.getHeaders().containsKey(X_CONTENT_TYPE_OPTIONS.toString())) {
-                    response.setHeader(X_CONTENT_TYPE_OPTIONS, "nosniff");
+                final var headers = response.getHeaders();
+                if (preventMimeSniffing) {
+                    headers.ensureEntryIgnoreCase(X_CONTENT_TYPE_OPTIONS.toString(), "nosniff");
                 }
-                if (preventAmbiguousResponseCacheControl &&
-                        !response.getHeaders().containsKey(CACHE_CONTROL.toString())) {
-                    response.setHeader(CACHE_CONTROL, NO_CACHE.toString());
+                if (preventAmbiguousResponseCacheControl && !headers.containsKey(CACHE_CONTROL.toString())) {
+                    response.setCacheControl(NO_CACHE);
                 }
                 jettyResponse.getHeaders().clear();
-                response.getHeaders().forEach(jettyResponse.getHeaders()::add);
+                headers.forEach(jettyResponse.getHeaders()::add);
             }
         }));
         server.setErrorHandler(new GracefulHandler(new Abstract() {
