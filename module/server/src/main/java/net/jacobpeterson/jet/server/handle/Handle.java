@@ -2,7 +2,6 @@ package net.jacobpeterson.jet.server.handle;
 
 import com.google.common.base.Stopwatch;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.Response;
@@ -18,7 +17,6 @@ import java.util.function.Supplier;
  * Note: this class is not thread-safe.
  */
 @NullMarked
-@RequiredArgsConstructor
 public class Handle {
 
     /**
@@ -27,19 +25,30 @@ public class Handle {
     private final @Getter HandleInternals internals;
 
     /**
+     * The {@link Request}.
+     */
+    private final @Getter Request request;
+
+    /**
+     * The {@link Response}.
+     */
+    private final @Getter Response response;
+
+    /**
      * A {@link Stopwatch} to measure the request and response lifecycle elapsed time.
      */
     private final @Getter Stopwatch stopwatch = Stopwatch.createStarted();
 
     /**
-     * The {@link Request}.
+     * Instantiates a new {@link Handle}.
+     *
+     * @param internals the {@link #getInternals()}
      */
-    private final @Getter Request request = new Request(this);
-
-    /**
-     * The {@link Response}.
-     */
-    private final @Getter Response response = new Response(this);
+    public Handle(final HandleInternals internals) {
+        this.internals = internals;
+        request = new Request(this);
+        response = new Response(this);
+    }
 
     /**
      * Same as {@link #withPausedStopwatch(Supplier)}, but with {@link Runnable#run()}.
