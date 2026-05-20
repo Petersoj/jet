@@ -12,7 +12,6 @@ import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.cookie.Cookie;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.headers.Headers;
-import net.jacobpeterson.jet.common.http.header.headers.ImmutableHeaders;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.http.header.stricttransportsecurity.StrictTransportSecurity;
 import net.jacobpeterson.jet.common.http.method.Method;
@@ -45,7 +44,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.List;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -159,208 +157,96 @@ public final class Response {
     }
 
     /**
-     * @return {@link #getHeader(String)} with {@link Header#toString()}
-     */
-    public @Nullable String getHeader(final Header header) {
-        return getHeader(header.toString());
-    }
-
-    /**
-     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link List#getFirst()} or <code>null</code>
-     */
-    public @Nullable String getHeader(final String header) {
-        final var headers = this.headers.get(header);
-        return headers.isEmpty() ? null : headers.getFirst();
-    }
-
-    /**
-     * Calls {@link #setHeader(String, String)} with {@link Header#toString()}.
-     */
-    public void setHeader(final Header key, final String value) {
-        setHeader(key.toString(), value);
-    }
-
-    /**
-     * Calls {@link #getHeaders()} {@link Headers#removeAll(Object)} with the given <code>key</code>, then
-     * calls {@link #getHeaders()} {@link Headers#put(Object, Object)}.
-     */
-    public void setHeader(final String key, final String value) {
-        headers.removeAll(key);
-        headers.put(key, value);
-    }
-
-    /**
-     * Calls {@link #addHeader(String, String)} with {@link Header#toString()}.
-     */
-    public void addHeader(final Header key, final String value) {
-        addHeader(key.toString(), value);
-    }
-
-    /**
-     * Calls {@link #getHeaders()} {@link Headers#put(Object, Object)}.
-     */
-    public void addHeader(final String key, final String value) {
-        headers.put(key, value);
-    }
-
-    /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_LENGTH}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONTENT_LENGTH} and {@link String#valueOf(int)}.
      */
     public void setContentLength(final Long contentLength) {
-        setHeader(CONTENT_LENGTH, String.valueOf(contentLength));
+        headers.set(CONTENT_LENGTH.toString(), String.valueOf(contentLength));
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#LAST_MODIFIED}
+     * Calls {@link Headers#set(String, String)} with {@link Header#LAST_MODIFIED} and
      * {@link DateTimeFormatter#RFC_1123_DATE_TIME} {@link DateTimeFormatter#format(TemporalAccessor)}
      * {@link ZonedDateTime#withZoneSameInstant(ZoneId)} {@link ZoneOffset#UTC}.
      */
     public void setLastModified(final ZonedDateTime lastModified) {
-        setHeader(LAST_MODIFIED, RFC_1123_DATE_TIME.format(lastModified.withZoneSameInstant(UTC)));
+        headers.set(LAST_MODIFIED.toString(), RFC_1123_DATE_TIME.format(lastModified.withZoneSameInstant(UTC)));
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#LAST_MODIFIED}
+     * Calls {@link Headers#set(String, String)} with {@link Header#LAST_MODIFIED} and
      * {@link DateTimeFormatter#RFC_1123_DATE_TIME} {@link DateTimeFormatter#format(TemporalAccessor)}
      * {@link Instant#atZone(ZoneId)} {@link ZoneOffset#UTC}.
      */
     public void setLastModified(final Instant lastModified) {
-        setHeader(LAST_MODIFIED, RFC_1123_DATE_TIME.format(lastModified.atZone(UTC)));
+        headers.set(LAST_MODIFIED.toString(), RFC_1123_DATE_TIME.format(lastModified.atZone(UTC)));
     }
 
     /**
-     * Calls {@link #setContentType(String)} with {@link ContentType#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONTENT_TYPE} and {@link ContentType#toString()}.
      */
     public void setContentType(final ContentType contentType) {
-        setContentType(contentType.toString());
+        headers.set(CONTENT_TYPE.toString(), contentType.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_TYPE}.
-     */
-    public void setContentType(final String contentType) {
-        setHeader(CONTENT_TYPE, contentType);
-    }
-
-    /**
-     * Calls {@link #setContentEncoding(String)} with {@link ContentEncoding#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONTENT_ENCODING} and
+     * {@link ContentEncoding#toString()}.
      */
     public void setContentEncoding(final ContentEncoding contentEncoding) {
-        setContentEncoding(contentEncoding.toString());
+        headers.set(CONTENT_ENCODING.toString(), contentEncoding.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_ENCODING}.
-     */
-    public void setContentEncoding(final String contentEncoding) {
-        setHeader(CONTENT_ENCODING, contentEncoding);
-    }
-
-    /**
-     * Calls {@link #setContentRange(String)} with {@link ContentRange#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONTENT_RANGE} and {@link ContentRange#toString()}.
      */
     public void setContentRange(final ContentRange contentRange) {
-        setContentRange(contentRange.toString());
+        headers.set(CONTENT_RANGE.toString(), contentRange.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_RANGE}.
-     */
-    public void setContentRange(final String contentRange) {
-        setHeader(CONTENT_RANGE, contentRange);
-    }
-
-    /**
-     * Calls {@link #setContentDisposition(String)} with {@link ContentDisposition#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONTENT_DISPOSITION} and
+     * {@link ContentDisposition#toString()}.
      */
     public void setContentDisposition(final ContentDisposition contentDisposition) {
-        setContentDisposition(contentDisposition.toString());
+        headers.set(CONTENT_DISPOSITION.toString(), contentDisposition.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_DISPOSITION}.
-     */
-    public void setContentDisposition(final String contentDisposition) {
-        setHeader(CONTENT_DISPOSITION, contentDisposition);
-    }
-
-    /**
-     * Calls {@link #setETag(String)} with {@link ETag#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#ETAG} and {@link ETag#toString()}.
      */
     public void setETag(final ETag eTag) {
-        setETag(eTag.toString());
+        headers.set(ETAG.toString(), eTag.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#ETAG}.
-     */
-    public void setETag(final String eTag) {
-        setHeader(ETAG, eTag);
-    }
-
-    /**
-     * Calls {@link #setCacheControl(String)} with {@link ResponseCacheControl#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CACHE_CONTROL} and
+     * {@link ResponseCacheControl#toString()}.
      */
     public void setCacheControl(final ResponseCacheControl responseCacheControl) {
-        setCacheControl(responseCacheControl.toString());
+        headers.set(CACHE_CONTROL.toString(), responseCacheControl.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_RANGE}.
-     */
-    public void setCacheControl(final String responseCacheControl) {
-        setHeader(CACHE_CONTROL, responseCacheControl);
-    }
-
-    /**
-     * Calls {@link #setStrictTransportSecurity(String)} with {@link StrictTransportSecurity#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#STRICT_TRANSPORT_SECURITY} and
+     * {@link StrictTransportSecurity#toString()}.
      */
     public void setStrictTransportSecurity(final StrictTransportSecurity strictTransportSecurity) {
-        setStrictTransportSecurity(strictTransportSecurity.toString());
+        headers.set(STRICT_TRANSPORT_SECURITY.toString(), strictTransportSecurity.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#STRICT_TRANSPORT_SECURITY}.
-     */
-    public void setStrictTransportSecurity(final String strictTransportSecurity) {
-        setHeader(STRICT_TRANSPORT_SECURITY, strictTransportSecurity);
-    }
-
-    /**
-     * Calls {@link #setContentSecurityPolicy(String)} with {@link ContentSecurityPolicy#toString()}.
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONTENT_SECURITY_POLICY} and
+     * {@link ContentSecurityPolicy#toString()}.
      */
     public void setContentSecurityPolicy(final ContentSecurityPolicy contentSecurityPolicy) {
-        setContentSecurityPolicy(contentSecurityPolicy.toString());
+        headers.set(CONTENT_SECURITY_POLICY.toString(), contentSecurityPolicy.toString());
     }
 
     /**
-     * Calls {@link #setHeader(Header, String)} {@link Header#CONTENT_SECURITY_POLICY}.
-     */
-    public void setContentSecurityPolicy(final String contentSecurityPolicy) {
-        setHeader(CONTENT_SECURITY_POLICY, contentSecurityPolicy);
-    }
-
-    /**
-     * Calls {@link #addHeader(Header, String)} {@link Header#SET_COOKIE} {@link Cookie#toResponseString()}.
+     * Calls {@link Headers#put(Object, Object)} with {@link Header#SET_COOKIE} and {@link Cookie#toResponseString()}.
      */
     public void addCookie(final Cookie cookie) {
-        addHeader(SET_COOKIE, cookie.toResponseString());
-    }
-
-    /**
-     * Calls {@link #redirectTemporarily(String)} with {@link Url#toString()}.
-     */
-    public void redirectTemporarily(final Url location) {
-        redirectTemporarily(location.toString());
-    }
-
-    /**
-     * Calls {@link #setHeader(String, String)} with {@link Header#LOCATION} and calls {@link #setStatus(Status)} with
-     * {@link Status#FOUND_302}.
-     */
-    public void redirectTemporarily(final String location) {
-        setStatus(FOUND_302);
-        setHeader(LOCATION, location);
+        headers.put(SET_COOKIE.toString(), cookie.toResponseString());
     }
 
     /**
@@ -371,12 +257,28 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #setHeader(String, String)} with {@link Header#LOCATION} and calls {@link #setStatus(Status)} with
-     * {@link Status#MOVED_PERMANENTLY_301}.
+     * Calls {@link #setStatus(Status)} with {@link Status#MOVED_PERMANENTLY_301} and calls
+     * {@link Headers#set(String, String)} with {@link Header#LOCATION}.
      */
     public void redirectPermanently(final String location) {
         setStatus(MOVED_PERMANENTLY_301);
-        setHeader(LOCATION, location);
+        headers.set(LOCATION.toString(), location);
+    }
+
+    /**
+     * Calls {@link #redirectTemporarily(String)} with {@link Url#toString()}.
+     */
+    public void redirectTemporarily(final Url location) {
+        redirectTemporarily(location.toString());
+    }
+
+    /**
+     * Calls {@link #setStatus(Status)} with {@link Status#FOUND_302} and calls {@link Headers#set(String, String)}
+     * with {@link Header#LOCATION}.
+     */
+    public void redirectTemporarily(final String location) {
+        setStatus(FOUND_302);
+        headers.set(LOCATION.toString(), location);
     }
 
     /**
@@ -407,8 +309,8 @@ public final class Response {
      * {@link ByteArrayInputStream#ByteArrayInputStream(byte[])}.
      */
     public void setBodyBytes(final byte[] bytes) {
-        setBodyInputStream(new ByteArrayInputStream(bytes));
         setContentLength((long) bytes.length);
+        setBodyInputStream(new ByteArrayInputStream(bytes));
     }
 
     /**
@@ -582,9 +484,10 @@ public final class Response {
      * {@link Status#NOT_MODIFIED_304}.
      *
      * @param resource              the {@link Resource}
-     * @param acceptRanges          <code>true</code> to {@link #setHeader(Header, String)} {@link Header#ACCEPT_RANGES}
-     *                              {@link Range#BYTES_UNIT} and to use {@link Resource#withRange(Range)} with
-     *                              {@link Request#getRange()} if non-<code>null</code>, <code>false</code> otherwise
+     * @param acceptRanges          <code>true</code> to {@link Headers#put(Object, Object)}
+     *                              {@link Header#ACCEPT_RANGES} {@link Range#BYTES_UNIT} and to use
+     *                              {@link Resource#withRange(Range)} with {@link Request#getRange()} if
+     *                              non-<code>null</code>, <code>false</code> otherwise
      * @param contentTypePeekLength if non-<code>null</code> and the given {@link Resource#getContentType()} is
      *                              <code>null</code>, then peek this many bytes into {@link Resource#getContent()} and
      *                              use {@link StringUtil#isLikelyUtf8(byte[])} to apply either
@@ -597,7 +500,7 @@ public final class Response {
             final @Nullable Integer contentTypePeekLength, boolean setBodyInputStream) {
         final var request = handle.getRequest();
         if (acceptRanges) {
-            setHeader(ACCEPT_RANGES, BYTES_UNIT);
+            headers.put(ACCEPT_RANGES.toString(), BYTES_UNIT);
             final var requestRange = request.getRange();
             if (requestRange != null && resource.getContentRange() == null && resource.getContentLength() != null) {
                 resource = resource.withRange(requestRange);

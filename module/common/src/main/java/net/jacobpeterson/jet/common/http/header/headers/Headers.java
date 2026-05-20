@@ -22,6 +22,14 @@ public final class Headers extends AbstractHeaders {
     }
 
     /**
+     * Calls {@link #removeAll(Object)} with the given <code>key</code>, then calls {@link #put(Object, Object)}.
+     */
+    public void set(final String key, final String value) {
+        removeAll(key);
+        put(key, value);
+    }
+
+    /**
      * Calls {@link #put(Object, Object)} if {@link #containsEntry(Object, Object)} is <code>false</code>.
      */
     public void ensureEntry(final String key, final String value) {

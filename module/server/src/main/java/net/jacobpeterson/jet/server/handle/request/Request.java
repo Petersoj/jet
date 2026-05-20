@@ -46,7 +46,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -54,7 +53,6 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static com.google.common.io.ByteStreams.readFully;
-import static java.lang.String.join;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.stream.StreamSupport.stream;
@@ -252,71 +250,6 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getHeader(String)} with {@link Header#toString()}
-     */
-    public @Nullable String getHeader(final Header header) {
-        return getHeader(header.toString());
-    }
-
-    /**
-     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link List#getFirst()} or <code>null</code>
-     */
-    public @Nullable String getHeader(final String header) {
-        final var headers = getHeaders().get(header);
-        return headers.isEmpty() ? null : headers.getFirst();
-    }
-
-    /**
-     * @return {@link #getCommaDelimitedHeader(String)} with {@link Header#toString()}
-     */
-    public @Nullable String getCommaDelimitedHeader(final Header header) {
-        return getCommaDelimitedHeader(header.toString());
-    }
-
-    /**
-     * @return {@link #getDelimitedHeader(String, String)} with <code>","</code>
-     */
-    public @Nullable String getCommaDelimitedHeader(final String header) {
-        return getDelimitedHeader(header, ",");
-    }
-
-    /**
-     * @return {@link #getSemicolonDelimitedHeader(String)} with {@link Header#toString()}
-     */
-    public @Nullable String getSemicolonDelimitedHeader(final Header header) {
-        return getSemicolonDelimitedHeader(header.toString());
-    }
-
-    /**
-     * @return {@link #getDelimitedHeader(String, String)} with <code>";"</code>
-     */
-    public @Nullable String getSemicolonDelimitedHeader(final String header) {
-        return getDelimitedHeader(header, ";");
-    }
-
-    /**
-     * @return {@link #getDelimitedHeader(String, String)} with {@link Header#toString()}
-     */
-    public @Nullable String getDelimitedHeader(final Header header, final String delimiter) {
-        return getDelimitedHeader(header.toString(), delimiter);
-    }
-
-    /**
-     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link String#join(CharSequence, Iterable)} or
-     * <code>null</code>
-     */
-    public @Nullable String getDelimitedHeader(final String header, final String delimiter) {
-        final var headers = getHeaders().get(header);
-        if (headers.isEmpty()) {
-            return null;
-        }
-        if (headers.size() == 1) {
-            return headers.getFirst();
-        }
-        return join(delimiter, headers);
-    }
-
-    /**
      * @return the {@link Header#CONTENT_LENGTH}, or <code>null</code> if unknown
      */
     public @Nullable Long getContentLength() {
@@ -325,11 +258,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#ACCEPT} {@link Accept#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getCommaDelimited(String)}
+     * {@link Header#ACCEPT} {@link Accept#parse(String)}
      */
     public @Nullable Accept getAccept() throws StatusException {
         if (accept == null) {
-            final var accept = getCommaDelimitedHeader(ACCEPT);
+            final var accept = getHeaders().getCommaDelimited(ACCEPT.toString());
             try {
                 this.accept = Optional.ofNullable(accept == null ? null : Accept.parse(accept));
             } catch (final Exception exception) {
@@ -341,12 +275,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#ACCEPT_ENCODING}
-     * {@link AcceptEncoding#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getCommaDelimited(String)}
+     * {@link Header#ACCEPT_ENCODING} {@link AcceptEncoding#parse(String)}
      */
     public @Nullable AcceptEncoding getAcceptEncoding() throws StatusException {
         if (acceptEncoding == null) {
-            final var acceptEncoding = getCommaDelimitedHeader(ACCEPT_ENCODING);
+            final var acceptEncoding = getHeaders().getCommaDelimited(ACCEPT_ENCODING.toString());
             try {
                 this.acceptEncoding = Optional.ofNullable(acceptEncoding == null ? null :
                         AcceptEncoding.parse(acceptEncoding));
@@ -359,12 +293,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#CONTENT_TYPE}
-     * {@link ContentType#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#CONTENT_TYPE} {@link ContentType#parse(String)}
      */
     public @Nullable ContentType getContentType() throws StatusException {
         if (contentType == null) {
-            final var contentType = getHeader(CONTENT_TYPE);
+            final var contentType = getHeaders().getFirst(CONTENT_TYPE.toString());
             try {
                 this.contentType = Optional.ofNullable(contentType == null ? null : ContentType.parse(contentType));
             } catch (final Exception exception) {
@@ -389,11 +323,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#RANGE} {@link Range#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getCommaDelimited(String)}
+     * {@link Header#RANGE} {@link Range#parse(String)}
      */
     public ImmutableList<Range> getRanges() throws StatusException {
         if (ranges == null) {
-            final var range = getCommaDelimitedHeader(RANGE);
+            final var range = getHeaders().getCommaDelimited(RANGE.toString());
             if (range == null) {
                 this.ranges = ImmutableList.of();
             } else {
@@ -423,11 +358,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_MATCH} {@link ETag#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#IF_MATCH} {@link ETag#parse(String)}
      */
     public @Nullable ETag getIfMatch() throws StatusException {
         if (ifMatch == null) {
-            final var ifMatch = getHeader(IF_MATCH);
+            final var ifMatch = getHeaders().getFirst(IF_MATCH.toString());
             try {
                 this.ifMatch = Optional.ofNullable(ifMatch == null ? null : ETag.parse(ifMatch));
             } catch (final Exception exception) {
@@ -439,11 +375,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_NONE_MATCH} {@link ETag#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#IF_NONE_MATCH} {@link ETag#parse(String)}
      */
     public @Nullable ETag getIfNoneMatch() throws StatusException {
         if (ifNoneMatch == null) {
-            final var ifNoneMatch = getHeader(IF_NONE_MATCH);
+            final var ifNoneMatch = getHeaders().getFirst(IF_NONE_MATCH.toString());
             try {
                 this.ifNoneMatch = Optional.ofNullable(ifNoneMatch == null ? null : ETag.parse(ifNoneMatch));
             } catch (final Exception exception) {
@@ -455,12 +392,13 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_MODIFIED_SINCE}
-     * {@link ZonedDateTime#parse(CharSequence, DateTimeFormatter)} {@link DateTimeFormatter#RFC_1123_DATE_TIME}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#IF_MODIFIED_SINCE} {@link ZonedDateTime#parse(CharSequence, DateTimeFormatter)}
+     * {@link DateTimeFormatter#RFC_1123_DATE_TIME}
      */
     public @Nullable ZonedDateTime getIfModifiedSince() throws StatusException {
         if (ifModifiedSince == null) {
-            final var ifModifiedSince = getHeader(IF_MODIFIED_SINCE);
+            final var ifModifiedSince = getHeaders().getFirst(IF_MODIFIED_SINCE.toString());
             try {
                 this.ifModifiedSince = Optional.ofNullable(ifModifiedSince == null ? null :
                         ZonedDateTime.parse(ifModifiedSince, RFC_1123_DATE_TIME));
@@ -473,12 +411,13 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_UNMODIFIED_SINCE}
-     * {@link ZonedDateTime#parse(CharSequence, DateTimeFormatter)} {@link DateTimeFormatter#RFC_1123_DATE_TIME}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#IF_UNMODIFIED_SINCE} {@link ZonedDateTime#parse(CharSequence, DateTimeFormatter)}
+     * {@link DateTimeFormatter#RFC_1123_DATE_TIME}
      */
     public @Nullable ZonedDateTime getIfUnmodifiedSince() throws StatusException {
         if (ifUnmodifiedSince == null) {
-            final var ifUnmodifiedSince = getHeader(IF_UNMODIFIED_SINCE);
+            final var ifUnmodifiedSince = getHeaders().getFirst(IF_UNMODIFIED_SINCE.toString());
             try {
                 this.ifUnmodifiedSince = Optional.ofNullable(ifUnmodifiedSince == null ? null :
                         ZonedDateTime.parse(ifUnmodifiedSince, RFC_1123_DATE_TIME));
@@ -491,11 +430,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#IF_RANGE} {@link IfRange#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)} {@link Header#IF_RANGE}
+     * {@link IfRange#parse(String)}
      */
     public @Nullable IfRange getIfRange() throws StatusException {
         if (ifRange == null) {
-            final var ifRange = getHeader(IF_RANGE);
+            final var ifRange = getHeaders().getFirst(IF_RANGE.toString());
             try {
                 this.ifRange = Optional.ofNullable(ifRange == null ? null : IfRange.parse(ifRange));
             } catch (final Exception exception) {
@@ -507,12 +447,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#CACHE_CONTROL}
-     * {@link RequestCacheControl#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#CACHE_CONTROL} {@link RequestCacheControl#parse(String)}
      */
     public @Nullable RequestCacheControl getCacheControl() throws StatusException {
         if (cacheControl == null) {
-            final var cacheControl = getHeader(CACHE_CONTROL);
+            final var cacheControl = getHeaders().getFirst(CACHE_CONTROL.toString());
             try {
                 this.cacheControl = Optional.ofNullable(cacheControl == null ? null :
                         RequestCacheControl.parse(cacheControl));
@@ -525,12 +465,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#COOKIE}
-     * {@link Cookie#parseRequestCookies(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getSemicolonDelimited(String)}
+     * {@link Header#COOKIE} {@link Cookie#parseRequestCookies(String)}
      */
     public ImmutableMap<String, String> getCookies() {
         if (cookies == null) {
-            final var cookie = getSemicolonDelimitedHeader(COOKIE);
+            final var cookie = getHeaders().getSemicolonDelimited(COOKIE.toString());
             cookies = cookie == null ? ImmutableMap.of() : Cookie.parseRequestCookies(cookie);
         }
         return cookies;
@@ -544,12 +484,12 @@ public final class Request {
     }
 
     /**
-     * @return internally-cached {@link #getHeader(Header)} {@link Header#AUTHORIZATION}
-     * {@link BasicAuthentication#parse(String)}
+     * @return internally-cached {@link #getHeaders()} {@link ImmutableHeaders#getFirst(String)}
+     * {@link Header#AUTHORIZATION} {@link BasicAuthentication#parse(String)}
      */
     public @Nullable BasicAuthentication getBasicAuthentication() throws StatusException {
         if (basicAuthentication == null) {
-            final var authorization = getHeader(AUTHORIZATION);
+            final var authorization = getHeaders().getFirst(AUTHORIZATION.toString());
             try {
                 basicAuthentication = Optional.ofNullable(authorization == null ? null :
                         BasicAuthentication.parse(authorization));
@@ -663,7 +603,7 @@ public final class Request {
     public ImmutableList<MultiPart> getBodyMultiParts(final @Nullable MultipartConfig config) {
         if (bodyMultiParts == null) {
             final var request = handle.getInternals().getRequest();
-            final var contentType = getHeader(CONTENT_TYPE);
+            final var contentType = getHeaders().getFirst(CONTENT_TYPE.toString());
             final var jetConfig = config != null ? config :
                     handle.getInternals().getJetServer().getDefaultMultipartConfig();
             final var jettyConfig = new MultiPartConfig.Builder()

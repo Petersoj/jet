@@ -8,8 +8,11 @@ import net.jacobpeterson.jet.common.util.string.StringUtil;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
+
 import static com.google.common.collect.Multimaps.unmodifiableListMultimap;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.lang.String.join;
 import static net.jacobpeterson.jet.common.util.string.StringUtil.containsIgnoreCase;
 
 /**
@@ -38,6 +41,42 @@ public sealed abstract class AbstractHeaders extends ForwardingListMultimap<Stri
             delegate.putAll(headers);
             this.delegate = unmodifiableListMultimap(delegate);
         }
+    }
+
+    /**
+     * @return {@link #get(Object)} {@link List#getFirst()} or <code>null</code>
+     */
+    public @Nullable String getFirst(final String key) {
+        final var values = get(key);
+        return values.isEmpty() ? null : values.getFirst();
+    }
+
+    /**
+     * @return {@link #getDelimited(String, String)} with <code>","</code>
+     */
+    public @Nullable String getCommaDelimited(final String key) {
+        return getDelimited(key, ",");
+    }
+
+    /**
+     * @return {@link #getDelimited(String, String)} with <code>";"</code>
+     */
+    public @Nullable String getSemicolonDelimited(final String key) {
+        return getDelimited(key, ";");
+    }
+
+    /**
+     * @return {@link #get(Object)} {@link String#join(CharSequence, Iterable)} or <code>null</code>
+     */
+    public @Nullable String getDelimited(final String key, final String delimiter) {
+        final var values = get(key);
+        if (values.isEmpty()) {
+            return null;
+        }
+        if (values.size() == 1) {
+            return values.getFirst();
+        }
+        return join(delimiter, values);
     }
 
     /**
