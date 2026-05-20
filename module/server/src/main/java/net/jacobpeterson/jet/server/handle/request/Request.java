@@ -54,6 +54,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
 import static com.google.common.io.ByteStreams.readFully;
+import static java.lang.String.join;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.stream.StreamSupport.stream;
@@ -266,6 +267,56 @@ public final class Request {
     }
 
     /**
+     * @return {@link #getCommaDelimitedHeader(String)} with {@link Header#toString()}
+     */
+    public @Nullable String getCommaDelimitedHeader(final Header header) {
+        return getCommaDelimitedHeader(header.toString());
+    }
+
+    /**
+     * @return {@link #getDelimitedHeader(String, String)} with <code>","</code>
+     */
+    public @Nullable String getCommaDelimitedHeader(final String header) {
+        return getDelimitedHeader(header, ",");
+    }
+
+    /**
+     * @return {@link #getSemicolonDelimitedHeader(String)} with {@link Header#toString()}
+     */
+    public @Nullable String getSemicolonDelimitedHeader(final Header header) {
+        return getSemicolonDelimitedHeader(header.toString());
+    }
+
+    /**
+     * @return {@link #getDelimitedHeader(String, String)} with <code>";"</code>
+     */
+    public @Nullable String getSemicolonDelimitedHeader(final String header) {
+        return getDelimitedHeader(header, ";");
+    }
+
+    /**
+     * @return {@link #getDelimitedHeader(String, String)} with {@link Header#toString()}
+     */
+    public @Nullable String getDelimitedHeader(final Header header, final String delimiter) {
+        return getDelimitedHeader(header.toString(), delimiter);
+    }
+
+    /**
+     * @return {@link #getHeaders()} {@link ImmutableHeaders#get(Object)} {@link String#join(CharSequence, Iterable)} or
+     * <code>null</code>
+     */
+    public @Nullable String getDelimitedHeader(final String header, final String delimiter) {
+        final var headers = getHeaders().get(header);
+        if (headers.isEmpty()) {
+            return null;
+        }
+        if (headers.size() == 1) {
+            return headers.getFirst();
+        }
+        return join(delimiter, headers);
+    }
+
+    /**
      * @return the {@link Header#CONTENT_LENGTH}, or <code>null</code> if unknown
      */
     public @Nullable Long getContentLength() {
@@ -278,7 +329,7 @@ public final class Request {
      */
     public @Nullable Accept getAccept() throws StatusException {
         if (accept == null) {
-            final var accept = getHeader(ACCEPT);
+            final var accept = getCommaDelimitedHeader(ACCEPT);
             try {
                 this.accept = Optional.ofNullable(accept == null ? null : Accept.parse(accept));
             } catch (final Exception exception) {
@@ -295,7 +346,7 @@ public final class Request {
      */
     public @Nullable AcceptEncoding getAcceptEncoding() throws StatusException {
         if (acceptEncoding == null) {
-            final var acceptEncoding = getHeader(ACCEPT_ENCODING);
+            final var acceptEncoding = getCommaDelimitedHeader(ACCEPT_ENCODING);
             try {
                 this.acceptEncoding = Optional.ofNullable(acceptEncoding == null ? null :
                         AcceptEncoding.parse(acceptEncoding));
@@ -342,7 +393,7 @@ public final class Request {
      */
     public ImmutableList<Range> getRanges() throws StatusException {
         if (ranges == null) {
-            final var range = getHeader(RANGE);
+            final var range = getCommaDelimitedHeader(RANGE);
             if (range == null) {
                 this.ranges = ImmutableList.of();
             } else {
@@ -479,7 +530,7 @@ public final class Request {
      */
     public ImmutableMap<String, String> getCookies() {
         if (cookies == null) {
-            final var cookie = getHeader(COOKIE);
+            final var cookie = getSemicolonDelimitedHeader(COOKIE);
             cookies = cookie == null ? ImmutableMap.of() : Cookie.parseRequestCookies(cookie);
         }
         return cookies;
