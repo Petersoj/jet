@@ -18,6 +18,7 @@ import net.jacobpeterson.jet.server.handle.HandleInternals;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.Response;
+import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
 import net.jacobpeterson.jet.server.handler.handler.Handler;
 import net.jacobpeterson.jet.server.handler.throwable.ThrowableHandler;
 import net.jacobpeterson.jet.server.handler.throwable.simple.SimpleThrowableHandler;
@@ -121,6 +122,7 @@ public final class JetServer {
         private @Nullable HandleFactory handleFactory;
         private int defaultRequestBodyBoundCount = 8 * 1024 * 1024;
         private @Nullable MultipartConfig defaultMultipartConfig;
+        private @Nullable CompressionConfig defaultCompressionConfig;
         private boolean preventMimeSniffing = true;
         private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable SessionStore sessionStore;
@@ -157,6 +159,14 @@ public final class JetServer {
          */
         public Builder defaultMultipartConfig(final MultipartConfig defaultMultipartConfig) {
             this.defaultMultipartConfig = defaultMultipartConfig;
+            return this;
+        }
+
+        /**
+         * @see #getDefaultCompressionConfig()
+         */
+        public Builder defaultCompressionConfig(final CompressionConfig defaultCompressionConfig) {
+            this.defaultCompressionConfig = defaultCompressionConfig;
             return this;
         }
 
@@ -414,6 +424,7 @@ public final class JetServer {
                     handleFactory != null ? handleFactory : Handle::new,
                     defaultRequestBodyBoundCount,
                     defaultMultipartConfig != null ? defaultMultipartConfig : MultipartConfig.builder().build(),
+                    defaultCompressionConfig != null ? defaultCompressionConfig : CompressionConfig.builder().build(),
                     preventMimeSniffing,
                     preventAmbiguousResponseCacheControl,
                     sessionStore != null ? sessionStore : new SimpleSessionStore(),
@@ -453,6 +464,13 @@ public final class JetServer {
      * Defaults to {@link MultipartConfig.Builder#build()}.
      */
     private final @Getter MultipartConfig defaultMultipartConfig;
+
+    /**
+     * The default {@link CompressionConfig} to initially set for {@link Response#getCompressionConfig()}.
+     * <p>
+     * Defaults to {@link CompressionConfig.Builder#build()}.
+     */
+    private final @Getter CompressionConfig defaultCompressionConfig;
 
     /**
      * Whether to call {@link Response#setHeader(Header, String)} with {@link Header#X_CONTENT_TYPE_OPTIONS} and
