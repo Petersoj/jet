@@ -93,14 +93,7 @@ public final class Response {
      * <p>
      * Defaults to {@link Status#OK_200} {@link Status#getCode()}.
      */
-    private @Getter int statusCode = OK_200.getCode();
-
-    /**
-     * The {@link Status}.
-     * <p>
-     * Defaults to {@link Status#OK_200}.
-     */
-    private @Getter @Nullable Status status = OK_200;
+    private @Getter @Setter int statusCode = OK_200.getCode();
 
     /**
      * The {@link Headers}.
@@ -141,19 +134,10 @@ public final class Response {
     }
 
     /**
-     * Sets {@link #getStatusCode()} and {@link #getStatus()} with {@link Status#forCode(int)}.
-     */
-    public void setStatusCode(final int statusCode) {
-        this.statusCode = statusCode;
-        status = Status.forCode(statusCode);
-    }
-
-    /**
-     * Sets {@link #getStatus()} and {@link #getStatusCode()} with {@link Status#getCode()}.
+     * Calls {@link #setStatusCode(int)} with {@link Status#getCode()}.
      */
     public void setStatus(final Status status) {
-        this.status = status;
-        statusCode = status.getCode();
+        setStatusCode(status.getCode());
     }
 
     /**
