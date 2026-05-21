@@ -310,8 +310,7 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getContentType()} {@link ContentType#getCharset()}, defaulting to
-     * {@link StandardCharsets#UTF_8}
+     * @return {@link #getContentType()} {@link ContentType#getCharset()}, defaulting to {@link StandardCharsets#UTF_8}
      */
     public Charset getCharset() {
         final var contentType = getContentType();
@@ -344,12 +343,12 @@ public final class Request {
     }
 
     /**
-     * Throws {@link StatusException} {@link Status#RANGE_NOT_SATISFIABLE_416} if {@link #getRanges()}
-     * {@link ImmutableList#size()} is greater than one.
-     *
      * @return {@link #getRanges()} {@link ImmutableList#getFirst()}, or <code>null</code>
+     *
+     * @throws StatusException thrown with {@link Status#RANGE_NOT_SATISFIABLE_416} if {@link #getRanges()}
+     *                         {@link ImmutableList#size()} is greater than one
      */
-    public @Nullable Range getRange() {
+    public @Nullable Range getRange() throws StatusException {
         final var ranges = getRanges();
         if (ranges.size() > 1) {
             throw new StatusException(RANGE_NOT_SATISFIABLE_416, "Multiple ranges unsupported");

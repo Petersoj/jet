@@ -11,6 +11,8 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
+import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
+import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.headers.Headers;
 import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -72,6 +74,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
+import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -84,7 +87,14 @@ import static java.util.concurrent.ForkJoinPool.commonPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
+import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_ENCODING;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_ENCODING;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_LENGTH;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_RANGE;
+import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_TYPE;
+import static net.jacobpeterson.jet.common.http.header.Header.ETAG;
+import static net.jacobpeterson.jet.common.http.header.Header.VARY;
 import static net.jacobpeterson.jet.common.http.header.Header.X_CONTENT_TYPE_OPTIONS;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.INTERNAL_SERVER_ERROR_500;
@@ -642,7 +652,6 @@ public final class JetServer {
                         routerThrowableHandler.handle(handle, throwable);
                     }
                     final var response = handle.getResponse();
-                    applyStatusAndHeaders(jettyResponse, response);
                     final var bodyInputStream = response.getBodyInputStream();
                     var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
                     if (bodyInputStream != null && bodyOutputStreamApplier != null) {
@@ -660,20 +669,29 @@ public final class JetServer {
                             }
                         };
                     }
+                    CompressionConfig.@Nullable Level compressionLevel;
+                    try {
+                        compressionLevel = getCompressionLevel(handle, bodyOutputStreamApplier != null);
+                    } catch (final Throwable throwable) {
+                        compressionLevel = null;
+                        callResponseBodyThrowableHandler(handle, throwable);
+                    }
+                    applyStatusAndHeaders(jettyResponse, response);
                     if (bodyOutputStreamApplier != null) {
-                        final var bodyOutputStream = asOutputStream(jettyResponse);
-                        try (bodyOutputStream) {
-                            bodyOutputStreamApplier.accept(bodyOutputStream);
+                        try (final var bodyOutputStream = asOutputStream(jettyResponse)) {
+                            if (compressionLevel == null) {
+                                bodyOutputStreamApplier.accept(bodyOutputStream);
+                            } else {
+                                try (final var compressedBodyOutputStream = compressionLevel.getType()
+                                        .compress(bodyOutputStream, compressionLevel.getLevel())) {
+                                    bodyOutputStreamApplier.accept(compressedBodyOutputStream);
+                                }
+                            }
                         } catch (final Throwable throwable) {
                             // Do not call `responseBodyThrowableHandler` for client disconnects or idle timeouts.
                             if (getCausalChain(throwable).stream().noneMatch(cause ->
                                     cause instanceof EofException || cause instanceof TimeoutException)) {
-                                try {
-                                    responseBodyThrowableHandler.handle(handle, throwable);
-                                } catch (final Throwable handleThrowable) {
-                                    LOGGER.error("`Jet.getResponseBodyThrowableHandler().handle()` threw",
-                                            handleThrowable);
-                                }
+                                callResponseBodyThrowableHandler(handle, throwable);
                                 if (!jettyResponse.isCommitted()) {
                                     applyStatusAndHeaders(jettyResponse, response);
                                 }
@@ -708,6 +726,65 @@ public final class JetServer {
                 return true;
             }
 
+            private CompressionConfig.@Nullable Level getCompressionLevel(final Handle handle,
+                    final boolean isBodyOutputStreamApplier) {
+                final var response = handle.getResponse();
+                final var compressionConfig = response.getCompressionConfig();
+                if (compressionConfig == null) {
+                    return null;
+                }
+                final var headers = response.getHeaders();
+                if (compressionConfig.isEnsureVaryHeader()) {
+                    headers.ensureEntryContainingIgnoreCase(VARY.toString(), ACCEPT_ENCODING.toString());
+                }
+                if (!isBodyOutputStreamApplier) {
+                    return null;
+                }
+                if (compressionConfig.isCheckContentEncoding() && headers.containsKey(CONTENT_ENCODING.toString())) {
+                    return null;
+                }
+                if (compressionConfig.isCheckContentRange() && headers.containsKey(CONTENT_RANGE.toString())) {
+                    return null;
+                }
+                final var minimumContentLength = compressionConfig.getMinimumContentLength();
+                if (minimumContentLength != null) {
+                    final var contentLength = headers.getFirst(CONTENT_LENGTH.toString());
+                    if (contentLength != null && parseLong(contentLength) < minimumContentLength) {
+                        return null;
+                    }
+                }
+                if (compressionConfig.isCheckContentType()) {
+                    final var contentType = headers.getFirst(CONTENT_TYPE.toString());
+                    if (contentType != null && ContentType.parse(contentType).isCompressed()) {
+                        return null;
+                    }
+                }
+                final var acceptEncoding = handle.getRequest().getAcceptEncoding();
+                if (acceptEncoding == null) {
+                    return null;
+                }
+                final var acceptEncodingTypes = acceptEncoding.getEntryTypes();
+                final var compressionLevel = compressionConfig.getLevels().stream()
+                        .filter(level -> acceptEncodingTypes.contains(level.getType()))
+                        .findFirst()
+                        .orElse(null);
+                if (compressionLevel == null) {
+                    return null;
+                }
+                headers.set(CONTENT_ENCODING.toString(), compressionLevel.getType().toString());
+                headers.removeAll(CONTENT_LENGTH.toString());
+                if (compressionConfig.isModifyETag()) {
+                    final var eTagValue = headers.getFirst(ETAG.toString());
+                    if (eTagValue != null) {
+                        final var eTag = ETag.parse(eTagValue);
+                        headers.put(ETAG.toString(), eTag.toBuilder()
+                                .value(eTag.getValueWithoutCompressionType(), compressionLevel.getType())
+                                .build().toString());
+                    }
+                }
+                return compressionLevel;
+            }
+
             private void applyStatusAndHeaders(final org.eclipse.jetty.server.Response jettyResponse,
                     final Response response) {
                 jettyResponse.setStatus(response.getStatusCode());
@@ -720,6 +797,14 @@ public final class JetServer {
                 }
                 jettyResponse.getHeaders().clear();
                 headers.forEach(jettyResponse.getHeaders()::add);
+            }
+
+            private void callResponseBodyThrowableHandler(final Handle handle, final Throwable throwable) {
+                try {
+                    responseBodyThrowableHandler.handle(handle, throwable);
+                } catch (final Throwable handleThrowable) {
+                    LOGGER.error("`Jet.getResponseBodyThrowableHandler().handle()` threw", handleThrowable);
+                }
             }
         }));
         server.setErrorHandler(new GracefulHandler(new Abstract() {
