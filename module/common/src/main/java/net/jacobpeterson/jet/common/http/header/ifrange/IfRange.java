@@ -15,6 +15,7 @@ import java.time.format.DateTimeParseException;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static java.util.Objects.requireNonNull;
 import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
 import static net.jacobpeterson.jet.common.http.header.etag.ETag.WEAK_PREFIX;
 
@@ -107,13 +108,8 @@ public final class IfRange {
     @Override
     public String toString() {
         if (string == null) {
-            if (dateTime != null) {
-                string = RFC_1123_DATE_TIME.format(dateTime.withZoneSameInstant(UTC));
-            } else if (eTag != null) {
-                string = eTag.toString();
-            } else {
-                throw new IllegalStateException();
-            }
+            string = dateTime != null ? RFC_1123_DATE_TIME.format(dateTime.withZoneSameInstant(UTC)) :
+                    requireNonNull(eTag).toString();
         }
         return string;
     }
