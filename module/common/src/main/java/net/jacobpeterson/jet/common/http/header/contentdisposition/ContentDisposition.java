@@ -229,6 +229,17 @@ public final class ContentDisposition {
     }
 
     /**
+     * @return this {@link ContentDisposition} copied into a new {@link Builder} instance
+     */
+    public Builder toBuilder() {
+        final var builder = new Builder();
+        builder.type = type;
+        builder.name = name;
+        builder.utf8EncodedFilename = utf8EncodedFilename;
+        return builder;
+    }
+
+    /**
      * @return internally-cached {@link String} value for {@link Header#CONTENT_DISPOSITION}
      *
      * @see #parse(String)

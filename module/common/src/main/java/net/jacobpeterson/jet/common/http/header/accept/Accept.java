@@ -143,6 +143,13 @@ public final class Accept {
     private @LazyInit @Nullable String string;
 
     /**
+     * @return this {@link Accept} copied into a new {@link Builder} instance
+     */
+    public Builder toBuilder() {
+        return new Builder().addAll(contentTypes);
+    }
+
+    /**
      * @return internally-cached {@link String} value for {@link Header#ACCEPT}
      *
      * @see #parse(String)

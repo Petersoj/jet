@@ -84,6 +84,14 @@ public final class ETagTest {
     }
 
     @Test
+    public void toBuilder() {
+        final var eTag = ETag.builder()
+                .value("abc", ZSTANDARD)
+                .build();
+        assertEquals(eTag, eTag.toBuilder().build());
+    }
+
+    @Test
     public void _toString() {
         assertEquals("\"abc\"", ETag.builder()
                 .value("abc")

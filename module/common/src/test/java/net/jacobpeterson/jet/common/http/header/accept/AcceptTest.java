@@ -32,6 +32,14 @@ public final class AcceptTest {
     }
 
     @Test
+    public void toBuilder() {
+        final var accept = Accept.builder()
+                .add(TEXT_HTML)
+                .build();
+        assertEquals(accept, accept.toBuilder().build());
+    }
+
+    @Test
     public void _toString() {
         assertEquals("text/html", Accept.builder()
                 .add(TEXT_HTML)

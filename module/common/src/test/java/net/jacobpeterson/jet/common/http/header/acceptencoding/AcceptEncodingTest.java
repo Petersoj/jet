@@ -79,6 +79,17 @@ public final class AcceptEncodingTest {
     }
 
     @Test
+    public void toBuilder() {
+        final var acceptEncoding = AcceptEncoding.builder()
+                .add(Entry.builder()
+                        .value(ZSTANDARD.toString())
+                        .weight(0.5)
+                        .build())
+                .build();
+        assertEquals(acceptEncoding, acceptEncoding.toBuilder().build());
+    }
+
+    @Test
     public void _toString() {
         assertEquals("*", AcceptEncoding.WILDCARD.toString());
         assertEquals("identity", AcceptEncoding.IDENTITY.toString());

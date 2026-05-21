@@ -207,6 +207,15 @@ public final class ContentEncoding {
     }
 
     /**
+     * @return this {@link ContentEncoding} copied into a new {@link Builder} instance
+     */
+    public Builder toBuilder() {
+        final var builder = new Builder();
+        types.forEach(builder::type);
+        return builder;
+    }
+
+    /**
      * @return internally-cached {@link String} value for {@link Header#CONTENT_ENCODING}
      *
      * @see #parse(String)

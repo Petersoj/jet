@@ -104,6 +104,15 @@ public final class ContentDispositionTest {
     }
 
     @Test
+    public void toBuilder() {
+        final var contentDisposition = ContentDisposition.builder()
+                .type(ATTACHMENT)
+                .utf8EncodedFilename("file%20name.jpg")
+                .build();
+        assertEquals(contentDisposition, contentDisposition.toBuilder().build());
+    }
+
+    @Test
     public void _toString() {
         assertEquals("inline", ContentDisposition.builder()
                 .type(INLINE)

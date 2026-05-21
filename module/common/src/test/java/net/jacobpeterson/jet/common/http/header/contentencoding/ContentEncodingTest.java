@@ -53,6 +53,14 @@ public final class ContentEncodingTest {
     }
 
     @Test
+    public void toBuilder() {
+        final var contentEncoding = ContentEncoding.builder()
+                .type(BROTLI)
+                .build();
+        assertEquals(contentEncoding, contentEncoding.toBuilder().build());
+    }
+
+    @Test
     public void _toString() {
         assertEquals("br", ContentEncoding.builder()
                 .type(BROTLI)

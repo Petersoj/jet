@@ -233,6 +233,16 @@ public final class ETag {
     }
 
     /**
+     * @return this {@link ETag} copied into a new {@link Builder} instance
+     */
+    public Builder toBuilder() {
+        final var builder = new Builder();
+        builder.weak = weak;
+        builder.value = value;
+        return builder;
+    }
+
+    /**
      * @return internally-cached {@link String} value for {@link Header#ETAG}
      *
      * @see #parse(String)

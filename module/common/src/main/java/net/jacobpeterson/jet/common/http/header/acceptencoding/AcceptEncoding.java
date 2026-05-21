@@ -290,6 +290,13 @@ public final class AcceptEncoding {
     }
 
     /**
+     * @return this {@link AcceptEncoding} copied into a new {@link Builder} instance
+     */
+    public Builder toBuilder() {
+        return new Builder().addAll(entries);
+    }
+
+    /**
      * @return internally-cached {@link String} value for {@link Header#ACCEPT}
      *
      * @see #parse(String)
