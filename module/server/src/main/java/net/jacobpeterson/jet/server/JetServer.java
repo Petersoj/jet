@@ -139,7 +139,7 @@ public final class JetServer {
         private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
-        private ThrowableHandler throwableHandler = SimpleThrowableHandler.INSTANCE;
+        private @Nullable ThrowableHandler throwableHandler;
         private @Nullable Handler afterHandler;
         private @Nullable Duration gracefulStopTimeout;
         private @Nullable String host;
@@ -423,6 +423,8 @@ public final class JetServer {
         public JetServer build() {
             checkArgument(defaultRequestBodyBoundCount >= 0,
                     "`defaultRequestBodyBoundCount` must be positive or zero");
+            final var connectionIdleTimeout = this.connectionIdleTimeout != null ? this.connectionIdleTimeout :
+                    ofMinutes(1);
             return new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
                     defaultRequestBodyBoundCount,
@@ -432,14 +434,14 @@ public final class JetServer {
                     preventAmbiguousResponseCacheControl,
                     sessionStore != null ? sessionStore : new SimpleSessionStore(),
                     router != null ? router : new MutableSimpleRouter(),
-                    throwableHandler,
+                    throwableHandler != null ? throwableHandler : SimpleThrowableHandler.INSTANCE,
                     afterHandler,
-                    gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
+                    gracefulStopTimeout != null ? gracefulStopTimeout : connectionIdleTimeout.plusSeconds(10),
                     host,
                     httpPort,
                     httpsPort,
                     http2,
-                    connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
+                    connectionIdleTimeout,
                     reloadSslPeriod,
                     ImmutableList.copyOf(sslPemsSuppliers));
         }
@@ -522,7 +524,7 @@ public final class JetServer {
     /**
      * The {@link Duration} to wait before closing active connections after {@link #stop()} is called.
      * <p>
-     * Defaults to <code>1 minute</code>.
+     * Defaults to {@link #getConnectionIdleTimeout()} plus <code>10 seconds</code>.
      */
     private final @Getter Duration gracefulStopTimeout;
 
@@ -833,7 +835,9 @@ public final class JetServer {
         LOGGER.info("Jet stopping...");
         if (reloadSslFuture != null) {
             reloadSslFuture.cancel(false);
+            reloadSslFuture = null;
         }
+        sslContextFactory = null;
         if (server != null) {
             try {
                 server.stop();
