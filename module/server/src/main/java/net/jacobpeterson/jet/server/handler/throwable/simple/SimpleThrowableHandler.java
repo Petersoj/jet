@@ -14,10 +14,10 @@ import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.ERROR;
 
 /**
- * {@link SimpleThrowableHandler} is a simple {@link ThrowableHandler} implementation that clears
- * {@link Response#getHeaders()}, calls {@link Response#responseText(int, String)} with
- * {@link StatusException#getStatusCode()} or {@link Status#INTERNAL_SERVER_ERROR_500} and {@link Status#toString()},
- * and logs the {@link Throwable} with {@link Level#ERROR} if not a {@link StatusException}.
+ * {@link SimpleThrowableHandler} is a simple {@link ThrowableHandler} implementation that calls
+ * {@link Response#responseText(int, String)} with {@link StatusException#getStatusCode()} or
+ * {@link Status#INTERNAL_SERVER_ERROR_500} and {@link Status#toString()}, and logs the {@link Throwable} with
+ * {@link Level#ERROR} if not a {@link StatusException}.
  */
 @NullMarked
 @Slf4j
@@ -30,8 +30,6 @@ public class SimpleThrowableHandler implements ThrowableHandler {
 
     @Override
     public void handle(final Handle handle, final Throwable throwable) {
-        final var response = handle.getResponse();
-        response.getHeaders().clear();
         final int statusCode;
         final String statusString;
         final var isStatusException = throwable instanceof StatusException;
@@ -44,10 +42,7 @@ public class SimpleThrowableHandler implements ThrowableHandler {
             statusCode = status.getCode();
             statusString = status.toString();
         }
-        response.responseText(statusCode, statusString);
-        // if-statement prevents superfluous `Object[]` creation from varargs.
-        if (isStatusException || LOGGER.isDebugEnabled()) {
-            LOGGER.atLevel(isStatusException ? DEBUG : ERROR).log("Handler threw", throwable);
-        }
+        handle.getResponse().responseText(statusCode, statusString);
+        LOGGER.atLevel(isStatusException ? DEBUG : ERROR).log("Handler threw", throwable);
     }
 }

@@ -52,6 +52,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -69,7 +70,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -138,8 +139,7 @@ public final class JetServer {
         private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
-        private ThrowableHandler routerThrowableHandler = SimpleThrowableHandler.INSTANCE;
-        private ThrowableHandler responseBodyThrowableHandler = SimpleThrowableHandler.INSTANCE;
+        private ThrowableHandler throwableHandler = SimpleThrowableHandler.INSTANCE;
         private @Nullable Handler afterHandler;
         private @Nullable Duration gracefulStopTimeout;
         private @Nullable String host;
@@ -221,18 +221,10 @@ public final class JetServer {
         }
 
         /**
-         * @see #getRouterThrowableHandler()
+         * @see #getThrowableHandler()
          */
-        public Builder routerThrowableHandler(final ThrowableHandler routerThrowableHandler) {
-            this.routerThrowableHandler = routerThrowableHandler;
-            return this;
-        }
-
-        /**
-         * @see #getResponseBodyThrowableHandler()
-         */
-        public Builder responseBodyThrowableHandler(final ThrowableHandler responseBodyThrowableHandler) {
-            this.responseBodyThrowableHandler = responseBodyThrowableHandler;
+        public Builder throwableHandler(final ThrowableHandler throwableHandler) {
+            this.throwableHandler = throwableHandler;
             return this;
         }
 
@@ -440,8 +432,7 @@ public final class JetServer {
                     preventAmbiguousResponseCacheControl,
                     sessionStore != null ? sessionStore : new SimpleSessionStore(),
                     router != null ? router : new MutableSimpleRouter(),
-                    routerThrowableHandler,
-                    responseBodyThrowableHandler,
+                    throwableHandler,
                     afterHandler,
                     gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     host,
@@ -514,18 +505,11 @@ public final class JetServer {
     private final @Getter Router router;
 
     /**
-     * The {@link ThrowableHandler} for {@link Throwable}s thrown by {@link Router#route(Handle)}.
+     * The {@link ThrowableHandler} for {@link Throwable}s thrown by {@link Handler}s.
      * <p>
      * Defaults to {@link SimpleThrowableHandler}.
      */
-    private final @Getter ThrowableHandler routerThrowableHandler;
-
-    /**
-     * The {@link ThrowableHandler} for {@link Throwable}s thrown by writing a response body.
-     * <p>
-     * Defaults to {@link SimpleThrowableHandler}.
-     */
-    private final @Getter ThrowableHandler responseBodyThrowableHandler;
+    private final @Getter ThrowableHandler throwableHandler;
 
     /**
      * The {@link Handler} called after a {@link Handle} has been fully processed and the response body (if any) has
@@ -643,74 +627,77 @@ public final class JetServer {
             public boolean handle(final org.eclipse.jetty.server.Request jettyRequest,
                     final org.eclipse.jetty.server.Response jettyResponse, final Callback callback) {
                 Handle handle = null;
-                final var closeResponseBodyInputStream = new AtomicBoolean(true);
                 try {
                     handle = handleFactory.create(new HandleInternals(JetServer.this, jettyRequest, jettyResponse));
+                    Consumer<OutputStream> bodyOutputStreamApplier = null;
+                    CompressionConfig.@Nullable Level compressionLevel = null;
                     try {
                         router.route(handle);
-                    } catch (final Throwable throwable) {
-                        routerThrowableHandler.handle(handle, throwable);
-                    }
-                    final var response = handle.getResponse();
-                    final var bodyInputStream = response.getBodyInputStream();
-                    var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
-                    if (bodyInputStream != null && bodyOutputStreamApplier != null) {
-                        LOGGER.warn("`Response.getBodyInputStream()` and `Response.getBodyOutputStreamApplier()` " +
-                                "should not both be set.");
-                    }
-                    if (bodyInputStream != null) {
-                        bodyOutputStreamApplier = outputStream -> {
-                            try (bodyInputStream) {
-                                bodyInputStream.transferTo(outputStream);
-                            } catch (final IOException ioException) {
-                                throw new UncheckedIOException(ioException);
-                            } finally {
-                                closeResponseBodyInputStream.setPlain(false);
-                            }
-                        };
-                    }
-                    CompressionConfig.@Nullable Level compressionLevel;
-                    try {
+                        final var response = handle.getResponse();
+                        final var headers = response.getHeaders();
+                        if (preventMimeSniffing) {
+                            headers.ensureEntryIgnoreCase(X_CONTENT_TYPE_OPTIONS.toString(), "nosniff");
+                        }
+                        if (preventAmbiguousResponseCacheControl && !headers.containsKey(CACHE_CONTROL.toString())) {
+                            response.setCacheControl(NO_CACHE);
+                        }
+                        bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
+                        final var bodyInputStream = response.getBodyInputStream();
+                        if (bodyInputStream != null) {
+                            bodyOutputStreamApplier = outputStream -> {
+                                try (bodyInputStream) {
+                                    bodyInputStream.transferTo(outputStream);
+                                } catch (final IOException ioException) {
+                                    throw new UncheckedIOException(ioException);
+                                }
+                            };
+                        }
                         compressionLevel = getCompressionLevel(handle, bodyOutputStreamApplier != null);
                     } catch (final Throwable throwable) {
-                        compressionLevel = null;
-                        callResponseBodyThrowableHandler(handle, throwable);
+                        final var response = handle.getResponse();
+                        response.setStatusCode(INTERNAL_SERVER_ERROR_500.getCode());
+                        response.getHeaders().clear();
+                        response.setBodyInputStream(null);
+                        response.setBodyOutputStreamApplier(null);
+                        throwableHandler.handle(handle, throwable);
                     }
-                    applyStatusAndHeaders(jettyResponse, response);
+                    final var response = handle.getResponse();
+                    jettyResponse.setStatus(response.getStatusCode());
+                    jettyResponse.getHeaders().clear();
+                    response.getHeaders().forEach(jettyResponse.getHeaders()::add);
                     if (bodyOutputStreamApplier != null) {
                         try (final var bodyOutputStream = asOutputStream(jettyResponse)) {
-                            if (compressionLevel == null) {
-                                bodyOutputStreamApplier.accept(bodyOutputStream);
-                            } else {
+                            if (compressionLevel != null) {
                                 try (final var compressedBodyOutputStream = compressionLevel.getType()
                                         .compress(bodyOutputStream, compressionLevel.getLevel())) {
                                     bodyOutputStreamApplier.accept(compressedBodyOutputStream);
                                 }
+                            } else {
+                                bodyOutputStreamApplier.accept(bodyOutputStream);
                             }
                         } catch (final Throwable throwable) {
-                            // Do not call `responseBodyThrowableHandler` for client disconnects or idle timeouts.
-                            if (getCausalChain(throwable).stream().noneMatch(cause ->
+                            if (getCausalChain(throwable).stream().anyMatch(cause ->
                                     cause instanceof EofException || cause instanceof TimeoutException)) {
-                                callResponseBodyThrowableHandler(handle, throwable);
-                                if (!jettyResponse.isCommitted()) {
-                                    applyStatusAndHeaders(jettyResponse, response);
-                                }
+                                LOGGER.debug("Client disconnect or idle timeout", throwable);
+                            } else {
+                                throw throwable;
                             }
                         }
                     }
                 } catch (final Throwable throwable) {
                     LOGGER.error("Internal handler threw", throwable);
-                    jettyResponse.setStatus(INTERNAL_SERVER_ERROR_500.getCode());
+                    if (!jettyResponse.isCommitted()) {
+                        jettyResponse.setStatus(INTERNAL_SERVER_ERROR_500.getCode());
+                        jettyResponse.getHeaders().clear();
+                    }
                 } finally {
                     if (handle != null) {
-                        if (closeResponseBodyInputStream.getPlain()) {
-                            final var responseBodyInputStream = handle.getResponse().getBodyInputStream();
-                            if (responseBodyInputStream != null) {
-                                try {
-                                    responseBodyInputStream.close();
-                                } catch (final Throwable throwable) {
-                                    LOGGER.error("`Response.getBodyInputStream().close()` threw", throwable);
-                                }
+                        final var bodyInputStream = handle.getResponse().getBodyInputStream();
+                        if (bodyInputStream != null) {
+                            try {
+                                bodyInputStream.close();
+                            } catch (final Throwable throwable) {
+                                LOGGER.error("`Response.getBodyInputStream().close()` threw", throwable);
                             }
                         }
                         if (afterHandler != null) {
@@ -783,28 +770,6 @@ public final class JetServer {
                     }
                 }
                 return compressionLevel;
-            }
-
-            private void applyStatusAndHeaders(final org.eclipse.jetty.server.Response jettyResponse,
-                    final Response response) {
-                jettyResponse.setStatus(response.getStatusCode());
-                final var headers = response.getHeaders();
-                if (preventMimeSniffing) {
-                    headers.ensureEntryIgnoreCase(X_CONTENT_TYPE_OPTIONS.toString(), "nosniff");
-                }
-                if (preventAmbiguousResponseCacheControl && !headers.containsKey(CACHE_CONTROL.toString())) {
-                    response.setCacheControl(NO_CACHE);
-                }
-                jettyResponse.getHeaders().clear();
-                headers.forEach(jettyResponse.getHeaders()::add);
-            }
-
-            private void callResponseBodyThrowableHandler(final Handle handle, final Throwable throwable) {
-                try {
-                    responseBodyThrowableHandler.handle(handle, throwable);
-                } catch (final Throwable handleThrowable) {
-                    LOGGER.error("`Jet.getResponseBodyThrowableHandler().handle()` threw", handleThrowable);
-                }
             }
         }));
         server.setErrorHandler(new GracefulHandler(new Abstract() {
