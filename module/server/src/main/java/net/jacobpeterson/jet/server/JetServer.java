@@ -22,7 +22,6 @@ import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
-import net.jacobpeterson.jet.server.handler.handler.Handler;
 import net.jacobpeterson.jet.server.handler.throwable.ThrowableHandler;
 import net.jacobpeterson.jet.server.handler.throwable.simple.SimpleThrowableHandler;
 import net.jacobpeterson.jet.server.route.router.Router;
@@ -140,7 +139,7 @@ public final class JetServer {
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
         private @Nullable ThrowableHandler throwableHandler;
-        private @Nullable Handler afterHandler;
+        private @Nullable Router afterRouter;
         private @Nullable Duration gracefulStopTimeout;
         private @Nullable String host;
         private int httpPort = 8080;
@@ -229,10 +228,10 @@ public final class JetServer {
         }
 
         /**
-         * @see #getAfterHandler()
+         * @see #getAfterRouter()
          */
-        public Builder afterHandler(final Handler afterHandler) {
-            this.afterHandler = afterHandler;
+        public Builder afterRouter(final Router afterRouter) {
+            this.afterRouter = afterRouter;
             return this;
         }
 
@@ -435,7 +434,7 @@ public final class JetServer {
                     sessionStore != null ? sessionStore : new SimpleSessionStore(),
                     router != null ? router : new MutableSimpleRouter(),
                     throwableHandler != null ? throwableHandler : SimpleThrowableHandler.INSTANCE,
-                    afterHandler,
+                    afterRouter,
                     gracefulStopTimeout != null ? gracefulStopTimeout : connectionIdleTimeout.plusSeconds(10),
                     host,
                     httpPort,
@@ -507,19 +506,18 @@ public final class JetServer {
     private final @Getter Router router;
 
     /**
-     * The {@link ThrowableHandler} for {@link Throwable}s thrown by {@link Handler}s.
+     * The {@link ThrowableHandler} for {@link Throwable}s thrown by {@link #getRouter()}.
      * <p>
-     * Defaults to {@link SimpleThrowableHandler}.
+     * Defaults to {@link SimpleThrowableHandler#INSTANCE}.
      */
     private final @Getter ThrowableHandler throwableHandler;
 
     /**
-     * The {@link Handler} called after a {@link Handle} has been fully processed and the response body (if any) has
-     * been written successfully or unsuccessfully.
+     * The {@link Router} to call after the response body (if any) has been written successfully or unsuccessfully.
      * <p>
      * Defaults to <code>null</code>.
      */
-    private final @Getter @Nullable Handler afterHandler;
+    private final @Getter @Nullable Router afterRouter;
 
     /**
      * The {@link Duration} to wait before closing active connections after {@link #stop()} is called.
@@ -680,7 +678,7 @@ public final class JetServer {
                         } catch (final Throwable throwable) {
                             if (getCausalChain(throwable).stream().anyMatch(cause ->
                                     cause instanceof EofException || cause instanceof TimeoutException)) {
-                                LOGGER.debug("Client disconnect or idle timeout", throwable);
+                                LOGGER.debug("Client early disconnect or idle timeout", throwable);
                             } else {
                                 throw throwable;
                             }
@@ -702,11 +700,11 @@ public final class JetServer {
                                 LOGGER.error("`Response.getBodyInputStream().close()` threw", throwable);
                             }
                         }
-                        if (afterHandler != null) {
+                        if (afterRouter != null) {
                             try {
-                                afterHandler.handle(handle);
+                                afterRouter.route(handle);
                             } catch (final Throwable throwable) {
-                                LOGGER.error("`Jet.getAfterHandler().handle()` threw", throwable);
+                                LOGGER.error("`Jet.getAfterRouter().route()` threw", throwable);
                             }
                         }
                     }
