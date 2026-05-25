@@ -20,8 +20,8 @@ import static net.jacobpeterson.jet.common.http.header.cookie.CookieSameSite.LAX
 import static net.jacobpeterson.jet.common.util.token.TokenUtil.generateToken;
 
 /**
- * {@link SimpleSessionStore} is a simple {@link SessionStore} implementation that uses a {@link Cache} to store
- * {@link SimpleSession}s.
+ * {@link SimpleSessionStore} is a simple {@link SessionStore} implementation that uses an in-memory {@link Cache} to
+ * store {@link SimpleSession}s.
  */
 @NullMarked
 @Getter

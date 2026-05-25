@@ -26,9 +26,9 @@ import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfi
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.router.Router;
 import net.jacobpeterson.jet.server.router.simple.MutableSimpleRouter;
+import net.jacobpeterson.jet.server.session.Session;
 import net.jacobpeterson.jet.server.session.SessionStore;
 import net.jacobpeterson.jet.server.session.simple.SimpleSessionStore;
-import net.jacobpeterson.jet.server.session.unsupported.UnsupportedSessionStore;
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
@@ -195,18 +195,18 @@ public final class JetServer {
         }
 
         /**
-         * @see #getSessionStore()
+         * Calls {@link #sessionStore(SessionStore)} with a new {@link SimpleSessionStore} instance.
          */
-        public Builder sessionStore(final SessionStore sessionStore) {
-            this.sessionStore = sessionStore;
-            return this;
+        public Builder sessionStore() {
+            return sessionStore(new SimpleSessionStore());
         }
 
         /**
-         * Calls {@link #sessionStore(SessionStore)} with {@link UnsupportedSessionStore#INSTANCE}.
+         * @see #getSessionStore()
          */
-        public Builder disableSessions() {
-            return sessionStore(UnsupportedSessionStore.INSTANCE);
+        public Builder sessionStore(final @Nullable SessionStore sessionStore) {
+            this.sessionStore = sessionStore;
+            return this;
         }
 
         /**
@@ -339,7 +339,6 @@ public final class JetServer {
                 for (var index = 0; index < certificateChainsSize; index++) {
                     sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index)));
                 }
-                LOGGER.info("sslPems: {}", sslPems.size());
                 return sslPems;
             });
         }
@@ -413,7 +412,7 @@ public final class JetServer {
                     defaultCompressionConfig != null ? defaultCompressionConfig : CompressionConfig.builder().build(),
                     preventMimeSniffing,
                     preventAmbiguousResponseCacheControl,
-                    sessionStore != null ? sessionStore : new SimpleSessionStore(),
+                    sessionStore,
                     router != null ? router : new MutableSimpleRouter(),
                     gracefulStopTimeout != null ? gracefulStopTimeout : connectionIdleTimeout.plusSeconds(10),
                     host,
@@ -472,11 +471,11 @@ public final class JetServer {
     private final @Getter boolean preventAmbiguousResponseCacheControl;
 
     /**
-     * The {@link SessionStore}.
+     * The {@link SessionStore}, or <code>null</code> to disable {@link Session}s.
      * <p>
-     * Defaults to {@link SimpleSessionStore}. Use {@link UnsupportedSessionStore#INSTANCE} to disable sessions.
+     * Defaults to <code>null</code>.
      */
-    private final @Getter SessionStore sessionStore;
+    private final @Getter @Nullable SessionStore sessionStore;
 
     /**
      * The {@link Router}.

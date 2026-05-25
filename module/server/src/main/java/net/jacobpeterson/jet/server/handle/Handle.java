@@ -11,6 +11,8 @@ import org.jspecify.annotations.NullMarked;
 
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * {@link Handle} is a class that represents a web server request and response.
  * <p>
@@ -86,6 +88,7 @@ public class Handle {
      * @return {@link JetServer#getSessionStore()} {@link SessionStore#getOrCreate(Handle)}
      */
     public Session getSession() {
-        return internals.getJetServer().getSessionStore().getOrCreate(this);
+        return requireNonNull(internals.getJetServer().getSessionStore(),
+                "`JetServer.Builder.sessionStore()` must be called to enable sessions").getOrCreate(this);
     }
 }
