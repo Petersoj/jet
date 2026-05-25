@@ -215,7 +215,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
             final @Nullable ContentEncoding contentEncoding,
             final @Nullable Cache<String, Resource> resourcesOfPathsCache, final boolean enableWatchService) {
         checkArgument(Files.isDirectory(directory), "Not a directory: %s", directory);
-        this.directory = directory.toAbsolutePath();
+        this.directory = directory;
         this.requestPathRelativizer = requestPathRelativizer;
         this.defaultFilename = defaultFilename;
         this.defaultExtension = defaultExtension;
