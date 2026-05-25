@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.server.handle.response;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 import net.jacobpeterson.jet.common.http.header.Header;
@@ -24,7 +25,7 @@ import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
-import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandler;
+import net.jacobpeterson.jet.server.handler.directory.FileDirectoryHandler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -44,6 +45,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -101,27 +104,20 @@ public final class Response {
     private final @Getter Headers headers = Headers.create();
 
     /**
-     * The {@link CompressionConfig}, or <code>null</code> to disable response compression.
+     * The {@link CompressionConfig}, or <code>null</code> to disable compression.
      * <p>
      * Defaults to {@link JetServer#getDefaultCompressionConfig()}.
      */
     private @Getter @Setter @Nullable CompressionConfig compressionConfig;
 
     /**
-     * The body {@link InputStream}.
+     * The body {@link OutputStream} applier used to write the body.
      * <p>
-     * {@link InputStream#close()} is guaranteed to be called.
-     * <p>
-     * Cannot be used with {@link #setBodyOutputStreamApplier(Consumer)}.
-     */
-    private @Getter @Nullable InputStream bodyInputStream;
-
-    /**
-     * The body {@link OutputStream} applier.
-     * <p>
-     * Cannot be used with {@link #setBodyInputStream(InputStream)}.
+     * Note: this is not guaranteed to be called.
      */
     private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
+
+    private @Nullable List<Runnable> afters;
 
     /**
      * Instantiates a new {@link Response}.
@@ -273,19 +269,39 @@ public final class Response {
     }
 
     /**
-     * Sets {@link #getBodyInputStream()}, closing the existing {@link #getBodyInputStream()} if any. Also calls
-     * {@link #setBodyOutputStreamApplier(Consumer)} with <code>null</code>.
+     * Calls {@link #setBodyInputStream(InputStream, boolean)} with <code>close</code> set to <code>true</code>.
      */
     public void setBodyInputStream(final @Nullable InputStream bodyInputStream) {
-        if (this.bodyInputStream != null) {
-            try {
-                this.bodyInputStream.close();
-            } catch (final IOException ioException) {
-                throw new UncheckedIOException(ioException);
+        setBodyInputStream(bodyInputStream, true);
+    }
+
+    /**
+     * Sets {@link #getBodyOutputStreamApplier()} using {@link InputStream#transferTo(OutputStream)}.
+     *
+     * @param closeAfter <code>true</code> to call {@link #addAfter(Runnable)} with {@link InputStream#close()},
+     *                   <code>false</code> otherwise
+     */
+    public void setBodyInputStream(final @Nullable InputStream bodyInputStream, final boolean closeAfter) {
+        if (bodyInputStream == null) {
+            bodyOutputStreamApplier = null;
+        } else {
+            bodyOutputStreamApplier = outputStream -> {
+                try (bodyInputStream) {
+                    bodyInputStream.transferTo(outputStream);
+                } catch (final IOException ioException) {
+                    throw new UncheckedIOException(ioException);
+                }
+            };
+            if (closeAfter) {
+                addAfter(() -> {
+                    try {
+                        bodyInputStream.close();
+                    } catch (final IOException ioException) {
+                        throw new UncheckedIOException(ioException);
+                    }
+                });
             }
         }
-        this.bodyInputStream = bodyInputStream;
-        bodyOutputStreamApplier = null;
     }
 
     /**
@@ -612,10 +628,28 @@ public final class Response {
      * <p>
      * Note: it is recommended to use {@link FileDirectoryHandler} instead of calling this method directly.
      */
-    public void ofFile(final Path file, final boolean strongETag, final boolean trustedContentType,
+    public void responseFile(final Path file, final boolean strongETag, final boolean trustedContentType,
             final @Nullable ContentType untrustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding, final boolean exposeFilename) {
         responseResource(Resource.ofFile(file, strongETag, trustedContentType, untrustedContentType, peekLength,
                 contentEncoding, exposeFilename));
+    }
+
+    /**
+     * Adds a {@link Runnable} guaranteed to run after this {@link Response} has been written.
+     */
+    public void addAfter(final Runnable after) {
+        if (afters == null) {
+            afters = new ArrayList<>();
+        }
+        afters.add(after);
+    }
+
+    /**
+     * @return an {@link ImmutableList} of all {@link Runnable}s given to {@link #addAfter(Runnable)}s, or
+     * <code>null</code>
+     */
+    public @Nullable ImmutableList<Runnable> getAfters() {
+        return afters == null ? null : ImmutableList.copyOf(afters);
     }
 }

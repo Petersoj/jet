@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.route.route.simple.pathstartswith;
+package net.jacobpeterson.jet.server.route.simple.pathstartswith;
 
 import com.google.errorprone.annotations.Immutable;
 import lombok.EqualsAndHashCode;
@@ -8,7 +8,7 @@ import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
-import net.jacobpeterson.jet.server.route.route.Route;
+import net.jacobpeterson.jet.server.route.Route;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

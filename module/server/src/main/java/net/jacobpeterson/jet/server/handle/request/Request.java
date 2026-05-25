@@ -28,12 +28,12 @@ import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
-import net.jacobpeterson.jet.server.route.route.Route;
-import net.jacobpeterson.jet.server.route.route.RouteMatch;
-import net.jacobpeterson.jet.server.route.route.simple.pathexact.PathExactRouteMatch;
-import net.jacobpeterson.jet.server.route.route.simple.pathparameters.PathParametersRouteMatch;
-import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRouteMatch;
-import net.jacobpeterson.jet.server.route.route.simple.pathstartswith.PathStartsWithRouteMatch;
+import net.jacobpeterson.jet.server.route.Route;
+import net.jacobpeterson.jet.server.route.RouteMatch;
+import net.jacobpeterson.jet.server.route.simple.pathexact.PathExactRouteMatch;
+import net.jacobpeterson.jet.server.route.simple.pathparameters.PathParametersRouteMatch;
+import net.jacobpeterson.jet.server.route.simple.pathregex.PathRegexRouteMatch;
+import net.jacobpeterson.jet.server.route.simple.pathstartswith.PathStartsWithRouteMatch;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.MultiPartConfig;
 import org.eclipse.jetty.http.MultiPartFormData.Parts;
@@ -544,8 +544,8 @@ public final class Request {
     /**
      * @param boundCount the bound count, or <code>null</code> for <code>{@link Integer#MAX_VALUE} - 8</code>
      *
-     * @return {@link #getBodyInputStream(Long)} {@link InputStream#readAllBytes()} or
-     * {@link ByteStreams#readFully(InputStream, byte[])} if {@link #getContentLength()} is non-<code>null</code>
+     * @return {@link #getBodyInputStream(Long)} {@link ByteStreams#readFully(InputStream, byte[])} or
+     * {@link InputStream#readAllBytes()} if {@link #getContentLength()} is <code>null</code>
      */
     public byte[] getBodyBytes(final @Nullable Integer boundCount) throws StatusException {
         final var appliedBoundCount = boundCount == null ? Integer.MAX_VALUE - 8 : boundCount.longValue();

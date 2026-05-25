@@ -1,8 +1,8 @@
-package net.jacobpeterson.jet.server.route.route.simple.pathparameters;
+package net.jacobpeterson.jet.server.route.simple.pathparameters;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Value;
-import net.jacobpeterson.jet.server.route.route.RouteMatch;
+import net.jacobpeterson.jet.server.route.RouteMatch;
 import org.jspecify.annotations.NullMarked;
 
 import static java.util.Objects.requireNonNull;

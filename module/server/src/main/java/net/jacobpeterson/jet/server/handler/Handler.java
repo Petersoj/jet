@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.handler.handler;
+package net.jacobpeterson.jet.server.handler;
 
 import net.jacobpeterson.jet.server.handle.Handle;
 import org.jspecify.annotations.NullMarked;

@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.route.route.simple.pathparameters;
+package net.jacobpeterson.jet.server.route.simple.pathparameters;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.EqualsAndHashCode;
@@ -8,8 +8,8 @@ import lombok.ToString;
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.url.Scheme;
 import net.jacobpeterson.jet.server.handle.Handle;
-import net.jacobpeterson.jet.server.route.route.Route;
-import net.jacobpeterson.jet.server.route.route.simple.pathregex.PathRegexRoute;
+import net.jacobpeterson.jet.server.route.Route;
+import net.jacobpeterson.jet.server.route.simple.pathregex.PathRegexRoute;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

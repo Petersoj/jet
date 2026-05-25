@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.handler.handler.directory;
+package net.jacobpeterson.jet.server.handler.directory;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -13,7 +13,7 @@ import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
-import net.jacobpeterson.jet.server.handler.handler.Handler;
+import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

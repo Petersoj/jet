@@ -1,12 +1,12 @@
-package net.jacobpeterson.jet.server.route.router.simple;
+package net.jacobpeterson.jet.server.router.simple;
 
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
-import net.jacobpeterson.jet.server.handler.handler.Handler;
-import net.jacobpeterson.jet.server.route.route.Route;
-import net.jacobpeterson.jet.server.route.router.Router;
+import net.jacobpeterson.jet.server.handler.Handler;
+import net.jacobpeterson.jet.server.route.Route;
+import net.jacobpeterson.jet.server.router.Router;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;

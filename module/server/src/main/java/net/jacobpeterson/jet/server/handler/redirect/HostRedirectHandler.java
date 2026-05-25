@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.handler.handler.redirect;
+package net.jacobpeterson.jet.server.handler.redirect;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.Response;
-import net.jacobpeterson.jet.server.handler.handler.Handler;
+import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 
 import static com.google.common.base.Preconditions.checkState;

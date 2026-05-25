@@ -1,7 +1,7 @@
-package net.jacobpeterson.jet.server.route.route.simple.pathstartswith;
+package net.jacobpeterson.jet.server.route.simple.pathstartswith;
 
 import lombok.Value;
-import net.jacobpeterson.jet.server.route.route.RouteMatch;
+import net.jacobpeterson.jet.server.route.RouteMatch;
 import org.jspecify.annotations.NullMarked;
 
 /**

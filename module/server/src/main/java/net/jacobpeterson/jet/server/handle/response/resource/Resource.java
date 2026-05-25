@@ -16,7 +16,7 @@ import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
-import net.jacobpeterson.jet.server.handler.handler.directory.FileDirectoryHandler;
+import net.jacobpeterson.jet.server.handler.directory.FileDirectoryHandler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

@@ -1,4 +1,4 @@
-package net.jacobpeterson.jet.server.route.route;
+package net.jacobpeterson.jet.server.route;
 
 import net.jacobpeterson.jet.server.handle.Handle;
 import org.jspecify.annotations.NullMarked;
