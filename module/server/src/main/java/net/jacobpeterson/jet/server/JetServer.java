@@ -718,7 +718,7 @@ public final class JetServer {
                     final var eTagValue = headers.getFirst(ETAG.toString());
                     if (eTagValue != null) {
                         final var eTag = ETag.parse(eTagValue);
-                        headers.put(ETAG.toString(), eTag.toBuilder()
+                        headers.set(ETAG.toString(), eTag.toBuilder()
                                 .value(eTag.getValueWithoutCompressionType(), compressionLevel.getType())
                                 .build().toString());
                     }
