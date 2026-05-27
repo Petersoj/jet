@@ -2,6 +2,7 @@ package net.jacobpeterson.jet.server.handle.response;
 
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
@@ -72,12 +73,12 @@ import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.T
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_PLAIN_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.range.Range.BYTES_UNIT;
 import static net.jacobpeterson.jet.common.http.method.Method.HEAD;
-import static net.jacobpeterson.jet.common.http.status.Status.FOUND_302;
-import static net.jacobpeterson.jet.common.http.status.Status.MOVED_PERMANENTLY_301;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_MODIFIED_304;
 import static net.jacobpeterson.jet.common.http.status.Status.OK_200;
 import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_206;
+import static net.jacobpeterson.jet.common.http.status.Status.PERMANENT_REDIRECT_308;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
+import static net.jacobpeterson.jet.common.http.status.Status.TEMPORARY_REDIRECT_307;
 import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
@@ -230,34 +231,40 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #redirectPermanently(String)} with {@link Url#toString()}.
+     * {@link RedirectType} represents a type of HTTP redirect, either temporary or permanent.
      */
-    public void redirectPermanently(final Url location) {
-        redirectPermanently(location.toString());
+    @RequiredArgsConstructor @Getter
+    public enum RedirectType {
+
+        /**
+         * @see Status#TEMPORARY_REDIRECT_307
+         */
+        TEMPORARY(TEMPORARY_REDIRECT_307),
+
+        /**
+         * @see Status#PERMANENT_REDIRECT_308
+         */
+        PERMANENT(PERMANENT_REDIRECT_308);
+
+        /**
+         * The {@link Status} used to define the {@link RedirectType} in a {@link Response}.
+         */
+        final Status status;
     }
 
     /**
-     * Calls {@link #setStatus(Status)} with {@link Status#MOVED_PERMANENTLY_301} and calls
+     * Calls {@link #redirect(RedirectType, String)} with {@link Url#toString()}.
+     */
+    public void redirect(final RedirectType type, final Url location) {
+        redirect(type, location.toString());
+    }
+
+    /**
+     * Calls {@link #setStatus(Status)} with {@link RedirectType#getStatus()}, then calls
      * {@link Headers#set(String, String)} with {@link Header#LOCATION}.
      */
-    public void redirectPermanently(final String location) {
-        setStatus(MOVED_PERMANENTLY_301);
-        headers.set(LOCATION.toString(), location);
-    }
-
-    /**
-     * Calls {@link #redirectTemporarily(String)} with {@link Url#toString()}.
-     */
-    public void redirectTemporarily(final Url location) {
-        redirectTemporarily(location.toString());
-    }
-
-    /**
-     * Calls {@link #setStatus(Status)} with {@link Status#FOUND_302} and calls {@link Headers#set(String, String)}
-     * with {@link Header#LOCATION}.
-     */
-    public void redirectTemporarily(final String location) {
-        setStatus(FOUND_302);
+    public void redirect(final RedirectType type, final String location) {
+        setStatus(type.getStatus());
         headers.set(LOCATION.toString(), location);
     }
 

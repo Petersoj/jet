@@ -9,6 +9,7 @@ import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.Response;
+import net.jacobpeterson.jet.server.handle.response.Response.RedirectType;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
 import net.jacobpeterson.jet.server.handler.Handler;
@@ -33,6 +34,7 @@ import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.Res
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static net.jacobpeterson.jet.common.http.url.Url.pathTrimLeading;
 import static net.jacobpeterson.jet.common.http.url.Url.pathTrimTrailing;
+import static net.jacobpeterson.jet.server.handle.response.Response.RedirectType.PERMANENT;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
 /**
@@ -77,7 +79,7 @@ public class ClasspathDirectoryHandler implements Handler {
      * <code>requestPathAlwaysStartsWith</code> from the start of the given request path,
      * <code>defaultFilename</code> set to <code>"index.html"</code>,
      * <code>defaultExtension</code> set to <code>".html"</code>,
-     * <code>redirectToDefault</code> set to <code>true</code>,
+     * <code>redirectToDefault</code> set to {@link RedirectType#PERMANENT},
      * <code>strongETag</code> set to <code>true</code>,
      * <code>peekLength</code> set to {@link Resource#DEFAULT_PEEK_LENGTH}, and
      * <code>contentEncoding</code> set to <code>null</code>.
@@ -92,7 +94,7 @@ public class ClasspathDirectoryHandler implements Handler {
                         requestPath.substring(requestPathAlwaysStartsWith.length()))
                 .defaultFilename("index.html")
                 .defaultExtension(".html")
-                .redirectToDefault(true)
+                .redirectToDefault(PERMANENT)
                 .cacheControl(cacheControl)
                 .trustedContentType(trustedContentType)
                 .peekLength(DEFAULT_PEEK_LENGTH)
@@ -130,11 +132,11 @@ public class ClasspathDirectoryHandler implements Handler {
     private final @Getter @Nullable String defaultExtension;
 
     /**
-     * Whether to call {@link Response#redirectTemporarily(Url)} to the request path with {@link #getDefaultFilename()}
-     * or {@link #getDefaultExtension()}. This prevents multiple requests paths from serving the same content e.g.
-     * helps establish the canonical request path of a file.
+     * If non-<code>null</code>, call {@link Response#redirect(RedirectType, Url)} to the request path with
+     * {@link #getDefaultFilename()} or {@link #getDefaultExtension()}. This prevents multiple requests paths from
+     * serving the same content e.g. helps establish the canonical request path of a file.
      */
-    private final @Getter boolean redirectToDefault;
+    private final @Getter @Nullable RedirectType redirectToDefault;
 
     /**
      * The {@link ResponseCacheControl} for {@link Response#setCacheControl(ResponseCacheControl)}, or <code>null</code>
@@ -171,7 +173,7 @@ public class ClasspathDirectoryHandler implements Handler {
      * @param requestPathRelativizer the {@link #getRequestPathRelativizer()}
      * @param defaultFilename        the {@link #getDefaultFilename()}
      * @param defaultExtension       the {@link #getDefaultExtension()}
-     * @param redirectToDefault      the {@link #isRedirectToDefault()}
+     * @param redirectToDefault      the {@link #getRedirectToDefault()}
      * @param cacheControl           the {@link #getCacheControl()}
      * @param trustedContentType     the {@link #isTrustedContentType()}
      * @param peekLength             the {@link #getPeekLength()}
@@ -181,7 +183,7 @@ public class ClasspathDirectoryHandler implements Handler {
     private ClasspathDirectoryHandler(final Class<?> clazz, final String directory,
             final @Nullable UnaryOperator<String> requestPathRelativizer,
             final @Nullable String defaultFilename, final @Nullable String defaultExtension,
-            final boolean redirectToDefault, final @Nullable ResponseCacheControl cacheControl,
+            final @Nullable RedirectType redirectToDefault, final @Nullable ResponseCacheControl cacheControl,
             final boolean trustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding) {
         this.clazz = clazz;
@@ -227,7 +229,7 @@ public class ClasspathDirectoryHandler implements Handler {
     public void handle(final Handle handle) {
         final var requestUrl = handle.getRequest().getUrl();
         final var requestPath = requestUrl.getNormalizedPath();
-        if (redirectToDefault) {
+        if (redirectToDefault != null) {
             final Integer redirectRemoveLength;
             if (defaultFilename != null && requestPath.endsWith(defaultFilename)) {
                 redirectRemoveLength = defaultFilename.length();
@@ -240,7 +242,7 @@ public class ClasspathDirectoryHandler implements Handler {
                 redirectRemoveLength = null;
             }
             if (redirectRemoveLength != null) {
-                handle.getResponse().redirectTemporarily(requestUrl.toBuilder()
+                handle.getResponse().redirect(redirectToDefault, requestUrl.toBuilder()
                         .path(requestPath.substring(0, requestPath.length() - redirectRemoveLength))
                         .build());
                 return;

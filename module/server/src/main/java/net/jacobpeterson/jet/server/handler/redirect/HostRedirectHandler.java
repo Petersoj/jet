@@ -5,7 +5,7 @@ import lombok.Getter;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
-import net.jacobpeterson.jet.server.handle.response.Response;
+import net.jacobpeterson.jet.server.handle.response.Response.RedirectType;
 import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 
@@ -26,10 +26,9 @@ public class HostRedirectHandler implements Handler {
     private final String host;
 
     /**
-     * <code>true</code> to use {@link Response#redirectPermanently(Url)}, <code>false</code> to use
-     * {@link Response#redirectTemporarily(Url)}.
+     * The {@link RedirectType}.
      */
-    private final boolean permanent;
+    private final RedirectType type;
 
     @Override
     public void handle(final Handle handle) {
@@ -37,12 +36,6 @@ public class HostRedirectHandler implements Handler {
         final var requestHost = requestUrl.getHost();
         checkState(!requestHost.equals(host),
                 "`HostRedirectHandler` cannot be used with a `Route` that does not match host: %s", requestHost);
-        final var redirectUrl = requestUrl.toBuilder().host(host).build();
-        final var response = handle.getResponse();
-        if (permanent) {
-            response.redirectPermanently(redirectUrl);
-        } else {
-            response.redirectTemporarily(redirectUrl);
-        }
+        handle.getResponse().redirect(type, requestUrl.toBuilder().host(host).build());
     }
 }

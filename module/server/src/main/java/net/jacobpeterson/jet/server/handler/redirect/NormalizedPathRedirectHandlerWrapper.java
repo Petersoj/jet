@@ -5,7 +5,7 @@ import lombok.Getter;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
-import net.jacobpeterson.jet.server.handle.response.Response;
+import net.jacobpeterson.jet.server.handle.response.Response.RedirectType;
 import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 
@@ -24,23 +24,16 @@ public class NormalizedPathRedirectHandlerWrapper implements Handler {
     private final Handler handler;
 
     /**
-     * <code>true</code> to use {@link Response#redirectPermanently(Url)}, <code>false</code> to use
-     * {@link Response#redirectTemporarily(Url)}.
+     * The {@link RedirectType}.
      */
-    private final boolean permanent;
+    private final RedirectType type;
 
     @Override
     public void handle(final Handle handle) {
         final var requestUrl = handle.getRequest().getUrl();
         final var encodedNormalizedPath = requestUrl.getEncodedNormalizedPath();
         if (!requestUrl.getEncodedPath().equals(encodedNormalizedPath)) {
-            final var response = handle.getResponse();
-            final var redirectUrl = requestUrl.toBuilder().path(encodedNormalizedPath).build();
-            if (permanent) {
-                response.redirectPermanently(redirectUrl);
-            } else {
-                response.redirectTemporarily(redirectUrl);
-            }
+            handle.getResponse().redirect(type, requestUrl.toBuilder().path(encodedNormalizedPath).build());
         } else {
             handler.handle(handle);
         }
