@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import dev.scheibelhofer.crypto.provider.JctProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -58,19 +57,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
 import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -83,7 +88,6 @@ import static java.time.Duration.ofMinutes;
 import static java.util.Locale.ROOT;
 import static java.util.concurrent.ForkJoinPool.commonPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
 import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_ENCODING;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
@@ -333,8 +337,8 @@ public final class JetServer {
                 }
                 final var certificateChainsSize = certificateChains.size();
                 final var privateKeysSize = privateKeys.size();
-                checkState(certificateChainsSize == privateKeysSize, "Found %s certificates, but only %s private keys",
-                        certificateChainsSize, privateKeysSize);
+                checkArgument(certificateChainsSize == privateKeysSize,
+                        "Found %s certificates, but only %s private keys", certificateChainsSize, privateKeysSize);
                 final var sslPems = new ArrayList<SslPem>(certificateChainsSize);
                 for (var index = 0; index < certificateChainsSize; index++) {
                     sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index)));
@@ -425,6 +429,8 @@ public final class JetServer {
         }
     }
 
+    private static final Pattern SSL_PEM_PRIVATE_KEY_STRIP_PATTERN = Pattern.compile("\\s|-----.*-----");
+
     /**
      * The {@link HandleFactory}.
      * <p>
@@ -448,7 +454,7 @@ public final class JetServer {
     private final @Getter MultipartConfig defaultMultipartConfig;
 
     /**
-     * The default {@link CompressionConfig} to initially set for {@link Response#getCompressionConfig()}.
+     * The default {@link CompressionConfig} that {@link Response#getCompressionConfig()} is initially set to.
      * <p>
      * Defaults to {@link CompressionConfig.Builder#build()}.
      */
@@ -756,13 +762,22 @@ public final class JetServer {
 
     private void setKeyStoreFromSslPemsSuppliers(final SslContextFactory sslContextFactory) {
         try {
-            final var keyStore = KeyStore.getInstance("pem", JctProvider.getInstance());
-            keyStore.load(new ByteArrayInputStream(sslPemsSuppliers.stream()
-                    .flatMap(supplier -> supplier.get().stream())
-                    .map(sslPem -> sslPem.privateKey + "\n" + sslPem.certificateChain)
-                    .collect(joining()).getBytes(US_ASCII)), null);
+            final var keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null, null);
+            final var certificateFactory = CertificateFactory.getInstance("X.509");
+            for (final var sslPemSupplier : sslPemsSuppliers) {
+                for (final var sslPem : sslPemSupplier.get()) {
+                    final var certificates = certificateFactory.generateCertificates(new ByteArrayInputStream(
+                            sslPem.certificateChain.getBytes(US_ASCII))).toArray(Certificate[]::new);
+                    final var privateKey = KeyFactory.getInstance(certificates[0].getPublicKey().getAlgorithm())
+                            .generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(
+                                    SSL_PEM_PRIVATE_KEY_STRIP_PATTERN.matcher(sslPem.privateKey).replaceAll(""))));
+                    keyStore.setKeyEntry(String.valueOf(keyStore.size()), privateKey, null, certificates);
+                }
+            }
             sslContextFactory.setKeyStore(keyStore);
-        } catch (final KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException exception) {
+        } catch (final CertificateException | NoSuchAlgorithmException | InvalidKeySpecException | KeyStoreException |
+                IOException exception) {
             throw new RuntimeException(exception);
         }
     }
