@@ -280,8 +280,11 @@ public enum Status {
             Description.UNUSED_306),
 
     /**
-     * This response code is no longer used; but is reserved. It was used in a previous version of the HTTP/1.1
-     * specification.
+     * The server sends this response to direct the client to get the requested resource at another URI with the same
+     * method that was used in the prior request. This has the same semantics as the <code>302 Found</code> response
+     * code, with the exception that the user agent <em>must not</em> change the HTTP method used: if a
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST"><code>POST</code></a> was used
+     * in the first request, a <code>POST</code> must be used in the redirected request.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/307">developer.mozilla.org</a>
      */
@@ -290,11 +293,12 @@ public enum Status {
             Description.TEMPORARY_REDIRECT_307),
 
     /**
-     * The server sends this response to direct the client to get the requested resource at another URI with the same
-     * method that was used in the prior request. This has the same semantics as the <code>302 Found</code> response
-     * code, with the exception that the user agent <em>must not</em> change the HTTP method used: if a
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST"><code>POST</code></a> was
-     * used in the first request, a <code>POST</code> must be used in the redirected request.
+     * This means that the resource is now permanently located at another URI, specified by the
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location"><code>Location</code></a>
+     * response header. This has the same semantics as the <code>301 Moved Permanently</code> HTTP response code, with
+     * the exception that the user agent <em>must not</em> change the HTTP method used: if a
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST"><code>POST</code></a> was used
+     * in the first request, a <code>POST</code> must be used in the second request.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/308">developer.mozilla.org</a>
      */
