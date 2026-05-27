@@ -51,6 +51,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -320,16 +321,12 @@ public final class JetServer {
                                 return CONTINUE;
                             }
                             if (isCertificateChain.apply(file)) {
-                                certificateChains.add(readSslFile(file));
+                                certificateChains.add(readString(file, US_ASCII));
                             }
                             if (isPrivateKey.apply(file)) {
-                                privateKeys.add(readSslFile(file));
+                                privateKeys.add(readString(file, US_ASCII));
                             }
                             return CONTINUE;
-                        }
-
-                        private String readSslFile(final Path file) throws IOException {
-                            return readString(file, US_ASCII);
                         }
                     });
                 } catch (final IOException ioException) {
@@ -344,6 +341,19 @@ public final class JetServer {
                     sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index)));
                 }
                 return sslPems;
+            });
+        }
+
+        /**
+         * @return {@link #sslPem(Supplier)} using {@link Files#readString(Path, Charset)}
+         */
+        public Builder sslPem(final Path certificateChain, final Path privateKey) {
+            return sslPem(() -> {
+                try {
+                    return new SslPem(readString(certificateChain, US_ASCII), readString(privateKey, US_ASCII));
+                } catch (final IOException ioException) {
+                    throw new UncheckedIOException(ioException);
+                }
             });
         }
 
@@ -746,7 +756,7 @@ public final class JetServer {
         } catch (final Exception exception) {
             throw new RuntimeException(exception);
         }
-        LOGGER.info("Jet started!");
+        LOGGER.info("Jet started");
         if (reloadSslPeriod != null) {
             final var periodSeconds = reloadSslPeriod.toSeconds();
             reloadSslFuture = commonPool().scheduleAtFixedRate(() -> Thread.ofVirtual().start(() -> {
@@ -756,7 +766,7 @@ public final class JetServer {
                     LOGGER.error("Reload SSL threw", throwable);
                 }
             }), periodSeconds, periodSeconds, SECONDS);
-            LOGGER.info("Reloading SSL every {}.", reloadSslPeriod.toString().substring(2).toLowerCase(ROOT));
+            LOGGER.info("Reloading SSL every {}", reloadSslPeriod.toString().substring(2).toLowerCase(ROOT));
         }
     }
 
@@ -791,6 +801,7 @@ public final class JetServer {
         }
         try {
             sslContextFactory.reload(this::setKeyStoreFromSslPemsSuppliers);
+            LOGGER.debug("Reloaded SSL");
         } catch (final Exception exception) {
             throw new RuntimeException(exception);
         }
