@@ -79,14 +79,14 @@ public final class PathStartsWithRoute implements Route {
     /**
      * Whether to use the decoded path from {@link Request#getUrl()}.
      * <p>
-     * Defaults to <code>false</code>.
+     * Defaults to <code>true</code>.
      */
     private final boolean useDecodedRequestPath;
 
     /**
      * Whether to use the normalized path from {@link Request#getUrl()}.
      * <p>
-     * Defaults to <code>false</code>.
+     * Defaults to <code>true</code>.
      */
     private final boolean useNormalizedRequestPath;
 
@@ -119,8 +119,8 @@ public final class PathStartsWithRoute implements Route {
         this.requirePathEndsWithSlash = requirePathEndsWithSlash == null || requirePathEndsWithSlash;
         checkArgument(pathEndsWithSlash || !this.requirePathEndsWithSlash,
                 "`requirePathEndsWithSlash` is `true`, but the given `path` doesn't end with `/`");
-        this.useDecodedRequestPath = useDecodedRequestPath != null && useDecodedRequestPath;
-        this.useNormalizedRequestPath = useNormalizedRequestPath != null && useNormalizedRequestPath;
+        this.useDecodedRequestPath = useDecodedRequestPath == null || useDecodedRequestPath;
+        this.useNormalizedRequestPath = useNormalizedRequestPath == null || useNormalizedRequestPath;
     }
 
     @Override

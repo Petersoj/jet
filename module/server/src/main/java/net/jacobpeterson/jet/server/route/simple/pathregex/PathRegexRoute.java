@@ -49,8 +49,8 @@ public final class PathRegexRoute implements Route {
         private @Nullable Scheme schemeEnum;
         private @Nullable String host;
         private @Nullable Pattern pathPattern;
-        private boolean useDecodedRequestPath = false;
-        private boolean useNormalizedRequestPath = false;
+        private boolean useDecodedRequestPath = true;
+        private boolean useNormalizedRequestPath = true;
 
         /**
          * @see #getMethod()
@@ -168,14 +168,14 @@ public final class PathRegexRoute implements Route {
     /**
      * Whether to use the decoded path from {@link Request#getUrl()}.
      * <p>
-     * Defaults to <code>false</code>.
+     * Defaults to <code>true</code>.
      */
     private final boolean useDecodedRequestPath;
 
     /**
      * Whether to use the normalized path from {@link Request#getUrl()}.
      * <p>
-     * Defaults to <code>false</code>.
+     * Defaults to <code>true</code>.
      */
     private final boolean useNormalizedRequestPath;
 
