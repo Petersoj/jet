@@ -86,6 +86,7 @@ import static java.nio.file.Files.readString;
 import static java.nio.file.Files.walkFileTree;
 import static java.time.Duration.ofDays;
 import static java.time.Duration.ofMinutes;
+import static java.time.Duration.ofSeconds;
 import static java.util.Locale.ROOT;
 import static java.util.concurrent.ForkJoinPool.commonPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -150,6 +151,8 @@ public final class JetServer {
         private boolean http2 = true;
         private @Nullable Duration reloadSslPeriod;
         private @Nullable Duration connectionIdleTimeout;
+        private @Nullable Duration connectionIdleTimeoutWhenStopping;
+        private boolean connectionIdleTimeoutWhenStoppingSet;
 
         /**
          * @see #getHandleFactory()
@@ -410,6 +413,15 @@ public final class JetServer {
         }
 
         /**
+         * @see #getConnectionIdleTimeoutWhenStopping()
+         */
+        public Builder connectionIdleTimeoutWhenStopping(final Duration connectionIdleTimeoutWhenStopping) {
+            this.connectionIdleTimeoutWhenStopping = connectionIdleTimeoutWhenStopping;
+            connectionIdleTimeoutWhenStoppingSet = true;
+            return this;
+        }
+
+        /**
          * Builds this {@link Builder} into a new {@link JetServer} instance.
          *
          * @return the built {@link JetServer} instance
@@ -417,8 +429,6 @@ public final class JetServer {
         public JetServer build() {
             checkArgument(defaultRequestBodyBoundCount >= 0,
                     "`defaultRequestBodyBoundCount` must be positive or zero");
-            final var connectionIdleTimeout = this.connectionIdleTimeout != null ? this.connectionIdleTimeout :
-                    ofMinutes(1);
             return new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
                     defaultRequestBodyBoundCount,
@@ -428,12 +438,13 @@ public final class JetServer {
                     preventAmbiguousResponseCacheControl,
                     sessionStore,
                     router != null ? router : new MutableSimpleRouter(),
-                    gracefulStopTimeout != null ? gracefulStopTimeout : connectionIdleTimeout.plusSeconds(10),
+                    gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     host,
                     httpPort,
                     httpsPort,
                     http2,
-                    connectionIdleTimeout,
+                    connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
+                    connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(10),
                     reloadSslPeriod,
                     ImmutableList.copyOf(sslPemsSuppliers));
         }
@@ -501,9 +512,9 @@ public final class JetServer {
     private final @Getter Router router;
 
     /**
-     * The {@link Duration} to wait before closing active connections after {@link #stop()} is called.
+     * The maximum {@link Duration} to wait before closing existing connections after {@link #stop()} is called.
      * <p>
-     * Defaults to {@link #getConnectionIdleTimeout()} plus <code>10 seconds</code>.
+     * Defaults to <code>1 minute</code>.
      */
     private final @Getter Duration gracefulStopTimeout;
 
@@ -543,6 +554,14 @@ public final class JetServer {
     private final @Getter Duration connectionIdleTimeout;
 
     /**
+     * The {@link #getConnectionIdleTimeout()} to apply to existing connections after {@link #stop()} is called, or
+     * <code>null</code> to not modify it.
+     * <p>
+     * Defaults to <code>10 seconds</code>.
+     */
+    private final @Getter @Nullable Duration connectionIdleTimeoutWhenStopping;
+
+    /**
      * The period {@link Duration} to call {@link #reloadSsl()}, or <code>null</code> to disable.
      */
     private final @Getter @Nullable Duration reloadSslPeriod;
@@ -567,13 +586,7 @@ public final class JetServer {
             final var http11Factory = new HttpConnectionFactory(httpConfiguration);
             final var httpFactories = !http2 ? new ConnectionFactory[]{http11Factory} :
                     new ConnectionFactory[]{http11Factory, new HTTP2CServerConnectionFactory(httpConfiguration)};
-            final var httpConnector = new ServerConnector(server, null, null, null, -1, -1, httpFactories);
-            httpConnector.setHost(host);
-            httpConnector.setPort(httpPort);
-            final var connectionIdleTimeoutMillis = connectionIdleTimeout.toMillis();
-            httpConnector.setIdleTimeout(connectionIdleTimeoutMillis);
-            httpConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
-            server.addConnector(httpConnector);
+            server.addConnector(createServerConnector(server, httpFactories, httpPort));
         }
         if (!sslPemsSuppliers.isEmpty()) {
             final var httpsConfiguration = new HttpConfiguration(httpConfiguration);
@@ -595,13 +608,7 @@ public final class JetServer {
                         new HTTP2ServerConnectionFactory(httpsConfiguration),
                         http11Factory};
             }
-            final var httpsConnector = new ServerConnector(server, null, null, null, -1, -1, httpsFactories);
-            httpsConnector.setHost(host);
-            httpsConnector.setPort(httpsPort);
-            final var connectionIdleTimeoutMillis = connectionIdleTimeout.toMillis();
-            httpsConnector.setIdleTimeout(connectionIdleTimeoutMillis);
-            httpsConnector.setShutdownIdleTimeout(connectionIdleTimeoutMillis);
-            server.addConnector(httpsConnector);
+            server.addConnector(createServerConnector(server, httpsFactories, httpsPort));
         }
         server.setHandler(new GracefulHandler(new Abstract() {
             @Override
@@ -768,6 +775,17 @@ public final class JetServer {
             }), periodSeconds, periodSeconds, SECONDS);
             LOGGER.info("Reloading SSL every {}", reloadSslPeriod.toString().substring(2).toLowerCase(ROOT));
         }
+    }
+
+    private ServerConnector createServerConnector(final Server server, final ConnectionFactory[] factories,
+            final int port) {
+        final var serverConnector = new ServerConnector(server, null, null, null, -1, -1, factories);
+        serverConnector.setHost(host);
+        serverConnector.setPort(port);
+        serverConnector.setIdleTimeout(connectionIdleTimeout.toMillis());
+        serverConnector.setShutdownIdleTimeout(connectionIdleTimeoutWhenStopping == null ? -1 :
+                connectionIdleTimeoutWhenStopping.toMillis());
+        return serverConnector;
     }
 
     private void setKeyStoreFromSslPemsSuppliers(final SslContextFactory sslContextFactory) {
