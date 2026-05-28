@@ -6,7 +6,7 @@ import java.lang.System.getenv
 
 plugins {
     id("module-common")
-    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.0.5"
+    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.1.0"
     signing
     id("com.gradle.plugin-publish") version "2.1.1"
     id("org.gradle.plugin-compatibility") version "1.0.0"
@@ -19,7 +19,7 @@ dependencies {
     api("com.github.victools:jsonschema-generator:$jsonschemaGeneratorVersion")
     api("com.github.victools:jsonschema-module-jackson:$jsonschemaGeneratorVersion")
 
-    api("com.networknt:json-schema-validator:3.0.2")
+    api("com.networknt:json-schema-validator:3.0.3")
 }
 
 // Gradle Test Kit already provides an SLF4j binding.

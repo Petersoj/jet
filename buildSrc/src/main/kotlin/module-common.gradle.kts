@@ -38,11 +38,11 @@ dependencies {
     errorprone("com.uber.nullaway:nullaway:0.13.4")
     errorprone("net.jacobpeterson:final-coat:1.2.3")
 
-    testImplementation(platform("org.junit:junit-bom:6.0.3"))
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.32")
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.33")
 }
 
 tasks.withType(JavaCompile::class) {

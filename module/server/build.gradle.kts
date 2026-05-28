@@ -5,9 +5,9 @@ plugins {
 dependencies {
     api(project(":module:common"))
 
-    api("com.github.ben-manes.caffeine:caffeine:3.2.3")
+    api("com.github.ben-manes.caffeine:caffeine:3.2.4")
 
-    val jettyVersion = "12.1.8"
+    val jettyVersion = "12.1.9"
     implementation("org.eclipse.jetty:jetty-alpn-java-server:${jettyVersion}")
     implementation("org.eclipse.jetty.http2:jetty-http2-server:${jettyVersion}")
     implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server:${jettyVersion}")
