@@ -14,6 +14,7 @@ import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.headers.Headers;
 import net.jacobpeterson.jet.common.http.status.Status;
+import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
@@ -29,7 +30,6 @@ import net.jacobpeterson.jet.server.session.Session;
 import net.jacobpeterson.jet.server.session.SessionStore;
 import net.jacobpeterson.jet.server.session.simple.SimpleSessionStore;
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
-import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
 import org.eclipse.jetty.io.EofException;
@@ -144,12 +144,12 @@ public final class JetServer {
         private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
-        private @Nullable Duration gracefulStopTimeout;
         private @Nullable String host;
         private int httpPort = 8080;
         private int httpsPort = 8443;
         private boolean http2 = true;
         private @Nullable Duration reloadSslPeriod;
+        private @Nullable Duration gracefulStopTimeout;
         private @Nullable Duration connectionIdleTimeout;
         private @Nullable Duration connectionIdleTimeoutWhenStopping;
         private boolean connectionIdleTimeoutWhenStoppingSet;
@@ -222,14 +222,6 @@ public final class JetServer {
          */
         public Builder router(final Router router) {
             this.router = router;
-            return this;
-        }
-
-        /**
-         * @see #getGracefulStopTimeout()
-         */
-        public Builder gracefulStopTimeout(final Duration gracefulStopTimeout) {
-            this.gracefulStopTimeout = gracefulStopTimeout;
             return this;
         }
 
@@ -405,6 +397,14 @@ public final class JetServer {
         }
 
         /**
+         * @see #getGracefulStopTimeout()
+         */
+        public Builder gracefulStopTimeout(final Duration gracefulStopTimeout) {
+            this.gracefulStopTimeout = gracefulStopTimeout;
+            return this;
+        }
+
+        /**
          * @see #getConnectionIdleTimeout()
          */
         public Builder connectionIdleTimeout(final Duration connectionIdleTimeout) {
@@ -427,8 +427,6 @@ public final class JetServer {
          * @return the built {@link JetServer} instance
          */
         public JetServer build() {
-            checkArgument(defaultRequestBodyBoundCount >= 0,
-                    "`defaultRequestBodyBoundCount` must be positive or zero");
             return new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
                     defaultRequestBodyBoundCount,
@@ -438,14 +436,14 @@ public final class JetServer {
                     preventAmbiguousResponseCacheControl,
                     sessionStore,
                     router != null ? router : new MutableSimpleRouter(),
-                    gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     host,
                     httpPort,
                     httpsPort,
                     http2,
+                    reloadSslPeriod,
+                    gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
                     connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(10),
-                    reloadSslPeriod,
                     ImmutableList.copyOf(sslPemsSuppliers));
         }
     }
@@ -512,13 +510,6 @@ public final class JetServer {
     private final @Getter Router router;
 
     /**
-     * The maximum {@link Duration} to wait before closing existing connections after {@link #stop()} is called.
-     * <p>
-     * Defaults to <code>1 minute</code>.
-     */
-    private final @Getter Duration gracefulStopTimeout;
-
-    /**
      * The host address to bind to, or <code>null</code> for all addresses.
      * <p>
      * Defaults to <code>null</code>.
@@ -540,11 +531,23 @@ public final class JetServer {
     private final @Getter int httpsPort;
 
     /**
-     * Whether to enable {@link HttpVersion#HTTP_2}.
+     * Whether to enable {@link Version#HTTP_2}.
      * <p>
      * Defaults to <code>true</code>.
      */
     private final @Getter boolean http2;
+
+    /**
+     * The period {@link Duration} to call {@link #reloadSsl()}, or <code>null</code> to disable.
+     */
+    private final @Getter @Nullable Duration reloadSslPeriod;
+
+    /**
+     * The maximum {@link Duration} to wait before closing existing connections after {@link #stop()} is called.
+     * <p>
+     * Defaults to <code>1 minute</code>.
+     */
+    private final @Getter Duration gracefulStopTimeout;
 
     /**
      * The {@link Duration} to wait for network data to be sent or received before closing the connection.
@@ -560,11 +563,6 @@ public final class JetServer {
      * Defaults to <code>10 seconds</code>.
      */
     private final @Getter @Nullable Duration connectionIdleTimeoutWhenStopping;
-
-    /**
-     * The period {@link Duration} to call {@link #reloadSsl()}, or <code>null</code> to disable.
-     */
-    private final @Getter @Nullable Duration reloadSslPeriod;
 
     private final ImmutableList<Supplier<List<SslPem>>> sslPemsSuppliers;
     private @Nullable Server server;

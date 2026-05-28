@@ -99,6 +99,20 @@ tasks.withType(Javadoc::class) {
                 "https://errorprone.info/api/latest/")
     }
 }
+afterEvaluate {
+    tasks.withType(Javadoc::class) {
+        project.configurations.flatMap { it.dependencies.withType(ProjectDependency::class) }.forEach {
+            project(it.path).tasks.withType(Javadoc::class).forEach { dependencyJavadocTask ->
+                this@withType.dependsOn(dependencyJavadocTask)
+                this@withType.options {
+                    (this as StandardJavadocDocletOptions).linksOffline(
+                            "https://javadoc.io/doc/${it.group}/${it.name}/${it.version}/",
+                            dependencyJavadocTask.destinationDir!!.path)
+                }
+            }
+        }
+    }
+}
 
 publishing {
     publications.create(JRELEASER_MAVEN_NAME, MavenPublication::class) {
