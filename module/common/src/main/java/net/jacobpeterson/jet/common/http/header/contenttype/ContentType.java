@@ -132,6 +132,7 @@ public final class ContentType {
     public static final String TEXT_EVENT_STREAM_STRING = TEXT_TYPE_STRING + TYPE_DELIMITER +
             TEXT_EVENT_STREAM_SUBTYPE_STRING;
     public static final ContentType TEXT_EVENT_STREAM = create(TEXT_TYPE_STRING, TEXT_EVENT_STREAM_SUBTYPE_STRING);
+    public static final ContentType TEXT_EVENT_STREAM_UTF_8 = TEXT_EVENT_STREAM.withCharset(UTF_8);
 
     // END text types
 
