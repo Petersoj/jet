@@ -410,7 +410,7 @@ public final class JetServer {
                     reloadSslPeriod,
                     gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
-                    connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(5),
+                    connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(1),
                     ImmutableList.copyOf(sslPemsSuppliers));
         }
     }
@@ -484,6 +484,8 @@ public final class JetServer {
 
     /**
      * The period {@link Duration} to call {@link #reloadSsl()}, or <code>null</code> to disable.
+     * <p>
+     * Defaults to <code>null</code>.
      */
     private final @Getter @Nullable Duration reloadSslPeriod;
 
@@ -495,7 +497,8 @@ public final class JetServer {
     private final @Getter Duration gracefulStopTimeout;
 
     /**
-     * The {@link Duration} to wait for network data to be sent or received before closing the connection.
+     * The maximum {@link Duration} to wait for network data to be sent or received when actively reading/writing a
+     * request/response before closing the connection.
      * <p>
      * Defaults to <code>1 minute</code>.
      */
@@ -503,9 +506,9 @@ public final class JetServer {
 
     /**
      * The {@link #getConnectionIdleTimeout()} to apply to existing connections after {@link #stop()} is called, or
-     * <code>null</code> to not modify it.
+     * <code>null</code> to not modify the {@link #getConnectionIdleTimeout()}.
      * <p>
-     * Defaults to <code>5 seconds</code>.
+     * Defaults to <code>1 second</code>.
      */
     private final @Getter @Nullable Duration connectionIdleTimeoutWhenStopping;
 
@@ -769,7 +772,8 @@ public final class JetServer {
     }
 
     /**
-     * Stops this server.
+     * Stops this server, rejecting new connections and waiting for {@link #getGracefulStopTimeout()} to elapse before
+     * closing existing connections.
      */
     public synchronized void stop() {
         LOGGER.info("Jet stopping...");
