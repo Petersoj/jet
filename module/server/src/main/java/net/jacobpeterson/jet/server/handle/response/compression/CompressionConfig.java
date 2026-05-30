@@ -27,6 +27,11 @@ import static net.jacobpeterson.jet.common.http.header.contentencoding.Compressi
 public class CompressionConfig {
 
     /**
+     * A static {@link CompressionConfig} instance with all default values.
+     */
+    public static final CompressionConfig DEFAULT = builder().build();
+
+    /**
      * An {@link ImmutableList} of {@link Level}s with {@link Level#getLevel()} set to <code>null</code> and in the
      * following order: {@link CompressionType#ZSTANDARD}, {@link CompressionType#BROTLI}, {@link CompressionType#GZIP},
      * {@link CompressionType#DEFLATE}.

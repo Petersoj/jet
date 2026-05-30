@@ -20,7 +20,6 @@ import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.util.string.StringUtil;
-import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
@@ -87,6 +86,7 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
  * <p>
  * Note: this class is not thread-safe.
  */
+@RequiredArgsConstructor
 @NullMarked
 public final class Response {
 
@@ -107,28 +107,20 @@ public final class Response {
     /**
      * The {@link CompressionConfig}, or <code>null</code> to disable compression.
      * <p>
-     * Defaults to {@link JetServer#getDefaultCompressionConfig()}.
+     * Defaults to {@link CompressionConfig#DEFAULT}.
      */
-    private @Getter @Setter @Nullable CompressionConfig compressionConfig;
+    private @Getter @Setter @Nullable CompressionConfig compressionConfig = CompressionConfig.DEFAULT;
 
     /**
      * The body {@link OutputStream} applier used to write the body.
      * <p>
      * Note: this is not guaranteed to be called.
+     * <p>
+     * Note: the provided {@link OutputStream} is thread-safe.
      */
     private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
 
     private @Nullable List<Runnable> afters;
-
-    /**
-     * Instantiates a new {@link Response}.
-     *
-     * @param handle the {@link Handle}
-     */
-    public Response(final Handle handle) {
-        this.handle = handle;
-        compressionConfig = handle.getInternals().getJetServer().getDefaultCompressionConfig();
-    }
 
     /**
      * Calls {@link #setStatusCode(int)} with {@link Status#getCode()}.

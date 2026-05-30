@@ -19,10 +19,7 @@ import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
-import net.jacobpeterson.jet.server.handle.request.Request;
-import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.Response;
-import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.router.Router;
 import net.jacobpeterson.jet.server.router.simple.MutableSimpleRouter;
@@ -137,13 +134,10 @@ public final class JetServer {
 
         private final List<Supplier<List<SslPem>>> sslPemsSuppliers = new ArrayList<>();
         private @Nullable HandleFactory handleFactory;
-        private int defaultRequestBodyBoundCount = 8 * 1024 * 1024;
-        private @Nullable MultipartConfig defaultMultipartConfig;
-        private @Nullable CompressionConfig defaultCompressionConfig;
-        private boolean preventMimeSniffing = true;
-        private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
+        private boolean preventMimeSniffing = true;
+        private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable String host;
         private int httpPort = 8080;
         private int httpsPort = 8443;
@@ -159,46 +153,6 @@ public final class JetServer {
          */
         public Builder handleFactory(final HandleFactory handleFactory) {
             this.handleFactory = handleFactory;
-            return this;
-        }
-
-        /**
-         * @see #getDefaultRequestBodyBoundCount()
-         */
-        public Builder defaultRequestBodyBoundCount(final int defaultRequestBodyBoundCount) {
-            this.defaultRequestBodyBoundCount = defaultRequestBodyBoundCount;
-            return this;
-        }
-
-        /**
-         * @see #getDefaultMultipartConfig()
-         */
-        public Builder defaultMultipartConfig(final MultipartConfig defaultMultipartConfig) {
-            this.defaultMultipartConfig = defaultMultipartConfig;
-            return this;
-        }
-
-        /**
-         * @see #getDefaultCompressionConfig()
-         */
-        public Builder defaultCompressionConfig(final CompressionConfig defaultCompressionConfig) {
-            this.defaultCompressionConfig = defaultCompressionConfig;
-            return this;
-        }
-
-        /**
-         * @see #isPreventMimeSniffing()
-         */
-        public Builder preventMimeSniffing(final boolean preventMimeSniffing) {
-            this.preventMimeSniffing = preventMimeSniffing;
-            return this;
-        }
-
-        /**
-         * @see #isPreventAmbiguousResponseCacheControl()
-         */
-        public Builder preventAmbiguousResponseCacheControl(final boolean preventAmbiguousResponseCacheControl) {
-            this.preventAmbiguousResponseCacheControl = preventAmbiguousResponseCacheControl;
             return this;
         }
 
@@ -222,6 +176,22 @@ public final class JetServer {
          */
         public Builder router(final Router router) {
             this.router = router;
+            return this;
+        }
+
+        /**
+         * @see #isPreventMimeSniffing()
+         */
+        public Builder preventMimeSniffing(final boolean preventMimeSniffing) {
+            this.preventMimeSniffing = preventMimeSniffing;
+            return this;
+        }
+
+        /**
+         * @see #isPreventAmbiguousResponseCacheControl()
+         */
+        public Builder preventAmbiguousResponseCacheControl(final boolean preventAmbiguousResponseCacheControl) {
+            this.preventAmbiguousResponseCacheControl = preventAmbiguousResponseCacheControl;
             return this;
         }
 
@@ -429,13 +399,10 @@ public final class JetServer {
         public JetServer build() {
             return new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
-                    defaultRequestBodyBoundCount,
-                    defaultMultipartConfig != null ? defaultMultipartConfig : MultipartConfig.builder().build(),
-                    defaultCompressionConfig != null ? defaultCompressionConfig : CompressionConfig.builder().build(),
-                    preventMimeSniffing,
-                    preventAmbiguousResponseCacheControl,
                     sessionStore,
                     router != null ? router : new MutableSimpleRouter(),
+                    preventMimeSniffing,
+                    preventAmbiguousResponseCacheControl,
                     host,
                     httpPort,
                     httpsPort,
@@ -458,26 +425,18 @@ public final class JetServer {
     private final @Getter HandleFactory handleFactory;
 
     /**
-     * The default bound count when reading a {@link Request} body without specifying a bound count.
+     * The {@link SessionStore}, or <code>null</code> to disable {@link Session}s.
      * <p>
-     * Defaults to <code>8 MiB</code>.
+     * Defaults to <code>null</code>.
      */
-    private final @Getter int defaultRequestBodyBoundCount;
+    private final @Getter @Nullable SessionStore sessionStore;
 
     /**
-     * The default {@link MultipartConfig} when reading a multipart {@link Request} body without specifying a
-     * {@link MultipartConfig}.
+     * The {@link Router}.
      * <p>
-     * Defaults to {@link MultipartConfig.Builder#build()}.
+     * Defaults to {@link MutableSimpleRouter}.
      */
-    private final @Getter MultipartConfig defaultMultipartConfig;
-
-    /**
-     * The default {@link CompressionConfig} that {@link Response#getCompressionConfig()} is initially set to.
-     * <p>
-     * Defaults to {@link CompressionConfig.Builder#build()}.
-     */
-    private final @Getter CompressionConfig defaultCompressionConfig;
+    private final @Getter Router router;
 
     /**
      * Whether to call {@link Response} {@link Headers#ensureEntryIgnoreCase(String, String)} with
@@ -494,20 +453,6 @@ public final class JetServer {
      * Defaults to <code>true</code>.
      */
     private final @Getter boolean preventAmbiguousResponseCacheControl;
-
-    /**
-     * The {@link SessionStore}, or <code>null</code> to disable {@link Session}s.
-     * <p>
-     * Defaults to <code>null</code>.
-     */
-    private final @Getter @Nullable SessionStore sessionStore;
-
-    /**
-     * The {@link Router}.
-     * <p>
-     * Defaults to {@link MutableSimpleRouter}.
-     */
-    private final @Getter Router router;
 
     /**
      * The host address to bind to, or <code>null</code> for all addresses.

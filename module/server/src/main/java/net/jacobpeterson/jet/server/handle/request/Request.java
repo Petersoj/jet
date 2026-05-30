@@ -23,7 +23,6 @@ import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.common.io.bounded.BoundException;
 import net.jacobpeterson.jet.common.io.bounded.BoundedInputStream;
-import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
@@ -83,6 +82,11 @@ import static org.eclipse.jetty.io.Content.Source.asInputStream;
 @RequiredArgsConstructor
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public final class Request {
+
+    /**
+     * The default body bound count: <code>8 MiB</code>
+     */
+    public static final int DEFAULT_BODY_BOUND_COUNT = 8 * 1024 * 1024;
 
     private final Handle handle;
     private @LazyInit @Nullable String localAddress;
@@ -501,10 +505,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyInputStream(Long)} with {@link JetServer#getDefaultRequestBodyBoundCount()}
+     * @return {@link #getBodyInputStream(Long)} with {@link #DEFAULT_BODY_BOUND_COUNT}
      */
     public BoundedInputStream getBodyInputStream() {
-        return getBodyInputStream((long) handle.getInternals().getJetServer().getDefaultRequestBodyBoundCount());
+        return getBodyInputStream((long) DEFAULT_BODY_BOUND_COUNT);
     }
 
     /**
@@ -535,10 +539,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyBytes(Integer)} with {@link JetServer#getDefaultRequestBodyBoundCount()}
+     * @return {@link #getBodyBytes(Integer)} with {@link #DEFAULT_BODY_BOUND_COUNT}
      */
     public byte[] getBodyBytes() {
-        return getBodyBytes(handle.getInternals().getJetServer().getDefaultRequestBodyBoundCount());
+        return getBodyBytes(DEFAULT_BODY_BOUND_COUNT);
     }
 
     /**
@@ -568,10 +572,10 @@ public final class Request {
     }
 
     /**
-     * @return {@link #getBodyString(Integer)} with {@link JetServer#getDefaultRequestBodyBoundCount()}
+     * @return {@link #getBodyString(Integer)} with {@link #DEFAULT_BODY_BOUND_COUNT}
      */
     public String getBodyString() {
-        return getBodyString(handle.getInternals().getJetServer().getDefaultRequestBodyBoundCount());
+        return getBodyString(DEFAULT_BODY_BOUND_COUNT);
     }
 
     /**
@@ -595,7 +599,7 @@ public final class Request {
     }
 
     /**
-     * @param config the {@link MultipartConfig}, or <code>null</code> for {@link JetServer#getDefaultMultipartConfig()}
+     * @param config the {@link MultipartConfig}, or <code>null</code> for {@link MultipartConfig#DEFAULT}
      *
      * @return the internally-cached {@link MultiPart} {@link ImmutableList} read from the body
      */
@@ -603,8 +607,7 @@ public final class Request {
         if (bodyMultiParts == null) {
             final var request = handle.getInternals().getRequest();
             final var contentType = getHeaders().getFirst(CONTENT_TYPE.toString());
-            final var jetConfig = config != null ? config :
-                    handle.getInternals().getJetServer().getDefaultMultipartConfig();
+            final var jetConfig = config != null ? config : MultipartConfig.DEFAULT;
             final var jettyConfig = new MultiPartConfig.Builder()
                     .maxSize(jetConfig.getMaxTotalSize())
                     .maxParts(jetConfig.getMaxPartCount())

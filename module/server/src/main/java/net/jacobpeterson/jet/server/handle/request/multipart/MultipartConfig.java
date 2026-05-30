@@ -18,6 +18,11 @@ import java.nio.file.Path;
 public class MultipartConfig {
 
     /**
+     * A static {@link MultipartConfig} instance with all default values.
+     */
+    public static final MultipartConfig DEFAULT = builder().build();
+
+    /**
      * The default for {@link #getTemporaryDirectory()}: <code>System.getProperty("java.io.tmpdir")</code>
      */
     public static final Path DEFAULT_TEMPORARY_DIRECTORY = Path.of(System.getProperty("java.io.tmpdir"));
