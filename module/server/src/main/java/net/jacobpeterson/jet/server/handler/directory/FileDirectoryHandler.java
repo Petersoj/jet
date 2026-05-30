@@ -249,8 +249,10 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                             final WatchKey watchKey;
                             try {
                                 watchKey = watchService.take();
-                            } catch (final ClosedWatchServiceException | InterruptedException exception) {
-                                return;
+                            } catch (final InterruptedException exception) {
+                                continue;
+                            } catch (final ClosedWatchServiceException exception) {
+                                break;
                             }
                             final var directoryOfWatchKey = directoriesOfWatchKeys.get(watchKey);
                             if (directoryOfWatchKey == null) {
