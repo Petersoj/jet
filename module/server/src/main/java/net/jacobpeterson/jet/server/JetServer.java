@@ -212,7 +212,7 @@ public final class JetServer {
         /**
          * @see #getSessionStore()
          */
-        public Builder sessionStore(final @Nullable SessionStore sessionStore) {
+        public Builder sessionStore(final SessionStore sessionStore) {
             this.sessionStore = sessionStore;
             return this;
         }
@@ -443,7 +443,7 @@ public final class JetServer {
                     reloadSslPeriod,
                     gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
-                    connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(10),
+                    connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(5),
                     ImmutableList.copyOf(sslPemsSuppliers));
         }
     }
@@ -560,7 +560,7 @@ public final class JetServer {
      * The {@link #getConnectionIdleTimeout()} to apply to existing connections after {@link #stop()} is called, or
      * <code>null</code> to not modify it.
      * <p>
-     * Defaults to <code>10 seconds</code>.
+     * Defaults to <code>5 seconds</code>.
      */
     private final @Getter @Nullable Duration connectionIdleTimeoutWhenStopping;
 
