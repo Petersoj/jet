@@ -130,14 +130,15 @@ public final class Resource {
             final @Nullable Integer peekLength, final @Nullable ContentEncoding contentEncoding,
             final boolean exposeFilename) throws StatusException {
         return OF_CLASSPATH_CACHE.get(new OfClasspathCacheKey(clazz, resourcePath, trustedContentType,
-                untrustedContentType, peekLength, contentEncoding, exposeFilename), _ -> {
-            final var url = clazz.getResource(resourcePath);
+                untrustedContentType, peekLength, contentEncoding, exposeFilename), key -> {
+            final var url = key.clazz.getResource(key.resourcePath);
             if (url == null) {
                 throw new StatusException(NOT_FOUND_404, "`%s` class resource not found: %s"
-                        .formatted(clazz.getName(), resourcePath));
+                        .formatted(key.clazz.getName(), key.resourcePath));
             }
-            final var lastIndexOfSlash = resourcePath.lastIndexOf('/');
-            final var filename = lastIndexOfSlash != -1 ? resourcePath.substring(lastIndexOfSlash + 1) : resourcePath;
+            final var lastIndexOfSlash = key.resourcePath.lastIndexOf('/');
+            final var filename = lastIndexOfSlash == -1 ? key.resourcePath :
+                    key.resourcePath.substring(lastIndexOfSlash + 1);
             final URLConnection urlConnection;
             try {
                 urlConnection = url.openConnection();
@@ -146,20 +147,21 @@ public final class Resource {
             }
             final var contentTypeForFilename = ContentType.forFilename(filename);
             final ContentType contentType;
-            if (contentTypeForFilename != null && (trustedContentType || contentTypeForFilename.isXssSafeHtmlTag())) {
+            if (contentTypeForFilename != null && (key.trustedContentType ||
+                    contentTypeForFilename.isXssSafeHtmlTag())) {
                 contentType = contentTypeForFilename;
-            } else if (untrustedContentType != null) {
-                contentType = untrustedContentType;
-            } else if (peekLength != null &&
-                    (contentEncoding == null || !contentEncoding.getType().isDictionaryRequired())) {
-                try (final var content = requireNonNull(clazz.getResourceAsStream(resourcePath))) {
+            } else if (key.untrustedContentType != null) {
+                contentType = key.untrustedContentType;
+            } else if (key.peekLength != null &&
+                    (key.contentEncoding == null || !key.contentEncoding.getType().isDictionaryRequired())) {
+                try (final var content = requireNonNull(key.clazz.getResourceAsStream(key.resourcePath))) {
                     final byte[] peekedBytes;
-                    if (contentEncoding != null) {
-                        try (final var decompressed = contentEncoding.getType().decompress(content)) {
-                            peekedBytes = decompressed.readNBytes(peekLength);
+                    if (key.contentEncoding != null) {
+                        try (final var decompressed = key.contentEncoding.getType().decompress(content)) {
+                            peekedBytes = decompressed.readNBytes(key.peekLength);
                         }
                     } else {
-                        peekedBytes = content.readNBytes(peekLength);
+                        peekedBytes = content.readNBytes(key.peekLength);
                     }
                     contentType = isLikelyUtf8(peekedBytes) ? TEXT_PLAIN_UTF_8 : APPLICATION_OCTET_STREAM;
                 } catch (final IOException ioException) {
@@ -169,19 +171,19 @@ public final class Resource {
                 contentType = null;
             }
             final var contentDisposition = ContentDisposition.builder()
-                    .type(trustedContentType ||
+                    .type(key.trustedContentType ||
                             (contentType != null && contentType.isXssSafeHtmlTag()) ? INLINE : ATTACHMENT);
-            if (exposeFilename) {
+            if (key.exposeFilename) {
                 contentDisposition.filename(filename);
             }
             return builder()
                     .contentLength(urlConnection.getContentLengthLong())
                     .lastModified(Instant.ofEpochMilli(urlConnection.getLastModified()))
-                    .eTag(ETag.computeStrong(requireNonNull(clazz.getResourceAsStream(resourcePath))))
+                    .eTag(ETag.computeStrong(requireNonNull(key.clazz.getResourceAsStream(key.resourcePath))))
                     .contentType(contentType)
-                    .contentEncoding(contentEncoding)
+                    .contentEncoding(key.contentEncoding)
                     .contentDisposition(contentDisposition.build())
-                    .content(() -> requireNonNull(clazz.getResourceAsStream(resourcePath)))
+                    .content(() -> requireNonNull(key.clazz.getResourceAsStream(key.resourcePath)))
                     .build();
         });
     }
