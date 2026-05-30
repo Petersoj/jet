@@ -55,6 +55,7 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
 import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_RANGES;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
+import static net.jacobpeterson.jet.common.http.header.Header.CONNECTION;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_DISPOSITION;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_ENCODING;
 import static net.jacobpeterson.jet.common.http.header.Header.CONTENT_LENGTH;
@@ -220,6 +221,13 @@ public final class Response {
      */
     public void addCookie(final Cookie cookie) {
         headers.put(SET_COOKIE.toString(), cookie.toResponseString());
+    }
+
+    /**
+     * Calls {@link Headers#set(String, String)} with {@link Header#CONNECTION} and <code>"close"</code>.
+     */
+    public void setConnectionClose() {
+        headers.set(CONNECTION.toString(), "close");
     }
 
     /**
