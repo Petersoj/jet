@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
@@ -39,6 +40,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.Duration.ofSeconds;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
@@ -87,9 +90,14 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
  * <p>
  * Note: this class is not thread-safe.
  */
-@RequiredArgsConstructor
+@RequiredArgsConstructor @Slf4j
 @NullMarked
 public final class Response {
+
+    /**
+     * The default SSE keep-alive period: <code>15 seconds</code>
+     */
+    public static final Duration DEFAULT_SSE_KEEP_ALIVE_PERIOD = ofSeconds(15);
 
     private final Handle handle;
 
@@ -643,6 +651,14 @@ public final class Response {
     }
 
     /**
+     * @return an {@link ImmutableList} of all {@link Runnable}s given to {@link #addAfter(Runnable)}s, or
+     * <code>null</code>
+     */
+    public @Nullable ImmutableList<Runnable> getAfters() {
+        return afters == null ? null : ImmutableList.copyOf(afters);
+    }
+
+    /**
      * Adds a {@link Runnable} guaranteed to run after this {@link Response} has been written.
      */
     public void addAfter(final Runnable after) {
@@ -653,10 +669,14 @@ public final class Response {
     }
 
     /**
-     * @return an {@link ImmutableList} of all {@link Runnable}s given to {@link #addAfter(Runnable)}s, or
-     * <code>null</code>
+     * Removes a {@link Runnable} added by {@link #addAfter(Runnable)}.
+     *
+     * @return <code>true</code> if removed, <code>false</code> otherwise
      */
-    public @Nullable ImmutableList<Runnable> getAfters() {
-        return afters == null ? null : ImmutableList.copyOf(afters);
+    public boolean removeAfter(final Runnable after) {
+        if (afters != null) {
+            return afters.remove(after);
+        }
+        return false;
     }
 }
