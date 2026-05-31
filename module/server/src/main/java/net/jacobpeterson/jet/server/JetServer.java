@@ -21,6 +21,7 @@ import net.jacobpeterson.jet.server.handle.HandleFactory;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
 import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
+import net.jacobpeterson.jet.server.handler.Handler;
 import net.jacobpeterson.jet.server.router.Router;
 import net.jacobpeterson.jet.server.router.simple.MutableSimpleRouter;
 import net.jacobpeterson.jet.server.session.Session;
@@ -75,6 +76,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
 import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.lang.Long.parseLong;
@@ -529,7 +531,7 @@ public final class JetServer {
 
     private final ImmutableList<Supplier<List<SslPem>>> sslPemsSuppliers;
     private final Set<Runnable> stopListeners = synchronizedSet(new HashSet<>());
-    private volatile boolean stopped;
+    private volatile boolean stopCalled;
     private @Nullable Server server;
     private SslContextFactory.@Nullable Server sslContextFactory;
     private @Nullable ScheduledFuture<?> reloadSslFuture;
@@ -581,7 +583,9 @@ public final class JetServer {
 
             private void handle(final org.eclipse.jetty.server.Request jettyRequest,
                     final org.eclipse.jetty.server.Response jettyResponse) {
-                if (stopped) {
+                // This check is still racy with `stop()`, but it decreases the chances of preventing
+                // `addStopListener()` from throwing after `stop()` is called.
+                if (stopCalled) {
                     jettyResponse.setStatus(SERVICE_UNAVAILABLE_503.getCode());
                     return;
                 }
@@ -806,9 +810,14 @@ public final class JetServer {
      * called.
      *
      * @return <code>true</code> if added, <code>false</code> otherwise
+     *
+     * @throws IllegalStateException thrown if already stopped
      */
-    public boolean addStopListener(final Runnable stopListener) {
-        return stopListeners.add(stopListener);
+    public boolean addStopListener(final Runnable stopListener) throws IllegalStateException {
+        synchronized (stopListeners) {
+            checkState(!stopCalled, "Cannot add `stopListener` after `stop()` has already been called");
+            return stopListeners.add(stopListener);
+        }
     }
 
     /**
@@ -824,12 +833,14 @@ public final class JetServer {
      * Calls all {@link Runnable} from {@link #addStopListener(Runnable)}, cancels {@link #getReloadSslPeriod()}, and
      * stops the server by rejecting new connections and waiting for {@link #getGracefulStopTimeout()} to elapse before
      * closing existing connections. Subsequent calls to this method are ignored.
+     * <p>
+     * Note: this method should never be called directly by a {@link Handler}.
      */
     public synchronized void stop() {
-        if (stopped) {
+        if (stopCalled) {
             return;
         }
-        stopped = true;
+        stopCalled = true;
         LOGGER.info("Jet stopping...");
         Throwable multiThrowable = null;
         for (final var stopListener : stopListeners.toArray(Runnable[]::new)) {
