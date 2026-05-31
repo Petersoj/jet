@@ -41,6 +41,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
@@ -567,7 +568,7 @@ public final class Request {
         } catch (final BoundException boundException) {
             throw new StatusException(CONTENT_TOO_LARGE_413, boundException);
         } catch (final IOException ioException) {
-            throw new StatusException(BAD_REQUEST_400, ioException);
+            throw new UncheckedIOException(ioException);
         }
     }
 
@@ -603,7 +604,7 @@ public final class Request {
      *
      * @return the internally-cached {@link MultiPart} {@link ImmutableList} read from the body
      */
-    public ImmutableList<MultiPart> getBodyMultiParts(final @Nullable MultipartConfig config) {
+    public ImmutableList<MultiPart> getBodyMultiParts(final @Nullable MultipartConfig config) throws StatusException {
         if (bodyMultiParts == null) {
             final var request = handle.getInternals().getRequest();
             final var contentType = getHeaders().getFirst(CONTENT_TYPE.toString());

@@ -15,6 +15,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -138,7 +139,7 @@ public final class MultiPart {
     /**
      * @return {@link #getInputStream()} {@link ByteStreams#readFully(InputStream, byte[])}
      */
-    public byte[] getBytes() {
+    public byte[] getBytes() throws StatusException {
         try (final var inputStream = getInputStream()) {
             final var size = getSize();
             if (size > Integer.MAX_VALUE - 8) {
@@ -148,7 +149,7 @@ public final class MultiPart {
             readFully(inputStream, bytes);
             return bytes;
         } catch (final IOException ioException) {
-            throw new StatusException(BAD_REQUEST_400, ioException);
+            throw new UncheckedIOException(ioException);
         }
     }
 
