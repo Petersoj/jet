@@ -666,7 +666,8 @@ public final class Response {
     }
 
     /**
-     * Adds a {@link Runnable} guaranteed to run after this {@link Response} has been written.
+     * Adds a {@link Runnable} guaranteed to run after this {@link Response} has been written successfully or
+     * unsuccessfully.
      */
     public void addAfter(final Runnable after) {
         if (afters == null) {
