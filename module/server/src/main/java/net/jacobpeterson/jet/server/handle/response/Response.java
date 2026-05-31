@@ -26,6 +26,7 @@ import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
+import net.jacobpeterson.jet.server.handle.response.sse.Sse;
 import net.jacobpeterson.jet.server.handler.directory.FileDirectoryHandler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -51,6 +52,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.google.common.util.concurrent.Uninterruptibles.joinUninterruptibly;
+import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ofSeconds;
 import static java.time.ZoneOffset.UTC;
@@ -70,8 +73,11 @@ import static net.jacobpeterson.jet.common.http.header.Header.LAST_MODIFIED;
 import static net.jacobpeterson.jet.common.http.header.Header.LOCATION;
 import static net.jacobpeterson.jet.common.http.header.Header.SET_COOKIE;
 import static net.jacobpeterson.jet.common.http.header.Header.STRICT_TRANSPORT_SECURITY;
+import static net.jacobpeterson.jet.common.http.header.Header.X_ACCEL_BUFFERING;
+import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.APPLICATION_JSON_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.APPLICATION_OCTET_STREAM;
+import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_EVENT_STREAM_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_HTML_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.contenttype.ContentType.TEXT_PLAIN_UTF_8;
 import static net.jacobpeterson.jet.common.http.header.range.Range.BYTES_UNIT;
@@ -678,5 +684,88 @@ public final class Response {
             return afters.remove(after);
         }
         return false;
+    }
+
+    /**
+     * Calls {@link #sse(Consumer, boolean)} with <code>keepAliveSeparateThread</code> set to <code>true</code>.
+     */
+    public void sse(final Consumer<Sse> sseApplier) {
+        sse(sseApplier, true);
+    }
+
+    /**
+     * Calls {@link #sse(Consumer, Duration, boolean)} with <code>keepAlivePeriod</code> set to
+     * {@link #DEFAULT_SSE_KEEP_ALIVE_PERIOD}.
+     */
+    public void sse(final Consumer<Sse> sseApplier, final boolean keepAliveSeparateThread) {
+        sse(sseApplier, DEFAULT_SSE_KEEP_ALIVE_PERIOD, keepAliveSeparateThread);
+    }
+
+    /**
+     * Calls {@link #sse(Consumer, Duration, boolean)} with <code>keepAliveSeparateThread</code> set to
+     * <code>true</code>.
+     */
+    public void sse(final Consumer<Sse> sseApplier, final @Nullable Duration keepAlivePeriod) {
+        sse(sseApplier, keepAlivePeriod, true);
+    }
+
+    /**
+     * Converts this {@link Response} into a Server-Sent Events (SSE) {@link Response}.
+     *
+     * @param sseApplier              the {@link Sse} applier
+     * @param keepAlivePeriod         the period {@link Duration} at which to call {@link Sse#comment(String)} with an
+     *                                empty string, or <code>null</code> to disable. If disabled,
+     *                                <code>sseApplier</code> must be blocking to keep the {@link Response} thread
+     *                                alive.
+     * @param keepAliveSeparateThread <code>true</code> if a separate {@link Thread#ofVirtual()} should be used for the
+     *                                <code>keepAlivePeriod</code>, <code>false</code> to use the current
+     *                                {@link Response} thread. If <code>sseApplier</code> is blocking, this should be
+     *                                set to <code>true</code>, whereas if <code>sseApplier</code> is non-blocking, this
+     *                                should be set to <code>false</code>.
+     */
+    public void sse(final Consumer<Sse> sseApplier, final @Nullable Duration keepAlivePeriod,
+            final boolean keepAliveSeparateThread) {
+        setStatus(OK_200);
+        setConnectionClose();
+        setContentType(TEXT_EVENT_STREAM_UTF_8);
+        setCacheControl(NO_CACHE);
+        headers.set(X_ACCEL_BUFFERING.toString(), "no");
+        disableCompression();
+        setBodyOutputStreamApplier(bodyOutputStream -> {
+            try {
+                bodyOutputStream.flush();
+            } catch (final IOException ioException) {
+                throw new UncheckedIOException(ioException);
+            }
+            final var sse = new Sse(bodyOutputStream);
+            addAfter(sse::close);
+            if (keepAlivePeriod != null) {
+                if (keepAliveSeparateThread) {
+                    final var keepAliveThread = Thread.ofVirtual().start(() -> {
+                        try {
+                            sseKeepAlive(sse, keepAlivePeriod);
+                        } catch (final Throwable throwable) {
+                            LOGGER.error("SSE keep-alive thread threw", throwable);
+                        }
+                    });
+                    sseApplier.accept(sse);
+                    joinUninterruptibly(keepAliveThread);
+                } else {
+                    sseApplier.accept(sse);
+                    sseKeepAlive(sse, keepAlivePeriod);
+                }
+            } else {
+                sseApplier.accept(sse);
+            }
+        });
+    }
+
+    private void sseKeepAlive(final Sse sse, final Duration keepAlivePeriod) {
+        while (!sse.isClosed()) {
+            sse.comment("");
+            try {
+                sleep(keepAlivePeriod);
+            } catch (final InterruptedException _) {}
+        }
     }
 }
