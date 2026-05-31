@@ -761,8 +761,7 @@ public final class Response {
     }
 
     private void sseKeepAlive(final Sse sse, final Duration keepAlivePeriod) {
-        while (!sse.isClosed()) {
-            sse.comment("");
+        while (sse.comment("")) {
             try {
                 sleep(keepAlivePeriod);
             } catch (final InterruptedException _) {}

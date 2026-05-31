@@ -9,8 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UncheckedIOException;
 
 import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -30,42 +29,40 @@ public class Sse {
     private static final Splitter NEWLINE_SPLITTER = Splitter.on('\n');
 
     private final OutputStream bodyOutputStream;
-    private final List<Runnable> onCloses = new ArrayList<>();
-    private boolean closed;
 
     /**
      * Calls {@link #send(String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
      */
-    public void send(final String data) {
-        send(data, true);
+    public boolean send(final String data) {
+        return send(data, true);
     }
 
     /**
      * Calls {@link #send(String, String, boolean)} with <code>event</code> set to <code>null</code>.
      */
-    public void send(final String data, final boolean ignoreThrowable) {
-        send(null, data, ignoreThrowable);
+    public boolean send(final String data, final boolean ignoreThrowable) {
+        return send(null, data, ignoreThrowable);
     }
 
     /**
      * Calls {@link #send(String, String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
      */
-    public void send(final @Nullable String event, final String data) {
-        send(event, data, true);
+    public boolean send(final @Nullable String event, final String data) {
+        return send(event, data, true);
     }
 
     /**
      * Calls {@link #send(String, String, String, boolean)} with <code>id</code> set to <code>null</code>.
      */
-    public void send(final @Nullable String event, final String data, final boolean ignoreThrowable) {
-        send(null, event, data, ignoreThrowable);
+    public boolean send(final @Nullable String event, final String data, final boolean ignoreThrowable) {
+        return send(null, event, data, ignoreThrowable);
     }
 
     /**
      * Calls {@link #send(String, String, String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
      */
-    public void send(final @Nullable String id, final @Nullable String event, final String data) {
-        send(id, event, data, true);
+    public boolean send(final @Nullable String id, final @Nullable String event, final String data) {
+        return send(id, event, data, true);
     }
 
     /**
@@ -78,11 +75,13 @@ public class Sse {
      *                        <code>false</code> otherwise. Note that {@link Throwable}s thrown internally will always
      *                        call {@link #close()}.
      *
+     * @return <code>true</code> if sent successfully, <code>false</code> otherwise
+     *
      * @see
      * <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#fields">
      * developer.mozilla.org</a>
      */
-    public synchronized void send(final @Nullable String id, final @Nullable String event, final String data,
+    public synchronized boolean send(final @Nullable String id, final @Nullable String event, final String data,
             final boolean ignoreThrowable) {
         try {
             if (id != null) {
@@ -95,16 +94,18 @@ public class Sse {
                 writeLine("data", dataLine);
             }
             writeFlush();
+            return true;
         } catch (final Throwable throwable) {
             closeForThrowable(ignoreThrowable, throwable);
+            return false;
         }
     }
 
     /**
      * Calls {@link #comment(String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
      */
-    public void comment(final String comment) {
-        comment(comment, true);
+    public boolean comment(final String comment) {
+        return comment(comment, true);
     }
 
     /**
@@ -114,18 +115,22 @@ public class Sse {
      * @param ignoreThrowable <code>true</code> if any {@link Throwable}s thrown internally should be ignored,
      *                        <code>false</code> otherwise. Note that {@link Throwable}s thrown internally will always
      *                        call {@link #close()}.
+     *
+     * @return <code>true</code> if sent successfully, <code>false</code> otherwise
      */
-    public synchronized void comment(final String comment, final boolean ignoreThrowable) {
+    public synchronized boolean comment(final String comment, final boolean ignoreThrowable) {
         try {
             writeLine("", sanitize(comment));
             writeFlush();
+            return true;
         } catch (final Throwable throwable) {
             closeForThrowable(ignoreThrowable, throwable);
+            return false;
         }
     }
 
     private String sanitize(final String input) {
-        return input.replace("\n", "");
+        return input.replace('\n', ' ');
     }
 
     private void writeLine(final String beforeColon, final String afterColon) throws IOException {
@@ -160,51 +165,13 @@ public class Sse {
     }
 
     /**
-     * Adds the given {@link Runnable} to an internal list of {@link Runnable}s that all are guaranteed to run a single
-     * time when {@link #close()} is called for the first time.
-     *
-     * @param onClose the {@link Runnable}
-     */
-    public synchronized void onClose(final Runnable onClose) {
-        onCloses.add(onClose);
-    }
-
-    /**
-     * @return <code>true</code> if {@link #close()} has been called, <code>false</code> otherwise
-     */
-    public synchronized boolean isClosed() {
-        return closed;
-    }
-
-    /**
-     * Closes this {@link Sse} {@link Response} and runs all {@link #onClose(Runnable)} {@link Runnable}s. Subsequent
-     * calls to this method are ignored.
+     * Closes this {@link Sse} {@link Response}
      */
     public synchronized void close() {
-        if (closed) {
-            return;
-        }
-        closed = true;
-        Throwable multiThrowable = null;
         try {
             bodyOutputStream.close();
-        } catch (final Throwable throwable) {
-            multiThrowable = throwable;
-        }
-        for (final var onClose : onCloses) {
-            try {
-                onClose.run();
-            } catch (final Throwable throwable) {
-                if (multiThrowable == null) {
-                    multiThrowable = throwable;
-                } else {
-                    multiThrowable.addSuppressed(throwable);
-                }
-            }
-        }
-        if (multiThrowable != null) {
-            throwIfUnchecked(multiThrowable);
-            throw new RuntimeException(multiThrowable);
+        } catch (final IOException ioException) {
+            throw new UncheckedIOException(ioException);
         }
     }
 }
