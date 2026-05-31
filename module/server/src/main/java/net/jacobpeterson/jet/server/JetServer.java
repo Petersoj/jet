@@ -67,6 +67,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
@@ -75,6 +76,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.getCausalChain;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
@@ -84,6 +86,7 @@ import static java.nio.file.Files.walkFileTree;
 import static java.time.Duration.ofDays;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
+import static java.util.Collections.synchronizedSet;
 import static java.util.Locale.ROOT;
 import static java.util.concurrent.ForkJoinPool.commonPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -99,6 +102,7 @@ import static net.jacobpeterson.jet.common.http.header.Header.VARY;
 import static net.jacobpeterson.jet.common.http.header.Header.X_CONTENT_TYPE_OPTIONS;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.INTERNAL_SERVER_ERROR_500;
+import static net.jacobpeterson.jet.common.http.status.Status.SERVICE_UNAVAILABLE_503;
 import static org.eclipse.jetty.http.UriCompliance.UNSAFE;
 import static org.eclipse.jetty.io.Content.Sink.asOutputStream;
 import static org.slf4j.event.Level.DEBUG;
@@ -397,7 +401,7 @@ public final class JetServer {
          * @return the built {@link JetServer} instance
          */
         public JetServer build() {
-            return new JetServer(
+            final var jetServer = new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
                     sessionStore,
                     router != null ? router : new MutableSimpleRouter(),
@@ -412,6 +416,17 @@ public final class JetServer {
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
                     connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(1),
                     ImmutableList.copyOf(sslPemsSuppliers));
+            try {
+                jetServer.start();
+            } catch (final Throwable throwable) {
+                try {
+                    jetServer.stop();
+                } catch (final Throwable stopThrowable) {
+                    throwable.addSuppressed(stopThrowable);
+                }
+                throw throwable;
+            }
+            return jetServer;
         }
     }
 
@@ -513,14 +528,13 @@ public final class JetServer {
     private final @Getter @Nullable Duration connectionIdleTimeoutWhenStopping;
 
     private final ImmutableList<Supplier<List<SslPem>>> sslPemsSuppliers;
+    private final Set<Runnable> stopListeners = synchronizedSet(new HashSet<>());
+    private volatile boolean stopped;
     private @Nullable Server server;
     private SslContextFactory.@Nullable Server sslContextFactory;
     private @Nullable ScheduledFuture<?> reloadSslFuture;
 
-    /**
-     * Starts this server.
-     */
-    public synchronized void start() {
+    private void start() {
         LOGGER.info("Jet starting...");
         server = new Server(new VirtualThreadPool(Integer.MAX_VALUE));
         server.setStopAtShutdown(true);
@@ -560,6 +574,17 @@ public final class JetServer {
             @Override
             public boolean handle(final org.eclipse.jetty.server.Request jettyRequest,
                     final org.eclipse.jetty.server.Response jettyResponse, final Callback callback) {
+                handle(jettyRequest, jettyResponse);
+                callback.succeeded();
+                return true;
+            }
+
+            private void handle(final org.eclipse.jetty.server.Request jettyRequest,
+                    final org.eclipse.jetty.server.Response jettyResponse) {
+                if (stopped) {
+                    jettyResponse.setStatus(SERVICE_UNAVAILABLE_503.getCode());
+                    return;
+                }
                 Handle handle = null;
                 try {
                     handle = handleFactory.create(new HandleInternals(JetServer.this, jettyRequest, jettyResponse));
@@ -626,8 +651,6 @@ public final class JetServer {
                         }
                     }
                 }
-                callback.succeeded();
-                return true;
             }
 
             private void handleCompression(final Handle handle) {
@@ -757,6 +780,13 @@ public final class JetServer {
     }
 
     /**
+     * @return <code>true</code> if HTTPS (SSL/TLS) is enabled, <code>false</code> otherwise
+     */
+    public boolean isHttps() {
+        return sslContextFactory != null;
+    }
+
+    /**
      * Reloads SSL (hot-swap).
      */
     public synchronized void reloadSsl() {
@@ -772,39 +802,74 @@ public final class JetServer {
     }
 
     /**
-     * Stops this server, rejecting new connections and waiting for {@link #getGracefulStopTimeout()} to elapse before
-     * closing existing connections.
+     * Adds the given {@link Runnable} to a list of {@link Runnable}s that are guaranteed to run when {@link #stop()} is
+     * called.
+     *
+     * @return <code>true</code> if added, <code>false</code> otherwise
+     */
+    public boolean addStopListener(final Runnable stopListener) {
+        return stopListeners.add(stopListener);
+    }
+
+    /**
+     * Removes a {@link Runnable} added from {@link #addStopListener(Runnable)}.
+     *
+     * @return <code>true</code> if removed, <code>false</code> otherwise
+     */
+    public boolean removeStopListener(final Runnable stopListener) {
+        return stopListeners.remove(stopListener);
+    }
+
+    /**
+     * Calls all {@link Runnable} from {@link #addStopListener(Runnable)}, cancels {@link #getReloadSslPeriod()}, and
+     * stops the server by rejecting new connections and waiting for {@link #getGracefulStopTimeout()} to elapse before
+     * closing existing connections. Subsequent calls to this method are ignored.
      */
     public synchronized void stop() {
+        if (stopped) {
+            return;
+        }
+        stopped = true;
         LOGGER.info("Jet stopping...");
+        Throwable multiThrowable = null;
+        for (final var stopListener : stopListeners.toArray(Runnable[]::new)) {
+            try {
+                stopListener.run();
+            } catch (final Throwable throwable) {
+                if (multiThrowable == null) {
+                    multiThrowable = throwable;
+                } else {
+                    multiThrowable.addSuppressed(throwable);
+                }
+            }
+        }
         if (reloadSslFuture != null) {
-            reloadSslFuture.cancel(false);
-            reloadSslFuture = null;
+            try {
+                reloadSslFuture.cancel(false);
+            } catch (final Throwable throwable) {
+                if (multiThrowable == null) {
+                    multiThrowable = throwable;
+                } else {
+                    multiThrowable.addSuppressed(throwable);
+                }
+            }
         }
         sslContextFactory = null;
         if (server != null) {
             try {
                 server.stop();
-            } catch (final Exception exception) {
-                throw new RuntimeException(exception);
-            } finally {
-                server = null;
+            } catch (final Throwable throwable) {
+                if (multiThrowable == null) {
+                    multiThrowable = throwable;
+                } else {
+                    multiThrowable.addSuppressed(throwable);
+                }
             }
         }
+        if (multiThrowable != null) {
+            throwIfUnchecked(multiThrowable);
+            throw new RuntimeException(multiThrowable);
+        }
         LOGGER.info("Jet stopped");
-    }
-
-    /**
-     * @return <code>true</code> if stopped, <code>false</code> if started and running
-     */
-    public synchronized boolean isStopped() {
-        return server == null || server.isStopped();
-    }
-
-    /**
-     * @return <code>true</code> if HTTPS (SSL/TLS) is enabled, <code>false</code> otherwise
-     */
-    public boolean isHttps() {
-        return sslContextFactory != null;
     }
 }
