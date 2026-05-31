@@ -165,9 +165,9 @@ public class Sse {
     }
 
     /**
-     * Closes this {@link Sse} {@link Response}
+     * Closes this {@link Sse} {@link Response}.
      */
-    public synchronized void close() {
+    public void close() {
         try {
             bodyOutputStream.close();
         } catch (final IOException ioException) {

@@ -50,10 +50,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
+import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
 import static com.google.common.util.concurrent.Uninterruptibles.joinUninterruptibly;
-import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ofSeconds;
 import static java.time.ZoneOffset.UTC;
@@ -738,7 +739,6 @@ public final class Response {
                 throw new UncheckedIOException(ioException);
             }
             final var sse = new Sse(bodyOutputStream);
-            addAfter(sse::close);
             if (keepAlivePeriod != null) {
                 if (keepAliveSeparateThread) {
                     final var keepAliveThread = Thread.ofVirtual().start(() -> {
@@ -761,10 +761,15 @@ public final class Response {
     }
 
     private void sseKeepAlive(final Sse sse, final Duration keepAlivePeriod) {
+        final var latch = new CountDownLatch(1);
+        final Runnable latchCountDown = latch::countDown;
+        final var jetServer = handle.getInternals().getJetServer();
+        jetServer.addStopListener(latchCountDown);
+        addAfter(() -> jetServer.removeStopListener(latchCountDown));
         while (sse.comment("")) {
-            try {
-                sleep(keepAlivePeriod);
-            } catch (final InterruptedException _) {}
+            if (awaitUninterruptibly(latch, keepAlivePeriod)) {
+                break;
+            }
         }
     }
 }
