@@ -1,7 +1,10 @@
 package net.jacobpeterson.jet.server.session;
 
+import com.google.common.collect.ImmutableSet;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Set;
 
 /**
  * {@link Session} is an interface representing a web session.
@@ -17,9 +20,9 @@ public interface Session {
     String getId();
 
     /**
-     * @return <code>true</code> if a value with the given <code>key</code> exists, <code>false</code> otherwise
+     * @return a copied {@link String} {@link Set} of keys stored in this {@link Session}
      */
-    boolean has(final String key);
+    ImmutableSet<String> keys();
 
     /**
      * Gets a value for the given <code>key</code>.

@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.server.session.simple;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import net.jacobpeterson.jet.server.session.Session;
@@ -38,8 +39,8 @@ public class SimpleSession implements Session {
     }
 
     @Override
-    public boolean has(final String key) {
-        return map.containsKey(key);
+    public ImmutableSet<String> keys() {
+        return ImmutableSet.copyOf(map.keySet());
     }
 
     @Override
