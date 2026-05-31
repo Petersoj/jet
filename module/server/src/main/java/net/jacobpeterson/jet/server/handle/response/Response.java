@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentdisposition.ContentDisposition;
@@ -50,11 +49,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
-import static com.google.common.util.concurrent.Uninterruptibles.joinUninterruptibly;
+import static com.google.common.util.concurrent.Uninterruptibles.getUninterruptibly;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ofSeconds;
 import static java.time.ZoneOffset.UTC;
@@ -97,7 +99,7 @@ import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEF
  * <p>
  * Note: this class is not thread-safe.
  */
-@RequiredArgsConstructor @Slf4j
+@RequiredArgsConstructor
 @NullMarked
 public final class Response {
 
@@ -742,15 +744,23 @@ public final class Response {
             final var sse = new Sse(bodyOutputStream);
             if (keepAlivePeriod != null) {
                 if (keepAliveSeparateThread) {
-                    final var keepAliveThread = Thread.ofVirtual().start(() -> {
+                    final var keepAliveFuture = new CompletableFuture<>();
+                    Thread.ofVirtual().start(() -> {
                         try {
                             sseKeepAlive(sse, keepAlivePeriod);
+                            keepAliveFuture.complete(null);
                         } catch (final Throwable throwable) {
-                            LOGGER.error("SSE keep-alive thread threw", throwable);
+                            keepAliveFuture.completeExceptionally(throwable);
                         }
                     });
                     sseApplier.accept(sse);
-                    joinUninterruptibly(keepAliveThread);
+                    try {
+                        getUninterruptibly(keepAliveFuture);
+                    } catch (final ExecutionException executionException) {
+                        final var cause = executionException.getCause();
+                        throwIfUnchecked(cause);
+                        throw new RuntimeException(cause);
+                    }
                 } else {
                     sseApplier.accept(sse);
                     sseKeepAlive(sse, keepAlivePeriod);
