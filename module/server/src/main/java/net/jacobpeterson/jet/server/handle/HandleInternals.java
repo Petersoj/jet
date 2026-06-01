@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
  * {@link HandleInternals} is a class to be internally instantiated by Jet and provided to {@link Handle} subclass
  * constructors.
  * <p>
- * Note: the fields in this class are for internal use only.
+ * Note: this class is for internal use only.
  * <p>
  * Note: this class is not thread-safe.
  */

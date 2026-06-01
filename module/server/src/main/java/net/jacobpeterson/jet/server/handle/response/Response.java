@@ -1,6 +1,5 @@
 package net.jacobpeterson.jet.server.handle.response;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -54,6 +53,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
 import static com.google.common.util.concurrent.Uninterruptibles.getUninterruptibly;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -90,8 +90,9 @@ import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_20
 import static net.jacobpeterson.jet.common.http.status.Status.PERMANENT_REDIRECT_308;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
 import static net.jacobpeterson.jet.common.http.status.Status.TEMPORARY_REDIRECT_307;
-import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
+import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.accumulateThrowable;
+import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
 /**
@@ -139,6 +140,7 @@ public final class Response {
     private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
 
     private @Nullable List<Runnable> afters;
+    private boolean aftersRun;
 
     /**
      * Calls {@link #setStatusCode(int)} with {@link Status#getCode()}.
@@ -660,18 +662,13 @@ public final class Response {
     }
 
     /**
-     * @return an {@link ImmutableList} of all {@link Runnable}s given to {@link #addAfter(Runnable)}s, or
-     * <code>null</code>
-     */
-    public @Nullable ImmutableList<Runnable> getAfters() {
-        return afters == null ? null : ImmutableList.copyOf(afters);
-    }
-
-    /**
      * Adds a {@link Runnable} guaranteed to run after this {@link Response} has been written successfully or
      * unsuccessfully.
+     *
+     * @throws IllegalStateException thrown if <code>afters</code> have already run
      */
-    public void addAfter(final Runnable after) {
+    public void addAfter(final Runnable after) throws IllegalStateException {
+        checkState(!aftersRun, "`afters` have already run");
         if (afters == null) {
             afters = new ArrayList<>();
         }
@@ -682,12 +679,33 @@ public final class Response {
      * Removes a {@link Runnable} added by {@link #addAfter(Runnable)}.
      *
      * @return <code>true</code> if removed, <code>false</code> otherwise
+     *
+     * @throws IllegalStateException thrown if <code>afters</code> have already run
      */
-    public boolean removeAfter(final Runnable after) {
+    public boolean removeAfter(final Runnable after) throws IllegalStateException {
+        checkState(!aftersRun, "`afters` have already run");
         if (afters != null) {
             return afters.remove(after);
         }
         return false;
+    }
+
+    /**
+     * FOR INTERNAL USE ONLY.
+     */
+    public void runAfters() {
+        aftersRun = true;
+        if (afters != null) {
+            Throwable throwables = null;
+            for (final var after : afters) {
+                try {
+                    after.run();
+                } catch (final Throwable throwable) {
+                    throwables = accumulateThrowable(throwables, throwable);
+                }
+            }
+            throwCheckedOrUnchecked(throwables);
+        }
     }
 
     /**

@@ -644,15 +644,10 @@ public final class JetServer {
                     }
                 } finally {
                     if (handle != null) {
-                        final var afters = handle.getResponse().getAfters();
-                        if (afters != null) {
-                            for (final var after : afters) {
-                                try {
-                                    after.run();
-                                } catch (final Throwable throwable) {
-                                    LOGGER.error("`Response.getAfters()` `run()` threw", throwable);
-                                }
-                            }
+                        try {
+                            handle.getResponse().runAfters();
+                        } catch (final Throwable throwable) {
+                            LOGGER.error("`Response.runAfters()` threw", throwable);
                         }
                     }
                 }
@@ -812,11 +807,11 @@ public final class JetServer {
      *
      * @return <code>true</code> if added, <code>false</code> otherwise
      *
-     * @throws IllegalStateException thrown if already stopped
+     * @throws IllegalStateException thrown if {@link #stop()} has already been called
      */
     public boolean addStopListener(final Runnable stopListener) throws IllegalStateException {
         synchronized (stopListeners) {
-            checkState(!stopCalled, "Cannot add `stopListener` after `stop()` has already been called");
+            checkState(!stopCalled, "`stop()` has already been called");
             return stopListeners.add(stopListener);
         }
     }
