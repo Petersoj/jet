@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 
-import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 
 /**
  * {@link Sse} represents a Server-Sent Events (SSE) {@link Response} and provides methods to send events and comments.
@@ -146,21 +146,17 @@ public class Sse {
         Throwable closeThrowable = null;
         try {
             close();
-        } catch (final Throwable theCloseThrowable) {
-            closeThrowable = theCloseThrowable;
+        } catch (final Throwable aCloseThrowable) {
+            closeThrowable = aCloseThrowable;
         }
         if (ignoreThrowable) {
             LOGGER.debug("SSE ignored throwable", throwable);
-            if (closeThrowable != null) {
-                throwIfUnchecked(closeThrowable);
-                throw new RuntimeException(closeThrowable);
-            }
+            throwCheckedOrUnchecked(closeThrowable);
         } else {
             if (closeThrowable != null) {
                 throwable.addSuppressed(throwable);
             }
-            throwIfUnchecked(throwable);
-            throw new RuntimeException(throwable);
+            throwCheckedOrUnchecked(throwable);
         }
     }
 

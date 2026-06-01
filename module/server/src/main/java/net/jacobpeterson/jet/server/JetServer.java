@@ -78,7 +78,6 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
-import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
@@ -105,6 +104,8 @@ import static net.jacobpeterson.jet.common.http.header.Header.X_CONTENT_TYPE_OPT
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
 import static net.jacobpeterson.jet.common.http.status.Status.INTERNAL_SERVER_ERROR_500;
 import static net.jacobpeterson.jet.common.http.status.Status.SERVICE_UNAVAILABLE_503;
+import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.accumulateThrowable;
+import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 import static org.eclipse.jetty.http.UriCompliance.UNSAFE;
 import static org.eclipse.jetty.io.Content.Sink.asOutputStream;
 import static org.slf4j.event.Level.DEBUG;
@@ -842,27 +843,19 @@ public final class JetServer {
         }
         stopCalled = true;
         LOGGER.info("Jet stopping...");
-        Throwable multiThrowable = null;
+        Throwable throwables = null;
         for (final var stopListener : stopListeners.toArray(Runnable[]::new)) {
             try {
                 stopListener.run();
             } catch (final Throwable throwable) {
-                if (multiThrowable == null) {
-                    multiThrowable = throwable;
-                } else {
-                    multiThrowable.addSuppressed(throwable);
-                }
+                throwables = accumulateThrowable(throwables, throwable);
             }
         }
         if (reloadSslFuture != null) {
             try {
                 reloadSslFuture.cancel(false);
             } catch (final Throwable throwable) {
-                if (multiThrowable == null) {
-                    multiThrowable = throwable;
-                } else {
-                    multiThrowable.addSuppressed(throwable);
-                }
+                throwables = accumulateThrowable(throwables, throwable);
             }
         }
         sslContextFactory = null;
@@ -870,17 +863,10 @@ public final class JetServer {
             try {
                 server.stop();
             } catch (final Throwable throwable) {
-                if (multiThrowable == null) {
-                    multiThrowable = throwable;
-                } else {
-                    multiThrowable.addSuppressed(throwable);
-                }
+                throwables = accumulateThrowable(throwables, throwable);
             }
         }
-        if (multiThrowable != null) {
-            throwIfUnchecked(multiThrowable);
-            throw new RuntimeException(multiThrowable);
-        }
+        throwCheckedOrUnchecked(throwables);
         LOGGER.info("Jet stopped");
     }
 }

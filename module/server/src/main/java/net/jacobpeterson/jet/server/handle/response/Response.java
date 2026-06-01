@@ -54,7 +54,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import static com.google.common.base.Throwables.throwIfUnchecked;
 import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
 import static com.google.common.util.concurrent.Uninterruptibles.getUninterruptibly;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -91,6 +90,7 @@ import static net.jacobpeterson.jet.common.http.status.Status.PARTIAL_CONTENT_20
 import static net.jacobpeterson.jet.common.http.status.Status.PERMANENT_REDIRECT_308;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
 import static net.jacobpeterson.jet.common.http.status.Status.TEMPORARY_REDIRECT_307;
+import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
 
@@ -757,9 +757,7 @@ public final class Response {
                     try {
                         getUninterruptibly(keepAliveFuture);
                     } catch (final ExecutionException executionException) {
-                        final var cause = executionException.getCause();
-                        throwIfUnchecked(cause);
-                        throw new RuntimeException(cause);
+                        throwCheckedOrUnchecked(executionException.getCause());
                     }
                 } else {
                     sseApplier.accept(sse);
