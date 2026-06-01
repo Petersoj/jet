@@ -1,5 +1,5 @@
 const val JET_GROUP = "net.jacobpeterson.jet"
-const val JET_VERSION = "3.1.0"
+const val JET_VERSION = "3.1.1"
 const val GITHUB_PROJECT_URL = "https://github.com/Petersoj/jet"
 const val JRELEASER_MAVEN_NAME = "jreleaser"
 const val JRELEASER_MAVEN_REPOSITORY_DIRECTORY = "jreleaser-staging"
