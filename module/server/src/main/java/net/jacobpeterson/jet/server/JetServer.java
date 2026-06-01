@@ -584,8 +584,8 @@ public final class JetServer {
 
             private void handle(final org.eclipse.jetty.server.Request jettyRequest,
                     final org.eclipse.jetty.server.Response jettyResponse) {
-                // This check is still racy with `stop()`, but it decreases the chances of preventing
-                // `addStopListener()` from throwing after `stop()` is called.
+                // This check is still racy with `stop()`, but it decreases the likelihood of `addStopListener()` calls
+                // throwing after `stop()` is called.
                 if (stopCalled) {
                     jettyResponse.setStatus(SERVICE_UNAVAILABLE_503.getCode());
                     return;
@@ -835,7 +835,7 @@ public final class JetServer {
      * stops the server by rejecting new connections and waiting for {@link #getGracefulStopTimeout()} to elapse before
      * closing existing connections. Subsequent calls to this method are ignored.
      * <p>
-     * Note: this method should never be called directly by a {@link Handler}.
+     * Note: this method should never be called on the {@link Thread} of a {@link Handler}.
      */
     public synchronized void stop() {
         if (stopCalled) {
