@@ -33,7 +33,7 @@ public class BoundedInputStream extends FilterInputStream {
 
     /**
      * <code>true</code> to throw {@link BoundException} if {@link #isBound()} on the first call to {@link #close()},
-     * <code>false</code> to not throw.
+     * <code>false</code> to not throw. This only applies if {@link #getBoundCount()} is non-<code>null</code>.
      */
     private final @Getter boolean throwOnClose;
 

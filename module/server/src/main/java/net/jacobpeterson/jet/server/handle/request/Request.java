@@ -24,6 +24,7 @@ import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.common.io.bounded.BoundException;
 import net.jacobpeterson.jet.common.io.bounded.BoundedInputStream;
 import net.jacobpeterson.jet.server.handle.Handle;
+import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultiPart;
 import net.jacobpeterson.jet.server.handle.request.multipart.MultipartConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
@@ -41,6 +42,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -71,6 +73,8 @@ import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
 import static net.jacobpeterson.jet.common.http.status.Status.BAD_REQUEST_400;
 import static net.jacobpeterson.jet.common.http.status.Status.CONTENT_TOO_LARGE_413;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
+import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.asBodyStreamException;
+import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.shouldBeBodyStreamException;
 import static org.eclipse.jetty.http.MultiPartFormData.getParts;
 import static org.eclipse.jetty.io.Content.Source.asInputStream;
 
@@ -528,7 +532,127 @@ public final class Request {
      * @return the body {@link BoundedInputStream}
      */
     public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount, final boolean throwOnClose) {
-        return new BoundedInputStream(asInputStream(handle.getInternals().getRequest()), boundCount, throwOnClose);
+        return new BoundedInputStream(new InputStream() {
+            final InputStream inputStream = asInputStream(handle.getInternals().getRequest());
+
+            @Override
+            public int read() throws IOException {
+                try {
+                    return inputStream.read();
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public int read(final byte[] b) throws IOException {
+                try {
+                    return inputStream.read(b);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public int read(final byte[] b, final int off, final int len) throws IOException {
+                try {
+                    return inputStream.read(b, off, len);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public byte[] readAllBytes() throws IOException {
+                try {
+                    return inputStream.readAllBytes();
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public byte[] readNBytes(final int len) throws IOException {
+                try {
+                    return inputStream.readNBytes(len);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public int readNBytes(final byte[] b, final int off, final int len) throws IOException {
+                try {
+                    return inputStream.readNBytes(b, off, len);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public long skip(final long n) throws IOException {
+                try {
+                    return inputStream.skip(n);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public void skipNBytes(final long n) throws IOException {
+                try {
+                    inputStream.skipNBytes(n);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public int available() throws IOException {
+                try {
+                    return inputStream.available();
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public void close() throws IOException {
+                try {
+                    inputStream.close();
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public void mark(final int readlimit) {
+                inputStream.mark(readlimit);
+            }
+
+            @Override
+            public void reset() throws IOException {
+                try {
+                    inputStream.reset();
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+
+            @Override
+            public boolean markSupported() {
+                return inputStream.markSupported();
+            }
+
+            @Override
+            public long transferTo(final OutputStream out) throws IOException {
+                try {
+                    return inputStream.transferTo(out);
+                } catch (final Exception exception) {
+                    throw asBodyStreamException(exception);
+                }
+            }
+        }, boundCount, throwOnClose);
     }
 
     /**
@@ -620,6 +744,9 @@ public final class Request {
             try {
                 parts = getParts(request, request, contentType, jettyConfig);
             } catch (final Exception exception) {
+                if (shouldBeBodyStreamException(exception)) {
+                    throw new UncheckedIOException(new BodyStreamException(exception));
+                }
                 throw new StatusException(BAD_REQUEST_400, exception);
             }
             bodyMultiParts = stream(parts.spliterator(), false)

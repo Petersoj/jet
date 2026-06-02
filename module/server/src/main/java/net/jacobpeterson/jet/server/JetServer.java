@@ -19,6 +19,7 @@ import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
+import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
 import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handler.Handler;
@@ -30,7 +31,6 @@ import net.jacobpeterson.jet.server.session.simple.SimpleSessionStore;
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
-import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Handler.Abstract;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -48,6 +48,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
@@ -72,7 +73,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -102,10 +102,12 @@ import static net.jacobpeterson.jet.common.http.header.Header.ETAG;
 import static net.jacobpeterson.jet.common.http.header.Header.VARY;
 import static net.jacobpeterson.jet.common.http.header.Header.X_CONTENT_TYPE_OPTIONS;
 import static net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl.NO_CACHE;
+import static net.jacobpeterson.jet.common.http.status.Status.BAD_REQUEST_400;
 import static net.jacobpeterson.jet.common.http.status.Status.INTERNAL_SERVER_ERROR_500;
 import static net.jacobpeterson.jet.common.http.status.Status.SERVICE_UNAVAILABLE_503;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.accumulateThrowable;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
+import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.asBodyStreamException;
 import static org.eclipse.jetty.http.UriCompliance.UNSAFE;
 import static org.eclipse.jetty.io.Content.Sink.asOutputStream;
 import static org.slf4j.event.Level.DEBUG;
@@ -601,18 +603,26 @@ public final class JetServer {
                         response.getHeaders().clear();
                         final int statusCode;
                         final String statusString;
-                        final var isStatusException = throwable instanceof StatusException;
-                        if (isStatusException) {
-                            statusCode = ((StatusException) throwable).getStatusCode();
+                        final boolean errorLog;
+                        if (throwable instanceof final StatusException statusException) {
+                            statusCode = statusException.getStatusCode();
                             final var status = Status.forCode(statusCode);
                             statusString = status == null ? statusCode + " Error" : status.toString();
+                            errorLog = false;
+                        } else if (getCausalChain(throwable).stream()
+                                .anyMatch(cause -> cause instanceof BodyStreamException)) {
+                            final var status = BAD_REQUEST_400;
+                            statusCode = status.getCode();
+                            statusString = status.toString();
+                            errorLog = false;
                         } else {
                             final var status = INTERNAL_SERVER_ERROR_500;
                             statusCode = status.getCode();
                             statusString = status.toString();
+                            errorLog = true;
                         }
                         handle.getResponse().responseText(statusCode, statusString);
-                        LOGGER.atLevel(isStatusException ? DEBUG : ERROR).log("Handler threw", throwable);
+                        LOGGER.atLevel(errorLog ? ERROR : DEBUG).log("Handler threw", throwable);
                     }
                     final var headers = response.getHeaders();
                     if (preventMimeSniffing) {
@@ -626,11 +636,56 @@ public final class JetServer {
                     final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
                     if (bodyOutputStreamApplier != null) {
                         try (final var bodyOutputStream = asOutputStream(jettyResponse)) {
-                            bodyOutputStreamApplier.accept(bodyOutputStream);
+                            bodyOutputStreamApplier.accept(new OutputStream() {
+                                @Override
+                                public void write(final byte[] b) throws IOException {
+                                    try {
+                                        bodyOutputStream.write(b);
+                                    } catch (final Exception exception) {
+                                        throw asBodyStreamException(exception);
+                                    }
+                                }
+
+                                @Override
+                                public void write(final byte[] b, final int off, final int len) throws IOException {
+                                    try {
+                                        bodyOutputStream.write(b, off, len);
+                                    } catch (final Exception exception) {
+                                        throw asBodyStreamException(exception);
+                                    }
+                                }
+
+                                @Override
+                                public void flush() throws IOException {
+                                    try {
+                                        bodyOutputStream.flush();
+                                    } catch (final Exception exception) {
+                                        throw asBodyStreamException(exception);
+                                    }
+                                }
+
+                                @Override
+                                public void close() throws IOException {
+                                    try {
+                                        bodyOutputStream.close();
+                                    } catch (final Exception exception) {
+                                        throw asBodyStreamException(exception);
+                                    }
+                                }
+
+                                @Override
+                                public void write(final int b) throws IOException {
+                                    try {
+                                        bodyOutputStream.write(b);
+                                    } catch (final Exception exception) {
+                                        throw asBodyStreamException(exception);
+                                    }
+                                }
+                            });
                         } catch (final Throwable throwable) {
                             if (getCausalChain(throwable).stream().anyMatch(cause ->
-                                    cause instanceof EofException || cause instanceof TimeoutException)) {
-                                LOGGER.debug("Client early disconnect or idle timeout", throwable);
+                                    cause instanceof BodyStreamException)) {
+                                LOGGER.debug("Body stream exception", throwable);
                             } else {
                                 throw throwable;
                             }

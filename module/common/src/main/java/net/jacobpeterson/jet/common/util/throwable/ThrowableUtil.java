@@ -28,7 +28,8 @@ public final class ThrowableUtil {
 
     /**
      * If <code>throwable</code> is non-<code>null</code>, calls {@link Throwables#throwIfUnchecked(Throwable)} and then
-     * calls <code>throw new {@link RuntimeException}</code>.
+     * calls <code>throw new {@link RuntimeException}</code>. It is not recommended to use this within
+     * non-<code>void</code> methods since this would still have to be followed by a <code>throw</code> clause.
      */
     public static void throwCheckedOrUnchecked(final @Nullable Throwable throwable) {
         if (throwable != null) {
