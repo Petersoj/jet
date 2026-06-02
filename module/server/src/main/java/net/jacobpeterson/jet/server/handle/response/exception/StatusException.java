@@ -3,11 +3,15 @@ package net.jacobpeterson.jet.server.handle.response.exception;
 import lombok.Getter;
 import lombok.ToString;
 import net.jacobpeterson.jet.common.http.status.Status;
+import net.jacobpeterson.jet.server.handler.Handler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
  * {@link StatusException} is a {@link RuntimeException} with an associated {@link Status} code.
+ * {@link StatusException}s are not intended to be caught and logged as errors. They should be used as silent errors in
+ * a {@link Handler}. For example, if a client sends a request with an invalid header, the server should respond with
+ * {@link Status#BAD_REQUEST_400} and not log any server errors.
  */
 @NullMarked
 @ToString
