@@ -42,7 +42,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.33")
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.34")
 }
 
 tasks.withType(JavaCompile::class) {
