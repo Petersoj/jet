@@ -734,7 +734,8 @@ public final class Response {
     /**
      * Converts this {@link Response} into a Server-Sent Events (SSE) {@link Response}.
      *
-     * @param sseApplier              the {@link Sse} applier
+     * @param sseApplier              the {@link Sse} applier (can be either blocking or non-blocking, but non-blocking
+     *                                is recommended)
      * @param keepAlivePeriod         the period {@link Duration} at which to call {@link Sse#comment(String)} with an
      *                                empty string, or <code>null</code> to disable. If disabled,
      *                                <code>sseApplier</code> must be blocking to keep the {@link Response} thread
