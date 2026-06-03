@@ -1,8 +1,8 @@
 # Jet
 
-[![Maven Central](https://img.shields.io/badge/Maven_Central-3.1.1-blue?logo=apachemaven)](https://central.sonatype.com/search?namespace=net.jacobpeterson.jet)
-[![Gradle Plugin](https://img.shields.io/badge/Gradle_Plugin-3.1.1-blue?logo=gradle)](https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin)
-[![Javadoc](https://img.shields.io/badge/javadoc-3.1.1-brightgreen)](https://javadoc.io/doc/net.jacobpeterson.jet)
+[![Maven Central](https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven)](https://central.sonatype.com/search?namespace=net.jacobpeterson.jet)
+[![Gradle Plugin](https://img.shields.io/badge/Gradle_Plugin-3.2.0-blue?logo=gradle)](https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin)
+[![Javadoc](https://img.shields.io/badge/javadoc-3.2.0-brightgreen)](https://javadoc.io/doc/net.jacobpeterson.jet)
 [![Codecov](https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E)](https://codecov.io/gh/Petersoj/jet)
 [![Java Version](https://img.shields.io/badge/Java_Version-25-orange?logo=java)](https://openjdk.org/projects/jdk/25)
 [![GitHub License](https://img.shields.io/github/license/Petersoj/jet)](https://github.com/Petersoj/jet/blob/main/LICENSE.txt)
@@ -40,7 +40,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:server:3.1.1")
+    implementation("net.jacobpeterson.jet:server:3.2.0")
 }
 ```
 
@@ -48,7 +48,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:server:3.1.1'
+    implementation 'net.jacobpeterson.jet:server:3.2.0'
 }
 ```
 
@@ -58,7 +58,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>server</artifactId>
-    <version>3.1.1</version>
+    <version>3.2.0</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:openapi-annotations:3.1.1")
+    implementation("net.jacobpeterson.jet:openapi-annotations:3.2.0")
 }
 ```
 
@@ -84,7 +84,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:openapi-annotations:3.1.1'
+    implementation 'net.jacobpeterson.jet:openapi-annotations:3.2.0'
 }
 ```
 
@@ -94,7 +94,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>openapi-annotations</artifactId>
-    <version>3.1.1</version>
+    <version>3.2.0</version>
 </dependency>
 ```
 
@@ -112,7 +112,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("net.jacobpeterson.jet.openapiannotationsplugin") version "3.1.1"
+    id("net.jacobpeterson.jet.openapiannotationsplugin") version "3.2.0"
 }
 ```
 
@@ -120,7 +120,7 @@ For `build.gradle`:
 
 ```groovy
 plugins {
-    id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.1.1"
+    id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.2.0"
 }
 ```
 
@@ -172,7 +172,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:client:3.1.1")
+    implementation("net.jacobpeterson.jet:client:3.2.0")
 }
 ```
 
@@ -180,7 +180,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:client:3.1.1'
+    implementation 'net.jacobpeterson.jet:client:3.2.0'
 }
 ```
 
@@ -190,7 +190,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>client</artifactId>
-    <version>3.1.1</version>
+    <version>3.2.0</version>
 </dependency>
 ```
 
@@ -211,7 +211,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:common:3.1.1")
+    implementation("net.jacobpeterson.jet:common:3.2.0")
 }
 ```
 
@@ -219,7 +219,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:common:3.1.1'
+    implementation 'net.jacobpeterson.jet:common:3.2.0'
 }
 ```
 
@@ -229,7 +229,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>common</artifactId>
-    <version>3.1.1</version>
+    <version>3.2.0</version>
 </dependency>
 ```
 
