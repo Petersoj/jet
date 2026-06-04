@@ -6,8 +6,8 @@ import com.aayushatharva.brotli4j.encoder.BrotliOutputStream;
 import com.aayushatharva.brotli4j.encoder.Encoder.Parameters;
 import com.aayushatharva.brotli4j.encoder.PreparedDictionary;
 import com.github.luben.zstd.RecyclingBufferPool;
-import com.github.luben.zstd.ZstdInputStream;
-import com.github.luben.zstd.ZstdOutputStream;
+import com.github.luben.zstd.ZstdInputStreamNoFinalizer;
+import com.github.luben.zstd.ZstdOutputStreamNoFinalizer;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -229,7 +229,8 @@ public enum CompressionType {
                 }
             };
             case BROTLI -> new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault), DEFAULT_BUFFER_SIZE);
-            case ZSTANDARD -> new ZstdOutputStream(outputStream, RecyclingBufferPool.INSTANCE, levelOrDefault);
+            case ZSTANDARD -> new ZstdOutputStreamNoFinalizer(outputStream, RecyclingBufferPool.INSTANCE,
+                    levelOrDefault);
             case DICTIONARY_COMPRESSED_BROTLI -> {
                 final var compress = new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault),
                         DEFAULT_BUFFER_SIZE);
@@ -241,7 +242,8 @@ public enum CompressionType {
                 yield compress;
             }
             case DICTIONARY_COMPRESSED_ZSTANDARD -> {
-                final var compress = new ZstdOutputStream(outputStream, RecyclingBufferPool.INSTANCE, levelOrDefault);
+                final var compress = new ZstdOutputStreamNoFinalizer(outputStream, RecyclingBufferPool.INSTANCE,
+                        levelOrDefault);
                 compress.setDict(requireNonNull(dictionary));
                 yield compress;
             }
@@ -299,7 +301,7 @@ public enum CompressionType {
                 }
             };
             case BROTLI -> new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
-            case ZSTANDARD -> new ZstdInputStream(inputStream, RecyclingBufferPool.INSTANCE);
+            case ZSTANDARD -> new ZstdInputStreamNoFinalizer(inputStream, RecyclingBufferPool.INSTANCE);
             case DICTIONARY_COMPRESSED_BROTLI -> {
                 final var decompress = new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
                 final var dictionaryDirect = allocateDirect(requireNonNull(dictionary).length);
@@ -308,7 +310,7 @@ public enum CompressionType {
                 yield decompress;
             }
             case DICTIONARY_COMPRESSED_ZSTANDARD -> {
-                final var decompress = new ZstdInputStream(inputStream, RecyclingBufferPool.INSTANCE);
+                final var decompress = new ZstdInputStreamNoFinalizer(inputStream, RecyclingBufferPool.INSTANCE);
                 decompress.setDict(requireNonNull(dictionary));
                 yield decompress;
             }
