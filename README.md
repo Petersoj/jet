@@ -1,18 +1,23 @@
-<br>
-<div align="center"><img src=".github/images/logo.svg" alt="Logo" width="70%"></div>
-<br>
-<br>
+<br><br>
 <div align="center">
-
-[![Repository](https://img.shields.io/badge/Repository-GitHub-black?logo=github)](https://github.com/Petersoj/jet)
-[![Documentation](https://img.shields.io/badge/Documentation-GitHub_Pages-whitesmoke?logo=github)](https://petersoj.github.io/jet/)
-[![Maven Central](https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven)](https://central.sonatype.com/search?namespace=net.jacobpeterson.jet)
-[![Gradle Plugin](https://img.shields.io/badge/Gradle_Plugin-3.2.0-blue?logo=gradle)](https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin)
-[![Javadoc](https://img.shields.io/badge/javadoc-3.2.0-brightgreen)](https://javadoc.io/doc/net.jacobpeterson.jet)
-[![Codecov](https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E)](https://codecov.io/gh/Petersoj/jet)
-[![Java Version](https://img.shields.io/badge/Java_Version-25-orange?logo=java)](https://openjdk.org/projects/jdk/25)
-[![GitHub License](https://img.shields.io/github/license/Petersoj/jet)](https://github.com/Petersoj/jet/blob/main/LICENSE.txt)
-
+    <img src=".github/images/logo.svg" alt="Logo" width="70%">
+    <br><br><br><br>
+    <a href="https://github.com/Petersoj/jet">
+    <img src="https://img.shields.io/badge/Repository-GitHub-black?logo=github" alt="Repository"></a>
+    <a href="https://petersoj.github.io/jet/">
+    <img src="https://img.shields.io/badge/Documentation-GitHub_Pages-whitesmoke?logo=github" alt="Documentation"></a>
+    <a href="https://central.sonatype.com/search?namespace=net.jacobpeterson.jet">
+    <img src="https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven" alt="Maven Central"></a>
+    <a href="https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin">
+    <img src="https://img.shields.io/badge/Gradle_Plugin-3.2.0-blue?logo=gradle" alt="Gradle Plugin"></a>
+    <a href="https://javadoc.io/doc/net.jacobpeterson.jet">
+    <img src="https://img.shields.io/badge/javadoc-3.2.0-brightgreen" alt="Javadoc"></a>
+    <a href="https://codecov.io/gh/Petersoj/jet">
+    <img src="https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E" alt="Codecov"></a>
+    <a href="https://openjdk.org/projects/jdk/25">
+    <img src="https://img.shields.io/badge/Java_Version-25-orange?logo=java" alt="Java Version"></a>
+    <a href="https://github.com/Petersoj/jet/blob/main/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/Petersoj/jet" alt="GitHub License"></a>
 </div>
 
 # Jet
