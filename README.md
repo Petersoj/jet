@@ -1,11 +1,21 @@
-# Jet
+<br>
+<div align="center"><img src=".github/images/logo.svg" alt="Logo" width="70%"></div>
+<br>
+<br>
+<div align="center">
 
+[![Repository](https://img.shields.io/badge/Repository-GitHub-black?logo=github)](https://github.com/Petersoj/jet)
+[![Documentation](https://img.shields.io/badge/Documentation-GitHub_Pages-whitesmoke?logo=github)](https://petersoj.github.io/jet/)
 [![Maven Central](https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven)](https://central.sonatype.com/search?namespace=net.jacobpeterson.jet)
 [![Gradle Plugin](https://img.shields.io/badge/Gradle_Plugin-3.2.0-blue?logo=gradle)](https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin)
 [![Javadoc](https://img.shields.io/badge/javadoc-3.2.0-brightgreen)](https://javadoc.io/doc/net.jacobpeterson.jet)
 [![Codecov](https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E)](https://codecov.io/gh/Petersoj/jet)
 [![Java Version](https://img.shields.io/badge/Java_Version-25-orange?logo=java)](https://openjdk.org/projects/jdk/25)
 [![GitHub License](https://img.shields.io/github/license/Petersoj/jet)](https://github.com/Petersoj/jet/blob/main/LICENSE.txt)
+
+</div>
+
+# Jet
 
 A simple, modern, turnkey, Java web client and server library.
 
