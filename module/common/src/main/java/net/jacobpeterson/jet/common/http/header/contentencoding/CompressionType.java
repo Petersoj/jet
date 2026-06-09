@@ -228,10 +228,14 @@ public enum CompressionType {
                     def.close();
                 }
             };
-            case BROTLI -> new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault), DEFAULT_BUFFER_SIZE);
+            case BROTLI -> {
+                Brotli4jLoader.ensureAvailability();
+                yield new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault), DEFAULT_BUFFER_SIZE);
+            }
             case ZSTANDARD -> new ZstdOutputStreamNoFinalizer(outputStream, RecyclingBufferPool.INSTANCE,
                     levelOrDefault);
             case DICTIONARY_COMPRESSED_BROTLI -> {
+                Brotli4jLoader.ensureAvailability();
                 final var compress = new BrotliOutputStream(outputStream, Parameters.create(levelOrDefault),
                         DEFAULT_BUFFER_SIZE);
                 compress.attachDictionary((PreparedDictionary) () -> {
@@ -300,9 +304,13 @@ public enum CompressionType {
                     super.close();
                 }
             };
-            case BROTLI -> new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
+            case BROTLI -> {
+                Brotli4jLoader.ensureAvailability();
+                yield new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
+            }
             case ZSTANDARD -> new ZstdInputStreamNoFinalizer(inputStream, RecyclingBufferPool.INSTANCE);
             case DICTIONARY_COMPRESSED_BROTLI -> {
+                Brotli4jLoader.ensureAvailability();
                 final var decompress = new BrotliInputStream(inputStream, DEFAULT_BUFFER_SIZE);
                 final var dictionaryDirect = allocateDirect(requireNonNull(dictionary).length);
                 dictionaryDirect.put(dictionary);
@@ -320,10 +328,6 @@ public enum CompressionType {
     @Override
     public String toString() {
         return string;
-    }
-
-    static {
-        Brotli4jLoader.ensureAvailability();
     }
 
     /**
