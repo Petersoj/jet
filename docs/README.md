@@ -1,6 +1,6 @@
 <br><br>
 <div align="center">
-    <img src=".github/images/logo.svg" alt="Logo" width="70%">
+    <img src="https://raw.githubusercontent.com/Petersoj/jet/refs/heads/main/docs/logo.svg" alt="Logo" width="70%">
     <br><br><br><br>
     <a href="https://github.com/Petersoj/jet">
     <img src="https://img.shields.io/badge/Repository-GitHub-black?logo=github" alt="Repository"></a>
