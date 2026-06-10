@@ -14,7 +14,7 @@ import java.io.Serializable;
  * Note: {@link SchemaGeneratorConfigBuilderProvider} extends {@link Serializable} so that this
  * {@link FunctionalInterface} can be used as a {@link Task} {@link Input}, but if the {@link #provide()} implementation
  * is changed, it will not re-run the {@link Task}. The Gradle <code>clean</code> task must be run in order to use the
- * update {@link #provide()} implementation.
+ * updated {@link #provide()} implementation.
  */
 @NullMarked
 @FunctionalInterface

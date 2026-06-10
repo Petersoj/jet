@@ -1,11 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.Generated;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -54,6 +53,27 @@ public @interface OpenApiXml {
     }
 
     /**
+     * {@link NodeType} is an enum for {@link #nodeType()}.
+     */
+    enum NodeType {
+
+        @AnnotationJsonName("element")
+        ELEMENT,
+
+        @AnnotationJsonName("attribute")
+        ATTRIBUTE,
+
+        @AnnotationJsonName("text")
+        TEXT,
+
+        @AnnotationJsonName("cdata")
+        CDATA,
+
+        @AnnotationJsonName("none")
+        NONE
+    }
+
+    /**
      * One of <code>element</code>, <code>attribute</code>, <code>text</code>, <code>cdata</code>, or <code>none</code>,
      * as explained under <a href="https://spec.openapis.org/oas/v3.2.0.html#xml-node-types">XML Node Types</a>. The
      * default value is <code>none</code> if <code>$ref</code>, <code>$dynamicRef</code>, or <code>type: "array"</code>
@@ -64,28 +84,6 @@ public @interface OpenApiXml {
      */
     @AnnotationArrayIsNullableValue
     NodeType[] nodeType() default {};
-
-    /**
-     * {@link NodeType} is an enum for {@link #nodeType()}.
-     */
-    @Generated
-    enum NodeType {
-
-        @SerializedName("element")
-        ELEMENT,
-
-        @SerializedName("attribute")
-        ATTRIBUTE,
-
-        @SerializedName("text")
-        TEXT,
-
-        @SerializedName("cdata")
-        CDATA,
-
-        @SerializedName("none")
-        NONE
-    }
 
     /**
      * Sets the name of the element/attribute corresponding to the schema, replacing the name that was inferred as

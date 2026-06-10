@@ -528,10 +528,10 @@ public final class ContentType {
             create(APPLICATION_TYPE_STRING, "x-rar-compressed"),
             create(APPLICATION_TYPE_STRING, "x-zip-compressed"),
             create(APPLICATION_TYPE_STRING, "x-7z-compressed"),
-            create(APPLICATION_TYPE_STRING, "application/gtar"),
-            create(APPLICATION_TYPE_STRING, "application/x-gtar"),
-            create(APPLICATION_TYPE_STRING, "application/java-archive"),
-            create(APPLICATION_TYPE_STRING, "application/x-java-archive"));
+            create(APPLICATION_TYPE_STRING, "gtar"),
+            create(APPLICATION_TYPE_STRING, "x-gtar"),
+            create(APPLICATION_TYPE_STRING, "java-archive"),
+            create(APPLICATION_TYPE_STRING, "x-java-archive"));
 
     /**
      * A non-exhaustive {@link ImmutableSetMultimap} of {@link ContentType}s mapped to their dot-less file

@@ -1,11 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.Generated;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -91,23 +90,14 @@ public @interface OpenApiParameter {
     String name() default "";
 
     /**
-     * <strong><em>REQUIRED</em></strong>. The location of the parameter. Possible values are <code>"query"</code>,
-     * <code>"querystring"</code>, <code>"header"</code>, <code>"path"</code> or <code>"cookie"</code>.
-     *
-     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-in">spec.openapis.org</a>
-     */
-    @AnnotationArrayIsNullableValue
-    ParameterLocation[] in() default {};
-
-    /**
      * {@link ParameterLocation} is an enum for the
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-object">OpenAPI Parameter Locations</a>.
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-object">OpenAPI Parameter Locations</a>
+     * ({@link #in()}).
      * <p>
      * There are five possible parameter locations specified by the <code>in</code> field.
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-locations">spec.openapis.org</a>
      */
-    @Generated
     enum ParameterLocation {
 
         /**
@@ -115,7 +105,7 @@ public @interface OpenApiParameter {
          * where the parameter value is actually part of the operation’s URL. This does not include the host or base
          * path of the API. For example, in <code>/items/{itemId}</code>, the path parameter is <code>itemId</code>.
          */
-        @SerializedName("path")
+        @AnnotationJsonName("path")
         PATH,
 
         /**
@@ -123,7 +113,7 @@ public @interface OpenApiParameter {
          * <code>id</code>; <em>MUST NOT</em> appear in the same operation (or in the operation’s path-item) as an
          * <code>in: "querystring"</code> parameter.
          */
-        @SerializedName("query")
+        @AnnotationJsonName("query")
         QUERY,
 
         /**
@@ -133,7 +123,7 @@ public @interface OpenApiParameter {
          * with request bodies of that media type; <em>MUST NOT</em> appear more than once, and <em>MUST NOT</em> appear
          * in the same operation (or in the operation’s path-item) as any <code>in: "query"</code> parameters.
          */
-        @SerializedName("querystring")
+        @AnnotationJsonName("querystring")
         QUERYSTRING,
 
         /**
@@ -142,15 +132,24 @@ public @interface OpenApiParameter {
          * <a href="https://datatracker.ietf.org/doc/html/rfc9110#section-5.1">Section 5.1</a> states header names are
          * case-insensitive.
          */
-        @SerializedName("header")
+        @AnnotationJsonName("header")
         HEADER,
 
         /**
          * Used to pass a specific cookie value to the API.
          */
-        @SerializedName("cookie")
+        @AnnotationJsonName("cookie")
         COOKIE
     }
+
+    /**
+     * <strong><em>REQUIRED</em></strong>. The location of the parameter. Possible values are <code>"query"</code>,
+     * <code>"querystring"</code>, <code>"header"</code>, <code>"path"</code> or <code>"cookie"</code>.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-in">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsNullableValue
+    ParameterLocation[] in() default {};
 
     /**
      * A brief description of the parameter. This could contain examples of use.
@@ -221,7 +220,7 @@ public @interface OpenApiParameter {
      * @see #examples()
      */
     @AnnotationArrayIsMap
-    @SerializedName("examples")
+    @AnnotationJsonName("examples")
     OpenApiReference.MapEntry[] exampleReferences() default {};
 
     /**
@@ -260,29 +259,14 @@ public @interface OpenApiParameter {
     @interface Schema { //@formatter:on
 
         /**
-         * Describes how the parameter value will be serialized depending on the type of the parameter value. Default
-         * values (based on value of <code>in</code>): for <code>"query"</code> - <code>"form"</code>; for
-         * <code>"path"</code> - <code>"simple"</code>; for <code>"header"</code> - <code>"simple"</code>; for
-         * <code>"cookie"</code> - <code>"form"</code> (for compatibility reasons; note that
-         * <code>style: "cookie"</code> <em>SHOULD</em> be used with <code>in: "cookie"</code>; see
-         * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a>
-         * for details).
-         *
-         * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-style">spec.openapis.org</a>
-         */
-        @AnnotationArrayIsNullableValue
-        Style[] style() default {};
-
-        /**
          * {@link Style} is an enum for the
-         * <a href="https://spec.openapis.org/oas/v3.2.0.html#style-values">OpenAPI Style Values</a>.
+         * <a href="https://spec.openapis.org/oas/v3.2.0.html#style-values">OpenAPI Style Values</a> ({@link #style()}).
          * <p>
          * In order to support common ways of serializing simple parameters, a set of <code>style</code> values are
          * defined. Combinations not represented in this table are not permitted.
          *
          * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#style-values">spec.openapis.org</a>
          */
-        @Generated
         enum Style {
 
             /**
@@ -294,7 +278,7 @@ public @interface OpenApiParameter {
              * <a href="https://spec.openapis.org/oas/v3.2.0.html#bib-rfc6570">RFC6570</a>
              * <a href="https://datatracker.ietf.org/doc/html/rfc6570#section-3.2.7">Section 3.2.7</a>
              */
-            @SerializedName("matrix")
+            @AnnotationJsonName("matrix")
             MATRIX,
 
             /**
@@ -306,7 +290,7 @@ public @interface OpenApiParameter {
              * <a href="https://spec.openapis.org/oas/v3.2.0.html#bib-rfc6570">RFC6570</a>
              * <a href="https://datatracker.ietf.org/doc/html/rfc6570#section-3.2.5">Section 3.2.5</a>
              */
-            @SerializedName("label")
+            @AnnotationJsonName("label")
             LABEL,
 
             /**
@@ -319,7 +303,7 @@ public @interface OpenApiParameter {
              * <a href="https://datatracker.ietf.org/doc/html/rfc6570#section-3.2.2">Section 3.2.2</a>. This option
              * replaces <code>collectionFormat</code> with a <code>csv</code> value from OpenAPI 2.0.
              */
-            @SerializedName("simple")
+            @AnnotationJsonName("simple")
             SIMPLE,
 
             /**
@@ -333,7 +317,7 @@ public @interface OpenApiParameter {
              * replaces <code>collectionFormat</code> with a <code>csv</code> (when <code>explode</code> is false) or
              * <code>multi</code> (when <code>explode</code> is true) value from OpenAPI 2.0.
              */
-            @SerializedName("form")
+            @AnnotationJsonName("form")
             FORM,
 
             /**
@@ -344,7 +328,7 @@ public @interface OpenApiParameter {
              * Space separated array values or object properties and values. This option replaces
              * <code>collectionFormat</code> equal to <code>ssv</code> from OpenAPI 2.0.
              */
-            @SerializedName("spaceDelimited")
+            @AnnotationJsonName("spaceDelimited")
             SPACE_DELIMITED,
 
             /**
@@ -355,7 +339,7 @@ public @interface OpenApiParameter {
              * Pipe separated array values or object properties and values. This option replaces
              * <code>collectionFormat</code> equal to <code>pipes</code> from OpenAPI 2.0.
              */
-            @SerializedName("pipeDelimited")
+            @AnnotationJsonName("pipeDelimited")
             PIPE_DELIMITED,
 
             /**
@@ -368,7 +352,7 @@ public @interface OpenApiParameter {
              * <a href="https://spec.openapis.org/oas/v3.2.0.html#extending-support-for-querystring-formats">Extending
              * Support for Querystring Formats</a> for alternatives).
              */
-            @SerializedName("deepObject")
+            @AnnotationJsonName("deepObject")
             DEEP_OBJECT,
 
             /**
@@ -382,9 +366,23 @@ public @interface OpenApiParameter {
              * <code>n1=v1; n2=v2</code>), and no percent-encoding or other escaping is applied; data values that
              * require any sort of escaping <em>MUST</em> be provided in escaped form.
              */
-            @SerializedName("cookie")
+            @AnnotationJsonName("cookie")
             COOKIE
         }
+
+        /**
+         * Describes how the parameter value will be serialized depending on the type of the parameter value. Default
+         * values (based on value of <code>in</code>): for <code>"query"</code> - <code>"form"</code>; for
+         * <code>"path"</code> - <code>"simple"</code>; for <code>"header"</code> - <code>"simple"</code>; for
+         * <code>"cookie"</code> - <code>"form"</code> (for compatibility reasons; note that
+         * <code>style: "cookie"</code> <em>SHOULD</em> be used with <code>in: "cookie"</code>; see
+         * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a>
+         * for details).
+         *
+         * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-style">spec.openapis.org</a>
+         */
+        @AnnotationArrayIsNullableValue
+        Style[] style() default {};
 
         /**
          * When this is true, parameter values of type <code>array</code> or <code>object</code> generate separate
@@ -448,7 +446,7 @@ public @interface OpenApiParameter {
      * @see #content()
      */
     @AnnotationArrayIsMap
-    @SerializedName("content")
+    @AnnotationJsonName("content")
     OpenApiReference.MapEntry[] contentReferences() default {};
 
     /**

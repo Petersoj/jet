@@ -1,10 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -77,7 +77,7 @@ public @interface OpenApiComponents {
      * @see #responses()
      */
     @AnnotationArrayIsMap
-    @SerializedName("responses")
+    @AnnotationJsonName("responses")
     OpenApiReference.MapEntry[] responseReferences() default {};
 
     /**
@@ -93,7 +93,7 @@ public @interface OpenApiComponents {
      * @see #parameters()
      */
     @AnnotationArrayIsMap
-    @SerializedName("parameters")
+    @AnnotationJsonName("parameters")
     OpenApiReference.MapEntry[] parameterReferences() default {};
 
     /**
@@ -109,7 +109,7 @@ public @interface OpenApiComponents {
      * @see #examples()
      */
     @AnnotationArrayIsMap
-    @SerializedName("examples")
+    @AnnotationJsonName("examples")
     OpenApiReference.MapEntry[] exampleReferences() default {};
 
     /**
@@ -125,7 +125,7 @@ public @interface OpenApiComponents {
      * @see #requestBodies()
      */
     @AnnotationArrayIsMap
-    @SerializedName("requestBodies")
+    @AnnotationJsonName("requestBodies")
     OpenApiReference.MapEntry[] requestBodyReferences() default {};
 
     /**
@@ -141,7 +141,7 @@ public @interface OpenApiComponents {
      * @see #headers()
      */
     @AnnotationArrayIsMap
-    @SerializedName("headers")
+    @AnnotationJsonName("headers")
     OpenApiReference.MapEntry[] headerReferences() default {};
 
     /**
@@ -157,7 +157,7 @@ public @interface OpenApiComponents {
      * @see #securitySchemes()
      */
     @AnnotationArrayIsMap
-    @SerializedName("securitySchemes")
+    @AnnotationJsonName("securitySchemes")
     OpenApiReference.MapEntry[] securitySchemeReferences() default {};
 
     /**
@@ -173,7 +173,7 @@ public @interface OpenApiComponents {
      * @see #links()
      */
     @AnnotationArrayIsMap
-    @SerializedName("links")
+    @AnnotationJsonName("links")
     OpenApiReference.MapEntry[] linkReferences() default {};
 
     /**
@@ -189,7 +189,7 @@ public @interface OpenApiComponents {
      * @see #callbacks()
      */
     @AnnotationArrayIsMap
-    @SerializedName("callbacks")
+    @AnnotationJsonName("callbacks")
     OpenApiReference.MapEntry[] callbackReferences() default {};
 
     /**
@@ -217,7 +217,7 @@ public @interface OpenApiComponents {
      * @see #mediaTypes()
      */
     @AnnotationArrayIsMap
-    @SerializedName("mediaTypes")
+    @AnnotationJsonName("mediaTypes")
     OpenApiReference.MapEntry[] mediaTypeReferences() default {};
 
     /**

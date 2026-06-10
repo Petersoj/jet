@@ -50,6 +50,7 @@ tasks.withType(JavaCompile::class) {
         allErrorsAsWarnings = true
         allSuggestionsAsWarnings = true
         disableWarningsInGeneratedCode = true
+        excludedPaths = ".*/build/.*"
 
         disable("MissingSummary")
         disable("NullableOptional")

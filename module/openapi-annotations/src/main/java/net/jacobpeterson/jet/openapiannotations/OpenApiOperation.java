@@ -1,10 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -110,7 +110,7 @@ public @interface OpenApiOperation {
     /**
      * @see #parameters()
      */
-    @SerializedName("parameters")
+    @AnnotationJsonName("parameters")
     OpenApiReference[] parameterReferences() default {};
 
     /**
@@ -131,7 +131,7 @@ public @interface OpenApiOperation {
      * @see #requestBody()
      */
     @AnnotationArrayIsNullableValue
-    @SerializedName("requestBody")
+    @AnnotationJsonName("requestBody")
     OpenApiReference[] requestBodyReference() default {};
 
     /**
@@ -154,7 +154,7 @@ public @interface OpenApiOperation {
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#operation-callbacks">spec.openapis.org</a>
      */
     @AnnotationArrayIsMap
-    @SerializedName("callbacks")
+    @AnnotationJsonName("callbacks")
     OpenApiReference.MapEntry[] callbackReferences() default {};
 
     /**

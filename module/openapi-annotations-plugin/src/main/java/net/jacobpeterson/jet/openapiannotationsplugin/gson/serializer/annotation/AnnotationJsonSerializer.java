@@ -7,13 +7,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonSerializeEmptyArray;
@@ -41,9 +41,7 @@ import static net.jacobpeterson.jet.openapiannotationsplugin.gson.GsonUtil.walk;
 /**
  * {@link AnnotationJsonSerializer} is a {@link JsonSerializer} for {@link Annotation} that uses reflection to invoke
  * the {@link Class#getDeclaredMethods()} of the {@link Annotation#annotationType()} and uses reflection to handle
- * {@link SerializedName}, {@link AnnotationJsonIgnore}, {@link AnnotationJsonSerializeEmptyArray},
- * {@link AnnotationJsonObjectInline}, {@link AnnotationArrayIsNullableValue}, {@link AnnotationJsonRawString},
- * {@link AnnotationArrayIsMap}, and {@link AnnotationArrayIsMapKey}.
+ * {@link net.jacobpeterson.jet.openapiannotations.meta}.
  */
 @NullMarked
 @RequiredArgsConstructor
@@ -150,8 +148,8 @@ public class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
                 }
                 continue;
             }
-            final var methodJsonKey = method.isAnnotationPresent(SerializedName.class) ?
-                    method.getAnnotation(SerializedName.class).value() : method.getName();
+            final var methodJsonKey = method.isAnnotationPresent(AnnotationJsonName.class) ?
+                    method.getAnnotation(AnnotationJsonName.class).value() : method.getName();
             jsonObject.add(methodJsonKey, !jsonObject.has(methodJsonKey) ? methodJsonValue :
                     combine(methodJsonValue, jsonObject.get(methodJsonKey)));
         }

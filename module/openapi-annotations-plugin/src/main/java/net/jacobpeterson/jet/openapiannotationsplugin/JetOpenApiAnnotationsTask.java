@@ -18,6 +18,7 @@ import net.jacobpeterson.jet.openapiannotations.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.OpenApiSchema;
 import net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.GsonUtil;
+import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationEnumJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.OpenApiJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.OpenApiPathItemJsonSerializer;
@@ -263,6 +264,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         .with(DEFINITIONS_FOR_MEMBER_SUPERTYPES);
             }
             final var annotationGson = new GsonBuilder()
+                    .registerTypeHierarchyAdapter(Enum.class, new AnnotationEnumJsonSerializer())
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))
                     .registerTypeHierarchyAdapter(OpenApi.class, new OpenApiJsonSerializer(methodsOfOpenApis))
                     .registerTypeHierarchyAdapter(OpenApiSchema.class,

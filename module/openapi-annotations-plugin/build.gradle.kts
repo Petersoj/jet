@@ -15,11 +15,13 @@ plugins {
 dependencies {
     api(project(":module:openapi-annotations"))
 
+    implementation("com.google.code.gson:gson:2.14.0")
+
     val jsonschemaGeneratorVersion = "5.0.0"
     api("com.github.victools:jsonschema-generator:$jsonschemaGeneratorVersion")
     api("com.github.victools:jsonschema-module-jackson:$jsonschemaGeneratorVersion")
 
-    api("com.networknt:json-schema-validator:3.0.3")
+    implementation("com.networknt:json-schema-validator:3.0.3")
 }
 
 // Gradle Test Kit already provides an SLF4j binding.

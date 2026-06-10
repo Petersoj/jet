@@ -1,10 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -97,7 +97,7 @@ public @interface OpenApiMediaType {
      * @see #examples()
      */
     @AnnotationArrayIsMap
-    @SerializedName("examples")
+    @AnnotationJsonName("examples")
     OpenApiReference.MapEntry[] exampleReferences() default {};
 
     /**

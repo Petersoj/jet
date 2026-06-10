@@ -1,10 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -73,7 +73,7 @@ public @interface OpenApiEncoding {
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#encoding-headers">spec.openapis.org</a>
      */
     @AnnotationArrayIsMap
-    @SerializedName("headers")
+    @AnnotationJsonName("headers")
     OpenApiReference.MapEntry[] headerReferences() default {};
 
     /**
@@ -203,7 +203,7 @@ public @interface OpenApiEncoding {
          * @see OpenApiEncoding#headerReferences()
          */
         @AnnotationArrayIsMap
-        @SerializedName("headers")
+        @AnnotationJsonName("headers")
         OpenApiReference.MapEntry[] headerReferences() default {};
 
         /**

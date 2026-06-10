@@ -3,8 +3,8 @@ package net.jacobpeterson.jet.openapiannotationsplugin;
 import net.jacobpeterson.jet.openapiannotations.OpenApi;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.jvm.tasks.Jar;
 import org.jspecify.annotations.NullMarked;
 
 import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;

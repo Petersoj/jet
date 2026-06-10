@@ -1,11 +1,10 @@
 package net.jacobpeterson.jet.openapiannotations;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.Generated;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMap;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsMapKey;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationArrayIsNullableValue;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonIgnore;
+import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonName;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonObjectInline;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import org.jspecify.annotations.NullMarked;
@@ -63,6 +62,27 @@ public @interface OpenApiSecurityScheme {
     }
 
     /**
+     * {@link Type} is an enum for {@link #type()}.
+     */
+    enum Type {
+
+        @AnnotationJsonName("apiKey")
+        APIKEY,
+
+        @AnnotationJsonName("http")
+        HTTP,
+
+        @AnnotationJsonName("mutualTLS")
+        MUTUAL_TLS,
+
+        @AnnotationJsonName("oauth2")
+        OAUTH2,
+
+        @AnnotationJsonName("openIdConnect")
+        OPENID_CONNECT
+    }
+
+    /**
      * Applies to: <td>Any</td>
      * <p>
      * <strong><em>REQUIRED</em></strong>. The type of the security scheme. Valid values are <code>"apiKey"</code>,
@@ -72,28 +92,6 @@ public @interface OpenApiSecurityScheme {
      */
     @AnnotationArrayIsNullableValue
     Type[] type() default {};
-
-    /**
-     * {@link Type} is an enum for {@link #type()}.
-     */
-    @Generated
-    enum Type {
-
-        @SerializedName("apiKey")
-        APIKEY,
-
-        @SerializedName("http")
-        HTTP,
-
-        @SerializedName("mutualTLS")
-        MUTUAL_TLS,
-
-        @SerializedName("oauth2")
-        OAUTH2,
-
-        @SerializedName("openIdConnect")
-        OPENID_CONNECT
-    }
 
     /**
      * Applies to: <td>Any</td>
@@ -116,6 +114,21 @@ public @interface OpenApiSecurityScheme {
     String name() default "";
 
     /**
+     * {@link In} is an enum for {@link #in()}.
+     */
+    enum In {
+
+        @AnnotationJsonName("query")
+        QUERY,
+
+        @AnnotationJsonName("header")
+        HEADER,
+
+        @AnnotationJsonName("cookie")
+        COOKIE
+    }
+
+    /**
      * Applies to: <td><code>apiKey</code></td>
      * <p>
      * <strong><em>REQUIRED</em></strong>. The location of the API key. Valid values are <code>"query"</code>,
@@ -125,22 +138,6 @@ public @interface OpenApiSecurityScheme {
      */
     @AnnotationArrayIsNullableValue
     In[] in() default {};
-
-    /**
-     * {@link In} is an enum for {@link #in()}.
-     */
-    @Generated
-    enum In {
-
-        @SerializedName("query")
-        QUERY,
-
-        @SerializedName("header")
-        HEADER,
-
-        @SerializedName("cookie")
-        COOKIE
-    }
 
     /**
      * Applies to: <td><code>http</code></td>
