@@ -1,6 +1,7 @@
 <br><br>
 <div align="center">
-    <img src="https://raw.githubusercontent.com/Petersoj/jet/refs/heads/main/docs/logo.svg" alt="Logo" width="70%">
+    <a href="https://github.com/Petersoj/jet">
+    <img src="https://raw.githubusercontent.com/Petersoj/jet/refs/heads/main/docs/logo.svg" alt="Logo" width="70%"></a>
     <br><br><br><br>
     <a href="https://github.com/Petersoj/jet">
     <img src="https://img.shields.io/badge/GitHub_Repository-black?logo=github" alt="GitHub Repository"></a>
@@ -23,11 +24,11 @@
     <a href="https://github.com/Petersoj/jet/blob/main/LICENSE.txt">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
 </div>
-
-Jet is a simple, lightweight, modern, turnkey, Java web client and server library.
+<br>
 
 ## Table of Contents
 
+- [Introduction](#introduction)
 - [Modules](#modules)
     - [Common](#common)
         - [Installation](#installation)
@@ -44,6 +45,10 @@ Jet is a simple, lightweight, modern, turnkey, Java web client and server librar
     - [Client](#client)
         - [Installation](#installation-4)
         - [Guide](#guide-4)
+
+## Introduction
+
+Jet is a simple, lightweight, modern, turnkey, Java web client and server library.
 
 ## Modules
 

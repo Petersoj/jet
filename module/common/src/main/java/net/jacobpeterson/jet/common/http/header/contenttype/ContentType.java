@@ -426,6 +426,7 @@ public final class ContentType {
                     TEXT_XML,
                     TEXT_XML_UTF_8,
                     TEXT_EVENT_STREAM,
+                    TEXT_EVENT_STREAM_UTF_8,
                     IMAGE_WILDCARD,
                     IMAGE_BMP,
                     IMAGE_GIF,
@@ -507,6 +508,7 @@ public final class ContentType {
             IMAGE_GIF, IMAGE_ICO, IMAGE_JPEG, IMAGE_PNG, IMAGE_TIFF, IMAGE_AVIF, IMAGE_WEBP, IMAGE_HEIF, IMAGE_HEIC,
             AUDIO_MP4, AUDIO_MPEG, AUDIO_OGG, AUDIO_WEBM, AUDIO_AAC, AUDIO_VORBIS,
             VIDEO_MP4, VIDEO_MPEG, VIDEO_OGG, VIDEO_QUICKTIME, VIDEO_WEBM,
+            APPLICATION_PDF,
             FONT_WOFF, FONT_WOFF2,
             create(APPLICATION_TYPE_STRING, "zip"),
             create(APPLICATION_TYPE_STRING, "x-zip"),
@@ -525,7 +527,11 @@ public final class ContentType {
             create(APPLICATION_TYPE_STRING, "x-xz"),
             create(APPLICATION_TYPE_STRING, "x-rar-compressed"),
             create(APPLICATION_TYPE_STRING, "x-zip-compressed"),
-            create(APPLICATION_TYPE_STRING, "x-7z-compressed"));
+            create(APPLICATION_TYPE_STRING, "x-7z-compressed"),
+            create(APPLICATION_TYPE_STRING, "application/gtar"),
+            create(APPLICATION_TYPE_STRING, "application/x-gtar"),
+            create(APPLICATION_TYPE_STRING, "application/java-archive"),
+            create(APPLICATION_TYPE_STRING, "application/x-java-archive"));
 
     /**
      * A non-exhaustive {@link ImmutableSetMultimap} of {@link ContentType}s mapped to their dot-less file
