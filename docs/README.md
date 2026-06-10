@@ -3,9 +3,9 @@
     <img src="https://raw.githubusercontent.com/Petersoj/jet/refs/heads/main/docs/logo.svg" alt="Logo" width="70%">
     <br><br><br><br>
     <a href="https://github.com/Petersoj/jet">
-    <img src="https://img.shields.io/badge/Repository-GitHub-black?logo=github" alt="Repository"></a>
+    <img src="https://img.shields.io/badge/GitHub-black?logo=github" alt="GitHub"></a>
     <a href="https://petersoj.github.io/jet/">
-    <img src="https://img.shields.io/badge/Documentation-GitHub_Pages-whitesmoke?logo=github" alt="Documentation"></a>
+    <img src="https://img.shields.io/badge/GitHub_Pages-whitesmoke?logo=github&logoColor=black" alt="GitHub Pages"></a>
     <a href="https://central.sonatype.com/search?namespace=net.jacobpeterson.jet">
     <img src="https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven" alt="Maven Central"></a>
     <a href="https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin">

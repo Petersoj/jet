@@ -12,8 +12,8 @@ plugins {
     `maven-publish`
 }
 
-group = JET_GROUP
-version = JET_VERSION
+group = PROJECT_GROUP
+version = PROJECT_VERSION
 
 java {
     sourceCompatibility = VERSION_25
@@ -119,7 +119,7 @@ publishing {
         from(components["java"])
         pom {
             name = artifactId
-            url = GITHUB_PROJECT_URL
+            url = PROJECT_GITHUB_URL
             inceptionYear = "2025"
             licenses {
                 license {

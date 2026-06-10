@@ -30,10 +30,10 @@ configurations.testRuntimeOnly {
 val projectDescription = "A code-first OpenAPI specification annotations processor Gradle plugin."
 
 gradlePlugin {
-    website = GITHUB_PROJECT_URL
+    website = PROJECT_GITHUB_URL
     vcsUrl = website.map { "$it.git" }
     plugins.create("JetOpenApiAnnotationsPlugin") {
-        val pluginPackage = "$JET_GROUP.openapiannotationsplugin"
+        val pluginPackage = "$PROJECT_GROUP.openapiannotationsplugin"
         id = pluginPackage
         implementationClass = "$pluginPackage.JetOpenApiAnnotationsPlugin"
         displayName = "Jet OpenAPI Annotations Plugin"

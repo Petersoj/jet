@@ -7,8 +7,8 @@ plugins {
     id("org.jreleaser") version "1.24.0"
 }
 
-group = JET_GROUP
-version = JET_VERSION
+group = PROJECT_GROUP
+version = PROJECT_VERSION
 
 repositories {
     mavenCentral()
