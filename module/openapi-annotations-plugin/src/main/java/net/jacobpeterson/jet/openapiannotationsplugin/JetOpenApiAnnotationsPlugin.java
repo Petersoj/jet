@@ -34,8 +34,9 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
     @Override
     public void apply(final Project project) {
         final var extension = project.getExtensions().create(EXTENSION_NAME, JetOpenApiAnnotationsExtension.class);
+        final var tasks = project.getTasks();
         extension.getJavaCompileTasks()
-                .convention(project.getTasks().withType(JavaCompile.class));
+                .convention(tasks.withType(JavaCompile.class));
         extension.getSchemaGeneratorUseNullableModule()
                 .convention(true);
         extension.getSchemaGeneratorUseSchemaNameModule()
@@ -54,7 +55,7 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
                 .convention(project.getLayout().getBuildDirectory().dir(BUILD_OUTPUT_DEFAULT_DIRECTORY_NAME));
         extension.getOutputDirectoryIncludeInJar()
                 .convention(true);
-        final var registeredTask = project.getTasks().register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
+        final var registeredTask = tasks.register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
             task.getJavaCompileTasks()
                     .set(extension.getJavaCompileTasks());
             task.getSchemaGeneratorConfigBuilderProvider()
@@ -78,7 +79,7 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
             task.getOutputDirectory()
                     .set(extension.getOutputDirectory());
         });
-        project.getTasks().withType(Jar.class).configureEach(jarTask -> {
+        tasks.withType(Jar.class).configureEach(jarTask -> {
             if (extension.getOutputDirectoryIncludeInJar().get()) {
                 jarTask.dependsOn(registeredTask);
                 final var outputDirectory = registeredTask.get().getOutputDirectory();

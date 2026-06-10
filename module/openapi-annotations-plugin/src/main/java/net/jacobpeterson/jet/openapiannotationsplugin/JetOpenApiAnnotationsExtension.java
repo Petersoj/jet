@@ -77,13 +77,6 @@ public abstract class JetOpenApiAnnotationsExtension {
     public abstract MapProperty<String, String> getSchemaGeneratorSimpleTypeMappings();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, set the {@link GenerateOperationId} configuration.
-     * <p>
-     * Defaults to {@link GenerateOperationId#BOTH}.
-     */
-    public abstract Property<GenerateOperationId> getGenerateOperationId();
-
-    /**
      * {@link GenerateOperationId} is an enum for {@link #getGenerateOperationId()}.
      */
     public enum GenerateOperationId {
@@ -116,6 +109,13 @@ public abstract class JetOpenApiAnnotationsExtension {
     }
 
     /**
+     * For the {@link JetOpenApiAnnotationsTask}, set the {@link GenerateOperationId} configuration.
+     * <p>
+     * Defaults to {@link GenerateOperationId#BOTH}.
+     */
+    public abstract Property<GenerateOperationId> getGenerateOperationId();
+
+    /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to move the JSON schema generated from
      * {@link OpenApiSchema#fromClass()} to {@link OpenApiComponents#schemas()}, set to <code>false</code> otherwise.
      * <p>
@@ -134,6 +134,8 @@ public abstract class JetOpenApiAnnotationsExtension {
 
     /**
      * The {@link JetOpenApiAnnotationsTask} output directory.
+     * <p>
+     * Defaults to {@link JetOpenApiAnnotationsPlugin#BUILD_OUTPUT_DEFAULT_DIRECTORY_NAME}.
      */
     public abstract DirectoryProperty getOutputDirectory();
 

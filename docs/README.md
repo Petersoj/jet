@@ -3,51 +3,92 @@
     <img src="https://raw.githubusercontent.com/Petersoj/jet/refs/heads/main/docs/logo.svg" alt="Logo" width="70%">
     <br><br><br><br>
     <a href="https://github.com/Petersoj/jet">
-    <img src="https://img.shields.io/badge/GitHub-black?logo=github" alt="GitHub"></a>
-    <a href="https://petersoj.github.io/jet/">
+    <img src="https://img.shields.io/badge/GitHub_Repository-black?logo=github" alt="GitHub Repository"></a>
+    <a href="https://petersoj.github.io/jet">
     <img src="https://img.shields.io/badge/GitHub_Pages-whitesmoke?logo=github&logoColor=black" alt="GitHub Pages"></a>
+    <a href="https://github.com/Petersoj/jet/discussions">
+    <img src="https://img.shields.io/badge/GitHub_Discussions-royalblue?logo=github" alt="GitHub Discussions"></a>
+    <br>
     <a href="https://central.sonatype.com/search?namespace=net.jacobpeterson.jet">
     <img src="https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven" alt="Maven Central"></a>
     <a href="https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin">
     <img src="https://img.shields.io/badge/Gradle_Plugin-3.2.0-blue?logo=gradle" alt="Gradle Plugin"></a>
     <a href="https://javadoc.io/doc/net.jacobpeterson.jet">
-    <img src="https://img.shields.io/badge/javadoc-3.2.0-brightgreen" alt="Javadoc"></a>
+    <img src="https://img.shields.io/badge/javadoc-3.2.0-brightgreen" alt="javadoc"></a>
+    <br>
     <a href="https://codecov.io/gh/Petersoj/jet">
     <img src="https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E" alt="Codecov"></a>
     <a href="https://openjdk.org/projects/jdk/25">
     <img src="https://img.shields.io/badge/Java_Version-25-orange?logo=java" alt="Java Version"></a>
     <a href="https://github.com/Petersoj/jet/blob/main/LICENSE.txt">
-    <img src="https://img.shields.io/github/license/Petersoj/jet" alt="GitHub License"></a>
+    <img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
 </div>
 
-# Jet
-
-A simple, modern, turnkey, Java web client and server library.
+Jet is a simple, lightweight, modern, turnkey, Java web client and server library.
 
 ## Table of Contents
 
 - [Modules](#modules)
-    - [Server](#server)
+    - [Common](#common)
         - [Installation](#installation)
         - [Guide](#guide)
-    - [OpenAPI Annotations](#openapi-annotations)
+    - [Server](#server)
         - [Installation](#installation-1)
         - [Guide](#guide-1)
-    - [OpenAPI Annotations Plugin](#openapi-annotations-plugin)
+    - [OpenAPI Annotations](#openapi-annotations)
         - [Installation](#installation-2)
         - [Guide](#guide-2)
-    - [Client](#client)
+    - [OpenAPI Annotations Plugin](#openapi-annotations-plugin)
         - [Installation](#installation-3)
         - [Guide](#guide-3)
-    - [Common](#common)
+    - [Client](#client)
         - [Installation](#installation-4)
         - [Guide](#guide-4)
 
 ## Modules
 
+### Common
+
+The common module for various Jet modules.
+
+#### Installation
+
+This module is transitively depended on by the [Server](#server) and [Client](#client) modules, so you typically don't
+need to install this module directly.
+
+For `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation("net.jacobpeterson.jet:common:3.2.0")
+}
+```
+
+For `build.gradle`:
+
+```groovy
+dependencies {
+    implementation 'net.jacobpeterson.jet:common:3.2.0'
+}
+```
+
+For `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>net.jacobpeterson.jet</groupId>
+    <artifactId>common</artifactId>
+    <version>3.2.0</version>
+</dependency>
+```
+
+#### Guide
+
+// TODO finish writing guide
+
 ### Server
 
-A simple, modern, turnkey, Java web server library.
+A simple, lightweight, modern, turnkey, Java web server library.
 
 #### Installation
 
@@ -119,7 +160,7 @@ For `pom.xml`:
 
 ### OpenAPI Annotations Plugin
 
-A code-first OpenAPI specification annotations processor Gradle plugin. There is no Maven plugin available at this time.
+A code-first OpenAPI specification annotations processor Gradle plugin.
 
 #### Installation
 
@@ -138,6 +179,8 @@ plugins {
     id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.2.0"
 }
 ```
+
+There is no Maven plugin available at this time.
 
 #### Guide
 
@@ -179,7 +222,7 @@ jetOpenApiAnnotations {
 
 ### Client
 
-A simple, modern, turnkey, Java web client library.
+A simple, lightweight, modern, turnkey, Java web client library.
 
 #### Installation
 
@@ -205,45 +248,6 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>client</artifactId>
-    <version>3.2.0</version>
-</dependency>
-```
-
-#### Guide
-
-// TODO finish writing guide
-
-### Common
-
-The common module for various Jet modules.
-
-#### Installation
-
-This module is transitively depended on by the Server and Client modules, so you typically don't need to install this
-module directly.
-
-For `build.gradle.kts`:
-
-```kotlin
-dependencies {
-    implementation("net.jacobpeterson.jet:common:3.2.0")
-}
-```
-
-For `build.gradle`:
-
-```groovy
-dependencies {
-    implementation 'net.jacobpeterson.jet:common:3.2.0'
-}
-```
-
-For `pom.xml`:
-
-```xml
-<dependency>
-    <groupId>net.jacobpeterson.jet</groupId>
-    <artifactId>common</artifactId>
     <version>3.2.0</version>
 </dependency>
 ```

@@ -15,5 +15,5 @@ dependencies {
 
 publishing {
     publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description =
-            "A simple, modern, turnkey, Java web server library."
+            "A simple, lightweight, modern, turnkey, Java web server library."
 }

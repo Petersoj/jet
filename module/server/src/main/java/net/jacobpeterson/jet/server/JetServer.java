@@ -114,7 +114,7 @@ import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.ERROR;
 
 /**
- * {@link JetServer} is a simple, modern, turnkey, Java web server library.
+ * {@link JetServer} is a simple, lightweight, modern, turnkey, Java web server library.
  * <p>
  * Note: this class is thread-safe.
  *
