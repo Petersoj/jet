@@ -78,13 +78,6 @@ public @interface OpenApiSecurityRequirement {
     }
 
     /**
-     * The {@link OpenApiSecurityRequirement} value.
-     */
-    @AnnotationArrayIsMap
-    @AnnotationJsonObjectInline
-    Entry[] value() default {};
-
-    /**
      * {@link Entry} is an annotation for an entry in the {@link OpenApiSecurityRequirement#value()} map.
      * <p>
      * Each name or URI <em>MUST</em> correspond to a security scheme as described above. If the security scheme is
@@ -111,6 +104,13 @@ public @interface OpenApiSecurityRequirement {
         @AnnotationJsonObjectInline
         String[] value() default {};
     }
+
+    /**
+     * The {@link OpenApiSecurityRequirement} value.
+     */
+    @AnnotationArrayIsMap
+    @AnnotationJsonObjectInline
+    Entry[] value() default {};
 
     /**
      * {@link OpenApiSecurityRequirement} raw JSON object {@link String}, merged with the existing JSON object

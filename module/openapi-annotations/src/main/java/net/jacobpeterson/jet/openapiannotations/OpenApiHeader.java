@@ -130,25 +130,6 @@ public @interface OpenApiHeader {
     OpenApiReference.MapEntry[] exampleReferences() default {};
 
     /**
-     * For simpler scenarios, a
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#header-schema"><code>schema</code></a> and
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#header-style"><code>style</code></a> can describe the
-     * structure and syntax of the header.
-     * <p>
-     * When serializing headers with <code>schema</code>, URI percent-encoding <em>MUST NOT</em> be applied; if using
-     * an RFC6570 implementation that automatically applies it, it <em>MUST</em> be removed before use. Implementations
-     * <em>MUST</em> pass header values through unchanged rather than attempting to automatically quote header values,
-     * as the quoting rules vary too widely among different headers; see
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a> for
-     * guidance on quoting and escaping.
-     *
-     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-for-use-with-schema-0">spec.openapis.org</a>
-     */
-    @AnnotationArrayIsNullableValue
-    @AnnotationJsonObjectInline
-    Schema[] schema() default {};
-
-    /**
      * {@link Schema} is an annotation for {@link OpenApiHeader#schema()}.
      */
     @Target({})
@@ -182,6 +163,25 @@ public @interface OpenApiHeader {
         @AnnotationArrayIsNullableValue
         OpenApiSchema[] schema() default {};
     }
+
+    /**
+     * For simpler scenarios, a
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#header-schema"><code>schema</code></a> and
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#header-style"><code>style</code></a> can describe the
+     * structure and syntax of the header.
+     * <p>
+     * When serializing headers with <code>schema</code>, URI percent-encoding <em>MUST NOT</em> be applied; if using
+     * an RFC6570 implementation that automatically applies it, it <em>MUST</em> be removed before use. Implementations
+     * <em>MUST</em> pass header values through unchanged rather than attempting to automatically quote header values,
+     * as the quoting rules vary too widely among different headers; see
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a> for
+     * guidance on quoting and escaping.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-for-use-with-schema-0">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsNullableValue
+    @AnnotationJsonObjectInline
+    Schema[] schema() default {};
 
     /**
      * For more complex scenarios, the

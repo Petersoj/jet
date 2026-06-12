@@ -96,17 +96,6 @@ public @interface OpenApiLink {
     String operationId() default "";
 
     /**
-     * A map representing parameters to pass to an operation as specified with <code>operationId</code> or identified
-     * via <code>operationRef</code>. The key is the parameter name to be used (optionally qualified with the parameter
-     * location, e.g. <code>path.id</code> for an <code>id</code> parameter in the path), whereas the value can be a
-     * constant or an expression to be evaluated and passed to the linked operation.
-     *
-     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#link-parameters">spec.openapis.org</a>
-     */
-    @AnnotationArrayIsMap
-    Parameter[] parameters() default {};
-
-    /**
      * {@link Parameter} is an annotation for the {@link #parameters()} map.
      */
     @Target({})
@@ -127,6 +116,17 @@ public @interface OpenApiLink {
         @AnnotationJsonObjectInline
         String value() default "";
     }
+
+    /**
+     * A map representing parameters to pass to an operation as specified with <code>operationId</code> or identified
+     * via <code>operationRef</code>. The key is the parameter name to be used (optionally qualified with the parameter
+     * location, e.g. <code>path.id</code> for an <code>id</code> parameter in the path), whereas the value can be a
+     * constant or an expression to be evaluated and passed to the linked operation.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#link-parameters">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsMap
+    Parameter[] parameters() default {};
 
     /**
      * A literal value or <a href="https://spec.openapis.org/oas/v3.2.0.html#runtime-expressions">{expression}</a> to

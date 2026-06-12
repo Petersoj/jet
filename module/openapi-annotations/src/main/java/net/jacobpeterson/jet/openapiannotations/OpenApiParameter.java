@@ -224,34 +224,6 @@ public @interface OpenApiParameter {
     OpenApiReference.MapEntry[] exampleReferences() default {};
 
     /**
-     * For simpler scenarios, a
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-schema"><code>schema</code></a> and
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-style"><code>style</code></a> can describe the
-     * structure and syntax of the parameter.
-     * <p>
-     * These fields <em>MUST NOT</em> be used with <code>in: "querystring"</code>.
-     * <p>
-     * Care is needed for parameters with <code>schema</code> that have <code>in: "header"</code> or <code>in: "cookie",
-     * style: "cookie"</code>:
-     * <ul>
-     * <li>When serializing these values, URI percent-encoding <em>MUST NOT</em> be applied.</li>
-     * <li>When parsing these parameters, any apparent percent-encoding <em>MUST NOT</em> be decoded.</li>
-     * <li>If using an RFC6570 implementation that automatically performs encoding or decoding steps, the steps
-     * <em>MUST</em> be undone before use.</li>
-     * </ul>
-     * In these cases, implementations <em>MUST</em> pass values through unchanged rather than attempting to quote or
-     * escape them, as the quoting rules for headers and escaping conventions for cookies vary too widely to be
-     * performed automatically; see
-     * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a> for
-     * guidance on quoting and escaping.
-     *
-     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-for-use-with-schema">spec.openapis.org</a>
-     */
-    @AnnotationArrayIsNullableValue
-    @AnnotationJsonObjectInline
-    Schema[] schema() default {};
-
-    /**
      * {@link Schema} is an annotation for {@link OpenApiParameter#schema()}.
      */
     @Target({})
@@ -424,6 +396,34 @@ public @interface OpenApiParameter {
         @AnnotationArrayIsNullableValue
         OpenApiSchema[] schema() default {};
     }
+
+    /**
+     * For simpler scenarios, a
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-schema"><code>schema</code></a> and
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#parameter-style"><code>style</code></a> can describe the
+     * structure and syntax of the parameter.
+     * <p>
+     * These fields <em>MUST NOT</em> be used with <code>in: "querystring"</code>.
+     * <p>
+     * Care is needed for parameters with <code>schema</code> that have <code>in: "header"</code> or <code>in: "cookie",
+     * style: "cookie"</code>:
+     * <ul>
+     * <li>When serializing these values, URI percent-encoding <em>MUST NOT</em> be applied.</li>
+     * <li>When parsing these parameters, any apparent percent-encoding <em>MUST NOT</em> be decoded.</li>
+     * <li>If using an RFC6570 implementation that automatically performs encoding or decoding steps, the steps
+     * <em>MUST</em> be undone before use.</li>
+     * </ul>
+     * In these cases, implementations <em>MUST</em> pass values through unchanged rather than attempting to quote or
+     * escape them, as the quoting rules for headers and escaping conventions for cookies vary too widely to be
+     * performed automatically; see
+     * <a href="https://spec.openapis.org/oas/v3.2.0.html#appendix-d-serializing-headers-and-cookies">Appendix D</a> for
+     * guidance on quoting and escaping.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-for-use-with-schema">spec.openapis.org</a>
+     */
+    @AnnotationArrayIsNullableValue
+    @AnnotationJsonObjectInline
+    Schema[] schema() default {};
 
     /**
      * For more complex scenarios, the

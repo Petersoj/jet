@@ -93,17 +93,6 @@ public @interface OpenApiOAuthFlow {
     String refreshUrl() default "";
 
     /**
-     * Applies to: <code>oauth2</code>
-     * <p>
-     * <strong><em>REQUIRED</em></strong>. The available scopes for the OAuth2 security scheme. A map between the scope
-     * name and a short description for it. The map <em>MAY</em> be empty.
-     *
-     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#oauth-flow-scopes">spec.openapis.org/</a>
-     */
-    @AnnotationArrayIsMap
-    Scope[] scopes() default {};
-
-    /**
      * {@link Scope} is an annotation an entry in the {@link #scopes()} map.
      */
     @Target({})
@@ -123,6 +112,17 @@ public @interface OpenApiOAuthFlow {
         @AnnotationJsonObjectInline
         String value() default "";
     }
+
+    /**
+     * Applies to: <code>oauth2</code>
+     * <p>
+     * <strong><em>REQUIRED</em></strong>. The available scopes for the OAuth2 security scheme. A map between the scope
+     * name and a short description for it. The map <em>MAY</em> be empty.
+     *
+     * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#oauth-flow-scopes">spec.openapis.org/</a>
+     */
+    @AnnotationArrayIsMap
+    Scope[] scopes() default {};
 
     /**
      * {@link OpenApiOAuthFlow} raw JSON object {@link String}, merged with the existing JSON object created from the

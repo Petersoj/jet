@@ -173,15 +173,6 @@ public @interface OpenApiPathItem {
     OpenApiOperation.MapEntry[] additionalOperations() default {};
 
     /**
-     * Instead of using {@link #get()}, {@link #put()}, {@link #post()}, {@link #delete()}, {@link #options()},
-     * {@link #head()}, {@link #patch()}, {@link #trace()}, or {@link #query()} directly, this uses the {@link Method}
-     * enum or {@link Method.ToString} constant mapped to a {@link OpenApiOperation}.
-     */
-    @AnnotationArrayIsMap
-    @AnnotationJsonObjectInline
-    MethodEntry[] methods() default {};
-
-    /**
      * {@link MethodEntry} is an annotation for an entry in the {@link #methods()} map.
      */
     @Target({})
@@ -211,6 +202,15 @@ public @interface OpenApiPathItem {
         @AnnotationJsonObjectInline
         OpenApiOperation[] value() default {};
     }
+
+    /**
+     * Instead of using {@link #get()}, {@link #put()}, {@link #post()}, {@link #delete()}, {@link #options()},
+     * {@link #head()}, {@link #patch()}, {@link #trace()}, or {@link #query()} directly, this uses the {@link Method}
+     * enum or {@link Method.ToString} constant mapped to a {@link OpenApiOperation}.
+     */
+    @AnnotationArrayIsMap
+    @AnnotationJsonObjectInline
+    MethodEntry[] methods() default {};
 
     /**
      * An alternative <code>servers</code> array to service all operations in this path. If a <code>servers</code> array
