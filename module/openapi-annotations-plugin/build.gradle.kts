@@ -48,8 +48,21 @@ gradlePlugin {
 }
 
 signing {
-    useInMemoryPgpKeys(getenv(JRELEASER_ENV_PREFIX + GPG_SECRET_KEY),
-            getenv(JRELEASER_ENV_PREFIX + GPG_PASSPHRASE))
+    val secretKey = getenv(JRELEASER_ENV_PREFIX + GPG_SECRET_KEY)
+    val passphrase = getenv(JRELEASER_ENV_PREFIX + GPG_PASSPHRASE)
+    if (secretKey != null && passphrase != null) {
+        useInMemoryPgpKeys(secretKey, passphrase)
+    }
+}
+tasks.withType(Sign::class).configureEach {
+    val predicate = provider {
+        gradle.taskGraph.allTasks.none {
+            it is PublishToMavenLocal
+        }
+    }
+    onlyIf {
+        predicate.get()
+    }
 }
 
 publishing {
