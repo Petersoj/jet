@@ -32,18 +32,17 @@ import net.jacobpeterson.jet.openapiannotationsplugin.schemagenerator.module.gso
 import net.jacobpeterson.jet.openapiannotationsplugin.schemagenerator.module.nullable.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotationsplugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.CompileClasspath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectories;
-import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -97,7 +96,6 @@ import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.ann
 import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
 import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER;
 import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.removeTracers;
-import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 /**
  * {@link JetOpenApiAnnotationsTask} is the {@link DefaultTask} for {@link JetOpenApiAnnotationsPlugin}.
@@ -123,8 +121,11 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
         setDescription("A code-first OpenAPI specification annotations processor Gradle plugin.");
     }
 
-    @InputFiles @PathSensitive(RELATIVE)
-    public abstract SetProperty<JavaCompile> getJavaCompileTasks();
+    @InputFiles @CompileClasspath
+    public abstract ConfigurableFileCollection getAnnotatedClassFiles();
+
+    @InputFiles @CompileClasspath
+    public abstract ConfigurableFileCollection getClasspaths();
 
     @Input @Optional
     public abstract Property<SchemaGeneratorConfigBuilderProvider> getSchemaGeneratorConfigBuilderProvider();
@@ -159,42 +160,34 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     @TaskAction
     public void run() {
         final var classLoaderUris = new HashSet<URI>();
-        final var javaCompileClassNames = new HashSet<String>();
-        for (final var javaCompileTask : getJavaCompileTasks().get()) {
-            for (final var classPath : javaCompileTask.getClasspath()) {
-                if (!classPath.exists()) {
-                    continue;
-                }
-                classLoaderUris.add(classPath.toURI());
-            }
-            for (final var javaCompileOutput : javaCompileTask.getOutputs().getFiles()) {
-                if (!javaCompileOutput.exists()) {
-                    continue;
-                }
-                classLoaderUris.add(javaCompileOutput.toURI());
-                final var javaCompileOutputPath = javaCompileOutput.toPath();
-                try {
-                    walkFileTree(javaCompileOutputPath, new SimpleFileVisitor<>() {
+        final var classNames = new HashSet<String>();
+        for (final var annotatedClassFile : getAnnotatedClassFiles().getFiles()) {
+            classLoaderUris.add(annotatedClassFile.toURI());
+            final var annotatedClassPath = annotatedClassFile.toPath();
+            try {
+                walkFileTree(annotatedClassPath, new SimpleFileVisitor<>() {
 
-                        private static final String CLASS_FILE_SUFFIX = ".class";
+                    private static final String CLASS_FILE_SUFFIX = ".class";
 
-                        @Override
-                        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-                            if (file.getFileName().toString().endsWith(CLASS_FILE_SUFFIX)) {
-                                final var packageClass = javaCompileOutputPath.relativize(file)
-                                        .toString().replace(file.getFileSystem().getSeparator(), ".");
-                                javaCompileClassNames.add(packageClass.substring(0,
-                                        packageClass.length() - CLASS_FILE_SUFFIX.length()));
-                            }
-                            return CONTINUE;
+                    @Override
+                    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
+                        if (file.getFileName().toString().endsWith(CLASS_FILE_SUFFIX)) {
+                            final var packageClass = annotatedClassPath.relativize(file)
+                                    .toString().replace(file.getFileSystem().getSeparator(), ".");
+                            classNames.add(packageClass.substring(0,
+                                    packageClass.length() - CLASS_FILE_SUFFIX.length()));
                         }
-                    });
-                } catch (final IOException ioException) {
-                    throw new UncheckedIOException(ioException);
-                }
+                        return CONTINUE;
+                    }
+                });
+            } catch (final IOException ioException) {
+                throw new UncheckedIOException(ioException);
             }
         }
-        try (final var javaCompileClassLoader = new URLClassLoader(classLoaderUris.stream().map(classLoaderUri -> {
+        for (final var classpath : getClasspaths()) {
+            classLoaderUris.add(classpath.toURI());
+        }
+        try (final var classLoader = new URLClassLoader(classLoaderUris.stream().map(classLoaderUri -> {
             try {
                 return classLoaderUri.toURL();
             } catch (final MalformedURLException malformedUrlException) {
@@ -206,17 +199,17 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .arrayListValues()
                     .<String, OpenApi>build();
             final var methodsOfOpenApis = new HashMap<OpenApi, java.lang.reflect.Method>();
-            for (final var javaCompileClassName : javaCompileClassNames) {
-                final Class<?> javaCompileClass;
+            for (final var className : classNames) {
+                final Class<?> clazz;
                 try {
-                    javaCompileClass = javaCompileClassLoader.loadClass(javaCompileClassName);
+                    clazz = classLoader.loadClass(className);
                 } catch (final ClassNotFoundException classNotFoundException) {
                     throw new RuntimeException(classNotFoundException);
                 }
-                for (final var openApi : javaCompileClass.getDeclaredAnnotationsByType(OpenApi.class)) {
+                for (final var openApi : clazz.getDeclaredAnnotationsByType(OpenApi.class)) {
                     openApisOfGroupNames.put(openApi.annotationGroupName(), openApi);
                 }
-                for (final var method : javaCompileClass.getDeclaredMethods()) {
+                for (final var method : clazz.getDeclaredMethods()) {
                     for (final var openApi : method.getDeclaredAnnotationsByType(OpenApi.class)) {
                         openApisOfGroupNames.put(openApi.annotationGroupName(), openApi);
                         methodsOfOpenApis.put(openApi, method);

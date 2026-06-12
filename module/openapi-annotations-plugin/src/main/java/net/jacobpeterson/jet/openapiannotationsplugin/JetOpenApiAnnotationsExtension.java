@@ -11,10 +11,10 @@ import net.jacobpeterson.jet.openapiannotationsplugin.schemagenerator.module.gso
 import net.jacobpeterson.jet.openapiannotationsplugin.schemagenerator.module.nullable.NullableSchemaModule;
 import net.jacobpeterson.jet.openapiannotationsplugin.schemagenerator.module.schemaname.SchemaNameSchemaModule;
 import org.gradle.api.Task;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
@@ -28,10 +28,19 @@ import java.util.Map;
 public abstract class JetOpenApiAnnotationsExtension {
 
     /**
-     * The {@link JavaCompile} tasks that are used to read compiled class files and classpaths from in
-     * {@link JetOpenApiAnnotationsTask}.
+     * For the {@link JetOpenApiAnnotationsTask}, the class files annotated with {@link OpenApi} annotations.
+     * <p>
+     * Defaults to {@link JavaCompile#getOutputs()}.
      */
-    public abstract SetProperty<JavaCompile> getJavaCompileTasks();
+    public abstract ConfigurableFileCollection getAnnotatedClassFiles();
+
+    /**
+     * For the {@link JetOpenApiAnnotationsTask}, the classpaths to load into a {@link ClassLoader} for
+     * {@link OpenApiSchema#fromClass()}.
+     * <p>
+     * Defaults to {@link JavaCompile#getClasspath()}.
+     */
+    public abstract ConfigurableFileCollection getClasspaths();
 
     /**
      * The {@link SchemaGeneratorConfigBuilderProvider} for the {@link JetOpenApiAnnotationsTask}.

@@ -7,6 +7,8 @@ import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.jspecify.annotations.NullMarked;
 
+import java.io.File;
+
 import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;
 
 /**
@@ -35,8 +37,12 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         final var extension = project.getExtensions().create(EXTENSION_NAME, JetOpenApiAnnotationsExtension.class);
         final var tasks = project.getTasks();
-        extension.getJavaCompileTasks()
-                .convention(tasks.withType(JavaCompile.class));
+        extension.getAnnotatedClassFiles()
+                .from(project.provider(() -> tasks.withType(JavaCompile.class).stream().map(javaCompile ->
+                        javaCompile.getOutputs().getFiles().filter(File::exists)).toList()));
+        extension.getClasspaths()
+                .from(project.provider(() -> tasks.withType(JavaCompile.class).stream().map(javaCompile ->
+                        javaCompile.getClasspath().filter(File::exists)).toList()));
         extension.getSchemaGeneratorUseNullableModule()
                 .convention(true);
         extension.getSchemaGeneratorUseSchemaNameModule()
@@ -56,8 +62,10 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         extension.getOutputDirectoryIncludeInJar()
                 .convention(true);
         final var registeredTask = tasks.register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
-            task.getJavaCompileTasks()
-                    .set(extension.getJavaCompileTasks());
+            task.getAnnotatedClassFiles()
+                    .from(extension.getAnnotatedClassFiles());
+            task.getClasspaths()
+                    .from(extension.getClasspaths());
             task.getSchemaGeneratorConfigBuilderProvider()
                     .set(extension.getSchemaGeneratorConfigBuilderProvider());
             task.getSchemaGeneratorUseNullableModule()
