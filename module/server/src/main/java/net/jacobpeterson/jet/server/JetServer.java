@@ -1,7 +1,5 @@
 package net.jacobpeterson.jet.server;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import lombok.Getter;
@@ -73,6 +71,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -294,10 +294,10 @@ public final class JetServer {
                             if (!attributes.isRegularFile()) {
                                 return CONTINUE;
                             }
-                            if (isCertificateChain.apply(file)) {
+                            if (isCertificateChain.test(file)) {
                                 certificateChains.add(readString(file, US_ASCII));
                             }
-                            if (isPrivateKey.apply(file)) {
+                            if (isPrivateKey.test(file)) {
                                 privateKeys.add(readString(file, US_ASCII));
                             }
                             return CONTINUE;
