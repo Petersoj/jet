@@ -93,8 +93,7 @@ tasks.withType(JacocoReport::class) {
 tasks.withType(Javadoc::class) {
     options {
         (this as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
-        links = listOf(
-                "https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/",
+        links("https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/",
                 "https://jspecify.dev/docs/api/",
                 "https://guava.dev/releases/$guavaVersion/api/docs/",
                 "https://errorprone.info/api/latest/")

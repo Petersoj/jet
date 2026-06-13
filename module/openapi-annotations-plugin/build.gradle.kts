@@ -12,14 +12,15 @@ plugins {
     id("org.gradle.plugin-compatibility") version "1.0.0"
 }
 
+val jsonSchemaGeneratorVersion = "5.0.0"
+
 dependencies {
     api(project(":module:openapi-annotations"))
 
     implementation("com.google.code.gson:gson:2.14.0")
 
-    val jsonschemaGeneratorVersion = "5.0.0"
-    api("com.github.victools:jsonschema-generator:$jsonschemaGeneratorVersion")
-    api("com.github.victools:jsonschema-module-jackson:$jsonschemaGeneratorVersion")
+    api("com.github.victools:jsonschema-generator:$jsonSchemaGeneratorVersion")
+    api("com.github.victools:jsonschema-module-jackson:$jsonSchemaGeneratorVersion")
 
     implementation("com.networknt:json-schema-validator:3.0.3")
 }
@@ -27,6 +28,14 @@ dependencies {
 // Gradle Test Kit already provides an SLF4j binding.
 configurations.testRuntimeOnly {
     exclude("ch.qos.logback", "logback-classic")
+}
+
+tasks.withType(Javadoc::class) {
+    options {
+        (this as StandardJavadocDocletOptions).links(
+                "https://javadoc.io/doc/com.github.victools/jsonschema-generator/$jsonSchemaGeneratorVersion",
+                "https://javadoc.io/doc/com.github.victools/jsonschema-module-jackson/$jsonSchemaGeneratorVersion")
+    }
 }
 
 val projectDescription = "A code-first OpenAPI specification annotations processor Gradle plugin."
