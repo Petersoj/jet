@@ -11,11 +11,11 @@
     <img src="https://img.shields.io/badge/GitHub_Discussions-royalblue?logo=github" alt="GitHub Discussions"></a>
     <br>
     <a href="https://central.sonatype.com/search?namespace=net.jacobpeterson.jet">
-    <img src="https://img.shields.io/badge/Maven_Central-3.2.0-blue?logo=apachemaven" alt="Maven Central"></a>
+    <img src="https://img.shields.io/badge/Maven_Central-3.3.0-blue?logo=apachemaven" alt="Maven Central"></a>
     <a href="https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin">
-    <img src="https://img.shields.io/badge/Gradle_Plugin-3.2.0-blue?logo=gradle" alt="Gradle Plugin"></a>
+    <img src="https://img.shields.io/badge/Gradle_Plugin-3.3.0-blue?logo=gradle" alt="Gradle Plugin"></a>
     <a href="https://javadoc.io/doc/net.jacobpeterson.jet">
-    <img src="https://img.shields.io/badge/javadoc-3.2.0-brightgreen" alt="javadoc"></a>
+    <img src="https://img.shields.io/badge/javadoc-3.3.0-brightgreen" alt="javadoc"></a>
     <br>
     <a href="https://codecov.io/gh/Petersoj/jet">
     <img src="https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E" alt="Codecov"></a>
@@ -88,7 +88,7 @@ A few more awesome things about Jet:
 - Kotlin friendly
 - MIT licensed
 
-Give this repository a star ⭐ and consider [sponsoring ❤️](https://github.com/sponsors/Petersoj).
+Give this repository a star ⭐ and consider [sponsoring ❤️](https://github.com/sponsors/Petersoj)
 
 # Modules
 
@@ -116,7 +116,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:common:3.2.0")
+    implementation("net.jacobpeterson.jet:common:3.3.0")
 }
 ```
 
@@ -124,7 +124,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:common:3.2.0'
+    implementation 'net.jacobpeterson.jet:common:3.3.0'
 }
 ```
 
@@ -134,7 +134,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>common</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -210,7 +210,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:server:3.2.0")
+    implementation("net.jacobpeterson.jet:server:3.3.0")
 }
 ```
 
@@ -218,7 +218,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:server:3.2.0'
+    implementation 'net.jacobpeterson.jet:server:3.3.0'
 }
 ```
 
@@ -228,7 +228,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>server</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -487,7 +487,7 @@ which the Java server defines the contract that all generated OpenAPI clients ad
 [victools/jsonschema-generator](https://github.com/victools/jsonschema-generator) library is used to generate the JSON
 schemas in the [OpenAPI Annotations Plugin](#openapi-annotations-plugin), so generics, inheritance, nullability, etc.
 are all supported! Note that you can enforce `@Nullable` annotations on the server in implementation handlers using
-[`NullableUtil.requireNonNullFieldsSet()`](https://javadoc.io/static/net.jacobpeterson.jet/common/3.2.0/net/jacobpeterson/jet/common/util/nullable/NullableUtil.html#requireNonNullFieldsSet(java.lang.Object)).
+[`NullableUtil.requireNonNullFieldsSet()`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/util/nullable/NullableUtil.html#requireNonNullFieldsSet(java.lang.Object)).
 
 ### Installation
 
@@ -495,7 +495,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:openapi-annotations:3.2.0")
+    implementation("net.jacobpeterson.jet:openapi-annotations:3.3.0")
 }
 ```
 
@@ -503,7 +503,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:openapi-annotations:3.2.0'
+    implementation 'net.jacobpeterson.jet:openapi-annotations:3.3.0'
 }
 ```
 
@@ -513,7 +513,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>openapi-annotations</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -567,9 +567,9 @@ to denote the map key.
 Note that some OpenAPI annotations encourage the use of the models and enums from [Common](#common) module. For example,
 [`OpenApiPathItem.MethodEntry`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations/latest/net/jacobpeterson/jet/openapiannotations/OpenApiPathItem.MethodEntry.html)
 has both
-[`key`](https://javadoc.io/static/net.jacobpeterson.jet/openapi-annotations/3.2.0/net/jacobpeterson/jet/openapiannotations/OpenApiPathItem.MethodEntry.html#key())
+[`key`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations/latest/net/jacobpeterson/jet/openapiannotations/OpenApiPathItem.MethodEntry.html#key())
 which can be set to a `String` constant, and
-[`keyEnum`](https://javadoc.io/static/net.jacobpeterson.jet/openapi-annotations/3.2.0/net/jacobpeterson/jet/openapiannotations/OpenApiPathItem.MethodEntry.html#keyEnum())
+[`keyEnum`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations/latest/net/jacobpeterson/jet/openapiannotations/OpenApiPathItem.MethodEntry.html#keyEnum())
 which can be set to a
 [`Method`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/http/method/Method.html)
 enum. However, an unfortunate limitation of Java annotations with methods of enum types is that they cannot be set to
@@ -746,7 +746,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("net.jacobpeterson.jet.openapiannotationsplugin") version "3.2.0"
+    id("net.jacobpeterson.jet.openapiannotationsplugin") version "3.3.0"
 }
 ```
 
@@ -754,7 +754,7 @@ For `build.gradle`:
 
 ```groovy
 plugins {
-    id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.2.0"
+    id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.3.0"
 }
 ```
 
