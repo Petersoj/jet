@@ -345,7 +345,8 @@ matched for a request/response lifecycle.
 
 #### [`Route`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/route/Route.html) Implementations
 
-These `Route` implementations are added to the `Router` and tested for a match when a request is received.
+These `Route` implementations are added to the `Router` and tested for a match when a request is received. A `Route` can
+filter based on the request method, scheme, host, and normalize/decoded path.
 
 - [`PathExactRoute`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/route/simple/pathexact/PathExactRoute.html)
 - [`PathParametersRoute`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/route/simple/pathparameters/PathParametersRoute.html)
