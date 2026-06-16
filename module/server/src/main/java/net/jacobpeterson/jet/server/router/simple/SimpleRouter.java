@@ -16,14 +16,14 @@ import static java.util.Map.entry;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 
 /**
- * {@link MutableSimpleRouter} is a mutable {@link Router} that uses a priority {@link List} of {@link Route}s mapped to
+ * {@link SimpleRouter} is a mutable {@link Router} that uses a priority {@link List} of {@link Route}s mapped to
  * {@link Handler}s. This {@link Router} implementation will only call one {@link Handler} per {@link #route(Handle)}
  * call.
  * <p>
  * Note: this class is thread-safe.
  */
 @NullMarked
-public class MutableSimpleRouter implements Router {
+public class SimpleRouter implements Router {
 
     private final List<Entry<Route, Handler>> handlersOfRoutes = new ArrayList<>();
 

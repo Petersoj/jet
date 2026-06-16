@@ -22,7 +22,7 @@ import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handler.Handler;
 import net.jacobpeterson.jet.server.router.Router;
-import net.jacobpeterson.jet.server.router.simple.MutableSimpleRouter;
+import net.jacobpeterson.jet.server.router.simple.SimpleRouter;
 import net.jacobpeterson.jet.server.session.Session;
 import net.jacobpeterson.jet.server.session.SessionStore;
 import net.jacobpeterson.jet.server.session.simple.SimpleSessionStore;
@@ -409,7 +409,7 @@ public final class JetServer {
             final var jetServer = new JetServer(
                     handleFactory != null ? handleFactory : Handle::new,
                     sessionStore,
-                    router != null ? router : new MutableSimpleRouter(),
+                    router != null ? router : new SimpleRouter(),
                     preventMimeSniffing,
                     preventAmbiguousResponseCacheControl,
                     host,
@@ -454,7 +454,7 @@ public final class JetServer {
     /**
      * The {@link Router}.
      * <p>
-     * Defaults to {@link MutableSimpleRouter}.
+     * Defaults to {@link SimpleRouter}.
      */
     private final @Getter Router router;
 

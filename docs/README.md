@@ -88,7 +88,7 @@ A few more awesome things about Jet:
 - Kotlin friendly
 - MIT licensed
 
-Give this repository a star ⭐ and consider [sponsoring ❤️](https://github.com/sponsors/Petersoj)
+Give this repository a star ⭐ and consider [sponsoring](https://github.com/sponsors/Petersoj) ❤️
 
 # Modules
 
@@ -341,7 +341,7 @@ These `Router` implementations represent a priority list for registered `Route` 
 matched for a request/response lifecycle.
 
 - [`ImmutableSimpleRouter`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/router/simple/ImmutableSimpleRouter.html)
-- [`MutableSimpleRouter`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/router/simple/MutableSimpleRouter.html)
+- [`SimpleRouter`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/router/simple/SimpleRouter.html)
 
 #### [`Route`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/route/Route.html) Implementations
 
