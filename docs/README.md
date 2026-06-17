@@ -58,7 +58,8 @@
     - [OpenAPI Annotations Plugin](#openapi-annotations-plugin)
         - [Installation](#installation-3)
         - [Guide](#guide-3)
-            - [Example Configuration (`build.gradle.kts`)](#example-configuration-buildgradlekts)
+            - [Example Configuration](#example-configuration)
+            - [Serving OpenAPI Specifications](#serving-openapi-specifications)
             - [Why not an annotation processor?](#why-not-an-annotation-processor)
     - [Client](#client)
 - [Personal Note About AI](#personal-note-about-ai)
@@ -237,20 +238,18 @@ For `pom.xml`:
 Here's a very simple example to get you going:
 
 ```java
-static void main() {
-    JetServer.builder()
-            .sslLetsEncrypt() // Enable Let's Encrypt SSL/TLS
-            .sessionStore() // Enable in-memory sessions
-            .router(ImmutableSimpleRouter.builder()
-                    // Add a custom handler
-                    .addLast(PathExactRoute.builder().path("/custom-path").build(), handle ->
-                            handle.getResponse().responseHtml("<h1>Custom handler!</h1>"))
-                    // Serve files from `~/webroot/`
-                    .addLast(PathStartsWithRoute.builder().path("/").build(), FileDirectoryHandler
-                            .simpleMutable(Path.of(System.getProperty("user.home"), "webroot"), null, true))
-                    .build())
-            .build(); // Automatically starts the server and adds a JVM shutdown hook to stop the server gracefully
-}
+JetServer.builder()
+        .sslLetsEncrypt() // Enable Let's Encrypt SSL/TLS
+        .sessionStore() // Enable in-memory sessions
+        .router(ImmutableSimpleRouter.builder()
+                // Add a custom handler
+                .addLast(PathExactRoute.builder().path("/custom-path").build(), handle ->
+                        handle.getResponse().responseHtml("<h1>Custom handler!</h1>"))
+                // Serve files from `~/webroot/`
+                .addLast(PathStartsWithRoute.builder().path("/").build(), FileDirectoryHandler
+                        .simpleMutable(Path.of(System.getProperty("user.home"), "webroot"), null, true))
+                .build())
+        .build(); // Automatically starts the server and adds a JVM shutdown hook to stop the server gracefully
 ```
 
 [`JetServer`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.html)
@@ -780,7 +779,9 @@ with the following configurations:
 - [`outputDirectory = <directory>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getOutputDirectory())
 - [`outputDirectoryIncludeInJar = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getOutputDirectoryIncludeInJar())
 
-#### Example Configuration (`build.gradle.kts`)
+#### Example Configuration
+
+In `build.gradle.kts`:
 
 ```kotlin
 jetOpenApiAnnotations {
@@ -790,6 +791,64 @@ jetOpenApiAnnotations {
     // `InetAddress` is used in a model class for an OpenAPI schema, it should be treated as a string.
     schemaGeneratorSimpleTypeMappings.put("java.net.InetAddress", """{"type": "string"}""")
 }
+```
+
+#### Serving OpenAPI Specifications
+
+If `outputDirectoryIncludeInJar` is `true` (which is the default), then you can serve OpenAPI Specification JSON files
+from the `outputDirectory` on the classpath. For example:
+
+```java
+final var openApiPath = "/openapi";
+JetServer.builder()
+        .router(ImmutableSimpleRouter.builder()
+                .addLast(PathStartsWithRoute.builder().path(openApiPath + "/").build(), ClasspathDirectoryHandler
+                        .simpleMutable(getClass(),
+                                "/jet-openapi-annotations", // The default `jetOpenApiAnnotations.outputDirectory`
+                                openApiPath, true))
+                .build())
+        .build();
+```
+
+With the [OpenAPI Generator Gradle plugin](https://plugins.gradle.org/plugin/org.openapi.generator), you can use the
+[`html2`](https://openapi-generator.tech/docs/generators/html2) documentation generator to build static sites for your
+OpenAPI Specification JSON files and serve them from the classpath. For example:
+
+```kotlin
+plugins {
+    id("org.openapi.generator") version "<version>"
+}
+
+tasks.jetOpenApiAnnotations.configure {
+    doLast {
+        outputDirectory.get().asFile.listFiles().forEach {
+            // The OpenAPI Generator Gradle plugin doesn't support `3.2.0` yet.
+            it.writeText(it.readText().replace("\"openapi\":\"3.2.0\"", "\"openapi\":\"3.1.0\""))
+        }
+    }
+}
+
+tasks.openApiGenerate.configure {
+    dependsOn(tasks.jetOpenApiAnnotations)
+    inputSpec = jetOpenApiAnnotations.outputDirectory.file("openapi.json")
+    generatorName = "html2"
+    cleanupOutput = true
+    skipValidateSpec = true
+}
+
+tasks.jar.configure {
+    from(tasks.openApiGenerate) { into("openapi-docs") }
+}
+```
+
+```java
+final var openApiDocsPath = "/openapi-docs";
+JetServer.builder()
+        .router(ImmutableSimpleRouter.builder()
+                .addLast(PathStartsWithRoute.builder().path(openApiDocsPath + "/").build(),
+                        ClasspathDirectoryHandler.simpleMutable(getClass(), openApiDocsPath, openApiDocsPath, true))
+                .build())
+        .build();
 ```
 
 #### Why not an annotation processor?
