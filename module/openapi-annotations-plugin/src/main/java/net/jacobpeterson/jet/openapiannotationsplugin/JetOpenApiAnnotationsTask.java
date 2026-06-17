@@ -429,13 +429,12 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         throw new IllegalArgumentException("\n" + errors.stream()
                                 .map(error -> "        OpenAPIv%s schema offense%s: %s".formatted(DEFAULT_OPENAPI,
                                         groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
-                                                " in annotation group \"%s\"".formatted(groupName),
-                                        error.toString()))
+                                                " in annotation group \"%s\"".formatted(groupName), error.toString()))
                                 .collect(joining("\n")));
                     }
                 }
-                writeString(outputDirectory.resolve("openapi%s.json"
-                        .formatted(!groupName.isEmpty() ? "-" + groupName : "")), openApiJsonString);
+                writeString(outputDirectory.resolve((groupName.isEmpty() ? "openapi" : groupName) + ".json"),
+                        openApiJsonString);
             }
         } catch (final IOException ioException) {
             throw new UncheckedIOException(ioException);
