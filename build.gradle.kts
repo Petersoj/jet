@@ -22,7 +22,7 @@ dependencies {
     jacocoAggregation(project(":module:openapi-annotations-plugin"))
 }
 
-tasks.withType(Test::class) {
+tasks.withType(Test::class).configureEach {
     finalizedBy(tasks.testCodeCoverageReport)
 }
 

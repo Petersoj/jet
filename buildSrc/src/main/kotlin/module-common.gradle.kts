@@ -45,7 +45,7 @@ dependencies {
     testRuntimeOnly("ch.qos.logback:logback-classic:1.5.34")
 }
 
-tasks.withType(JavaCompile::class) {
+tasks.withType(JavaCompile::class).configureEach {
     options.errorprone {
         allErrorsAsWarnings = true
         allSuggestionsAsWarnings = true
@@ -74,7 +74,7 @@ tasks.withType(JavaCompile::class) {
     }
 }
 
-tasks.withType(Test::class) {
+tasks.withType(Test::class).configureEach {
     useJUnitPlatform()
     systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "ON_SUCCESS")
     systemProperty("java.io.tmpdir", temporaryDir.path)
@@ -85,12 +85,12 @@ tasks.withType(Test::class) {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-tasks.withType(JacocoReport::class) {
+tasks.withType(JacocoReport::class).configureEach {
     dependsOn(tasks.test)
     reports.xml.required = true
 }
 
-tasks.withType(Javadoc::class) {
+tasks.withType(Javadoc::class).configureEach {
     options {
         (this as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
         links("https://docs.oracle.com/en/java/javase/${java.targetCompatibility.majorVersion}/docs/api/",
@@ -99,16 +99,14 @@ tasks.withType(Javadoc::class) {
                 "https://errorprone.info/api/latest/")
     }
 }
-afterEvaluate {
-    tasks.withType(Javadoc::class) {
-        project.configurations.flatMap { it.dependencies.withType(ProjectDependency::class) }.forEach {
-            project(it.path).tasks.withType(Javadoc::class).forEach { dependencyJavadocTask ->
-                this@withType.dependsOn(dependencyJavadocTask)
-                this@withType.options {
-                    (this as StandardJavadocDocletOptions).linksOffline(
-                            "https://javadoc.io/doc/${it.group}/${it.name}/${it.version}/",
-                            dependencyJavadocTask.destinationDir!!.path)
-                }
+tasks.withType(Javadoc::class).configureEach {
+    project.configurations.flatMap { it.dependencies.withType(ProjectDependency::class) }.forEach {
+        project(it.path).tasks.withType(Javadoc::class).forEach { dependencyJavadocTask ->
+            this@configureEach.dependsOn(dependencyJavadocTask)
+            this@configureEach.options {
+                (this as StandardJavadocDocletOptions).linksOffline(
+                        "https://javadoc.io/doc/${it.group}/${it.name}/${it.version}/",
+                        dependencyJavadocTask.destinationDir!!.path)
             }
         }
     }

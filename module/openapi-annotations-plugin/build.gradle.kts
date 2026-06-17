@@ -30,7 +30,7 @@ configurations.testRuntimeOnly {
     exclude("ch.qos.logback", "logback-classic")
 }
 
-tasks.withType(Javadoc::class) {
+tasks.withType(Javadoc::class).configureEach {
     options {
         (this as StandardJavadocDocletOptions).links(
                 "https://javadoc.io/doc/com.github.victools/jsonschema-generator/$jsonSchemaGeneratorVersion",

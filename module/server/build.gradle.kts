@@ -15,7 +15,7 @@ dependencies {
     implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server:${jettyVersion}")
 }
 
-tasks.withType(Javadoc::class) {
+tasks.withType(Javadoc::class).configureEach {
     options {
         (this as StandardJavadocDocletOptions).links(
                 "https://javadoc.io/doc/com.github.ben-manes.caffeine/caffeine/$caffeineVersion")
