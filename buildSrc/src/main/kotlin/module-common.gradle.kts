@@ -116,7 +116,8 @@ publishing {
     publications.create(JRELEASER_MAVEN_NAME, MavenPublication::class) {
         from(components["java"])
         pom {
-            name = artifactId
+            name = provider { artifactId }
+            description = provider { project.description }
             url = PROJECT_GITHUB_URL
             inceptionYear = "2025"
             licenses {

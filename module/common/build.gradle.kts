@@ -2,6 +2,8 @@ plugins {
     id("module-common")
 }
 
+description = "The common module for various Jet modules."
+
 dependencies {
     // `jetty-client` depends on `jetty-server`, so including this dependency in the `common` module is fine.
     implementation("org.eclipse.jetty:jetty-server:12.1.10")
@@ -16,9 +18,4 @@ dependencies {
             "darwin_x86_64", "darwin_aarch64",
             "win_amd64", "win_aarch64")
             .forEach { implementation("com.github.luben:zstd-jni:1.5.7-9:${it}") }
-}
-
-publishing {
-    publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description =
-            "The common module for various Jet modules."
 }

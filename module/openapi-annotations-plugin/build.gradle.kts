@@ -12,6 +12,8 @@ plugins {
     id("org.gradle.plugin-compatibility") version "1.0.0"
 }
 
+description = "A code-first OpenAPI specification annotations processor Gradle plugin."
+
 val jsonSchemaGeneratorVersion = "5.0.0"
 
 dependencies {
@@ -24,7 +26,6 @@ dependencies {
 
     implementation("com.networknt:json-schema-validator:3.0.3")
 }
-
 // Gradle Test Kit already provides an SLF4j binding.
 configurations.testRuntimeOnly {
     exclude("ch.qos.logback", "logback-classic")
@@ -38,8 +39,6 @@ tasks.withType(Javadoc::class).configureEach {
     }
 }
 
-val projectDescription = "A code-first OpenAPI specification annotations processor Gradle plugin."
-
 gradlePlugin {
     website = PROJECT_GITHUB_URL
     vcsUrl = website.map { "$it.git" }
@@ -48,7 +47,7 @@ gradlePlugin {
         id = pluginPackage
         implementationClass = "$pluginPackage.JetOpenApiAnnotationsPlugin"
         displayName = "Jet OpenAPI Annotations Plugin"
-        description = projectDescription
+        description = project.description
         tags = listOf("jet", "openapi", "annotations")
         compatibility {
             features.configurationCache = true
@@ -72,10 +71,6 @@ tasks.withType(Sign::class).configureEach {
     onlyIf {
         predicate.get()
     }
-}
-
-publishing {
-    publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description = projectDescription
 }
 
 // The `com.gradle.plugin-publish` plugin creates `MavenRepository` publications that should not be published to

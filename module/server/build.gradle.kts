@@ -2,6 +2,8 @@ plugins {
     id("module-common")
 }
 
+description = "A simple, lightweight, modern, turnkey, Java web server library."
+
 val caffeineVersion = "3.2.4"
 
 dependencies {
@@ -20,9 +22,4 @@ tasks.withType(Javadoc::class).configureEach {
         (this as StandardJavadocDocletOptions).links(
                 "https://javadoc.io/doc/com.github.ben-manes.caffeine/caffeine/$caffeineVersion")
     }
-}
-
-publishing {
-    publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description =
-            "A simple, lightweight, modern, turnkey, Java web server library."
 }

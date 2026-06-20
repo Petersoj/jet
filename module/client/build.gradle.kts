@@ -2,11 +2,8 @@ plugins {
     id("module-common")
 }
 
+description = "A simple, lightweight, modern, turnkey, Java web client library."
+
 dependencies {
     api(project(":module:common"))
-}
-
-publishing {
-    publications.getByName(JRELEASER_MAVEN_NAME, MavenPublication::class).pom.description =
-            "A simple, lightweight, modern, turnkey, Java web client library."
 }
