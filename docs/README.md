@@ -73,10 +73,10 @@ Jet is a wrapper around the excellent [Jetty](https://jetty.org) web client and 
 the battle-tested low-level protocol handling, while Jet focuses on providing a modern and consistent interface with
 superb documentation and an amazing developer experience.
 
-Jet offers four modules: [Common](#common), [Server](#server), [OpenAPI Annotations](#openapi-annotations),
+Jet offers five modules: [Common](#common), [Server](#server), [OpenAPI Annotations](#openapi-annotations),
 [OpenAPI Annotations Plugin](#openapi-annotations-plugin), and [Client](#client).
 
-A few more awesome things about Jet:
+Some awesome things about Jet:
 
 - Exhaustive Javadoc documentation (all public classes, fields, and methods have Javadocs)
 - Amazing developer experience
