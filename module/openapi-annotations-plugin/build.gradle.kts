@@ -62,6 +62,7 @@ signing {
         useInMemoryPgpKeys(secretKey, passphrase)
     }
 }
+// Do not sign if publishing to Maven local (~/.m2/)
 tasks.withType(Sign::class).configureEach {
     val predicate = provider {
         gradle.taskGraph.allTasks.none {
@@ -86,10 +87,6 @@ tasks.withType(PublishToMavenRepository::class).configureEach {
     }
 }
 
-subprojects {
-    tasks.configureEach {
-        tasks.publishPlugins.configure {
-            mustRunAfter(this@configureEach)
-        }
-    }
+tasks.publishPlugins.configure {
+    dependsOn(tasks.build)
 }
