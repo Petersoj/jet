@@ -79,6 +79,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
 import static java.lang.Long.parseLong;
+import static java.lang.Runtime.getRuntime;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -156,6 +157,7 @@ public final class JetServer {
         private @Nullable Duration connectionIdleTimeout;
         private @Nullable Duration connectionIdleTimeoutWhenStopping;
         private boolean connectionIdleTimeoutWhenStoppingSet;
+        private boolean addShutdownHook = true;
 
         /**
          * @see #getHandleFactory()
@@ -401,6 +403,14 @@ public final class JetServer {
         }
 
         /**
+         * @see #isAddShutdownHook()
+         */
+        public Builder addShutdownHook(final boolean addShutdownHook) {
+            this.addShutdownHook = addShutdownHook;
+            return this;
+        }
+
+        /**
          * Builds this {@link Builder} into a new {@link JetServer} instance.
          *
          * @return the built {@link JetServer} instance
@@ -420,6 +430,7 @@ public final class JetServer {
                     gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
                     connectionIdleTimeoutWhenStoppingSet ? connectionIdleTimeoutWhenStopping : ofSeconds(1),
+                    addShutdownHook,
                     ImmutableList.copyOf(sslPemsSuppliers));
             try {
                 jetServer.start();
@@ -532,17 +543,29 @@ public final class JetServer {
      */
     private final @Getter @Nullable Duration connectionIdleTimeoutWhenStopping;
 
+    /**
+     * Whether to call {@link Runtime#addShutdownHook(Thread)} with
+     * {@link Thread.Builder.OfPlatform#unstarted(Runnable)} {@link #stop()}.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    private final @Getter boolean addShutdownHook;
+
     private final ImmutableList<Supplier<List<SslPem>>> sslPemsSuppliers;
     private final Set<Runnable> stopListeners = synchronizedSet(new HashSet<>());
     private volatile boolean stopCalled;
+    private @Nullable Thread shutdownHook;
     private @Nullable Server server;
     private SslContextFactory.@Nullable Server sslContextFactory;
     private @Nullable ScheduledFuture<?> reloadSslFuture;
 
     private void start() {
+        if (addShutdownHook) {
+            shutdownHook = Thread.ofPlatform().unstarted(this::stop);
+            getRuntime().addShutdownHook(shutdownHook);
+        }
         LOGGER.info("Jet starting...");
         server = new Server(new VirtualThreadPool(Integer.MAX_VALUE));
-        server.setStopAtShutdown(true);
         server.setStopTimeout(gracefulStopTimeout.toMillis());
         final var httpConfiguration = new HttpConfiguration();
         httpConfiguration.setSendServerVersion(false);
@@ -887,11 +910,17 @@ public final class JetServer {
      * <p>
      * Note: this method should never be called on the {@link Thread} of a {@link Handler}.
      */
+    @SuppressWarnings("EmptyCatch")
     public synchronized void stop() {
         if (stopCalled) {
             return;
         }
         stopCalled = true;
+        if (shutdownHook != null) {
+            try {
+                getRuntime().removeShutdownHook(shutdownHook);
+            } catch (final IllegalStateException _) {}
+        }
         LOGGER.info("Jet stopping...");
         Throwable throwables = null;
         for (final var stopListener : stopListeners.toArray(Runnable[]::new)) {
