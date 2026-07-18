@@ -124,7 +124,7 @@ import static org.slf4j.event.Level.ERROR;
 @NullMarked
 @Slf4j
 @RequiredArgsConstructor(access = PRIVATE)
-public final class JetServer {
+public final class JetServer implements AutoCloseable {
 
     /**
      * Creates a {@link Builder}.
@@ -904,7 +904,15 @@ public final class JetServer {
     }
 
     /**
-     * Calls all {@link Runnable} from {@link #addStopListener(Runnable)}, cancels {@link #getReloadSslPeriod()}, and
+     * Calls {@link #stop()}.
+     */
+    @Override
+    public void close() {
+        stop();
+    }
+
+    /**
+     * Calls all {@link Runnable}s from {@link #addStopListener(Runnable)}, cancels {@link #getReloadSslPeriod()}, and
      * stops the server by rejecting new connections and waiting for {@link #getGracefulStopTimeout()} to elapse before
      * closing existing connections. Subsequent calls to this method are ignored.
      * <p>
