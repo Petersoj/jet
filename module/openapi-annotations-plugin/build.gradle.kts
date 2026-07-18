@@ -24,7 +24,7 @@ dependencies {
     api("com.github.victools:jsonschema-generator:$jsonSchemaGeneratorVersion")
     api("com.github.victools:jsonschema-module-jackson:$jsonSchemaGeneratorVersion")
 
-    implementation("com.networknt:json-schema-validator:3.0.3")
+    implementation("com.networknt:json-schema-validator:3.0.6")
 }
 // Gradle Test Kit already provides an SLF4j binding.
 configurations.testRuntimeOnly {
