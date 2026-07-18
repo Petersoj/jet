@@ -659,8 +659,8 @@ public final class Url {
     private @LazyInit @Nullable String toEncodedString;
     private @LazyInit @Nullable String toDecodedString;
 
-    // Use Java's `URI` instead of Jetty's `HttpURI` as it's more standardized.
-    // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path.
+    // Use Java's `URI` instead of Jetty's `HttpURI` as it's more standardized
+    // Java's `URI` allows all components to be `null` and allows decoded UTF-8 characters in the path
     private Url(final URI uri) throws IllegalArgumentException {
         final var uriScheme = uri.getScheme();
         checkArgument(uriScheme != null && !uriScheme.isEmpty(), "Invalid scheme: %s", uriScheme);

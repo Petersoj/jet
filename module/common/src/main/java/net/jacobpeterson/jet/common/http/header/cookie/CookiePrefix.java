@@ -118,7 +118,7 @@ public enum CookiePrefix {
             return null;
         }
         final var lowercasedCookieName = cookieName.toLowerCase(ROOT);
-        // Brute-force search for only 4 possibilities is fine.
+        // Brute-force search for only 4 possibilities is fine
         for (final var cookiePrefix : FROM_COOKIE_NAME_SEARCH_LIST) {
             if (lowercasedCookieName.startsWith(requireNonNull(LOWERCASED_STRINGS_OF_VALUES.get(cookiePrefix)))) {
                 return cookiePrefix;

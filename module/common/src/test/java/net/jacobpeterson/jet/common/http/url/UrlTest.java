@@ -1722,7 +1722,7 @@ public final class UrlTest {
                 .build().toDecodedString());
     }
 
-    // `Url.toString()` calls `toEncodedString()`, so there is no need for a `_toString()` test here.
+    // `Url.toString()` calls `toEncodedString()`, so there is no need for a `_toString()` test here
 
     @Test
     public void _equals() {

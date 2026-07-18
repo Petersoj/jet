@@ -90,7 +90,7 @@ public final class ETag {
      * @return the weak {@link ETag}
      */
     public static ETag computeWeak(final String name, final long size, final long lastModified) {
-        // Based on the same algorithm as `org.eclipse.jetty.http.EtagUtils.computeWeakEtag()`.
+        // Based on the same algorithm as `org.eclipse.jetty.http.EtagUtils.computeWeakEtag()`
         final var hashBytes = allocate(Integer.BYTES + Long.BYTES + Long.BYTES);
         final var nameHashcode = name.hashCode();
         hashBytes.putInt(nameHashcode);

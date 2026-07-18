@@ -26,7 +26,7 @@ dependencies {
 
     implementation("com.networknt:json-schema-validator:3.0.6")
 }
-// Gradle Test Kit already provides an SLF4j binding.
+// Gradle Test Kit already provides an SLF4j binding
 configurations.testRuntimeOnly {
     exclude("ch.qos.logback", "logback-classic")
 }

@@ -74,7 +74,7 @@ public final class Resource {
 
     private static final Cache<OfClasspathCacheKey, Resource> OF_CLASSPATH_CACHE = Caffeine.newBuilder()
             // Long enough that the cost of recomputing a strong ETag is negligible, but short enough to reduce
-            // long-term memory usage.
+            // long-term memory usage
             .expireAfterAccess(7, DAYS)
             .softValues()
             .build();

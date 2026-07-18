@@ -177,7 +177,7 @@ public @interface OpenApiPathItem {
      */
     @Target({})
     @Retention(RUNTIME) //@formatter:off
-    // Note: this interface is not named `Method` because that would clash with the `common` module `Method` enum.
+    // Note: this interface is not named `Method` because that would clash with the `common` module `Method` enum
     @interface MethodEntry { //@formatter:on
 
         /**

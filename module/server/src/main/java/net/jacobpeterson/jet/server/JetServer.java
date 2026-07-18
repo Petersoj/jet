@@ -610,7 +610,7 @@ public final class JetServer implements AutoCloseable {
             private void handle(final org.eclipse.jetty.server.Request jettyRequest,
                     final org.eclipse.jetty.server.Response jettyResponse) {
                 // This check is still racy with `stop()`, but it decreases the likelihood of `addStopListener()` calls
-                // throwing after `stop()` is called.
+                // throwing after `stop()` is called
                 if (stopCalled) {
                     jettyResponse.setStatus(SERVICE_UNAVAILABLE_503.getCode());
                     return;

@@ -574,7 +574,7 @@ public final class Response {
                 if (contentEncoding != null) {
                     try (final var decompressed = contentEncoding.getType()
                             .decompress(new FilterInputStream(contentMarkable) {
-                                // Close decompression stream, but do not close underlying stream.
+                                // Close decompression stream, but do not close underlying stream
                                 @Override public void close() {}
                             })) {
                         peekedBytes = decompressed.readNBytes(contentTypePeekLength);

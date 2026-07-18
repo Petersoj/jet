@@ -334,7 +334,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
             } else {
                 throw new StatusException(NOT_FOUND_404, "Invalid file: " + requestFile);
             }
-            // No need to call `Files.isRegularFile()` here since `Resource.ofFile()` will check for file existence.
+            // No need to call `Files.isRegularFile()` here since `Resource.ofFile()` will check for file existence
         }
         if (!requestFile.startsWith(directory)) { // Protect against path traversals
             throw new StatusException(NOT_FOUND_404,
@@ -342,7 +342,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
         }
         final var response = handle.getResponse();
         final var fRequestFile = requestFile;
-        // `resourcesOfPathsCache` null-check is racy, but NPE is unlikely and is better than using invalid `Resource`.
+        // `resourcesOfPathsCache` null-check is racy, but NPE is unlikely and is better than using invalid `Resource`
         response.responseResource(resourcesOfPathsCache != null ?
                 resourcesOfPathsCache.get(fRequestFile.toString(), _ -> Resource.ofFile(
                         fRequestFile, strongETag, trustedContentType, null, peekLength, contentEncoding, true)) :
