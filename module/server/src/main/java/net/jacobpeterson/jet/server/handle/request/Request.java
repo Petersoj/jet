@@ -530,6 +530,8 @@ public final class Request {
      * @param throwOnClose see {@link BoundedInputStream#BoundedInputStream(InputStream, Long, boolean)}
      *
      * @return the body {@link BoundedInputStream}
+     *
+     * @see BodyStreamException
      */
     public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount, final boolean throwOnClose) {
         return new BoundedInputStream(new InputStream() {
@@ -727,6 +729,8 @@ public final class Request {
      * @param config the {@link MultipartConfig}, or <code>null</code> for {@link MultipartConfig#DEFAULT}
      *
      * @return the internally-cached {@link MultiPart} {@link ImmutableList} read from the body
+     *
+     * @see BodyStreamException
      */
     public ImmutableList<MultiPart> getBodyMultiParts(final @Nullable MultipartConfig config) throws StatusException {
         if (bodyMultiParts == null) {

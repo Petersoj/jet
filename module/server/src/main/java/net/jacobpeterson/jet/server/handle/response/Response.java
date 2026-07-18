@@ -20,6 +20,7 @@ import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.Handle;
+import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
@@ -136,6 +137,8 @@ public final class Response {
      * Note: this is not guaranteed to be called.
      * <p>
      * Note: the provided {@link OutputStream} is thread-safe.
+     *
+     * @see BodyStreamException
      */
     private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
 
