@@ -241,6 +241,7 @@ Here's a very simple example to get you going:
 JetServer.builder()
         .sslLetsEncrypt() // Enable Let's Encrypt SSL/TLS
         .sessionStore() // Enable in-memory sessions
+        .addShutdownHook(true) // Adds a JVM shutdown hook to stop the server gracefully
         .router(ImmutableSimpleRouter.builder()
                 // Add a custom handler
                 .addLast(PathExactRoute.builder().path("/custom-path").build(), handle ->
@@ -249,7 +250,7 @@ JetServer.builder()
                 .addLast(PathStartsWithRoute.builder().path("/").build(), FileDirectoryHandler
                         .simpleMutable(Path.of(System.getProperty("user.home"), "webroot"), null, true))
                 .build())
-        .build(); // Automatically starts the server and adds a JVM shutdown hook to stop the server gracefully
+        .build(); // Starts the server
 ```
 
 [`JetServer`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.html)
@@ -276,6 +277,7 @@ represents the web server instance. Use the builder to configure and start the w
 - [`gracefulStopTimeout(Duration)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#gracefulStopTimeout(java.time.Duration))
 - [`connectionIdleTimeout(Duration)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#connectionIdleTimeout(java.time.Duration))
 - [`connectionIdleTimeoutWhenStopping(Duration)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#connectionIdleTimeoutWhenStopping(java.time.Duration))
+- [`addShutdownHook(boolean)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#addShutdownHook(boolean))
 
 #### [`Handle`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/handle/Handle.html)
 

@@ -157,7 +157,7 @@ public final class JetServer implements AutoCloseable {
         private @Nullable Duration connectionIdleTimeout;
         private @Nullable Duration connectionIdleTimeoutWhenStopping;
         private boolean connectionIdleTimeoutWhenStoppingSet;
-        private boolean addShutdownHook = true;
+        private boolean addShutdownHook = false;
 
         /**
          * @see #getHandleFactory()
@@ -547,7 +547,7 @@ public final class JetServer implements AutoCloseable {
      * Whether to call {@link Runtime#addShutdownHook(Thread)} with
      * {@link Thread.Builder.OfPlatform#unstarted(Runnable)} {@link #stop()}.
      * <p>
-     * Defaults to <code>true</code>.
+     * Defaults to <code>false</code>.
      */
     private final @Getter boolean addShutdownHook;
 
