@@ -341,9 +341,9 @@ public final class Resource {
     /**
      * Returns a copy of this {@link Resource}, with {@link #getContentRange()} set to
      * {@link ContentRange#forRange(Range, long)} using the given {@link Range} and this {@link #getContentLength()}
-     * (which must be non-<code>null</code>), and {@link #getContent()} set to
-     * {@link ContentRange#forInputStream(InputStream)} using this {@link #getContent()}. If this
-     * {@link #getContentRange()} is already set, an {@link IllegalArgumentException} is thrown.
+     * (which must be non-<code>null</code> or else an {@link IllegalArgumentException} is thrown), and
+     * {@link #getContent()} set to {@link ContentRange#forInputStream(InputStream)} using this {@link #getContent()}.
+     * If this {@link #getContentRange()} is already set, an {@link IllegalArgumentException} is thrown.
      *
      * @param range the {@link Range}
      *
@@ -351,12 +351,13 @@ public final class Resource {
      */
     public Resource withRange(final Range range) throws StatusException, IllegalArgumentException {
         checkArgument(contentRange == null, "`contentRange` cannot already be set");
+        checkArgument(contentLength != null, "`contentLength` must be set");
         if (!range.getUnit().equals(BYTES_UNIT)) {
             throw new StatusException(RANGE_NOT_SATISFIABLE_416, "`%s` unit must be: %s".formatted(RANGE, BYTES_UNIT));
         }
         final ContentRange contentRange;
         try {
-            contentRange = ContentRange.forRange(range, requireNonNull(contentLength));
+            contentRange = ContentRange.forRange(range, contentLength);
         } catch (final Exception exception) {
             throw new StatusException(RANGE_NOT_SATISFIABLE_416, exception);
         }

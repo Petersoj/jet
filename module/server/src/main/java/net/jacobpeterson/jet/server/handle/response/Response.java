@@ -18,6 +18,7 @@ import net.jacobpeterson.jet.common.http.header.stricttransportsecurity.StrictTr
 import net.jacobpeterson.jet.common.http.method.Method;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.url.Url;
+import net.jacobpeterson.jet.common.io.function.IoConsumer;
 import net.jacobpeterson.jet.common.util.string.StringUtil;
 import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
@@ -140,7 +141,7 @@ public final class Response {
      *
      * @see BodyStreamException
      */
-    private @Getter @Setter @Nullable Consumer<OutputStream> bodyOutputStreamApplier;
+    private @Getter @Setter @Nullable IoConsumer<OutputStream> bodyOutputStreamApplier;
 
     private @Nullable List<Runnable> afters;
     private boolean aftersRun;
@@ -313,23 +314,21 @@ public final class Response {
     public void setBodyInputStream(final @Nullable InputStream bodyInputStream, final boolean closeAfter) {
         if (bodyInputStream == null) {
             bodyOutputStreamApplier = null;
-        } else {
-            bodyOutputStreamApplier = outputStream -> {
-                try (bodyInputStream) {
-                    bodyInputStream.transferTo(outputStream);
+            return;
+        }
+        bodyOutputStreamApplier = outputStream -> {
+            try (bodyInputStream) {
+                bodyInputStream.transferTo(outputStream);
+            }
+        };
+        if (closeAfter) {
+            addAfter(() -> {
+                try {
+                    bodyInputStream.close();
                 } catch (final IOException ioException) {
                     throw new UncheckedIOException(ioException);
                 }
-            };
-            if (closeAfter) {
-                addAfter(() -> {
-                    try {
-                        bodyInputStream.close();
-                    } catch (final IOException ioException) {
-                        throw new UncheckedIOException(ioException);
-                    }
-                });
-            }
+            });
         }
     }
 
@@ -758,11 +757,7 @@ public final class Response {
         headers.set(X_ACCEL_BUFFERING.toString(), "no");
         disableCompression();
         setBodyOutputStreamApplier(bodyOutputStream -> {
-            try {
-                bodyOutputStream.flush();
-            } catch (final IOException ioException) {
-                throw new UncheckedIOException(ioException);
-            }
+            bodyOutputStream.flush();
             final var sse = new Sse(bodyOutputStream);
             if (keepAlivePeriod != null) {
                 if (keepAliveSeparateThread) {
