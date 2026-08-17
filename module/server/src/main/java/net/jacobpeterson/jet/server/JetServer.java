@@ -8,6 +8,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.Header;
 import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
+import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
 import net.jacobpeterson.jet.common.http.header.headers.Headers;
@@ -621,7 +622,9 @@ public final class JetServer implements AutoCloseable {
                     final var response = handle.getResponse();
                     try {
                         router.route(handle);
-                        handleCompression(handle);
+                        if (!handleCompression(handle)) {
+                            handleDecompression(handle);
+                        }
                     } catch (final Throwable throwable) {
                         response.getHeaders().clear();
                         final int statusCode;
@@ -731,11 +734,11 @@ public final class JetServer implements AutoCloseable {
                 }
             }
 
-            private void handleCompression(final Handle handle) {
+            private boolean handleCompression(final Handle handle) {
                 final var response = handle.getResponse();
                 final var compressionConfig = response.getCompressionConfig();
                 if (compressionConfig == null) {
-                    return;
+                    return false;
                 }
                 final var headers = response.getHeaders();
                 if (compressionConfig.isEnsureVaryHeader()) {
@@ -743,30 +746,30 @@ public final class JetServer implements AutoCloseable {
                 }
                 final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
                 if (bodyOutputStreamApplier == null) {
-                    return;
+                    return false;
                 }
                 if (compressionConfig.isCheckContentEncoding() && headers.containsKey(CONTENT_ENCODING.toString())) {
-                    return;
+                    return false;
                 }
                 if (compressionConfig.isCheckContentRange() && headers.containsKey(CONTENT_RANGE.toString())) {
-                    return;
+                    return false;
                 }
                 final var minimumContentLength = compressionConfig.getMinimumContentLength();
                 if (minimumContentLength != null) {
                     final var contentLength = headers.getFirst(CONTENT_LENGTH.toString());
                     if (contentLength != null && parseLong(contentLength) < minimumContentLength) {
-                        return;
+                        return false;
                     }
                 }
                 if (compressionConfig.isCheckContentType()) {
                     final var contentType = headers.getFirst(CONTENT_TYPE.toString());
                     if (contentType != null && ContentType.parse(contentType).isCompressed()) {
-                        return;
+                        return false;
                     }
                 }
                 final var acceptEncoding = handle.getRequest().getAcceptEncoding();
                 if (acceptEncoding == null) {
-                    return;
+                    return false;
                 }
                 final var acceptEncodingTypes = acceptEncoding.getEntryTypes();
                 final var compressionLevel = compressionConfig.getLevels().stream()
@@ -774,7 +777,7 @@ public final class JetServer implements AutoCloseable {
                         .findFirst()
                         .orElse(null);
                 if (compressionLevel == null) {
-                    return;
+                    return false;
                 }
                 headers.set(CONTENT_ENCODING.toString(), compressionLevel.getType().toString());
                 headers.removeAll(CONTENT_LENGTH.toString());
@@ -791,10 +794,38 @@ public final class JetServer implements AutoCloseable {
                     try (final var compressedBodyOutputStream = compressionLevel.getType()
                             .compress(bodyOutputStream, compressionLevel.getLevel())) {
                         bodyOutputStreamApplier.accept(compressedBodyOutputStream);
-                    } catch (final IOException ioException) {
-                        throw new UncheckedIOException(ioException);
                     }
                 });
+                return true;
+            }
+
+            private void handleDecompression(final Handle handle) {
+                final var response = handle.getResponse();
+                final var compressionConfig = response.getCompressionConfig();
+                if (compressionConfig == null || !compressionConfig.isDecompressEncodingMismatch()) {
+                    return;
+                }
+                final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
+                if (bodyOutputStreamApplier == null) {
+                    return;
+                }
+                final var headers = response.getHeaders();
+                final var contentEncodingString = headers.getFirst(CONTENT_ENCODING.toString());
+                if (contentEncodingString == null || headers.containsKey(CONTENT_RANGE.toString())) {
+                    return;
+                }
+                final var contentEncodingType = ContentEncoding.parse(contentEncodingString).getType();
+                if (contentEncodingType.isDictionaryRequired()) {
+                    return;
+                }
+                final var acceptEncoding = handle.getRequest().getAcceptEncoding();
+                if (acceptEncoding != null && acceptEncoding.getEntryTypes().contains(contentEncodingType)) {
+                    return;
+                }
+                headers.removeAll(CONTENT_ENCODING.toString());
+                headers.removeAll(CONTENT_LENGTH.toString());
+                response.setBodyOutputStreamApplier(bodyOutputStream ->
+                        contentEncodingType.decompress(bodyOutputStreamApplier, bodyOutputStream));
             }
         }));
         server.setErrorHandler(new GracefulHandler(new Abstract() {

@@ -19,7 +19,8 @@ import static net.jacobpeterson.jet.common.http.header.contentencoding.Compressi
 import static net.jacobpeterson.jet.common.http.header.contentencoding.CompressionType.ZSTANDARD;
 
 /**
- * {@link CompressionConfig} is an immutable class that represents the configuration for response compression.
+ * {@link CompressionConfig} is an immutable class that represents the configuration for transparent response
+ * compression and decompression.
  */
 @NullMarked
 @Immutable
@@ -111,4 +112,12 @@ public class CompressionConfig {
      * Defaults to <code>true</code>.
      */
     @Default boolean modifyETag = true;
+
+    /**
+     * Whether to transparently decompress the response body if the request {@link Header#ACCEPT_ENCODING} doesn't
+     * accept the response {@link Header#CONTENT_ENCODING}.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    @Default boolean decompressEncodingMismatch = true;
 }
