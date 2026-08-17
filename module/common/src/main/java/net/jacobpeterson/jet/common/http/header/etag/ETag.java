@@ -72,9 +72,7 @@ public final class ETag {
     public static ETag computeStrong(final InputStream content) {
         try (final var hashingInputStream = new HashingInputStream(sha256(), content)) {
             hashingInputStream.transferTo(nullOutputStream());
-            return builder()
-                    .value(hashingInputStream.hash().toString())
-                    .build();
+            return builder().value(hashingInputStream.hash().toString()).build();
         } catch (final IOException ioException) {
             throw new UncheckedIOException(ioException);
         }

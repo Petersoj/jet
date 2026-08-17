@@ -5,6 +5,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -46,8 +47,11 @@ public final class CompressionTypeTest {
         for (final var randomBytesLength : List.of(0, 1, 2, 8, 1024, 8 * 1024, 1024 * 1024)) {
             final var randomBytes = new byte[randomBytesLength];
             ThreadLocalRandom.current().nextBytes(randomBytes);
-            assertArrayEquals(randomBytes, compressionType.decompress(compressionType.compress(randomBytes,
-                    dictionary), dictionary));
+            final var compressed = compressionType.compress(randomBytes, dictionary);
+            assertArrayEquals(randomBytes, compressionType.decompress(compressed, dictionary));
+            final var decompressed = new ByteArrayOutputStream();
+            compressionType.decompress(outputStream -> outputStream.write(compressed), decompressed, dictionary);
+            assertArrayEquals(randomBytes, decompressed.toByteArray());
         }
     }
 

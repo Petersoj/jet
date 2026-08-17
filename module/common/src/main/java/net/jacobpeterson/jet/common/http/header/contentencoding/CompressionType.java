@@ -11,6 +11,8 @@ import com.github.luben.zstd.ZstdOutputStreamNoFinalizer;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.jacobpeterson.jet.common.io.function.IoConsumer;
+import net.jacobpeterson.jet.common.util.io.IoUtil;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -34,6 +36,7 @@ import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
+import static net.jacobpeterson.jet.common.util.io.IoUtil.outputStreamToInputStream;
 
 /**
  * {@link CompressionType} is an enum that represents a {@link ContentEncoding} compression type.
@@ -271,6 +274,26 @@ public enum CompressionType {
         } catch (final IOException ioException) {
             throw new UncheckedIOException(ioException);
         }
+    }
+
+    /**
+     * Calls {@link #decompress(IoConsumer, OutputStream, byte[])} with <code>dictionary</code> set to <code>null</code>
+     */
+    public void decompress(final IoConsumer<OutputStream> source, final OutputStream destination) {
+        decompress(source, destination, null);
+    }
+
+    /**
+     * Calls {@link IoUtil#outputStreamToInputStream(IoConsumer, IoConsumer)} with
+     * {@link #decompress(InputStream, byte[])} and {@link InputStream#transferTo(OutputStream)}.
+     */
+    public void decompress(final IoConsumer<OutputStream> source, final OutputStream destination,
+            final byte @Nullable [] dictionary) {
+        outputStreamToInputStream(source, inputStream -> {
+            try (final var decompressed = decompress(inputStream, dictionary)) {
+                decompressed.transferTo(destination);
+            }
+        });
     }
 
     /**
