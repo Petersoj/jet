@@ -6,11 +6,11 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static java.nio.ByteBuffer.wrap;
 import static net.jacobpeterson.jet.common.http.header.contentencoding.CompressionType.BROTLI;
 import static net.jacobpeterson.jet.common.http.header.contentencoding.CompressionType.DEFLATE;
 import static net.jacobpeterson.jet.common.http.header.contentencoding.CompressionType.DICTIONARY_COMPRESSED_BROTLI;
@@ -34,8 +34,8 @@ public final class CompressionTypeTest {
             compressAndDecompress(compressionType, null);
         }
 
-        final var brotliDictionary = PreparedDictionaryGenerator.generate(wrap(new byte[]{0, 1, 2, 3, 4, 5, 6, 7}))
-                .getData();
+        final var brotliDictionary = PreparedDictionaryGenerator.generate(
+                ByteBuffer.wrap(new byte[]{0, 1, 2, 3, 4, 5, 6, 7})).getData();
         final var brotliDictionaryBytes = new byte[brotliDictionary.remaining()];
         brotliDictionary.get(brotliDictionaryBytes);
         compressAndDecompress(DICTIONARY_COMPRESSED_BROTLI, brotliDictionaryBytes);

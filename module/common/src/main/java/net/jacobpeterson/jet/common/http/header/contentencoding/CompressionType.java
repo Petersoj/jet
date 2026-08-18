@@ -248,12 +248,8 @@ public enum CompressionType {
                 });
                 yield compress;
             }
-            case DICTIONARY_COMPRESSED_ZSTANDARD -> {
-                final var compress = new ZstdOutputStreamNoFinalizer(outputStream, RecyclingBufferPool.INSTANCE,
-                        levelOrDefault);
-                compress.setDict(requireNonNull(dictionary));
-                yield compress;
-            }
+            case DICTIONARY_COMPRESSED_ZSTANDARD -> new ZstdOutputStreamNoFinalizer(outputStream,
+                    RecyclingBufferPool.INSTANCE, levelOrDefault).setDict(requireNonNull(dictionary));
         };
     }
 
@@ -340,11 +336,8 @@ public enum CompressionType {
                 decompress.attachDictionary(dictionaryDirect);
                 yield decompress;
             }
-            case DICTIONARY_COMPRESSED_ZSTANDARD -> {
-                final var decompress = new ZstdInputStreamNoFinalizer(inputStream, RecyclingBufferPool.INSTANCE);
-                decompress.setDict(requireNonNull(dictionary));
-                yield decompress;
-            }
+            case DICTIONARY_COMPRESSED_ZSTANDARD -> new ZstdInputStreamNoFinalizer(inputStream,
+                    RecyclingBufferPool.INSTANCE).setDict(requireNonNull(dictionary));
         };
     }
 
@@ -354,7 +347,7 @@ public enum CompressionType {
     }
 
     /**
-     * The default buffer size for compression streams: <code>16 KiB</code>
+     * The default buffer size for (de)compression streams: <code>16 KiB</code>
      *
      * @see <a href="https://bugs.openjdk.org/browse/JDK-8299336">bugs.openjdk.org</a>
      */

@@ -535,6 +535,7 @@ public final class Request {
      */
     public BoundedInputStream getBodyInputStream(final @Nullable Long boundCount, final boolean throwOnClose) {
         return new BoundedInputStream(new InputStream() {
+
             final InputStream inputStream = asInputStream(handle.getInternals().getRequest());
 
             @Override
