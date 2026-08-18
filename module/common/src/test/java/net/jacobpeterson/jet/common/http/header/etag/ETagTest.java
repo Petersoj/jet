@@ -63,23 +63,23 @@ public final class ETagTest {
             final var eTag = ETag.builder()
                     .value("abc", ZSTANDARD)
                     .build();
-            assertEquals("abc-compression-type-zstd", eTag.getValue());
+            assertEquals("abc-compressed-zstd", eTag.getValue());
             assertEquals("abc", eTag.getValueWithoutCompressedSuffix());
         }
     }
 
     @Test
     public void equalsWithoutCompressionType() {
-        assertTrue(ETag.parse("\"abc-compression-type-zstd\"")
+        assertTrue(ETag.parse("\"abc-compressed-zstd\"")
                 .equalsWithoutCompressedSuffix(ETag.parse("\"abc\"")));
         assertTrue(ETag.parse("W/\"abc\"")
-                .equalsWithoutCompressedSuffix(ETag.parse("W/\"abc-compression-type-zstd\"")));
-        assertTrue(ETag.parse("\"abc-compression-type-gzip\"")
-                .equalsWithoutCompressedSuffix(ETag.parse("\"abc-compression-type-zstd\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("W/\"abc-compressed-zstd\"")));
+        assertTrue(ETag.parse("\"abc-compressed-gzip\"")
+                .equalsWithoutCompressedSuffix(ETag.parse("\"abc-compressed-zstd\"")));
         assertFalse(ETag.parse("W/\"abc\"")
-                .equalsWithoutCompressedSuffix(ETag.parse("\"abc-compression-type-zstd\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("\"abc-compressed-zstd\"")));
         assertFalse(ETag.parse("W/\"abc\"")
-                .equalsWithoutCompressedSuffix(ETag.parse("W/\"def-compression-type-zstd\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("W/\"def-compressed-zstd\"")));
         assertFalse(ETag.parse("W/\"abc\"").equalsWithoutCompressedSuffix(new Object()));
     }
 
