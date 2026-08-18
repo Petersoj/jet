@@ -6,7 +6,7 @@ description = "The common module for various Jet modules."
 
 dependencies {
     // `jetty-client` depends on `jetty-server`, so including this dependency in the `common` module is fine
-    implementation("org.eclipse.jetty:jetty-server:12.1.11")
+    implementation("org.eclipse.jetty:jetty-server:12.1.12")
 
     setOf("brotli4j",
             "native-linux-x86_64", "native-linux-aarch64",
@@ -17,5 +17,5 @@ dependencies {
     setOf("linux_amd64", "linux_aarch64",
             "darwin_x86_64", "darwin_aarch64",
             "win_amd64", "win_aarch64")
-            .forEach { implementation("com.github.luben:zstd-jni:1.5.7-11:${it}") }
+            .forEach { implementation("com.github.luben:zstd-jni:1.5.7-15:${it}") }
 }

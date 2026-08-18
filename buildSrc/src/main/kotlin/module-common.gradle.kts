@@ -26,23 +26,23 @@ repositories {
     mavenCentral()
 }
 
-val guavaVersion = "33.6.0-jre"
+val guavaVersion = "33.7.0-jre"
 
 dependencies {
-    api("org.jspecify:jspecify:1.0.0")
+    api("org.jspecify:jspecify:1.0.1")
     api("com.google.guava:guava:$guavaVersion")
 
     implementation("org.slf4j:slf4j-api:2.0.17")
 
     errorprone("com.google.errorprone:error_prone_core:2.50.0")
-    errorprone("com.uber.nullaway:nullaway:0.13.7")
+    errorprone("com.uber.nullaway:nullaway:0.13.8")
     errorprone("net.jacobpeterson:final-coat:1.2.3")
 
-    testImplementation(platform("org.junit:junit-bom:6.1.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testRuntimeOnly("ch.qos.logback:logback-classic:1.5.38")
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.6.3")
 }
 
 tasks.withType(JavaCompile::class).configureEach {
