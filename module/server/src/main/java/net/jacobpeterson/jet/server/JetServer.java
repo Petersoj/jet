@@ -622,9 +622,8 @@ public final class JetServer implements AutoCloseable {
                     final var response = handle.getResponse();
                     try {
                         router.route(handle);
-                        if (!handleCompression(handle)) {
-                            handleDecompression(handle);
-                        }
+                        handleDecompression(handle);
+                        handleCompression(handle);
                     } catch (final Throwable throwable) {
                         response.getHeaders().clear();
                         final int statusCode;
@@ -664,6 +663,15 @@ public final class JetServer implements AutoCloseable {
                         try (final var bodyOutputStream = asOutputStream(jettyResponse)) {
                             bodyOutputStreamApplier.accept(new OutputStream() {
                                 @Override
+                                public void write(final int b) throws IOException {
+                                    try {
+                                        bodyOutputStream.write(b);
+                                    } catch (final Exception exception) {
+                                        throw asBodyStreamException(exception);
+                                    }
+                                }
+
+                                @Override
                                 public void write(final byte[] b) throws IOException {
                                     try {
                                         bodyOutputStream.write(b);
@@ -698,15 +706,6 @@ public final class JetServer implements AutoCloseable {
                                         throw asBodyStreamException(exception);
                                     }
                                 }
-
-                                @Override
-                                public void write(final int b) throws IOException {
-                                    try {
-                                        bodyOutputStream.write(b);
-                                    } catch (final Exception exception) {
-                                        throw asBodyStreamException(exception);
-                                    }
-                                }
                             });
                         } catch (final Throwable throwable) {
                             if (getCausalChain(throwable).stream().anyMatch(cause ->
@@ -732,71 +731,6 @@ public final class JetServer implements AutoCloseable {
                         }
                     }
                 }
-            }
-
-            private boolean handleCompression(final Handle handle) {
-                final var response = handle.getResponse();
-                final var compressionConfig = response.getCompressionConfig();
-                if (compressionConfig == null) {
-                    return false;
-                }
-                final var headers = response.getHeaders();
-                if (compressionConfig.isEnsureVaryHeader()) {
-                    headers.ensureEntryContainingIgnoreCase(VARY.toString(), ACCEPT_ENCODING.toString());
-                }
-                final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
-                if (bodyOutputStreamApplier == null) {
-                    return false;
-                }
-                if (compressionConfig.isCheckContentEncoding() && headers.containsKey(CONTENT_ENCODING.toString())) {
-                    return false;
-                }
-                if (compressionConfig.isCheckContentRange() && headers.containsKey(CONTENT_RANGE.toString())) {
-                    return false;
-                }
-                final var minimumContentLength = compressionConfig.getMinimumContentLength();
-                if (minimumContentLength != null) {
-                    final var contentLength = headers.getFirst(CONTENT_LENGTH.toString());
-                    if (contentLength != null && parseLong(contentLength) < minimumContentLength) {
-                        return false;
-                    }
-                }
-                if (compressionConfig.isCheckContentType()) {
-                    final var contentType = headers.getFirst(CONTENT_TYPE.toString());
-                    if (contentType != null && ContentType.parse(contentType).isCompressed()) {
-                        return false;
-                    }
-                }
-                final var acceptEncoding = handle.getRequest().getAcceptEncoding();
-                if (acceptEncoding == null) {
-                    return false;
-                }
-                final var acceptEncodingTypes = acceptEncoding.getEntryTypes();
-                final var compressionLevel = compressionConfig.getLevels().stream()
-                        .filter(level -> acceptEncodingTypes.contains(level.getType()))
-                        .findFirst()
-                        .orElse(null);
-                if (compressionLevel == null) {
-                    return false;
-                }
-                headers.set(CONTENT_ENCODING.toString(), compressionLevel.getType().toString());
-                headers.removeAll(CONTENT_LENGTH.toString());
-                if (compressionConfig.isModifyETag()) {
-                    final var eTagValue = headers.getFirst(ETAG.toString());
-                    if (eTagValue != null) {
-                        final var eTag = ETag.parse(eTagValue);
-                        headers.set(ETAG.toString(), eTag.toBuilder()
-                                .value(eTag.getValueWithoutCompressionType(), compressionLevel.getType())
-                                .build().toString());
-                    }
-                }
-                response.setBodyOutputStreamApplier(bodyOutputStream -> {
-                    try (final var compressedBodyOutputStream = compressionLevel.getType()
-                            .compress(bodyOutputStream, compressionLevel.getLevel())) {
-                        bodyOutputStreamApplier.accept(compressedBodyOutputStream);
-                    }
-                });
-                return true;
             }
 
             private void handleDecompression(final Handle handle) {
@@ -826,6 +760,70 @@ public final class JetServer implements AutoCloseable {
                 headers.removeAll(CONTENT_LENGTH.toString());
                 response.setBodyOutputStreamApplier(bodyOutputStream ->
                         contentEncodingType.decompress(bodyOutputStreamApplier, bodyOutputStream));
+            }
+
+            private void handleCompression(final Handle handle) {
+                final var response = handle.getResponse();
+                final var compressionConfig = response.getCompressionConfig();
+                if (compressionConfig == null) {
+                    return;
+                }
+                final var headers = response.getHeaders();
+                if (compressionConfig.isEnsureVaryHeader()) {
+                    headers.ensureEntryContainingIgnoreCase(VARY.toString(), ACCEPT_ENCODING.toString());
+                }
+                final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
+                if (bodyOutputStreamApplier == null) {
+                    return;
+                }
+                if (compressionConfig.isCheckContentEncoding() && headers.containsKey(CONTENT_ENCODING.toString())) {
+                    return;
+                }
+                if (compressionConfig.isCheckContentRange() && headers.containsKey(CONTENT_RANGE.toString())) {
+                    return;
+                }
+                final var minimumContentLength = compressionConfig.getMinimumContentLength();
+                if (minimumContentLength != null) {
+                    final var contentLength = headers.getFirst(CONTENT_LENGTH.toString());
+                    if (contentLength != null && parseLong(contentLength) < minimumContentLength) {
+                        return;
+                    }
+                }
+                if (compressionConfig.isCheckContentType()) {
+                    final var contentType = headers.getFirst(CONTENT_TYPE.toString());
+                    if (contentType != null && ContentType.parse(contentType).isCompressed()) {
+                        return;
+                    }
+                }
+                final var acceptEncoding = handle.getRequest().getAcceptEncoding();
+                if (acceptEncoding == null) {
+                    return;
+                }
+                final var acceptEncodingTypes = acceptEncoding.getEntryTypes();
+                final var compressionLevel = compressionConfig.getLevels().stream()
+                        .filter(level -> acceptEncodingTypes.contains(level.getType()))
+                        .findFirst()
+                        .orElse(null);
+                if (compressionLevel == null) {
+                    return;
+                }
+                headers.set(CONTENT_ENCODING.toString(), compressionLevel.getType().toString());
+                headers.removeAll(CONTENT_LENGTH.toString());
+                if (compressionConfig.isModifyETag()) {
+                    final var eTagValue = headers.getFirst(ETAG.toString());
+                    if (eTagValue != null) {
+                        final var eTag = ETag.parse(eTagValue);
+                        headers.set(ETAG.toString(), eTag.toBuilder()
+                                .value(eTag.getValueWithoutCompressionType(), compressionLevel.getType())
+                                .build().toString());
+                    }
+                }
+                response.setBodyOutputStreamApplier(bodyOutputStream -> {
+                    try (final var compressedBodyOutputStream = compressionLevel.getType()
+                            .compress(bodyOutputStream, compressionLevel.getLevel())) {
+                        bodyOutputStreamApplier.accept(compressedBodyOutputStream);
+                    }
+                });
             }
         }));
         server.setErrorHandler(new GracefulHandler(new Abstract() {

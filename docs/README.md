@@ -203,7 +203,8 @@ Features:
 - HTTPS encryption with SSL/TSL certificate hot-swap reloading
 - Custom routing and handlers
 - Sessions
-- Resource serving (classpath files, filesystem files, `InputStream`)
+- Resource serving (classpath files, filesystem files with automatic cache invalidation, `InputStream`) with support for
+  conditional requests (`304 Not Modified`), ETag generation, content type detection, range requests
 - Server-Sent Events (SSE)
 - WebSockets (_coming soon_)
 - Multipart request body

@@ -44,6 +44,15 @@ public class CompressionConfig {
     public static final CompressionConfig DEFAULT = builder().build();
 
     /**
+     * Whether to transparently decompress the response body if the request {@link Header#ACCEPT_ENCODING} doesn't
+     * accept the response {@link Header#CONTENT_ENCODING}. This transparent decompression is applied before transparent
+     * compression, enable a compressed resource to be served with various compression types.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    @Default boolean decompressEncodingMismatch = true;
+
+    /**
      * {@link Level} is an immutable class that represents a {@link CompressionType} mapped to a compression level.
      */
     @Immutable
@@ -112,12 +121,4 @@ public class CompressionConfig {
      * Defaults to <code>true</code>.
      */
     @Default boolean modifyETag = true;
-
-    /**
-     * Whether to transparently decompress the response body if the request {@link Header#ACCEPT_ENCODING} doesn't
-     * accept the response {@link Header#CONTENT_ENCODING}.
-     * <p>
-     * Defaults to <code>true</code>.
-     */
-    @Default boolean decompressEncodingMismatch = true;
 }
