@@ -57,30 +57,30 @@ public final class ETagTest {
                     .value("abc")
                     .build();
             assertEquals("abc", eTag.getValue());
-            assertEquals("abc", eTag.getValueWithoutCompressionType());
+            assertEquals("abc", eTag.getValueWithoutCompressedSuffix());
         }
         {
             final var eTag = ETag.builder()
                     .value("abc", ZSTANDARD)
                     .build();
             assertEquals("abc-compression-type-zstd", eTag.getValue());
-            assertEquals("abc", eTag.getValueWithoutCompressionType());
+            assertEquals("abc", eTag.getValueWithoutCompressedSuffix());
         }
     }
 
     @Test
     public void equalsWithoutCompressionType() {
         assertTrue(ETag.parse("\"abc-compression-type-zstd\"")
-                .equalsWithoutCompressionType(ETag.parse("\"abc\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("\"abc\"")));
         assertTrue(ETag.parse("W/\"abc\"")
-                .equalsWithoutCompressionType(ETag.parse("W/\"abc-compression-type-zstd\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("W/\"abc-compression-type-zstd\"")));
         assertTrue(ETag.parse("\"abc-compression-type-gzip\"")
-                .equalsWithoutCompressionType(ETag.parse("\"abc-compression-type-zstd\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("\"abc-compression-type-zstd\"")));
         assertFalse(ETag.parse("W/\"abc\"")
-                .equalsWithoutCompressionType(ETag.parse("\"abc-compression-type-zstd\"")));
+                .equalsWithoutCompressedSuffix(ETag.parse("\"abc-compression-type-zstd\"")));
         assertFalse(ETag.parse("W/\"abc\"")
-                .equalsWithoutCompressionType(ETag.parse("W/\"def-compression-type-zstd\"")));
-        assertFalse(ETag.parse("W/\"abc\"").equalsWithoutCompressionType(new Object()));
+                .equalsWithoutCompressedSuffix(ETag.parse("W/\"def-compression-type-zstd\"")));
+        assertFalse(ETag.parse("W/\"abc\"").equalsWithoutCompressedSuffix(new Object()));
     }
 
     @Test

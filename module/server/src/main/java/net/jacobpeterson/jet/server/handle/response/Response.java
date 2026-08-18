@@ -24,6 +24,7 @@ import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
 import net.jacobpeterson.jet.server.handle.request.Request;
 import net.jacobpeterson.jet.server.handle.response.compression.CompressionConfig;
+import net.jacobpeterson.jet.server.handle.response.compression.DecompressionConfig;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handle.response.resource.Resource;
 import net.jacobpeterson.jet.server.handle.response.sse.Sse;
@@ -142,7 +143,18 @@ public final class Response {
     private @Getter @Setter boolean preventAmbiguousCacheControl = true;
 
     /**
-     * The {@link CompressionConfig}, or <code>null</code> to disable compression.
+     * The {@link DecompressionConfig}, or <code>null</code> to disable transparent decompression.
+     * <p>
+     * Transparent decompression applies if the request {@link Header#ACCEPT_ENCODING} doesn't accept the response
+     * {@link Header#CONTENT_ENCODING} and is applied before transparent compression, enabling a compressed resource to
+     * be served with various compression types.
+     * <p>
+     * Defaults to {@link DecompressionConfig#DEFAULT}.
+     */
+    private @Getter @Setter @Nullable DecompressionConfig decompressionConfig = DecompressionConfig.DEFAULT;
+
+    /**
+     * The {@link CompressionConfig}, or <code>null</code> to disable transparent compression.
      * <p>
      * Defaults to {@link CompressionConfig#DEFAULT}.
      */
@@ -305,6 +317,13 @@ public final class Response {
     public void redirect(final RedirectType type, final String location) {
         setStatus(type.getStatus());
         headers.set(LOCATION.toString(), location);
+    }
+
+    /**
+     * Calls {@link #setDecompressionConfig(DecompressionConfig)} with <code>null</code>.
+     */
+    public void disableDecompression() {
+        setDecompressionConfig(null);
     }
 
     /**
@@ -563,7 +582,7 @@ public final class Response {
         if (eTag != null) {
             setETag(eTag);
             final var ifNoneMatch = request.getIfNoneMatch();
-            if (ifNoneMatch != null && ifNoneMatch.equalsWithoutCompressionType(eTag)) {
+            if (ifNoneMatch != null && ifNoneMatch.equalsWithoutCompressedSuffix(eTag)) {
                 notModified = true;
             }
         }
@@ -626,7 +645,7 @@ public final class Response {
                     throw new StatusException(RANGE_NOT_SATISFIABLE_416);
                 }
                 final var ifRangeETag = ifRange.getETag();
-                if (ifRangeETag != null && eTag != null && !ifRangeETag.equalsWithoutCompressionType(eTag)) {
+                if (ifRangeETag != null && eTag != null && !ifRangeETag.equalsWithoutCompressedSuffix(eTag)) {
                     throw new StatusException(RANGE_NOT_SATISFIABLE_416);
                 }
             }
@@ -771,8 +790,9 @@ public final class Response {
         setContentType(TEXT_EVENT_STREAM_UTF_8);
         setCacheControl(NO_CACHE);
         headers.set(X_ACCEL_BUFFERING.toString(), "no");
+        disableDecompression();
         disableCompression();
-        setBodyOutputStreamApplier(bodyOutputStream -> {
+        bodyOutputStreamApplier = bodyOutputStream -> {
             bodyOutputStream.flush();
             final var sse = new Sse(bodyOutputStream);
             if (keepAlivePeriod != null) {
@@ -799,7 +819,7 @@ public final class Response {
             } else {
                 sseApplier.accept(sse);
             }
-        });
+        };
     }
 
     private void sseKeepAlive(final Sse sse, final Duration keepAlivePeriod) {

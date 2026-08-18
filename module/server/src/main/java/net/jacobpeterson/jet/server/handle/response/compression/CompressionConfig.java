@@ -20,7 +20,7 @@ import static net.jacobpeterson.jet.common.http.header.contentencoding.Compressi
 
 /**
  * {@link CompressionConfig} is an immutable class that represents the configuration for transparent response
- * compression and decompression.
+ * compression.
  */
 @NullMarked
 @Immutable
@@ -42,15 +42,6 @@ public class CompressionConfig {
      * A static {@link CompressionConfig} instance with all default values.
      */
     public static final CompressionConfig DEFAULT = builder().build();
-
-    /**
-     * Whether to transparently decompress the response body if the request {@link Header#ACCEPT_ENCODING} doesn't
-     * accept the response {@link Header#CONTENT_ENCODING}. This transparent decompression is applied before transparent
-     * compression, enable a compressed resource to be served with various compression types.
-     * <p>
-     * Defaults to <code>true</code>.
-     */
-    @Default boolean decompressEncodingMismatch = true;
 
     /**
      * {@link Level} is an immutable class that represents a {@link CompressionType} mapped to a compression level.

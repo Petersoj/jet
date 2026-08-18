@@ -696,15 +696,18 @@ public final class JetServer implements AutoCloseable {
 
             private void handleDecompression(final Handle handle) {
                 final var response = handle.getResponse();
-                final var compressionConfig = response.getCompressionConfig();
-                if (compressionConfig == null || !compressionConfig.isDecompressEncodingMismatch()) {
+                final var decompressionConfig = response.getDecompressionConfig();
+                if (decompressionConfig == null) {
                     return;
+                }
+                final var headers = response.getHeaders();
+                if (decompressionConfig.isEnsureVaryHeader()) {
+                    headers.ensureEntryContainingIgnoreCase(VARY.toString(), ACCEPT_ENCODING.toString());
                 }
                 final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
                 if (bodyOutputStreamApplier == null) {
                     return;
                 }
-                final var headers = response.getHeaders();
                 final var contentEncodingString = headers.getFirst(CONTENT_ENCODING.toString());
                 if (contentEncodingString == null || headers.containsKey(CONTENT_RANGE.toString())) {
                     return;
@@ -719,6 +722,23 @@ public final class JetServer implements AutoCloseable {
                 }
                 headers.removeAll(CONTENT_ENCODING.toString());
                 headers.removeAll(CONTENT_LENGTH.toString());
+                if (decompressionConfig.isModifyETag()) {
+                    final var eTagString = headers.getFirst(ETAG.toString());
+                    if (eTagString != null) {
+                        final var eTag = ETag.parse(eTagString);
+                        final var value = eTag.getValue();
+                        final var valueWithoutCompressedSuffix = eTag.getValueWithoutCompressedSuffix();
+                        final String newValue;
+                        if (value.equals(valueWithoutCompressedSuffix)) {
+                            newValue = value + "-decompressed";
+                        } else {
+                            newValue = valueWithoutCompressedSuffix;
+                        }
+                        headers.set(ETAG.toString(), eTag.toBuilder()
+                                .value(newValue)
+                                .build().toString());
+                    }
+                }
                 response.setBodyOutputStreamApplier(bodyOutputStream ->
                         compressionType.decompress(bodyOutputStreamApplier, bodyOutputStream));
             }
@@ -775,11 +795,11 @@ public final class JetServer implements AutoCloseable {
                 headers.set(CONTENT_ENCODING.toString(), compressionType.toString());
                 headers.removeAll(CONTENT_LENGTH.toString());
                 if (compressionConfig.isModifyETag()) {
-                    final var eTagValue = headers.getFirst(ETAG.toString());
-                    if (eTagValue != null) {
-                        final var eTag = ETag.parse(eTagValue);
+                    final var eTagString = headers.getFirst(ETAG.toString());
+                    if (eTagString != null) {
+                        final var eTag = ETag.parse(eTagString);
                         headers.set(ETAG.toString(), eTag.toBuilder()
-                                .value(eTag.getValueWithoutCompressionType(), compressionType)
+                                .value(eTag.getValueWithoutCompressedSuffix(), compressionType)
                                 .build().toString());
                     }
                 }

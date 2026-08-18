@@ -54,11 +54,11 @@ public final class ETag {
     public static final String WEAK_PREFIX = "W/";
 
     /**
-     * The suffix for {@link CompressionType}: <code>"-compression-type-"</code>
+     * The suffix denoting applied compression: <code>"-compressed-"</code>
      *
      * @see Builder#value(String, CompressionType)
      */
-    public static final String COMPRESSION_TYPE_SUFFIX = "-compression-type-";
+    public static final String COMPRESSED_SUFFIX = "-compressed-";
 
     /**
      * Computes a strong {@link ETag} for the given entity content using {@link HashingInputStream} with
@@ -159,11 +159,11 @@ public final class ETag {
         }
 
         /**
-         * Calls {@link #value(String)} with {@link #COMPRESSION_TYPE_SUFFIX} and {@link CompressionType#toString()}
-         * appended.
+         * Calls {@link #value(String)} with {@link #COMPRESSED_SUFFIX} and {@link CompressionType#toString()}
+         * suffixed.
          */
         public Builder value(final String value, final CompressionType compressionType) {
-            return value(value + COMPRESSION_TYPE_SUFFIX + compressionType);
+            return value(value + COMPRESSED_SUFFIX + compressionType);
         }
 
         /**
@@ -202,32 +202,32 @@ public final class ETag {
      */
     private final @Getter @EqualsAndHashCode.Include String value;
 
-    private @LazyInit @Nullable String valueWithoutCompressionType;
+    private @LazyInit @Nullable String valueWithoutCompressedSuffix;
     private @LazyInit @Nullable String string;
 
     /**
-     * @return internally-cached {@link #getValue()} without {@link #COMPRESSION_TYPE_SUFFIX} and
+     * @return internally-cached {@link #getValue()} without {@link #COMPRESSED_SUFFIX} and
      * {@link CompressionType#toString()}
      *
      * @see Builder#value(String, CompressionType)
      */
-    public String getValueWithoutCompressionType() {
-        if (valueWithoutCompressionType == null) {
-            final var indexOf = value.indexOf(COMPRESSION_TYPE_SUFFIX);
-            valueWithoutCompressionType = indexOf == -1 ? value : value.substring(0, indexOf);
+    public String getValueWithoutCompressedSuffix() {
+        if (valueWithoutCompressedSuffix == null) {
+            final var indexOf = value.indexOf(COMPRESSED_SUFFIX);
+            valueWithoutCompressedSuffix = indexOf == -1 ? value : value.substring(0, indexOf);
         }
-        return valueWithoutCompressionType;
+        return valueWithoutCompressedSuffix;
     }
 
     /**
-     * @return same as {@link #equals(Object)}, but uses {@link #getValueWithoutCompressionType()} instead of
+     * @return same as {@link #equals(Object)}, but uses {@link #getValueWithoutCompressedSuffix()} instead of
      * {@link #getValue()}
      */
-    public boolean equalsWithoutCompressionType(final Object o) {
+    public boolean equalsWithoutCompressedSuffix(final Object o) {
         if (!(o instanceof final ETag oETag)) {
             return false;
         }
-        return weak == oETag.weak && getValueWithoutCompressionType().equals(oETag.getValueWithoutCompressionType());
+        return weak == oETag.weak && getValueWithoutCompressedSuffix().equals(oETag.getValueWithoutCompressedSuffix());
     }
 
     /**
