@@ -177,16 +177,21 @@ Case-insensitive key-value pairs:
 
 #### URL Building
 
+- [`Scheme`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/http/url/Scheme.html)
 - [`Url`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/http/url/Url.html)
 
-#### I/O Utilities
+#### I/O
 
 - [`BoundedInputStream`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/io/bounded/BoundedInputStream.html)
 - [`ReplacingInputStream`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/io/replacing/ReplacingInputStream.html)
 
 #### Other Utilities
 
+- [`IoUtil`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/util/io/IoUtil.html)
 - [`NullableUtil`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/util/nullable/NullableUtil.html)
+- [`StringUtil`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/util/string/StringUtil.html)
+- [`ThrowableUtil`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/util/throwable/ThrowableUtil.html)
+- [`TokenUtil`](https://javadoc.io/doc/net.jacobpeterson.jet/common/latest/net/jacobpeterson/jet/common/util/token/TokenUtil.html)
 
 ## Server
 
@@ -202,7 +207,7 @@ Features:
 - Server-Sent Events (SSE)
 - WebSockets (_coming soon_)
 - Multipart request body
-- Response body compression (Zstandard, Brotli, Gzip, Deflate)
+- Transparent response body compression and decompression (Zstandard, Brotli, Gzip, Deflate)
 - Virtual threads (no more ugly async/reactive programming)
 
 ### Installation
