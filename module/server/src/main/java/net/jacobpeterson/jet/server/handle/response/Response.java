@@ -126,6 +126,22 @@ public final class Response {
     private final @Getter Headers headers = Headers.create();
 
     /**
+     * Whether to call {@link Headers#ensureEntryIgnoreCase(String, String)} with {@link Header#X_CONTENT_TYPE_OPTIONS}
+     * and <code>"nosniff"</code>.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    private @Getter @Setter boolean preventMimeSniffing = true;
+
+    /**
+     * Whether to call {@link #setCacheControl(ResponseCacheControl)} with {@link ResponseCacheControl#NO_CACHE} if
+     * {@link Header#CACHE_CONTROL} is not already set.
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    private @Getter @Setter boolean preventAmbiguousCacheControl = true;
+
+    /**
      * The {@link CompressionConfig}, or <code>null</code> to disable compression.
      * <p>
      * Defaults to {@link CompressionConfig#DEFAULT}.

@@ -268,8 +268,6 @@ represents the web server instance. Use the builder to configure and start the w
 - [`sessionStore()`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sessionStore())
 - [`sessionStore(SessionStore)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sessionStore(net.jacobpeterson.jet.server.session.SessionStore))
 - [`router(Router)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#router(net.jacobpeterson.jet.server.router.Router))
-- [`preventMimeSniffing(boolean)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#preventMimeSniffing(boolean))
-- [`preventAmbiguousResponseCacheControl(boolean)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#preventAmbiguousResponseCacheControl(boolean))
 - [`host(String)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#host(java.lang.String))
 - [`httpPort(int)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#httpPort(int))
 - [`httpsPort(int)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#httpsPort(int))

@@ -6,12 +6,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import net.jacobpeterson.jet.common.http.header.Header;
-import net.jacobpeterson.jet.common.http.header.cachecontrol.response.ResponseCacheControl;
 import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
-import net.jacobpeterson.jet.common.http.header.headers.Headers;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
@@ -19,7 +16,6 @@ import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
 import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
-import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handler.Handler;
 import net.jacobpeterson.jet.server.router.Router;
@@ -147,8 +143,6 @@ public final class JetServer implements AutoCloseable {
         private @Nullable HandleFactory handleFactory;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
-        private boolean preventMimeSniffing = true;
-        private boolean preventAmbiguousResponseCacheControl = true;
         private @Nullable String host;
         private int httpPort = 8080;
         private int httpsPort = 8443;
@@ -188,22 +182,6 @@ public final class JetServer implements AutoCloseable {
          */
         public Builder router(final Router router) {
             this.router = router;
-            return this;
-        }
-
-        /**
-         * @see #isPreventMimeSniffing()
-         */
-        public Builder preventMimeSniffing(final boolean preventMimeSniffing) {
-            this.preventMimeSniffing = preventMimeSniffing;
-            return this;
-        }
-
-        /**
-         * @see #isPreventAmbiguousResponseCacheControl()
-         */
-        public Builder preventAmbiguousResponseCacheControl(final boolean preventAmbiguousResponseCacheControl) {
-            this.preventAmbiguousResponseCacheControl = preventAmbiguousResponseCacheControl;
             return this;
         }
 
@@ -421,8 +399,6 @@ public final class JetServer implements AutoCloseable {
                     handleFactory != null ? handleFactory : Handle::new,
                     sessionStore,
                     router != null ? router : new SimpleRouter(),
-                    preventMimeSniffing,
-                    preventAmbiguousResponseCacheControl,
                     host,
                     httpPort,
                     httpsPort,
@@ -469,22 +445,6 @@ public final class JetServer implements AutoCloseable {
      * Defaults to {@link SimpleRouter}.
      */
     private final @Getter Router router;
-
-    /**
-     * Whether to call {@link Response} {@link Headers#ensureEntryIgnoreCase(String, String)} with
-     * {@link Header#X_CONTENT_TYPE_OPTIONS} and <code>"nosniff"</code>.
-     * <p>
-     * Defaults to <code>true</code>.
-     */
-    private final @Getter boolean preventMimeSniffing;
-
-    /**
-     * Whether to call {@link Response#setCacheControl(ResponseCacheControl)} with {@link ResponseCacheControl#NO_CACHE}
-     * if {@link Header#CACHE_CONTROL} is not already set.
-     * <p>
-     * Defaults to <code>true</code>.
-     */
-    private final @Getter boolean preventAmbiguousResponseCacheControl;
 
     /**
      * The host address to bind to, or <code>null</code> for all addresses.
@@ -619,12 +579,12 @@ public final class JetServer implements AutoCloseable {
                 Handle handle = null;
                 try {
                     handle = handleFactory.create(new HandleInternals(JetServer.this, jettyRequest, jettyResponse));
-                    final var response = handle.getResponse();
                     try {
                         router.route(handle);
                         handleDecompression(handle);
                         handleCompression(handle);
                     } catch (final Throwable throwable) {
+                        final var response = handle.getResponse();
                         response.getHeaders().clear();
                         final int statusCode;
                         final String statusString;
@@ -646,14 +606,15 @@ public final class JetServer implements AutoCloseable {
                             statusString = status.toString();
                             errorLog = true;
                         }
-                        handle.getResponse().responseText(statusCode, statusString);
                         LOGGER.atLevel(errorLog ? ERROR : DEBUG).log("Handler threw", throwable);
+                        response.responseText(statusCode, statusString);
                     }
+                    final var response = handle.getResponse();
                     final var headers = response.getHeaders();
-                    if (preventMimeSniffing) {
+                    if (response.isPreventMimeSniffing()) {
                         headers.ensureEntryIgnoreCase(X_CONTENT_TYPE_OPTIONS.toString(), "nosniff");
                     }
-                    if (preventAmbiguousResponseCacheControl && !headers.containsKey(CACHE_CONTROL.toString())) {
+                    if (response.isPreventAmbiguousCacheControl() && !headers.containsKey(CACHE_CONTROL.toString())) {
                         response.setCacheControl(NO_CACHE);
                     }
                     jettyResponse.setStatus(response.getStatusCode());
