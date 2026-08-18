@@ -709,18 +709,18 @@ public final class JetServer implements AutoCloseable {
                 if (contentEncodingString == null || headers.containsKey(CONTENT_RANGE.toString())) {
                     return;
                 }
-                final var contentEncodingType = ContentEncoding.parse(contentEncodingString).getType();
-                if (contentEncodingType.isDictionaryRequired()) {
+                final var compressionType = ContentEncoding.parse(contentEncodingString).getType();
+                if (!compressionType.isSupported() || compressionType.isDictionaryRequired()) {
                     return;
                 }
                 final var acceptEncoding = handle.getRequest().getAcceptEncoding();
-                if (acceptEncoding != null && acceptEncoding.getEntryTypes().contains(contentEncodingType)) {
+                if (acceptEncoding != null && acceptEncoding.getEntryTypes().contains(compressionType)) {
                     return;
                 }
                 headers.removeAll(CONTENT_ENCODING.toString());
                 headers.removeAll(CONTENT_LENGTH.toString());
                 response.setBodyOutputStreamApplier(bodyOutputStream ->
-                        contentEncodingType.decompress(bodyOutputStreamApplier, bodyOutputStream));
+                        compressionType.decompress(bodyOutputStreamApplier, bodyOutputStream));
             }
 
             private void handleCompression(final Handle handle) {
@@ -768,19 +768,23 @@ public final class JetServer implements AutoCloseable {
                 if (compressionLevel == null) {
                     return;
                 }
-                headers.set(CONTENT_ENCODING.toString(), compressionLevel.getType().toString());
+                final var compressionType = compressionLevel.getType();
+                if (!compressionType.isSupported() || compressionType.isDictionaryRequired()) {
+                    return;
+                }
+                headers.set(CONTENT_ENCODING.toString(), compressionType.toString());
                 headers.removeAll(CONTENT_LENGTH.toString());
                 if (compressionConfig.isModifyETag()) {
                     final var eTagValue = headers.getFirst(ETAG.toString());
                     if (eTagValue != null) {
                         final var eTag = ETag.parse(eTagValue);
                         headers.set(ETAG.toString(), eTag.toBuilder()
-                                .value(eTag.getValueWithoutCompressionType(), compressionLevel.getType())
+                                .value(eTag.getValueWithoutCompressionType(), compressionType)
                                 .build().toString());
                     }
                 }
                 response.setBodyOutputStreamApplier(bodyOutputStream -> {
-                    try (final var compressedBodyOutputStream = compressionLevel.getType()
+                    try (final var compressedBodyOutputStream = compressionType
                             .compress(bodyOutputStream, compressionLevel.getLevel())) {
                         bodyOutputStreamApplier.accept(compressedBodyOutputStream);
                     }

@@ -58,7 +58,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#gzip">
      * developer.mozilla.org</a>
      */
-    GZIP("gzip", 0, 9, 5, false),
+    GZIP("gzip", true, 0, 9, 5, false),
 
     /**
      * A format using the <a href="https://en.wikipedia.org/wiki/LZW">Lempel-Ziv-Welch</a> (LZW) algorithm. The value
@@ -69,7 +69,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#compress">
      * developer.mozilla.org</a>
      */
-    COMPRESS("compress", 0, 0, 0, false),
+    COMPRESS("compress", false, 0, 0, 0, false),
 
     /**
      * Using the <a href="https://en.wikipedia.org/wiki/Zlib">zlib</a> structure (defined in
@@ -80,7 +80,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#deflate">
      * developer.mozilla.org</a>
      */
-    DEFLATE("deflate", 0, 9, 5, false),
+    DEFLATE("deflate", true, 0, 9, 5, false),
 
     /**
      * A format using the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Brotli_compression">Brotli</a>
@@ -89,7 +89,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#br">
      * developer.mozilla.org</a>
      */
-    BROTLI("br", 0, 11, 4, false),
+    BROTLI("br", true, 0, 11, 4, false),
 
     /**
      * A format using the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Zstandard_compression">
@@ -99,7 +99,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#zstd">
      * developer.mozilla.org</a>
      */
-    ZSTANDARD("zstd", 0, 22, 6, false),
+    ZSTANDARD("zstd", true, 0, 22, 6, false),
 
     /**
      * A format that uses the
@@ -111,7 +111,7 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#dcb">
      * developer.mozilla.org</a>
      */
-    DICTIONARY_COMPRESSED_BROTLI("dcb", 0, 11, 4, true),
+    DICTIONARY_COMPRESSED_BROTLI("dcb", true, 0, 11, 4, true),
 
     /**
      * A format that uses the
@@ -123,9 +123,15 @@ public enum CompressionType {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding#dcz">
      * developer.mozilla.org</a>
      */
-    DICTIONARY_COMPRESSED_ZSTANDARD("dcz", 0, 22, 6, true);
+    DICTIONARY_COMPRESSED_ZSTANDARD("dcz", true, 0, 22, 6, true);
 
     private final String string;
+
+    /**
+     * Whether {@link #compress(OutputStream, Integer, byte[])} and {@link #decompress(InputStream, byte[])} are
+     * supported.
+     */
+    private final @Getter boolean supported;
 
     /**
      * The minimum compression level.
