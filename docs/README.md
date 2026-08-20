@@ -455,7 +455,7 @@ instance, but can be adapted to other Linux distributions.
    JetServer.builder()
            .sslLetsEncrypt() // Automatically enables hot-swap SSL reloading
            .router(ImmutableSimpleRouter.builder()
-                   // Keep the `FileDirectoryHandler` for future `certbot` auto-renewals.
+                   // Keep the `FileDirectoryHandler` for future `certbot` auto-renewals
                    .addLast(PathStartsWithRoute.builder().path("/.well-known/acme-challenge/").build(),
                            FileDirectoryHandler.simpleMutable(Path.of("webroot"), null, true))
                    .addLast(PathExactRoute.builder()
@@ -589,6 +589,12 @@ all enums so they can be used within Java annotations as constant references. Fo
 this string constant can be directly referenced both by the OpenAPI annotation and the  web server implementation
 handler route registration, so we keep our type-safety and single-source-of-truth practice!
 
+It is recommended to only attach OpenAPI annotations to public class definitions. Using a visibility scope other
+than `public` prevents the [OpenAPI Annotations Plugin](#why-not-an-annotation-processor) from triggering a cache
+invalidation for Gradle Incremental Builds, requiring you to clean the build output to trigger the plugin task. You can
+attach OpenAPI annotations to public methods, but `Handler` method implementations should typically be private and only
+invoked by the server `Router`.
+
 Here is an example of the recommended approach for using OpenAPI annotations and implementation handlers with Jet using
 type-safety and single-source-of-truth practices. Note that this example uses static inner classes for `Web` and 
 `AccountHandlers`, but ideally these would be separate class files, to better manage separation of concerns and to not
@@ -645,6 +651,8 @@ public class Server {
 
         @SchemaName("Account")
         public static final class AccountHandlers {
+            
+            public static final String TAG_NAME = "account";
 
             public AccountHandlers(final ImmutableSimpleRouter.Builder router) {
                 router.addLast(PathExactRoute.builder()
@@ -653,8 +661,24 @@ public class Server {
                         .build(), this::getInfo);
             }
 
-            public static final String TAG_NAME = "account";
-
+            @OpenApi(annotationGroupName = PATH, paths = @OpenApiPaths(@OpenApiPathItem.MapEntry(
+                    key = GetInfo.PATH, value = @OpenApiPathItem(methods = @OpenApiPathItem.MethodEntry(
+                    key = GetInfo.METHOD, value = @OpenApiOperation(tags = TAG_NAME,
+                    parameters = @OpenApiParameter(
+                            name = GetInfo.QUERY_KEY_ID,
+                            in = QUERY,
+                            required = true,
+                            schema = @OpenApiParameter.Schema(schema = @OpenApiSchema(fromClass = String.class))
+                    ),
+                    responses = @OpenApiResponses({@OpenApiResponse.MapEntry(
+                            keyEnum = OK_200,
+                            value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
+                                    key = APPLICATION_JSON_STRING,
+                                    value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass =
+                                            GetInfo.Response.class))
+                            ))
+                    )})
+            ))))))
             public static final class GetInfo {
 
                 public static final String METHOD = GET;
@@ -683,25 +707,7 @@ public class Server {
                 }
             }
 
-            @OpenApi(annotationGroupName = PATH, paths = @OpenApiPaths(@OpenApiPathItem.MapEntry(
-                    key = GetInfo.PATH, value = @OpenApiPathItem(methods = @OpenApiPathItem.MethodEntry(
-                    key = GetInfo.METHOD, value = @OpenApiOperation(tags = TAG_NAME,
-                    parameters = @OpenApiParameter(
-                            name = GetInfo.QUERY_KEY_ID,
-                            in = QUERY,
-                            required = true,
-                            schema = @OpenApiParameter.Schema(schema = @OpenApiSchema(fromClass = String.class))
-                    ),
-                    responses = @OpenApiResponses({@OpenApiResponse.MapEntry(
-                            keyEnum = OK_200,
-                            value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
-                                    key = APPLICATION_JSON_STRING,
-                                    value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass =
-                                            GetInfo.Response.class))
-                            ))
-                    )})
-            ))))))
-            public void getInfo(final Handle handle) {
+            private void getInfo(final Handle handle) {
                 if (<check_logged_in_logic>) {
                     handle.getResponse().responseJson(toJson(GetInfo.Response.builder()
                             .failReason(GetInfo.FailReason.NOT_LOGGED_IN)
@@ -771,7 +777,7 @@ There is no Maven plugin available at this time.
 This Gradle plugin registers a task named `jetOpenApiAnnotations` and an extension also named `jetOpenApiAnnotations`
 with the following configurations:
 
-- [`annotatedClassFiles = <files>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getAnnotatedClassFiles())
+- [`annotatedClasspaths = <files>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getAnnotatedClasspaths())
 - [`classpaths = <files>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getClasspaths())
 - [`schemaGeneratorConfigBuilderProvider = <SchemaGeneratorConfigBuilderProvider>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getSchemaGeneratorConfigBuilderProvider())
 - [`schemaGeneratorUseNullableModule = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getSchemaGeneratorUseNullableModule())
@@ -779,7 +785,7 @@ with the following configurations:
 - [`schemaGeneratorUseGsonModule = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getSchemaGeneratorUseGsonModule())
 - [`schemaGeneratorUseJacksonModule = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getSchemaGeneratorUseJacksonModule())
 - [`schemaGeneratorSimpleTypeMappings = <Map<String, String>>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getSchemaGeneratorSimpleTypeMappings())
-- [`generateOperationId = <DISABLED, FROM_CLASS_METHOD_NAME, FROM_METHOD_AND_PATH, BOTH>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getGenerateOperationId())
+- [`generateOperationId = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getGenerateOperationId())
 - [`moveClassSchemasToComponents = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getMoveClassSchemasToComponents())
 - [`schemaValidation = <true or false>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getSchemaValidation())
 - [`outputDirectory = <directory>`](https://javadoc.io/doc/net.jacobpeterson.jet/openapi-annotations-plugin/latest/net/jacobpeterson/jet/openapiannotationsplugin/JetOpenApiAnnotationsExtension.html#getOutputDirectory())
@@ -794,7 +800,7 @@ jetOpenApiAnnotations {
     schemaGeneratorUseGsonModule = true // Set to this `true` if you're using Gson
     schemaGeneratorUseJacksonModule = false // Set to this `true` if you're using Jackson
     // If you have a custom (de)serializer for `InetAddress` with Gson or Jackson, you can specify that every time
-    // `InetAddress` is used in a model class for an OpenAPI schema, it should be treated as a string.
+    // `InetAddress` is used in a model class for an OpenAPI schema, it should be treated as a string
     schemaGeneratorSimpleTypeMappings.put("java.net.InetAddress", """{"type": "string"}""")
 }
 ```
@@ -825,15 +831,6 @@ plugins {
     id("org.openapi.generator") version "<version>"
 }
 
-tasks.jetOpenApiAnnotations.configure {
-    doLast {
-        outputDirectory.get().asFile.listFiles().forEach {
-            // The OpenAPI Generator Gradle plugin doesn't support `3.2.0` yet.
-            it.writeText(it.readText().replace("\"openapi\":\"3.2.0\"", "\"openapi\":\"3.1.0\""))
-        }
-    }
-}
-
 tasks.openApiGenerate.configure {
     dependsOn(tasks.jetOpenApiAnnotations)
     inputSpec = jetOpenApiAnnotations.outputDirectory.file("openapi.json")
@@ -845,6 +842,17 @@ tasks.openApiGenerate.configure {
 tasks.jar.configure {
     from(tasks.openApiGenerate) { into("openapi-docs") }
 }
+```
+
+The OpenAPI Generator Gradle plugin doesn't support `v3.2.0` yet, so you need to use `v3.1.x` in your `@OpenApi`
+annotation declaration:
+
+```java
+@OpenApi(
+        $schema = OpenApi.$SCHEMA_3_1,
+        openapi = OpenApi.VERSION_3_1,
+        ...
+)
 ```
 
 ```java
