@@ -55,26 +55,49 @@ public @interface OpenApi {
      * This {@link String} constant acts as a reference for the default annotation group, which is just an empty
      * {@link String}.
      */
-    String DEFAULT_ANNOTATION_GROUP_NAME = "";
+    String ANNOTATION_GROUP_NAME_DEFAULT = "";
 
     /**
-     * The default value for {@link #$schema()}:
+     * The {@link #$schema()} value for OpenAPI Specification version 3.1:
+     * <code>"https://spec.openapis.org/oas/3.1/schema/2025-11-23"</code>
+     */
+    @SuppressWarnings({"JavadocLinkAsPlainText", "IdentifierName"})
+    String $SCHEMA_3_1 = "https://spec.openapis.org/oas/3.1/schema/2025-11-23";
+
+    /**
+     * The {@link #$schema()} value for OpenAPI Specification version 3.2:
      * <code>"https://spec.openapis.org/oas/3.2/schema/2025-11-23"</code>
      */
     @SuppressWarnings({"JavadocLinkAsPlainText", "IdentifierName"})
-    String DEFAULT_$SCHEMA = "https://spec.openapis.org/oas/3.2/schema/2025-11-23";
+    String $SCHEMA_3_2 = "https://spec.openapis.org/oas/3.2/schema/2025-11-23";
 
     /**
-     * The default value for {@link #openapi()}: <code>"3.2.0"</code>
+     * The default value for {@link #$schema()}: {@link #$SCHEMA_3_2}
      */
-    String DEFAULT_OPENAPI = "3.2.0";
+    @SuppressWarnings("IdentifierName")
+    String $SCHEMA_DEFAULT = $SCHEMA_3_2;
+
+    /**
+     * The {@link #openapi()} latest patch version for OpenAPI Specification version 3.1: <code>"3.1.2"</code>
+     */
+    String VERSION_3_1 = "3.1.2";
+
+    /**
+     * The {@link #openapi()} latest patch version for OpenAPI Specification version 3.2: <code>"3.2.0"</code>
+     */
+    String VERSION_3_2 = "3.2.0";
+
+    /**
+     * The default value for {@link #openapi()}: {@link #VERSION_3_2}
+     */
+    String VERSION_DEFAULT = VERSION_3_2;
 
     /**
      * {@link OpenApi} annotations can be grouped into different OpenAPI specification JSON outputs according to their
      * <em>annotation group name</em>. This method sets the name of the annotation group this {@link OpenApi} annotation
      * should belong to.
      * <p>
-     * Note: defaults to {@link #DEFAULT_ANNOTATION_GROUP_NAME}.
+     * Note: defaults to {@link #ANNOTATION_GROUP_NAME_DEFAULT}.
      */
     @AnnotationJsonIgnore
     String annotationGroupName() default "";
@@ -82,7 +105,7 @@ public @interface OpenApi {
     /**
      * The URL of the OpenAPI Specification JSON schema.
      * <p>
-     * Note: defaults to {@link #DEFAULT_$SCHEMA}.
+     * Note: defaults to {@link #$SCHEMA_DEFAULT}.
      */
     String $schema() default "";
 
@@ -94,7 +117,7 @@ public @interface OpenApi {
      * <a href="https://spec.openapis.org/oas/v3.2.0.html#info-version"><code>info.version</code></a> string, which
      * describes the OpenAPI document’s version.
      * <p>
-     * Note: defaults to {@link #DEFAULT_OPENAPI}.
+     * Note: defaults to {@link #VERSION_DEFAULT}.
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#oas-version">spec.openapis.org</a>
      */

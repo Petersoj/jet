@@ -85,9 +85,11 @@ import static java.util.Map.entry;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableMap;
-import static net.jacobpeterson.jet.openapiannotations.OpenApi.DEFAULT_$SCHEMA;
-import static net.jacobpeterson.jet.openapiannotations.OpenApi.DEFAULT_ANNOTATION_GROUP_NAME;
-import static net.jacobpeterson.jet.openapiannotations.OpenApi.DEFAULT_OPENAPI;
+import static net.jacobpeterson.jet.openapiannotations.OpenApi.$SCHEMA_3_1;
+import static net.jacobpeterson.jet.openapiannotations.OpenApi.$SCHEMA_3_2;
+import static net.jacobpeterson.jet.openapiannotations.OpenApi.$SCHEMA_DEFAULT;
+import static net.jacobpeterson.jet.openapiannotations.OpenApi.ANNOTATION_GROUP_NAME_DEFAULT;
+import static net.jacobpeterson.jet.openapiannotations.OpenApi.VERSION_DEFAULT;
 import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;
 import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.DISABLED;
 import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.FROM_CLASS_METHOD_NAME;
@@ -101,13 +103,13 @@ import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.ann
 /**
  * {@link JetOpenApiAnnotationsTask} is the {@link DefaultTask} for {@link JetOpenApiAnnotationsPlugin}.
  */
-@NullMarked
 @CacheableTask
+@NullMarked
 public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     private static final ImmutableMap<String, String> SCHEMA_FILENAMES_OF_URLS = ImmutableMap.of(
-            "https://spec.openapis.org/oas/3.1/schema/2025-11-23", "oas-3.1-schema-2025-11-23.json",
-            "https://spec.openapis.org/oas/3.2/schema/2025-11-23", "oas-3.2-schema-2025-11-23.json");
+            $SCHEMA_3_1, "oas-3.1-schema-2025-11-23.json",
+            $SCHEMA_3_2, "oas-3.2-schema-2025-11-23.json");
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$SCHEMA = "$schema";
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$DEFS = "$defs";
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$REF = "$ref";
@@ -281,10 +283,10 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 final var groupName = openApiJsonOfGroupName.getKey();
                 final var openApiJson = openApiJsonOfGroupName.getValue().getAsJsonObject();
                 if (!openApiJson.has(JSON_KEY_$SCHEMA)) {
-                    openApiJson.addProperty(JSON_KEY_$SCHEMA, DEFAULT_$SCHEMA);
+                    openApiJson.addProperty(JSON_KEY_$SCHEMA, $SCHEMA_DEFAULT);
                 }
                 if (!openApiJson.has(JSON_KEY_OPENAPI)) {
-                    openApiJson.addProperty(JSON_KEY_OPENAPI, DEFAULT_OPENAPI);
+                    openApiJson.addProperty(JSON_KEY_OPENAPI, VERSION_DEFAULT);
                 }
                 if (generateOperationId != DISABLED) {
                     walk(openApiJson, stack -> {
@@ -434,9 +436,10 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                                     .formatAssertionsEnabled(true)
                                     .annotationCollectionEnabled(true)));
                     if (!errors.isEmpty()) {
+                        final var version = openApiJson.get(JSON_KEY_OPENAPI);
                         throw new IllegalArgumentException("\n" + errors.stream()
-                                .map(error -> "        OpenAPIv%s schema offense%s: %s".formatted(DEFAULT_OPENAPI,
-                                        groupName.equals(DEFAULT_ANNOTATION_GROUP_NAME) ? "" :
+                                .map(error -> "        OpenAPIv%s schema offense%s: %s".formatted(version,
+                                        groupName.equals(ANNOTATION_GROUP_NAME_DEFAULT) ? "" :
                                                 " in annotation group \"%s\"".formatted(groupName), error.toString()))
                                 .collect(joining("\n")));
                     }

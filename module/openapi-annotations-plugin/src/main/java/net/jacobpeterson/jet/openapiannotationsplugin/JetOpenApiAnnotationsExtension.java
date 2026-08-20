@@ -134,8 +134,8 @@ public abstract class JetOpenApiAnnotationsExtension {
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to validate the OpenAPI specification JSON
-     * output generated from {@link OpenApi} annotations using the {@link OpenApi#DEFAULT_$SCHEMA}, set to
-     * <code>false</code> otherwise.
+     * output generated from {@link OpenApi} annotations using supported OpenAPI JSON schemas (see {@link OpenApi}
+     * public constants starting with <code>$SCHEMA_</code>), set to <code>false</code> otherwise.
      * <p>
      * Defaults to <code>true</code>.
      */
