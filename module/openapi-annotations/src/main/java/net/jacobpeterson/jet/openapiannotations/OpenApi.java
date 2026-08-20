@@ -59,10 +59,10 @@ public @interface OpenApi {
 
     /**
      * The default value for {@link #$schema()}:
-     * <code>"https://spec.openapis.org/oas/3.2/schema/2025-09-17"</code>
+     * <code>"https://spec.openapis.org/oas/3.2/schema/2025-11-23"</code>
      */
     @SuppressWarnings({"JavadocLinkAsPlainText", "IdentifierName"})
-    String DEFAULT_$SCHEMA = "https://spec.openapis.org/oas/3.2/schema/2025-09-17";
+    String DEFAULT_$SCHEMA = "https://spec.openapis.org/oas/3.2/schema/2025-11-23";
 
     /**
      * The default value for {@link #openapi()}: <code>"3.2.0"</code>
