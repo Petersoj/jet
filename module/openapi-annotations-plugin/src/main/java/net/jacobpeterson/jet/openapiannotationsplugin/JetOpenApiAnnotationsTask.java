@@ -4,6 +4,7 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -104,6 +105,9 @@ import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.ann
 @CacheableTask
 public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
+    private static final ImmutableMap<String, String> SCHEMA_FILENAMES_OF_URLS = ImmutableMap.of(
+            "https://spec.openapis.org/oas/3.1/schema/2025-11-23", "oas-3.1-schema-2025-11-23.json",
+            "https://spec.openapis.org/oas/3.2/schema/2025-11-23", "oas-3.2-schema-2025-11-23.json");
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$SCHEMA = "$schema";
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$DEFS = "$defs";
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$REF = "$ref";
@@ -268,7 +272,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .registerTypeAdapter(Status.class, new StatusJsonSerializer())
                     .registerTypeAdapter(Header.class, new HeaderJsonSerializer())
                     .create();
-            Schema schema = null;
+            final var schemasOfUrls = new HashMap<String, Schema>();
             final var outputDirectory = getOutputDirectory().get().getAsFile().toPath();
             for (final var openApiJsonOfGroupName : openApisOfGroupNames.entries().stream()
                     .map(entry -> entry(entry.getKey(), annotationGson.toJsonTree(entry.getValue())))
@@ -414,13 +418,17 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 final var openApiJsonString = openApiJson.toString();
                 if (getSchemaValidation().get()) {
                     final var $schema = openApiJson.get(JSON_KEY_$SCHEMA).getAsString();
-                    checkArgument($schema.equals(DEFAULT_$SCHEMA),
-                            "Validation for custom `@OpenApi.$schema` of `%s` is unsupported.", $schema);
-                    if (schema == null) {
-                        schema = SchemaRegistry.withDefaultDialectId(null, null)
-                                .getSchema(new String(requireNonNull(getClass()
-                                        .getResourceAsStream("oas-3.2-schema-2025-09-17.json")).readAllBytes(), UTF_8));
-                    }
+                    final var schemaFilename = SCHEMA_FILENAMES_OF_URLS.get($schema);
+                    checkArgument(schemaFilename != null, "Validation for `@OpenApi.$schema` of `%s` is unsupported. " +
+                            "Add `schemaValidation = false` to your `jetOpenApiAnnotations` config.", $schema);
+                    final var schema = schemasOfUrls.computeIfAbsent(schemaFilename, key -> {
+                        try {
+                            return SchemaRegistry.withDefaultDialectId(null, null).getSchema(new String(
+                                    requireNonNull(getClass().getResourceAsStream(key)).readAllBytes(), UTF_8));
+                        } catch (final IOException ioException) {
+                            throw new UncheckedIOException(ioException);
+                        }
+                    });
                     final var errors = schema.validate(openApiJsonString, JSON, executionContext -> executionContext
                             .executionConfig(executionConfig -> executionConfig
                                     .formatAssertionsEnabled(true)
