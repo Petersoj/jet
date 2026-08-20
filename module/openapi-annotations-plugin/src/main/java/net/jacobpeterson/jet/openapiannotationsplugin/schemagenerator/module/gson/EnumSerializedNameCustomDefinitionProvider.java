@@ -4,12 +4,11 @@ import com.fasterxml.classmate.ResolvedType;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.SerializedName;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.JsonNodeFactory;
-
-import java.util.ArrayList;
 
 import static com.github.victools.jsonschema.generator.SchemaKeyword.TAG_ENUM;
 
@@ -28,7 +27,7 @@ public class EnumSerializedNameCustomDefinitionProvider implements CustomDefinit
             return null;
         }
         var hasSerializedName = false;
-        final var serializedNames = new ArrayList<String>(enumConstants.length);
+        final var serializedNames = ImmutableList.<String>builderWithExpectedSize(enumConstants.length);
         for (final var enumConstant : enumConstants) {
             final var enumName = ((Enum<?>) enumConstant).name();
             final SerializedName serializedName;
@@ -48,7 +47,7 @@ public class EnumSerializedNameCustomDefinitionProvider implements CustomDefinit
         }
         final var standardDefinition = context.createStandardDefinition(javaType, this);
         standardDefinition.putArray(TAG_ENUM.forVersion(context.getGeneratorConfig().getSchemaVersion()))
-                .addAll(serializedNames.stream()
+                .addAll(serializedNames.build().stream()
                         .map(JsonNodeFactory.instance::stringNode)
                         .toList());
         return new CustomDefinition(standardDefinition, false);

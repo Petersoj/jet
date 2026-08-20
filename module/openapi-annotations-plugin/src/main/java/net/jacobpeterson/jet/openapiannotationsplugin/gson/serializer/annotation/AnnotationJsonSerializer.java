@@ -19,7 +19,6 @@ import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonRawString;
 import net.jacobpeterson.jet.openapiannotations.meta.AnnotationJsonSerializeEmptyArray;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.GsonUtil;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -27,8 +26,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Set;
+import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -54,38 +53,16 @@ public class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
     public static final String JSON_KEY_CLASS_TRACER = "__AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER__";
 
     /**
-     * The JSON key name for {@link #CURRENT_ANNOTATION_METHOD}:
-     * <code>"__AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER__"</code>
-     */
-    public static final String JSON_KEY_METHOD_TRACER = "__AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER__";
-
-    /**
-     * The delimiter as described by {@link #CURRENT_ANNOTATION_METHOD}: <code>"#"</code>
-     */
-    public static final String ANNOTATION_METHOD_CLASS_NAME_DELIMITER = "#";
-
-    /**
-     * The {@link ThreadLocal} {@link Method} of the current {@link Annotation} being serialized. If set and the
-     * {@link Annotation#annotationType()} being serialized is in {@link #getTracerClasses()}, then a property with the
-     * key of {@link #JSON_KEY_METHOD_TRACER} and a value of the concatenation of {@link Class#getCanonicalName()},
-     * {@link #ANNOTATION_METHOD_CLASS_NAME_DELIMITER}, and {@link Method#getName()} is added to the serialized
-     * {@link JsonObject}.
-     */
-    public static final ThreadLocal<@Nullable Method> CURRENT_ANNOTATION_METHOD = new ThreadLocal<>();
-
-    /**
-     * Removes all {@link #JSON_KEY_CLASS_TRACER} and {@link #JSON_KEY_METHOD_TRACER} keys from the given
-     * {@link JsonObject}.
+     * Removes all {@link #JSON_KEY_CLASS_TRACER} keys from the given {@link JsonObject} using
+     * {@link GsonUtil#walk(JsonElement, Function)}.
      *
      * @param jsonObject the {@link JsonObject}
      */
-    public static void removeTracers(final JsonObject jsonObject) {
+    public static void removeTracerClasses(final JsonObject jsonObject) {
         walk(jsonObject, stack -> {
             final var top = requireNonNull(stack.peek()).getValue();
             if (top.isJsonObject()) {
-                final var topObject = top.getAsJsonObject();
-                topObject.remove(JSON_KEY_CLASS_TRACER);
-                topObject.remove(JSON_KEY_METHOD_TRACER);
+                top.getAsJsonObject().remove(JSON_KEY_CLASS_TRACER);
             }
             return true;
         });
@@ -99,24 +76,13 @@ public class AnnotationJsonSerializer implements JsonSerializer<Annotation> {
 
     @Override
     public JsonElement serialize(final Annotation src, final Type typeOfSrc, final JsonSerializationContext context) {
-        var serialized = serialize(src, context);
+        final var serialized = serialize(src, context);
+        if (!serialized.isJsonObject()) {
+            return serialized;
+        }
         final var annotationType = src.annotationType();
         if (tracerClasses.contains(annotationType)) {
-            checkArgument(serialized.isJsonObject() || serialized.isJsonNull(),
-                    "Tracer class `%s` can only be added to JSON objects", annotationType);
-            if (serialized.isJsonNull()) {
-                serialized = new JsonObject();
-            }
-            final var serializedObject = serialized.getAsJsonObject();
-
-            serializedObject.addProperty(JSON_KEY_CLASS_TRACER, annotationType.getCanonicalName());
-
-            final var currentAnnotationMethod = CURRENT_ANNOTATION_METHOD.get();
-            if (currentAnnotationMethod != null) {
-                serializedObject.addProperty(JSON_KEY_METHOD_TRACER,
-                        currentAnnotationMethod.getDeclaringClass().getCanonicalName() +
-                                ANNOTATION_METHOD_CLASS_NAME_DELIMITER + currentAnnotationMethod.getName());
-            }
+            serialized.getAsJsonObject().addProperty(JSON_KEY_CLASS_TRACER, annotationType.getCanonicalName());
         }
         return serialized;
     }

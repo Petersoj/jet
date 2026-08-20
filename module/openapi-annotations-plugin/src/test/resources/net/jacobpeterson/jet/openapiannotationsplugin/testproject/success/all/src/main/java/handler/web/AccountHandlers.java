@@ -30,6 +30,28 @@ public final class AccountHandlers {
 
     public static final String TAG_NAME = "account";
 
+    @OpenApi(annotationGroupName = WEB, paths = @OpenApiPaths(@OpenApiPathItem.MapEntry(
+            key = GetInfo.PATH, value = @OpenApiPathItem(methods = @MethodEntry(
+            key = GetInfo.METHOD, value = @OpenApiOperation(tags = TAG_NAME,
+            parameters = @OpenApiParameter(
+                    name = GetInfo.QUERY_KEY_ID,
+                    in = QUERY,
+                    schema = @Schema(schema = @OpenApiSchema(fromClass = String.class))
+            ),
+            responses = @OpenApiResponses({@OpenApiResponse.MapEntry(
+                    keyInt = GetInfo.OK_STATUS_CODE,
+                    value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
+                            key = APPLICATION_JSON_STRING,
+                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = GetInfo.Success.class))
+                    ))
+            ), @OpenApiResponse.MapEntry(
+                    keyInt = GetInfo.EXCEPTION_STATUS_CODE,
+                    value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
+                            key = APPLICATION_JSON_STRING,
+                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = GetInfo.Exception.class))
+                    ))
+            )})
+    ))))))
     public static class GetInfo {
 
         public static final String METHOD = GET;
@@ -58,29 +80,24 @@ public final class AccountHandlers {
     }
 
     @OpenApi(annotationGroupName = WEB, paths = @OpenApiPaths(@OpenApiPathItem.MapEntry(
-            key = GetInfo.PATH, value = @OpenApiPathItem(methods = @MethodEntry(
-            key = GetInfo.METHOD, value = @OpenApiOperation(tags = TAG_NAME,
+            key = Delete.PATH, value = @OpenApiPathItem(methods = @MethodEntry(
+            key = Delete.METHOD, value = @OpenApiOperation(tags = TAG_NAME,
             parameters = @OpenApiParameter(
-                    name = GetInfo.QUERY_KEY_ID,
+                    name = Delete.QUERY_KEY_ID,
                     in = QUERY,
                     schema = @Schema(schema = @OpenApiSchema(fromClass = String.class))
             ),
             responses = @OpenApiResponses({@OpenApiResponse.MapEntry(
-                    keyInt = GetInfo.OK_STATUS_CODE,
-                    value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
-                            key = APPLICATION_JSON_STRING,
-                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = GetInfo.Success.class))
-                    ))
+                    keyInt = Delete.OK_STATUS_CODE,
+                    value = @OpenApiResponse()
             ), @OpenApiResponse.MapEntry(
-                    keyInt = GetInfo.EXCEPTION_STATUS_CODE,
+                    keyInt = Delete.EXCEPTION_STATUS_CODE,
                     value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
                             key = APPLICATION_JSON_STRING,
-                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = GetInfo.Exception.class))
+                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = Delete.Exception.class))
                     ))
             )})
     ))))))
-    public void getInfo() {}
-
     public static class Delete {
 
         public static final String METHOD = DELETE;
@@ -101,25 +118,4 @@ public final class AccountHandlers {
             }
         }
     }
-
-    @OpenApi(annotationGroupName = WEB, paths = @OpenApiPaths(@OpenApiPathItem.MapEntry(
-            key = Delete.PATH, value = @OpenApiPathItem(methods = @MethodEntry(
-            key = Delete.METHOD, value = @OpenApiOperation(tags = TAG_NAME,
-            parameters = @OpenApiParameter(
-                    name = Delete.QUERY_KEY_ID,
-                    in = QUERY,
-                    schema = @Schema(schema = @OpenApiSchema(fromClass = String.class))
-            ),
-            responses = @OpenApiResponses({@OpenApiResponse.MapEntry(
-                    keyInt = Delete.OK_STATUS_CODE,
-                    value = @OpenApiResponse()
-            ), @OpenApiResponse.MapEntry(
-                    keyInt = Delete.EXCEPTION_STATUS_CODE,
-                    value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
-                            key = APPLICATION_JSON_STRING,
-                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = Delete.Exception.class))
-                    ))
-            )})
-    ))))))
-    public void delete() {}
 }

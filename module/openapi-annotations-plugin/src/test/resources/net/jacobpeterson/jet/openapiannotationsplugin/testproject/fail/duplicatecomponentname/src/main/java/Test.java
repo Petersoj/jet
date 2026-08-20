@@ -16,18 +16,6 @@ import static net.jacobpeterson.jet.common.http.method.Method.GET;
 @NullMarked
 public final class Test {
 
-    @SchemaName("A")
-    public static final class A1 {
-
-        public String a;
-    }
-
-    @SchemaName("A")
-    public static final class A2 {
-
-        public String b;
-    }
-
     @OpenApi(paths = @OpenApiPaths(@OpenApiPathItem.MapEntry(
             key = "/test", value = @OpenApiPathItem(methods = @OpenApiPathItem.MethodEntry(
             keyEnum = GET, value = @OpenApiOperation(responses = @OpenApiResponses({
@@ -35,16 +23,29 @@ public final class Test {
                     keyEnum = Status.OK_200,
                     value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
                             key = APPLICATION_JSON_STRING,
-                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = A1.class))
+                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = Get.A1.class))
                     ))
             ),
             @OpenApiResponse.MapEntry(
                     keyEnum = Status.MULTI_STATUS_207,
                     value = @OpenApiResponse(content = @OpenApiMediaType.MapEntry(
                             key = APPLICATION_JSON_STRING,
-                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = A2.class))
+                            value = @OpenApiMediaType(schema = @OpenApiSchema(fromClass = Get.A2.class))
                     ))
             )}
     )))))))
-    public void getTest() {}
+    public static final class Get {
+
+        @SchemaName("A")
+        public static final class A1 {
+
+            public String a;
+        }
+
+        @SchemaName("A")
+        public static final class A2 {
+
+            public String b;
+        }
+    }
 }

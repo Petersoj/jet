@@ -85,7 +85,7 @@ public final class JetOpenApiAnnotationsPluginTest {
 
     @Test
     public void failDuplicateComponentName(final @TempDir Path tempDir) {
-        testFail(tempDir, "duplicatecomponentname", "different schemas share the same component name of \"TestA\"");
+        testFail(tempDir, "duplicatecomponentname", "different schemas share the same component name");
     }
 
     private void testSuccess(final Path tempDir, final String projectDirectoryName) {

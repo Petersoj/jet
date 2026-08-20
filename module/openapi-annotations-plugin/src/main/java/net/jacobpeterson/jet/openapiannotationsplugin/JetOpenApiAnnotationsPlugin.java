@@ -9,8 +9,6 @@ import org.jspecify.annotations.NullMarked;
 
 import java.io.File;
 
-import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;
-
 /**
  * {@link JetOpenApiAnnotationsPlugin} is {@link Project} {@link Plugin} for {@link OpenApi} annotations.
  */
@@ -37,7 +35,7 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         final var extension = project.getExtensions().create(EXTENSION_NAME, JetOpenApiAnnotationsExtension.class);
         final var tasks = project.getTasks();
-        extension.getAnnotatedClassFiles()
+        extension.getAnnotatedClasspaths()
                 .from(project.provider(() -> tasks.withType(JavaCompile.class).stream().map(javaCompile ->
                         javaCompile.getOutputs().getFiles().filter(File::exists)).toList()));
         extension.getClasspaths()
@@ -52,7 +50,7 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         extension.getSchemaGeneratorUseJacksonModule()
                 .convention(false);
         extension.getGenerateOperationId()
-                .convention(BOTH);
+                .convention(true);
         extension.getMoveClassSchemasToComponents()
                 .convention(true);
         extension.getSchemaValidation()
@@ -62,8 +60,8 @@ public class JetOpenApiAnnotationsPlugin implements Plugin<Project> {
         extension.getOutputDirectoryIncludeInJar()
                 .convention(true);
         final var registeredTask = tasks.register(TASK_NAME, JetOpenApiAnnotationsTask.class, task -> {
-            task.getAnnotatedClassFiles()
-                    .from(extension.getAnnotatedClassFiles());
+            task.getAnnotatedClasspaths()
+                    .from(extension.getAnnotatedClasspaths());
             task.getClasspaths()
                     .from(extension.getClasspaths());
             task.getSchemaGeneratorConfigBuilderProvider()

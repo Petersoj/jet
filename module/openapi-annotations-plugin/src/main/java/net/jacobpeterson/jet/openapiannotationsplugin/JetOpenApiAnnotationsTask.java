@@ -5,8 +5,9 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.networknt.schema.Schema;
@@ -18,11 +19,9 @@ import net.jacobpeterson.jet.openapiannotations.OpenApi;
 import net.jacobpeterson.jet.openapiannotations.OpenApiOperation;
 import net.jacobpeterson.jet.openapiannotations.OpenApiPathItem;
 import net.jacobpeterson.jet.openapiannotations.OpenApiSchema;
-import net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.GsonUtil;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationEnumJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer;
-import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.OpenApiJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.OpenApiPathItemJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.OpenApiSchemaJsonSerializer;
 import net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.commonenum.HeaderJsonSerializer;
@@ -60,8 +59,8 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.github.victools.jsonschema.generator.Option.DEFINITIONS_FOR_ALL_OBJECTS;
@@ -81,6 +80,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.Files.writeString;
+import static java.util.Arrays.stream;
 import static java.util.Locale.ROOT;
 import static java.util.Map.entry;
 import static java.util.Objects.requireNonNull;
@@ -91,15 +91,9 @@ import static net.jacobpeterson.jet.openapiannotations.OpenApi.$SCHEMA_3_2;
 import static net.jacobpeterson.jet.openapiannotations.OpenApi.$SCHEMA_DEFAULT;
 import static net.jacobpeterson.jet.openapiannotations.OpenApi.ANNOTATION_GROUP_NAME_DEFAULT;
 import static net.jacobpeterson.jet.openapiannotations.OpenApi.VERSION_DEFAULT;
-import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.BOTH;
-import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.DISABLED;
-import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.FROM_CLASS_METHOD_NAME;
-import static net.jacobpeterson.jet.openapiannotationsplugin.JetOpenApiAnnotationsExtension.GenerateOperationId.FROM_METHOD_AND_PATH;
 import static net.jacobpeterson.jet.openapiannotationsplugin.gson.GsonUtil.walk;
-import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.ANNOTATION_METHOD_CLASS_NAME_DELIMITER;
 import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_CLASS_TRACER;
-import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.JSON_KEY_METHOD_TRACER;
-import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.removeTracers;
+import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.annotation.AnnotationJsonSerializer.removeTracerClasses;
 
 /**
  * {@link JetOpenApiAnnotationsTask} is the {@link DefaultTask} for {@link JetOpenApiAnnotationsPlugin}.
@@ -129,7 +123,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     }
 
     @InputFiles @CompileClasspath
-    public abstract ConfigurableFileCollection getAnnotatedClassFiles();
+    public abstract ConfigurableFileCollection getAnnotatedClasspaths();
 
     @InputFiles @CompileClasspath
     public abstract ConfigurableFileCollection getClasspaths();
@@ -153,7 +147,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     public abstract MapProperty<String, String> getSchemaGeneratorSimpleTypeMappings();
 
     @Input
-    public abstract Property<GenerateOperationId> getGenerateOperationId();
+    public abstract Property<Boolean> getGenerateOperationId();
 
     @Input
     public abstract Property<Boolean> getMoveClassSchemasToComponents();
@@ -166,11 +160,11 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     @TaskAction
     public void run() {
-        final var classLoaderUris = new HashSet<URI>();
-        final var classNames = new HashSet<String>();
-        for (final var annotatedClassFile : getAnnotatedClassFiles().getFiles()) {
-            classLoaderUris.add(annotatedClassFile.toURI());
-            final var annotatedClassPath = annotatedClassFile.toPath();
+        final var classLoaderUris = ImmutableSet.<URI>builder();
+        final var classNames = ImmutableSet.<String>builder();
+        for (final var annotatedClasspath : getAnnotatedClasspaths().getFiles()) {
+            classLoaderUris.add(annotatedClasspath.toURI());
+            final var annotatedClassPath = annotatedClasspath.toPath();
             try {
                 walkFileTree(annotatedClassPath, new SimpleFileVisitor<>() {
 
@@ -179,10 +173,10 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     @Override
                     public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
                         if (file.getFileName().toString().endsWith(CLASS_FILE_SUFFIX)) {
-                            final var packageClass = annotatedClassPath.relativize(file)
+                            final var packageClassFilename = annotatedClassPath.relativize(file)
                                     .toString().replace(file.getFileSystem().getSeparator(), ".");
-                            classNames.add(packageClass.substring(0,
-                                    packageClass.length() - CLASS_FILE_SUFFIX.length()));
+                            classNames.add(packageClassFilename.substring(0,
+                                    packageClassFilename.length() - CLASS_FILE_SUFFIX.length()));
                         }
                         return CONTINUE;
                     }
@@ -194,36 +188,29 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
         for (final var classpath : getClasspaths()) {
             classLoaderUris.add(classpath.toURI());
         }
-        try (final var classLoader = new URLClassLoader(classLoaderUris.stream().map(classLoaderUri -> {
+        try (final var classLoader = new URLClassLoader(classLoaderUris.build().stream().map(classLoaderUri -> {
             try {
                 return classLoaderUri.toURL();
             } catch (final MalformedURLException malformedUrlException) {
                 throw new RuntimeException(malformedUrlException);
             }
         }).toArray(URL[]::new), getClass().getClassLoader())) {
-            final var openApisOfGroupNames = ListMultimapBuilder
-                    .hashKeys()
-                    .arrayListValues()
-                    .<String, OpenApi>build();
-            final var methodsOfOpenApis = new HashMap<OpenApi, java.lang.reflect.Method>();
-            for (final var className : classNames) {
+            final var openApisOfGroupNamesBuilder = ImmutableListMultimap.<String, OpenApi>builder();
+            for (final var className : classNames.build()) {
                 final Class<?> clazz;
                 try {
                     clazz = classLoader.loadClass(className);
                 } catch (final ClassNotFoundException classNotFoundException) {
                     throw new RuntimeException(classNotFoundException);
                 }
-                for (final var openApi : clazz.getDeclaredAnnotationsByType(OpenApi.class)) {
-                    openApisOfGroupNames.put(openApi.annotationGroupName(), openApi);
-                }
-                for (final var method : clazz.getDeclaredMethods()) {
-                    for (final var openApi : method.getDeclaredAnnotationsByType(OpenApi.class)) {
-                        openApisOfGroupNames.put(openApi.annotationGroupName(), openApi);
-                        methodsOfOpenApis.put(openApi, method);
-                    }
-                }
+                final var put = (Consumer<OpenApi>) openApi ->
+                        openApisOfGroupNamesBuilder.put(openApi.annotationGroupName(), openApi);
+                stream(clazz.getDeclaredAnnotationsByType(OpenApi.class)).forEach(put);
+                stream(clazz.getDeclaredMethods())
+                        .flatMap(method -> stream(method.getDeclaredAnnotationsByType(OpenApi.class)))
+                        .forEach(put);
             }
-            final var tracerClasses = new HashSet<Class<? extends Annotation>>();
+            final var tracerClassesBuilder = ImmutableSet.<Class<? extends Annotation>>builder();
             final var schemaGeneratorConfigBuilder = getSchemaGeneratorConfigBuilderProvider()
                     .getOrElse((SchemaGeneratorConfigBuilderProvider) () ->
                             new SchemaGeneratorConfigBuilder(DRAFT_2020_12, PLAIN_JSON)
@@ -251,25 +238,25 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                             context.getGeneratorConfig().getObjectMapper().readTree(rawJson), true);
                 });
             }
-            final var generateOperationId = getGenerateOperationId().get();
-            if (generateOperationId != DISABLED) {
-                tracerClasses.add(OpenApiOperation.class);
+            final boolean generateOperationId = getGenerateOperationId().get();
+            if (generateOperationId) {
+                tracerClassesBuilder.add(OpenApiOperation.class);
             }
             final var moveClassSchemasToComponents = getMoveClassSchemasToComponents().get();
             if (moveClassSchemasToComponents) {
-                tracerClasses.add(OpenApiSchema.class);
+                tracerClassesBuilder.add(OpenApiSchema.class);
                 schemaGeneratorConfigBuilder
                         .with(DEFINITION_FOR_MAIN_SCHEMA)
                         .with(DEFINITIONS_FOR_ALL_OBJECTS)
                         .with(DEFINITIONS_FOR_MEMBER_SUPERTYPES);
             }
+            final var tracerClasses = tracerClassesBuilder.build();
             final var annotationGson = new GsonBuilder()
                     .registerTypeHierarchyAdapter(Enum.class, new AnnotationEnumJsonSerializer())
                     .registerTypeHierarchyAdapter(Annotation.class, new AnnotationJsonSerializer(tracerClasses))
-                    .registerTypeHierarchyAdapter(OpenApi.class, new OpenApiJsonSerializer(methodsOfOpenApis))
+                    .registerTypeHierarchyAdapter(OpenApiPathItem.class, new OpenApiPathItemJsonSerializer())
                     .registerTypeHierarchyAdapter(OpenApiSchema.class,
                             new OpenApiSchemaJsonSerializer(new SchemaGenerator(schemaGeneratorConfigBuilder.build())))
-                    .registerTypeHierarchyAdapter(OpenApiPathItem.class, new OpenApiPathItemJsonSerializer())
                     .registerTypeAdapter(String.class, new EmptyStringIsNullJsonSerializer())
                     .registerTypeAdapter(Method.class, new MethodJsonSerializer())
                     .registerTypeAdapter(Status.class, new StatusJsonSerializer())
@@ -277,7 +264,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     .create();
             final var schemasOfUrls = new HashMap<String, Schema>();
             final var outputDirectory = getOutputDirectory().get().getAsFile().toPath();
-            for (final var openApiJsonOfGroupName : openApisOfGroupNames.entries().stream()
+            for (final var openApiJsonOfGroupName : openApisOfGroupNamesBuilder.build().entries().stream()
                     .map(entry -> entry(entry.getKey(), annotationGson.toJsonTree(entry.getValue())))
                     .collect(toUnmodifiableMap(Entry::getKey, Entry::getValue, GsonUtil::combine))
                     .entrySet()) {
@@ -289,7 +276,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                 if (!openApiJson.has(JSON_KEY_OPENAPI)) {
                     openApiJson.addProperty(JSON_KEY_OPENAPI, VERSION_DEFAULT);
                 }
-                if (generateOperationId != DISABLED) {
+                if (generateOperationId) {
                     walk(openApiJson, stack -> {
                         final var top = requireNonNull(stack.peek());
                         if (!top.getValue().isJsonObject()) {
@@ -297,52 +284,34 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         }
                         final var topObject = top.getValue().getAsJsonObject();
                         final var tracerClass = topObject.get(JSON_KEY_CLASS_TRACER);
-                        if (tracerClass == null ||
+                        if (tracerClass == null || tracerClass.isJsonNull() ||
                                 !tracerClass.getAsString().equals(OpenApiOperation.class.getCanonicalName())) {
                             return true;
                         }
                         if (topObject.has(JSON_KEY_OPERATION_ID)) {
                             return false;
                         }
-                        String fromClassMethodName = null;
-                        String fromMethodAndPath = null;
-                        if (generateOperationId == FROM_CLASS_METHOD_NAME || generateOperationId == BOTH) {
-                            final var methodTracer = topObject.get(JSON_KEY_METHOD_TRACER);
-                            if (methodTracer != null && !methodTracer.isJsonNull()) {
-                                final var methodTracerString = methodTracer.getAsString();
-                                fromClassMethodName = methodTracerString.substring(
-                                        methodTracerString.indexOf(ANNOTATION_METHOD_CLASS_NAME_DELIMITER) + 1);
-                            }
-                        }
-                        if (generateOperationId == FROM_METHOD_AND_PATH || generateOperationId == BOTH) {
-                            final var list = ImmutableList.copyOf(stack);
-                            if (list.size() >= 4 && list.get(list.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
-                                var path = list.get(list.size() - 3).getKey().toLowerCase(ROOT);
-                                if (topObject.has(JSON_KEY_TAGS)) {
-                                    var substringIndex = 0;
-                                    for (final var tag : topObject.getAsJsonArray(JSON_KEY_TAGS)) {
-                                        final var tagString = tag.getAsString().toLowerCase(ROOT);
-                                        final var indexOfTag = path.indexOf(tagString);
-                                        if (indexOfTag != -1) {
-                                            substringIndex = max(substringIndex, indexOfTag + tagString.length());
-                                        }
+                        final var list = ImmutableList.copyOf(stack);
+                        if (list.size() >= 4 && list.get(list.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
+                            var path = list.get(list.size() - 3).getKey().toLowerCase(ROOT);
+                            final var tags = topObject.get(JSON_KEY_TAGS);
+                            if (tags != null && !tags.isJsonNull()) {
+                                var substringIndex = 0;
+                                for (final var tag : tags.getAsJsonArray()) {
+                                    if (tag == null || tag.isJsonNull()) {
+                                        continue;
                                     }
-                                    path = path.substring(substringIndex);
+                                    final var tagString = tag.getAsString().toLowerCase(ROOT);
+                                    final var indexOfTag = path.indexOf(tagString);
+                                    if (indexOfTag != -1) {
+                                        substringIndex = max(substringIndex, indexOfTag + tagString.length());
+                                    }
                                 }
-                                fromMethodAndPath = LOWER_UNDERSCORE.to(LOWER_CAMEL, NON_ALPHANUMERIC_PATTERN.matcher(
-                                        top.getKey().toLowerCase(ROOT)).replaceAll("_") + "_" +
-                                        NON_ALPHANUMERIC_PATTERN.matcher(path).replaceAll("_"));
+                                path = path.substring(substringIndex);
                             }
-                        }
-                        if (generateOperationId == BOTH && fromClassMethodName != null && fromMethodAndPath != null) {
-                            checkArgument(fromClassMethodName.equals(fromMethodAndPath),
-                                    "Operation ID \"%s\" generated from class method name does not match " +
-                                            "generated operation ID \"%s\" from @OpenApi annotation method and path",
-                                    fromClassMethodName, fromMethodAndPath);
-                        }
-                        if (fromClassMethodName != null || fromMethodAndPath != null) {
-                            topObject.addProperty(JSON_KEY_OPERATION_ID,
-                                    fromClassMethodName != null ? fromClassMethodName : fromMethodAndPath);
+                            topObject.addProperty(JSON_KEY_OPERATION_ID, LOWER_UNDERSCORE.to(LOWER_CAMEL,
+                                    NON_ALPHANUMERIC_PATTERN.matcher(top.getKey().toLowerCase(ROOT)).replaceAll("_") +
+                                            "_" + NON_ALPHANUMERIC_PATTERN.matcher(path).replaceAll("_")));
                         }
                         return false;
                     });
@@ -367,7 +336,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                         }
                         final var topObject = topValue.getAsJsonObject();
                         final var tracerClass = topObject.get(JSON_KEY_CLASS_TRACER);
-                        if (tracerClass == null ||
+                        if (tracerClass == null || tracerClass.isJsonNull() ||
                                 !tracerClass.getAsString().equals(OpenApiSchema.class.getCanonicalName())) {
                             return true;
                         }
@@ -417,7 +386,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                     }
                 }
                 if (!tracerClasses.isEmpty()) {
-                    removeTracers(openApiJson);
+                    removeTracerClasses(openApiJson);
                 }
                 final var openApiJsonString = openApiJson.toString();
                 if (getSchemaValidation().get()) {

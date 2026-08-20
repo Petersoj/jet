@@ -28,15 +28,19 @@ import java.util.Map;
 public abstract class JetOpenApiAnnotationsExtension {
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, the class files annotated with {@link OpenApi} annotations.
+     * For the {@link JetOpenApiAnnotationsTask}, the classpath files to load into a {@link ClassLoader} that should be
+     * scanned for {@link OpenApi} annotations. Can be JAR files or a directories containing <code>.class</code> files,
+     * but only <code>.class</code> files will be scanned for {@link OpenApi} annotations. The classes inside JAR files
+     * will not be scanned.
      * <p>
      * Defaults to {@link JavaCompile#getOutputs()}.
      */
-    public abstract ConfigurableFileCollection getAnnotatedClassFiles();
+    public abstract ConfigurableFileCollection getAnnotatedClasspaths();
 
     /**
-     * For the {@link JetOpenApiAnnotationsTask}, the classpaths to load into a {@link ClassLoader} for
-     * {@link OpenApiSchema#fromClass()}.
+     * For the {@link JetOpenApiAnnotationsTask}, the classpaths to load into a {@link ClassLoader} for dependency
+     * classes used in fields that {@link OpenApiSchema#fromClass()}. Can be JAR files or directories containing
+     * <code>.class</code> files. These classpaths will not be scanned for {@link OpenApi} annotations.
      * <p>
      * Defaults to {@link JavaCompile#getClasspath()}.
      */
@@ -86,43 +90,17 @@ public abstract class JetOpenApiAnnotationsExtension {
     public abstract MapProperty<String, String> getSchemaGeneratorSimpleTypeMappings();
 
     /**
-     * {@link GenerateOperationId} is an enum for {@link #getGenerateOperationId()}.
-     */
-    public enum GenerateOperationId {
-
-        /**
-         * Do not generate {@link OpenApiOperation#operationId()}.
-         */
-        DISABLED,
-
-        /**
-         * If not already provided, generate {@link OpenApiOperation#operationId()} using the name of the class method
-         * annotated with the {@link OpenApi} annotation.
-         */
-        FROM_CLASS_METHOD_NAME,
-
-        /**
-         * If not already provided, generate {@link OpenApiOperation#operationId()} by concatenating
-         * {@link OpenApiPathItem#methods()} with the lower-camelcase conversion of the path segments of
-         * {@link OpenApiPathItem.MapEntry#key()} after the index of {@link OpenApiOperation#tags()}.
-         */
-        FROM_METHOD_AND_PATH,
-
-        /**
-         * If not already provided, generate {@link OpenApiOperation#operationId()} using the
-         * {@link #FROM_CLASS_METHOD_NAME} configuration and ensuring the generated value is equal to the generated
-         * value of the {@link #FROM_METHOD_AND_PATH} configuration. This enforces the same naming convention for both
-         * the class method name and the API path.
-         */
-        BOTH
-    }
-
-    /**
-     * For the {@link JetOpenApiAnnotationsTask}, set the {@link GenerateOperationId} configuration.
+     * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to, if not already provided, generate
+     * {@link OpenApiOperation#operationId()} by concatenating {@link OpenApiPathItem#methods()} with the
+     * lower-camelcase conversion of the path segments of {@link OpenApiPathItem.MapEntry#key()} after the index of
+     * {@link OpenApiOperation#tags()}. For example, if method is <code>POST</code>, path item key is
+     * <code>/account/create</code>, and tag is <code>account</code>, then the generated operation ID is
+     * <code>postCreate</code>. For many OpenAPI generated clients, this results in intuitively-named method calls, for
+     * example: <code>account.postCreate(...)</code>.
      * <p>
-     * Defaults to {@link GenerateOperationId#BOTH}.
+     * Defaults to <code>true</code>.
      */
-    public abstract Property<GenerateOperationId> getGenerateOperationId();
+    public abstract Property<Boolean> getGenerateOperationId();
 
     /**
      * For the {@link JetOpenApiAnnotationsTask}, set to <code>true</code> to move the JSON schema generated from
