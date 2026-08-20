@@ -260,15 +260,16 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                             }
                             for (final var pollEvent : watchKey.pollEvents()) {
                                 final var eventKind = pollEvent.kind();
-                                if (eventKind == OVERFLOW) {
+                                if (eventKind.equals(OVERFLOW)) {
                                     LOGGER.warn("`WatchService` `OVERFLOW` event occurred: {}", directory);
                                     continue;
                                 }
                                 final var eventPath = directoryOfWatchKey.resolve((Path) pollEvent.context());
                                 final var isDirectory = Files.isDirectory(eventPath, NOFOLLOW_LINKS);
-                                if (isDirectory && eventKind == ENTRY_CREATE) {
+                                if (isDirectory && eventKind.equals(ENTRY_CREATE)) {
                                     registerRecursively(watchService, eventPath);
-                                } else if (!isDirectory && (eventKind == ENTRY_MODIFY || eventKind == ENTRY_DELETE)) {
+                                } else if (!isDirectory &&
+                                        (eventKind.equals(ENTRY_MODIFY) || eventKind.equals(ENTRY_DELETE))) {
                                     resourcesOfPathsCache.invalidate(eventPath.toString());
                                 }
                             }
