@@ -731,6 +731,7 @@ public final class Response {
      * FOR INTERNAL USE ONLY.
      */
     public void runAfters() {
+        checkState(!aftersRun, "`afters` have already run");
         aftersRun = true;
         if (afters != null) {
             Throwable throwables = null;
