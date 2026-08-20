@@ -11,11 +11,11 @@
     <img src="https://img.shields.io/badge/GitHub_Discussions-royalblue?logo=github" alt="GitHub Discussions"></a>
     <br>
     <a href="https://central.sonatype.com/search?namespace=net.jacobpeterson.jet">
-    <img src="https://img.shields.io/badge/Maven_Central-3.7.0-blue?logo=apachemaven" alt="Maven Central"></a>
+    <img src="https://img.shields.io/badge/Maven_Central-3.8.0-blue?logo=apachemaven" alt="Maven Central"></a>
     <a href="https://plugins.gradle.org/plugin/net.jacobpeterson.jet.openapiannotationsplugin">
-    <img src="https://img.shields.io/badge/Gradle_Plugin-3.7.0-blue?logo=gradle" alt="Gradle Plugin"></a>
+    <img src="https://img.shields.io/badge/Gradle_Plugin-3.8.0-blue?logo=gradle" alt="Gradle Plugin"></a>
     <a href="https://javadoc.io/doc/net.jacobpeterson.jet">
-    <img src="https://img.shields.io/badge/javadoc-3.7.0-brightgreen" alt="javadoc"></a>
+    <img src="https://img.shields.io/badge/javadoc-3.8.0-brightgreen" alt="javadoc"></a>
     <br>
     <a href="https://codecov.io/gh/Petersoj/jet">
     <img src="https://codecov.io/gh/Petersoj/jet/graph/badge.svg?token=Y8H056Y89E" alt="Codecov"></a>
@@ -117,7 +117,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:common:3.7.0")
+    implementation("net.jacobpeterson.jet:common:3.8.0")
 }
 ```
 
@@ -125,7 +125,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:common:3.7.0'
+    implementation 'net.jacobpeterson.jet:common:3.8.0'
 }
 ```
 
@@ -135,7 +135,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>common</artifactId>
-    <version>3.7.0</version>
+    <version>3.8.0</version>
 </dependency>
 ```
 
@@ -217,7 +217,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:server:3.7.0")
+    implementation("net.jacobpeterson.jet:server:3.8.0")
 }
 ```
 
@@ -225,7 +225,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:server:3.7.0'
+    implementation 'net.jacobpeterson.jet:server:3.8.0'
 }
 ```
 
@@ -235,7 +235,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>server</artifactId>
-    <version>3.7.0</version>
+    <version>3.8.0</version>
 </dependency>
 ```
 
@@ -501,7 +501,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.jacobpeterson.jet:openapi-annotations:3.7.0")
+    implementation("net.jacobpeterson.jet:openapi-annotations:3.8.0")
 }
 ```
 
@@ -509,7 +509,7 @@ For `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'net.jacobpeterson.jet:openapi-annotations:3.7.0'
+    implementation 'net.jacobpeterson.jet:openapi-annotations:3.8.0'
 }
 ```
 
@@ -519,7 +519,7 @@ For `pom.xml`:
 <dependency>
     <groupId>net.jacobpeterson.jet</groupId>
     <artifactId>openapi-annotations</artifactId>
-    <version>3.7.0</version>
+    <version>3.8.0</version>
 </dependency>
 ```
 
@@ -758,7 +758,7 @@ For `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("net.jacobpeterson.jet.openapiannotationsplugin") version "3.7.0"
+    id("net.jacobpeterson.jet.openapiannotationsplugin") version "3.8.0"
 }
 ```
 
@@ -766,7 +766,7 @@ For `build.gradle`:
 
 ```groovy
 plugins {
-    id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.7.0"
+    id 'net.jacobpeterson.jet.openapiannotationsplugin' version "3.8.0"
 }
 ```
 
