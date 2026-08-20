@@ -4,6 +4,10 @@
   "description": "The description of OpenAPI v3.2.x Documents without Schema Object validation",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri-reference"
+    },
     "openapi": {
       "type": "string",
       "pattern": "^3\\.2\\.\\d+(-.+)?$"
