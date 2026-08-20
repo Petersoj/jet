@@ -7,7 +7,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
@@ -60,28 +61,21 @@ public final class GsonUtil {
     }
 
     /**
-     * Recursively walks the given {@link JsonElement} tree.
+     * Walks the given {@link JsonElement} tree using recursion.
      *
      * @param root   the root {@link JsonElement}
      * @param walker the walker {@link Function} that receives the current tree stack and returns a <code>boolean</code>
      *               of whether to walk the entry at the top of the stack
      */
-    @SuppressWarnings({"NonApiType", "JdkObsolete"})
-    public static void walk(final JsonElement root,
-            // TODO replace `LinkedList` with `ArrayDeque`: https://bugs.openjdk.org/browse/JDK-8356821
-            final Function<LinkedList<Entry<String, JsonElement>>, Boolean> walker) {
-        walkRecursively(entry("root", root), new LinkedList<>(), walker);
+    public static void walk(final JsonElement root, final Function<Deque<Entry<String, JsonElement>>, Boolean> walker) {
+        walkRecursively(entry("root", root), new ArrayDeque<>(), walker);
     }
 
-    @SuppressWarnings("NonApiType")
     private static void walkRecursively(final Entry<String, JsonElement> entry,
-            final LinkedList<Entry<String, JsonElement>> stack,
-            final Function<LinkedList<Entry<String, JsonElement>>, Boolean> walker) {
+            final Deque<Entry<String, JsonElement>> stack,
+            final Function<Deque<Entry<String, JsonElement>>, Boolean> walker) {
         stack.push(entry);
-        try {
-            if (!walker.apply(stack)) {
-                return;
-            }
+        if (walker.apply(stack)) {
             if (entry.getValue().isJsonObject()) {
                 for (final var entryValueEntry : entry.getValue().getAsJsonObject().entrySet()) {
                     walkRecursively(entryValueEntry, stack, walker);
@@ -92,9 +86,8 @@ public final class GsonUtil {
                     walkRecursively(entry(String.valueOf(index), array.get(index)), stack, walker);
                 }
             }
-        } finally {
-            stack.pop();
         }
+        stack.pop();
     }
 
     private GsonUtil() {}

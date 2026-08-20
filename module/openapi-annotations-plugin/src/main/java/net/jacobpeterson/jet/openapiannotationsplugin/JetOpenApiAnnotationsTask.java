@@ -4,6 +4,7 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.gson.GsonBuilder;
@@ -314,8 +315,9 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                             }
                         }
                         if (generateOperationId == FROM_METHOD_AND_PATH || generateOperationId == BOTH) {
-                            if (stack.size() >= 4 && stack.get(stack.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
-                                var path = stack.get(stack.size() - 3).getKey().toLowerCase(ROOT);
+                            final var list = ImmutableList.copyOf(stack);
+                            if (list.size() >= 4 && list.get(list.size() - 2).getKey().equals(JSON_KEY_PATHS)) {
+                                var path = list.get(list.size() - 3).getKey().toLowerCase(ROOT);
                                 if (topObject.has(JSON_KEY_TAGS)) {
                                     var substringIndex = 0;
                                     for (final var tag : topObject.getAsJsonArray(JSON_KEY_TAGS)) {
