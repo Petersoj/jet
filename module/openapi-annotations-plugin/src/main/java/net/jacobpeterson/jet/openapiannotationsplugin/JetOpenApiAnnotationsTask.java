@@ -407,7 +407,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
                                     .formatAssertionsEnabled(true)
                                     .annotationCollectionEnabled(true)));
                     if (!errors.isEmpty()) {
-                        final var version = openApiJson.get(JSON_KEY_OPENAPI);
+                        final var version = openApiJson.get(JSON_KEY_OPENAPI).getAsString();
                         throw new IllegalArgumentException("\n" + errors.stream()
                                 .map(error -> "        OpenAPIv%s schema offense%s: %s".formatted(version,
                                         groupName.equals(ANNOTATION_GROUP_NAME_DEFAULT) ? "" :

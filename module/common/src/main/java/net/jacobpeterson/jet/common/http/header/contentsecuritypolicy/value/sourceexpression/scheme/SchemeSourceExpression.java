@@ -40,6 +40,36 @@ public final class SchemeSourceExpression implements SourceExpression {
     public static final String SUFFIX = ":";
 
     /**
+     * {@link SchemeSourceExpression} constant for {@link Scheme#BLOB} using {@link #forScheme(Scheme)}.
+     */
+    public static final SchemeSourceExpression BLOB = SchemeSourceExpression.forScheme(Scheme.BLOB);
+
+    /**
+     * {@link SchemeSourceExpression} constant for {@link Scheme#DATA} using {@link #forScheme(Scheme)}.
+     */
+    public static final SchemeSourceExpression DATA = SchemeSourceExpression.forScheme(Scheme.DATA);
+
+    /**
+     * {@link SchemeSourceExpression} constant for {@link Scheme#HTTP} using {@link #forScheme(Scheme)}.
+     */
+    public static final SchemeSourceExpression HTTP = SchemeSourceExpression.forScheme(Scheme.HTTP);
+
+    /**
+     * {@link SchemeSourceExpression} constant for {@link Scheme#HTTPS} using {@link #forScheme(Scheme)}.
+     */
+    public static final SchemeSourceExpression HTTPS = SchemeSourceExpression.forScheme(Scheme.HTTPS);
+
+    /**
+     * {@link SchemeSourceExpression} constant for {@link Scheme#WS} using {@link #forScheme(Scheme)}.
+     */
+    public static final SchemeSourceExpression WS = SchemeSourceExpression.forScheme(Scheme.WS);
+
+    /**
+     * {@link SchemeSourceExpression} constant for {@link Scheme#WSS} using {@link #forScheme(Scheme)}.
+     */
+    public static final SchemeSourceExpression WSS = SchemeSourceExpression.forScheme(Scheme.WSS);
+
+    /**
      * @return {@link #create(String)} {@link Scheme#toString()}
      *
      * @see #toScheme()
