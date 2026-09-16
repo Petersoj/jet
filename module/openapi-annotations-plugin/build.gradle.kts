@@ -8,8 +8,8 @@ plugins {
     id("module-common")
     id("io.github.gmazzo.gradle.testkit.jacoco") version "1.1.0"
     signing
-    id("com.gradle.plugin-publish") version "2.1.1"
-    id("org.gradle.plugin-compatibility") version "1.0.0"
+    id("com.gradle.plugin-publish") version "2.2.1"
+    id("org.gradle.plugin-compatibility") version "1.1.0"
 }
 
 description = "A code-first OpenAPI specification annotations processor Gradle plugin."
@@ -24,7 +24,7 @@ dependencies {
     api("com.github.victools:jsonschema-generator:$jsonSchemaGeneratorVersion")
     api("com.github.victools:jsonschema-module-jackson:$jsonSchemaGeneratorVersion")
 
-    implementation("com.networknt:json-schema-validator:3.0.6")
+    implementation("com.networknt:json-schema-validator:3.0.7")
 }
 // Gradle Test Kit already provides an SLF4j binding
 configurations.testRuntimeOnly {
