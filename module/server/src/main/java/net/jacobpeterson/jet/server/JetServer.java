@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.common.http.header.contentencoding.ContentEncoding;
 import net.jacobpeterson.jet.common.http.header.contenttype.ContentType;
 import net.jacobpeterson.jet.common.http.header.etag.ETag;
+import net.jacobpeterson.jet.common.http.header.headers.Headers;
 import net.jacobpeterson.jet.common.http.status.Status;
 import net.jacobpeterson.jet.common.http.version.Version;
 import net.jacobpeterson.jet.server.JetServer.Builder.SslPem;
@@ -16,9 +17,11 @@ import net.jacobpeterson.jet.server.handle.Handle;
 import net.jacobpeterson.jet.server.handle.HandleFactory;
 import net.jacobpeterson.jet.server.handle.HandleInternals;
 import net.jacobpeterson.jet.server.handle.exception.BodyStreamException;
+import net.jacobpeterson.jet.server.handle.response.Response;
 import net.jacobpeterson.jet.server.handle.response.exception.StatusException;
 import net.jacobpeterson.jet.server.handler.Handler;
 import net.jacobpeterson.jet.server.router.Router;
+import net.jacobpeterson.jet.server.router.RouterThrowableHandler;
 import net.jacobpeterson.jet.server.router.simple.SimpleRouter;
 import net.jacobpeterson.jet.server.session.Session;
 import net.jacobpeterson.jet.server.session.SessionStore;
@@ -143,6 +146,7 @@ public final class JetServer implements AutoCloseable {
         private @Nullable HandleFactory handleFactory;
         private @Nullable SessionStore sessionStore;
         private @Nullable Router router;
+        private @Nullable RouterThrowableHandler routerThrowableHandler;
         private @Nullable String host;
         private int httpPort = 8080;
         private int httpsPort = 8443;
@@ -182,6 +186,14 @@ public final class JetServer implements AutoCloseable {
          */
         public Builder router(final Router router) {
             this.router = router;
+            return this;
+        }
+
+        /**
+         * @see #getRouterThrowableHandler()
+         */
+        public Builder routerThrowableHandler(final RouterThrowableHandler routerThrowableHandler) {
+            this.routerThrowableHandler = routerThrowableHandler;
             return this;
         }
 
@@ -399,6 +411,7 @@ public final class JetServer implements AutoCloseable {
                     handleFactory != null ? handleFactory : Handle::new,
                     sessionStore,
                     router != null ? router : new SimpleRouter(),
+                    routerThrowableHandler,
                     host,
                     httpPort,
                     httpsPort,
@@ -445,6 +458,16 @@ public final class JetServer implements AutoCloseable {
      * Defaults to {@link SimpleRouter}.
      */
     private final @Getter Router router;
+
+    /**
+     * The handler for {@link Throwable}s thrown by {@link #getRouter()} {@link Router#route(Handle)}. Before this
+     * handler is called, {@link Response#getHeaders()} {@link Headers#clear()} is always called to clear any headers
+     * set by {@link Router#route(Handle)} and the {@link Throwable} is always logged as an <code>error</code> (or
+     * <code>debug</code> if it is a {@link StatusException}).
+     * <p>
+     * Defaults to <code>null</code>.
+     */
+    private final @Getter @Nullable RouterThrowableHandler routerThrowableHandler;
 
     /**
      * The host address to bind to, or <code>null</code> for all addresses.
@@ -587,27 +610,22 @@ public final class JetServer implements AutoCloseable {
                         final var response = handle.getResponse();
                         response.getHeaders().clear();
                         final int statusCode;
-                        final String statusString;
-                        final boolean errorLog;
-                        if (throwable instanceof final StatusException statusException) {
-                            statusCode = statusException.getStatusCode();
-                            final var status = Status.forCode(statusCode);
-                            statusString = status == null ? statusCode + " Error" : status.toString();
-                            errorLog = false;
+                        final var isStatusException = throwable instanceof StatusException;
+                        if (isStatusException) {
+                            statusCode = ((StatusException) throwable).getStatusCode();
                         } else if (getCausalChain(throwable).stream()
                                 .anyMatch(cause -> cause instanceof BodyStreamException)) {
-                            final var status = BAD_REQUEST_400;
-                            statusCode = status.getCode();
-                            statusString = status.toString();
-                            errorLog = false;
+                            statusCode = BAD_REQUEST_400.getCode();
                         } else {
-                            final var status = INTERNAL_SERVER_ERROR_500;
-                            statusCode = status.getCode();
-                            statusString = status.toString();
-                            errorLog = true;
+                            statusCode = INTERNAL_SERVER_ERROR_500.getCode();
                         }
-                        LOGGER.atLevel(errorLog ? ERROR : DEBUG).log("Handler threw", throwable);
-                        response.responseText(statusCode, statusString);
+                        final var status = Status.forCode(statusCode);
+                        final var statusDescription = status != null ? status.getDescription() : "Error";
+                        LOGGER.atLevel(isStatusException ? DEBUG : ERROR).log("Handler threw", throwable);
+                        response.responseText(statusCode, statusCode + " " + statusDescription);
+                        if (routerThrowableHandler != null) {
+                            routerThrowableHandler.handle(handle, statusCode, statusDescription, throwable);
+                        }
                     }
                     final var response = handle.getResponse();
                     final var headers = response.getHeaders();

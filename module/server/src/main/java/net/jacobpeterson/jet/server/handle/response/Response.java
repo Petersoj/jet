@@ -707,7 +707,7 @@ public final class Response {
     public void addAfter(final Runnable after) throws IllegalStateException {
         checkState(!aftersRun, "`afters` have already run");
         if (afters == null) {
-            afters = new ArrayList<>();
+            afters = new ArrayList<>(5);
         }
         afters.add(after);
     }

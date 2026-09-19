@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
  * {@link Status#BAD_REQUEST_400} and not log any server errors.
  */
 @NullMarked
-@ToString
+@ToString(callSuper = false)
 public class StatusException extends RuntimeException {
 
     /**

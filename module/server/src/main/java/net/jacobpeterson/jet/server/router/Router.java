@@ -10,6 +10,8 @@ import org.jspecify.annotations.NullMarked;
 /**
  * {@link Router} is a {@link FunctionalInterface} for routing a {@link Handle} to a {@link Handler} using
  * {@link Route#match(Handle)}.
+ *
+ * @see RouterThrowableHandler
  */
 @NullMarked
 @FunctionalInterface
