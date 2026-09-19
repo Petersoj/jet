@@ -5,7 +5,7 @@
             <pattern>%-5level %date{yyyy-MM-dd HH:mm:ss.SSS zzz} [%thread] %logger - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
     <logger name="org.eclipse.jetty" level="WARN"/>
