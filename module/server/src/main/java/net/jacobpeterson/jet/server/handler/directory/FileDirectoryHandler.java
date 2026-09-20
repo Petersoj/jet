@@ -191,7 +191,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
 
     private final @Nullable String defaultFilenameWithoutDefaultExtension;
     private final @Getter @Nullable WatchService watchService;
-    private @Nullable Cache<String, Resource> resourcesOfPathsCache;
+    private @Nullable Cache<Path, Resource> resourcesOfPathsCache;
 
     /**
      * Instantiates a new {@link FileDirectoryHandler}.
@@ -215,7 +215,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
             final @Nullable RedirectType redirectToDefault, final @Nullable ResponseCacheControl cacheControl,
             final boolean strongETag, final boolean trustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding,
-            final @Nullable Cache<String, Resource> resourcesOfPathsCache, final boolean enableWatchService) {
+            final @Nullable Cache<Path, Resource> resourcesOfPathsCache, final boolean enableWatchService) {
         checkArgument(Files.isDirectory(directory), "Not a directory: %s", directory);
         this.directory = directory;
         this.requestPathRelativizer = requestPathRelativizer;
@@ -272,7 +272,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                                 if (eventKind.equals(ENTRY_CREATE) && Files.isDirectory(eventPath, NOFOLLOW_LINKS)) {
                                     walkFileTree(eventPath, registerFileTree);
                                 } else if (eventKind.equals(ENTRY_MODIFY) || eventKind.equals(ENTRY_DELETE)) {
-                                    resourcesOfPathsCache.invalidate(eventPath.toString());
+                                    resourcesOfPathsCache.invalidate(eventPath);
                                 }
                             }
                             if (!watchKey.reset()) {
@@ -342,12 +342,11 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                     "Request file does not start with \"%s\": %s".formatted(directory, requestFile));
         }
         final var response = handle.getResponse();
-        final var fRequestFile = requestFile;
         // `resourcesOfPathsCache` null-check is racy, but NPE is unlikely and is better than using invalid `Resource`
         response.responseResource(resourcesOfPathsCache != null ?
-                resourcesOfPathsCache.get(fRequestFile.toString(), _ -> Resource.ofFile(
-                        fRequestFile, strongETag, trustedContentType, null, peekLength, contentEncoding, true)) :
-                Resource.ofFile(fRequestFile, strongETag, trustedContentType, null, peekLength, contentEncoding, true));
+                resourcesOfPathsCache.get(requestFile, key -> Resource.ofFile(
+                        key, strongETag, trustedContentType, null, peekLength, contentEncoding, true)) :
+                Resource.ofFile(requestFile, strongETag, trustedContentType, null, peekLength, contentEncoding, true));
         if (cacheControl != null) {
             response.setCacheControl(cacheControl);
         }
@@ -363,7 +362,7 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
      */
     public void cacheInvalidate(final Path file) {
         checkArgument(resourcesOfPathsCache != null, "This `FileDirectoryHandler` does not have a `Resource` cache");
-        resourcesOfPathsCache.invalidate(file.toString());
+        resourcesOfPathsCache.invalidate(file);
     }
 
     /**
