@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.walk;
@@ -108,7 +109,9 @@ public class ClasspathDirectoryHandler implements Handler {
     private final @Getter Class<?> clazz;
 
     /**
-     * The directory path relative to {@link #getClazz()}.
+     * The directory path passed to {@link Class#getResource(String)}. If it starts with a <code>/</code>, it is an
+     * absolute resource path, if it doesn't start with a <code>/</code>, it is relative to the package of
+     * {@link #getClazz()}. It cannot be an empty.
      */
     private final @Getter String directory;
 
@@ -187,6 +190,7 @@ public class ClasspathDirectoryHandler implements Handler {
             final boolean trustedContentType, final @Nullable Integer peekLength,
             final @Nullable ContentEncoding contentEncoding) {
         this.clazz = clazz;
+        checkArgument(!directory.isEmpty(), "`directory` cannot be empty");
         this.directory = pathTrimTrailing(directory);
         this.requestPathRelativizer = requestPathRelativizer;
         this.defaultFilename = defaultFilename;
