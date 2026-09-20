@@ -29,13 +29,13 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
@@ -232,19 +232,26 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
         this.contentEncoding = contentEncoding;
         this.resourcesOfPathsCache = resourcesOfPathsCache;
         if (resourcesOfPathsCache != null && enableWatchService) {
+            final WatchService watchService;
             try {
                 watchService = directory.getFileSystem().newWatchService();
             } catch (final IOException ioException) {
                 throw new UncheckedIOException(ioException);
             }
-            Thread.ofVirtual().start(new Runnable() {
-
-                private final Map<WatchKey, Path> directoriesOfWatchKeys = new HashMap<>();
-
-                @Override
-                public void run() {
+            try {
+                final var directoriesOfWatchKeys = new HashMap<WatchKey, Path>();
+                final var registerFileTree = new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(final Path directory, final BasicFileAttributes attrs)
+                            throws IOException {
+                        directoriesOfWatchKeys.put(directory.register(watchService,
+                                ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE), directory);
+                        return CONTINUE;
+                    }
+                };
+                walkFileTree(directory, registerFileTree);
+                Thread.ofVirtual().start(() -> {
                     try (watchService) {
-                        registerRecursively(requireNonNull(watchService), directory);
                         while (true) {
                             final WatchKey watchKey;
                             try {
@@ -254,22 +261,17 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                             } catch (final ClosedWatchServiceException exception) {
                                 break;
                             }
-                            final var directoryOfWatchKey = directoriesOfWatchKeys.get(watchKey);
-                            if (directoryOfWatchKey == null) {
-                                continue;
-                            }
                             for (final var pollEvent : watchKey.pollEvents()) {
                                 final var eventKind = pollEvent.kind();
                                 if (eventKind.equals(OVERFLOW)) {
                                     LOGGER.warn("`WatchService` `OVERFLOW` event occurred: {}", directory);
                                     continue;
                                 }
-                                final var eventPath = directoryOfWatchKey.resolve((Path) pollEvent.context());
-                                final var isDirectory = Files.isDirectory(eventPath, NOFOLLOW_LINKS);
-                                if (isDirectory && eventKind.equals(ENTRY_CREATE)) {
-                                    registerRecursively(watchService, eventPath);
-                                } else if (!isDirectory &&
-                                        (eventKind.equals(ENTRY_MODIFY) || eventKind.equals(ENTRY_DELETE))) {
+                                final var eventPath = requireNonNull(directoriesOfWatchKeys.get(watchKey))
+                                        .resolve((Path) pollEvent.context());
+                                if (eventKind.equals(ENTRY_CREATE) && Files.isDirectory(eventPath, NOFOLLOW_LINKS)) {
+                                    walkFileTree(eventPath, registerFileTree);
+                                } else if (eventKind.equals(ENTRY_MODIFY) || eventKind.equals(ENTRY_DELETE)) {
                                     resourcesOfPathsCache.invalidate(eventPath.toString());
                                 }
                             }
@@ -282,21 +284,19 @@ public class FileDirectoryHandler implements Handler, AutoCloseable {
                         LOGGER.error("`FileDirectoryHandler` `WatchService` threw", throwable);
                         FileDirectoryHandler.this.resourcesOfPathsCache = null;
                     }
+                });
+            } catch (final Throwable throwable) {
+                if (watchService != null) {
+                    try {
+                        watchService.close();
+                    } catch (final IOException ioException) {
+                        throwable.addSuppressed(ioException);
+                    }
                 }
-
-                private void registerRecursively(final WatchService watchService, final Path startDirectory)
-                        throws IOException {
-                    walkFileTree(startDirectory, new SimpleFileVisitor<>() {
-                        @Override
-                        public FileVisitResult preVisitDirectory(final Path directory, final BasicFileAttributes attrs)
-                                throws IOException {
-                            directoriesOfWatchKeys.put(directory.register(watchService,
-                                    ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE), directory);
-                            return CONTINUE;
-                        }
-                    });
-                }
-            });
+                throwIfUnchecked(throwable);
+                throw new RuntimeException(throwable);
+            }
+            this.watchService = watchService;
         } else {
             watchService = null;
         }
