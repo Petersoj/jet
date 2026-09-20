@@ -50,7 +50,8 @@ public final class JetServerTest {
         try (final var jetServer = JetServer.builder()
                 .router(_ -> { throw new StatusException(status); })
                 .routerThrowableHandler((handle, statusCode, statusDescription, _) ->
-                        handle.getResponse().responseText(statusCode, statusDescription)).build();
+                        handle.getResponse().responseText(statusCode, statusDescription))
+                .build();
                 final var httpClient = HttpClient.newHttpClient()) {
             assertEquals(status.getCode(), httpClient.send(HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:" + jetServer.getHttpPort()))
