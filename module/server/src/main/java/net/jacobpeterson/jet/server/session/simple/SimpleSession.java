@@ -43,21 +43,24 @@ public class SimpleSession implements Session {
         return ImmutableSet.copyOf(map.keySet());
     }
 
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     @Override
-    public <T> @Nullable T get(final String key, final Class<T> clazz) {
-        return clazz.cast(map.get(key));
+    public <T> @Nullable T get(final String key) {
+        return (T) map.get(key);
     }
 
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     @Override
-    public <T> @Nullable T set(final String key, @Nullable final Object value, final Class<T> clazz) {
+    public <T> @Nullable T set(final String key, @Nullable final Object value) {
         if (value == null) {
-            return remove(key, clazz);
+            return remove(key);
         }
-        return clazz.cast(map.put(key, value));
+        return (T) map.put(key, value);
     }
 
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     @Override
-    public <T> @Nullable T remove(final String key, final Class<T> clazz) {
-        return clazz.cast(map.remove(key));
+    public <T> @Nullable T remove(final String key) {
+        return (T) map.remove(key);
     }
 }

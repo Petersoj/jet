@@ -27,35 +27,35 @@ public interface Session {
     /**
      * Gets a value for the given <code>key</code>.
      *
-     * @param <T>   the existing value type
-     * @param key   the key {@link String}
-     * @param clazz the existing value type {@link Class}
+     * @param <T> the existing value type
+     * @param key the key {@link String}
      *
      * @return the value for the given <code>key</code>, or <code>null</code> if the given <code>key</code> doesn't
      * exist
      */
-    <T> @Nullable T get(final String key, final Class<T> clazz);
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    <T> @Nullable T get(final String key);
 
     /**
      * Sets the given <code>value</code> for the given <code>key</code>.
      *
      * @param <T>   the existing value type
      * @param key   the key {@link String}
-     * @param value the value, or <code>null</code> to {@link #remove(String, Class)}
-     * @param clazz the existing value type {@link Class}
+     * @param value the value, or <code>null</code> to {@link #remove(String)}
      *
      * @return the existing value for the given <code>key</code>, or <code>null</code> if there was no existing value
      */
-    <T> @Nullable T set(final String key, final @Nullable Object value, final Class<T> clazz);
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    <T> @Nullable T set(final String key, final @Nullable Object value);
 
     /**
      * Removes the <code>value</code> for the given <code>key</code>.
      *
-     * @param <T>   the existing value type
-     * @param key   the key {@link String}
-     * @param clazz the existing value type {@link Class}
+     * @param <T> the existing value type
+     * @param key the key {@link String}
      *
      * @return the existing value for the given <code>key</code>, or <code>null</code> if there was no existing value
      */
-    <T> @Nullable T remove(final String key, final Class<T> clazz);
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    <T> @Nullable T remove(final String key);
 }
