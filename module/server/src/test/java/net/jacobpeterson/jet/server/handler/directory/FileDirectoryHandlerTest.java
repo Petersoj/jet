@@ -1,5 +1,6 @@
 package net.jacobpeterson.jet.server.handler.directory;
 
+import net.jacobpeterson.jet.common.http.header.range.Range;
 import net.jacobpeterson.jet.server.JetServer;
 import net.jacobpeterson.jet.server.route.simple.pathstartswith.PathStartsWithRoute;
 import net.jacobpeterson.jet.server.router.simple.ImmutableSimpleRouter;
@@ -18,6 +19,7 @@ import static java.net.http.HttpResponse.BodyHandlers.ofString;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.writeString;
 import static java.time.Duration.ofSeconds;
+import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
 import static net.jacobpeterson.jet.common.http.status.Status.NOT_FOUND_404;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,7 +35,7 @@ public final class FileDirectoryHandlerTest {
         final var indexHtmlPath = tempDir.resolve(indexHtmlFilename);
         writeString(indexHtmlPath, indexHtmlContent);
         final var path = "/path";
-        try (final var simpleMutable = FileDirectoryHandler.simpleMutable(tempDir, path, true);
+        try (final var simpleMutable = FileDirectoryHandler.simpleMutable(tempDir, path, false);
                 final var jetServer = JetServer.builder()
                         .router(ImmutableSimpleRouter.builder()
                                 .addLast(PathStartsWithRoute.builder().path(path + "/").build(), simpleMutable)
@@ -41,41 +43,55 @@ public final class FileDirectoryHandlerTest {
                         .build();
                 final var httpClient = HttpClient.newBuilder().followRedirects(ALWAYS).build()) {
             assertTrue(simpleMutable.isWatchServiceEnabled());
+            final var host = "http://localhost:" + jetServer.getHttpPort();
             assertEquals(indexHtmlContent, httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path))
+                    .uri(URI.create(host + path))
+                    .GET()
+                    .build(), ofString()).body());
+            assertEquals(indexHtmlContent.substring(0, 1), httpClient.send(HttpRequest.newBuilder()
+                    .uri(URI.create(host + path))
+                    .GET()
+                    .header(RANGE.toString(), Range.builder()
+                            .start(0L)
+                            .end(0L)
+                            .build().toString())
+                    .build(), ofString()).body());
+            assertEquals(indexHtmlContent.substring(2), httpClient.send(HttpRequest.newBuilder()
+                    .uri(URI.create(host + path))
+                    .GET()
+                    .header(RANGE.toString(), Range.builder().start(2L).build().toString())
+                    .build(), ofString()).body());
+            assertEquals(indexHtmlContent, httpClient.send(HttpRequest.newBuilder()
+                    .uri(URI.create(host + path + "/" + indexFilename))
                     .GET()
                     .build(), ofString()).body());
             assertEquals(indexHtmlContent, httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path + "/" + indexFilename))
-                    .GET()
-                    .build(), ofString()).body());
-            assertEquals(indexHtmlContent, httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path + "/" + indexHtmlFilename))
+                    .uri(URI.create(host + path + "/" + indexHtmlFilename))
                     .GET()
                     .build(), ofString()).body());
             assertEquals(NOT_FOUND_404.getCode(), httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + "/non-existant"))
+                    .uri(URI.create(host + "/non-existant"))
                     .GET()
                     .build(), ofString()).statusCode());
             assertEquals(NOT_FOUND_404.getCode(), httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path + "/non-existant"))
+                    .uri(URI.create(host + path + "/non-existant"))
                     .GET()
                     .build(), ofString()).statusCode());
             final var newIndexHtmlContent = "<html><body><h1>new index.html</h1></body></html>";
             writeString(indexHtmlPath, newIndexHtmlContent);
             sleep(ofSeconds(2));
             assertEquals(newIndexHtmlContent, httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path))
+                    .uri(URI.create(host + path))
                     .GET()
                     .build(), ofString()).body());
             delete(indexHtmlPath);
             assertEquals(NOT_FOUND_404.getCode(), httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path))
+                    .uri(URI.create(host + path))
                     .GET()
                     .build(), ofString()).statusCode());
             sleep(ofSeconds(2));
             assertEquals(NOT_FOUND_404.getCode(), httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + jetServer.getHttpPort() + path))
+                    .uri(URI.create(host + path))
                     .GET()
                     .build(), ofString()).statusCode());
         }
