@@ -84,7 +84,7 @@ public final class PathExactRoute implements Route {
         if (schemeEnum != null && schemeEnum != requestUrl.getSchemeEnum()) {
             return null;
         }
-        if (host != null && host.equalsIgnoreCase(requestUrl.getHost())) {
+        if (host != null && !host.equalsIgnoreCase(requestUrl.getHost())) {
             return null;
         }
         final String requestPath;
