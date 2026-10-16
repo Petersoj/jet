@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static net.jacobpeterson.jet.common.http.header.cookie.CookieSameSite.NONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -198,7 +199,7 @@ public final class CookieTest {
             assertEquals("a=b; SameSite=None", Cookie.builder()
                     .name("a")
                     .value("b")
-                    .sameSite(CookieSameSite.NONE)
+                    .sameSite(NONE)
                     .build().toString());
         }
 
@@ -456,6 +457,11 @@ public final class CookieTest {
                 .name("a")
                 .value("b")
                 .secure()
+                .build().toResponseString());
+        assertEquals("a=b; SameSite=None", Cookie.builder()
+                .name("a")
+                .value("b")
+                .sameSite(NONE)
                 .build().toResponseString());
     }
 

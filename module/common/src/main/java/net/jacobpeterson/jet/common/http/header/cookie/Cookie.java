@@ -97,6 +97,16 @@ public final class Cookie {
             Splitter.on(REQUEST_COOKIE_NAME_VALUE_DELIMITER).limit(2).trimResults();
 
     /**
+     * The response cookie attribute delimiter: <code>;</code>
+     */
+    public static final String RESPONSE_COOKIE_ATTRIBUTE_DELIMITER = ";";
+
+    /**
+     * The response cookie {@link #getAttribute(String)} key-value delimiter: <code>=</code>
+     */
+    public static final String RESPONSE_COOKIE_ATTRIBUTE_KEY_VALUE_DELIMITER = "=";
+
+    /**
      * Parses the given {@link Header#COOKIE} value {@link String} into a {@link String} {@link ImmutableMap}.
      *
      * @param requestCookies the {@link Header#COOKIE} value {@link String}
@@ -534,6 +544,11 @@ public final class Cookie {
         return new Builder(HttpCookie.build(httpCookie));
     }
 
+    private void checkValidNameAndValue(final String name, final String value) {
+        requireValidRFC2616Token(name, "ERROR");
+        requireValidRFC6265CookieValue(value);
+    }
+
     /**
      * @return internally-cached
      * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies#see_also">RFC6265</a>
@@ -546,9 +561,8 @@ public final class Cookie {
     public String toRequestString() throws IllegalArgumentException {
         if (requestString == null) {
             final var name = getName();
-            requireValidRFC2616Token(name, "ERROR");
             final var value = getValue();
-            requireValidRFC6265CookieValue(value);
+            checkValidNameAndValue(name, value);
             requestString = name + REQUEST_COOKIE_NAME_VALUE_DELIMITER + value;
         }
         return requestString;
@@ -564,7 +578,19 @@ public final class Cookie {
      */
     public String toResponseString() throws IllegalArgumentException {
         if (responseString == null) {
-            responseString = getRFC6265SetCookie(httpCookie);
+            final var name = getName();
+            final var value = getValue();
+            checkValidNameAndValue(name, value);
+            final var responseString = new StringBuilder();
+            responseString.append(name).append(RESPONSE_COOKIE_ATTRIBUTE_KEY_VALUE_DELIMITER).append(value);
+            for (final var attribute : getAttributes().entrySet()) {
+                responseString.append(RESPONSE_COOKIE_ATTRIBUTE_DELIMITER).append(' ').append(attribute.getKey());
+                final var cookieAttribute = CookieAttribute.forString(attribute.getKey());
+                if (cookieAttribute != SECURE && cookieAttribute != HTTP_ONLY && cookieAttribute != PARTITIONED) {
+                    responseString.append(RESPONSE_COOKIE_ATTRIBUTE_KEY_VALUE_DELIMITER).append(attribute.getValue());
+                }
+            }
+            this.responseString = responseString.toString();
         }
         return responseString;
     }
