@@ -103,8 +103,8 @@ import static net.jacobpeterson.jet.openapiannotationsplugin.gson.serializer.ann
 public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
 
     private static final ImmutableMap<String, String> SCHEMA_FILENAMES_OF_URLS = ImmutableMap.of(
-            $SCHEMA_3_1, "oas-3.1-schema-2025-11-23.json",
-            $SCHEMA_3_2, "oas-3.2-schema-2025-11-23.json");
+            $SCHEMA_3_1, "oas-3.1-schema-2026-08-03.json",
+            $SCHEMA_3_2, "oas-3.2-schema-2026-08-30.json");
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$SCHEMA = "$schema";
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$DEFS = "$defs";
     private static final @SuppressWarnings("IdentifierName") String JSON_KEY_$REF = "$ref";
