@@ -41,7 +41,6 @@ import static net.jacobpeterson.jet.common.http.header.cookie.CookieAttribute.SE
 import static org.eclipse.jetty.http.HttpCookie.asJavaNetHttpCookie;
 import static org.eclipse.jetty.http.Syntax.requireValidRFC2616Token;
 import static org.eclipse.jetty.http.Syntax.requireValidRFC6265CookieValue;
-import static org.eclipse.jetty.server.HttpCookieUtils.getRFC6265SetCookie;
 
 /**
  * {@link Cookie} is an immutable class that represents a standardized HTTP {@link Header#SET_COOKIE}. Internally, this
@@ -189,9 +188,15 @@ public final class Cookie {
             this.httpCookieBuilder = httpCookieBuilder;
         }
 
-        private void requireHttpCookieBuilder(final boolean require) {
-            checkArgument(require == (httpCookieBuilder != null), "`Cookie.Builder` `name()` and `value()` methods %s",
-                    (require ? "must be called first" : "can only be called once"));
+        private void requireNullHttpCookieBuilder() {
+            checkArgument(httpCookieBuilder == null,
+                    "`Cookie.Builder` `name()` and `value()` methods can only be called once");
+        }
+
+        private HttpCookie.Builder requireHttpCookieBuilder() {
+            checkArgument(httpCookieBuilder != null,
+                    "`Cookie.Builder` `name()` and `value()` methods must be called first");
+            return httpCookieBuilder;
         }
 
         /**
@@ -212,7 +217,7 @@ public final class Cookie {
          * @see #getName()
          */
         public Builder name(final String name) {
-            requireHttpCookieBuilder(false);
+            requireNullHttpCookieBuilder();
             this.name = name;
             return this;
         }
@@ -227,7 +232,7 @@ public final class Cookie {
          * @see #getValue()
          */
         public Builder value(final String value) {
-            requireHttpCookieBuilder(false);
+            requireNullHttpCookieBuilder();
             checkArgument(name != null, "`name()` must be called before `value()`");
             httpCookieBuilder = HttpCookie.build(name, value);
             return this;
@@ -256,30 +261,24 @@ public final class Cookie {
         /**
          * @see #getAttribute(String)
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder attribute(final String name, final String value) {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.attribute(name, requireNonNull(value));
+            requireHttpCookieBuilder().attribute(name, requireNonNull(value));
             return this;
         }
 
         /**
          * @see #getDomain()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder domain(final String domain) {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.domain(requireNonNull(domain));
+            requireHttpCookieBuilder().domain(requireNonNull(domain));
             return this;
         }
 
         /**
          * @see #isHttpOnly()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder httpOnly() {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.httpOnly(true);
+            requireHttpCookieBuilder().httpOnly(true);
             return this;
         }
 
@@ -293,30 +292,24 @@ public final class Cookie {
         /**
          * @see #getMaxAge()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder maxAge(final long maxAge) {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.maxAge(maxAge);
+            requireHttpCookieBuilder().maxAge(maxAge);
             return this;
         }
 
         /**
          * @see #getPath()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder path(final String path) {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.path(requireNonNull(path)); // `requireNonNull()` prevents path resetting
+            requireHttpCookieBuilder().path(requireNonNull(path)); // `requireNonNull()` prevents path resetting
             return this;
         }
 
         /**
          * @see #getSameSite()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder sameSite(final CookieSameSite cookieSameSite) {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.sameSite(switch (cookieSameSite) {
+            requireHttpCookieBuilder().sameSite(switch (cookieSameSite) {
                 case STRICT -> HttpCookie.SameSite.STRICT;
                 case LAX -> HttpCookie.SameSite.LAX;
                 case NONE -> HttpCookie.SameSite.NONE;
@@ -327,20 +320,16 @@ public final class Cookie {
         /**
          * @see #isSecure()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder secure() {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.secure(true);
+            requireHttpCookieBuilder().secure(true);
             return this;
         }
 
         /**
          * @see #isPartitioned()
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Builder partitioned() {
-            requireHttpCookieBuilder(true);
-            httpCookieBuilder.partitioned(true);
+            requireHttpCookieBuilder().partitioned(true);
             return this;
         }
 
@@ -349,10 +338,8 @@ public final class Cookie {
          *
          * @return the built {@link Cookie}
          */
-        @SuppressWarnings({"NullAway", "DataFlowIssue"})
         public Cookie build() {
-            requireHttpCookieBuilder(true);
-            return new Cookie(httpCookieBuilder.build());
+            return new Cookie(requireHttpCookieBuilder().build());
         }
     }
 
