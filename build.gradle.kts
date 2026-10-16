@@ -52,10 +52,9 @@ jreleaser {
         }
     }
 }
-subprojects {
-    tasks.configureEach {
-        rootProject.tasks.jreleaserFullRelease.configure {
-            mustRunAfter(this@configureEach)
-        }
+
+subprojects.forEach { subproject ->
+    tasks.jreleaserFullRelease.configure {
+        dependsOn(subproject.tasks.matching { it.name == "build" || it.name == "publish" })
     }
 }

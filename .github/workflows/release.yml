@@ -17,8 +17,8 @@ jobs:
           distribution: corretto
           cache: gradle
           cache-dependency-path: gradle/wrapper/gradle-wrapper.properties
-      - name: Gradle Build and Release
-        run: ./gradlew clean build publish publishPlugins jreleaserFullRelease --no-daemon --no-configuration-cache
+      - name: Gradle Full Release
+        run: ./gradlew clean publishPlugins jreleaserFullRelease --no-daemon --no-configuration-cache
         env:
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
