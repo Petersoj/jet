@@ -6,7 +6,7 @@ import java.lang.System.getenv
 
 plugins {
     id("module-common")
-    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.1.0"
+    id("io.github.gmazzo.gradle.testkit.jacoco") version "1.1.2"
     signing
     id("com.gradle.plugin-publish") version "2.2.1"
     id("org.gradle.plugin-compatibility") version "1.1.0"
@@ -19,14 +19,14 @@ val jsonSchemaGeneratorVersion = "5.0.0"
 dependencies {
     api(project(":module:openapi-annotations"))
 
-    implementation("com.google.code.gson:gson:2.14.0")
+    implementation("com.google.code.gson:gson:2.15.0")
 
     api("com.github.victools:jsonschema-generator:$jsonSchemaGeneratorVersion")
     api("com.github.victools:jsonschema-module-jackson:$jsonSchemaGeneratorVersion")
 
-    implementation("com.networknt:json-schema-validator:3.0.7")
+    implementation("com.networknt:json-schema-validator:3.0.9")
 }
-// Gradle Test Kit already provides an SLF4j binding
+// Gradle Test Kit already provides an SLF4J binding
 configurations.testRuntimeOnly {
     exclude("ch.qos.logback", "logback-classic")
 }

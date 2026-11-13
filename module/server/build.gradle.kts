@@ -4,14 +4,14 @@ plugins {
 
 description = "A simple, lightweight, modern, turnkey, Java web server library."
 
-val caffeineVersion = "3.2.4"
+val caffeineVersion = "3.3.1"
 
 dependencies {
     api(project(":module:common"))
 
     api("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
 
-    val jettyVersion = "12.1.13"
+    val jettyVersion = "12.1.15"
     implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
     implementation("org.eclipse.jetty:jetty-alpn-java-server:${jettyVersion}")
     implementation("org.eclipse.jetty.http2:jetty-http2-server:${jettyVersion}")
