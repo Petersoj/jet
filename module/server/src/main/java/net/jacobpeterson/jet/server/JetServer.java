@@ -44,6 +44,10 @@ import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import javax.crypto.Cipher;
+import javax.crypto.EncryptedPrivateKeyInfo;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -57,12 +61,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyFactory;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -78,6 +78,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getCausalChain;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.lang.Long.parseLong;
 import static java.lang.Runtime.getRuntime;
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -92,6 +93,7 @@ import static java.util.Collections.synchronizedSet;
 import static java.util.Locale.ROOT;
 import static java.util.concurrent.ForkJoinPool.commonPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static javax.crypto.Cipher.DECRYPT_MODE;
 import static lombok.AccessLevel.PRIVATE;
 import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_ENCODING;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
@@ -245,13 +247,18 @@ public final class JetServer implements AutoCloseable {
              * The private key {@link String}.
              */
             String privateKey;
+
+            /**
+             * The passphrase {@link String} of the {@link #getPrivateKey()}, or <code>null</code>.
+             */
+            @Nullable String passphrase;
         }
 
         /**
          * Calls {@link #reloadSslPeriod(Duration)} with a {@link Duration} of <code>1 day</code>. Calls
          * {@link #sslDirectory(Path, Predicate, Predicate)} with <code>sslDirectory</code> set to
-         * <code>/etc/letsencrypt/live/</code> and <code>isCertificateChain</code> set to test for
-         * <code>fullchain.pem</code> filename and <code>isPrivateKey</code> set to test for <code>privkey.pem</code>
+         * <code>/etc/letsencrypt/live/</code>, <code>isCertificateChain</code> set to test for
+         * <code>fullchain.pem</code> filename, and <code>isPrivateKey</code> set to test for <code>privkey.pem</code>
          * filename.
          *
          * @return {@link #sslDirectory(Path, Predicate, Predicate)}
@@ -264,18 +271,29 @@ public final class JetServer implements AutoCloseable {
         }
 
         /**
+         * @return {@link #sslDirectory(Path, Predicate, Predicate, String)} with <code>passphrase</code> set to
+         * <code>null</code>
+         */
+        public Builder sslDirectory(final Path sslDirectory, final Predicate<Path> isCertificateChain,
+                final Predicate<Path> isPrivateKey) {
+            return sslDirectory(sslDirectory, isCertificateChain, isPrivateKey, null);
+        }
+
+        /**
          * Uses {@link Files#walkFileTree(Path, Set, int, FileVisitor)} to discover SSL certificate files in the given
-         * <code>sslDirectory</code>.
+         * <code>sslDirectory</code>. There should be exactly one certificate chain file and exactly one private key
+         * file in a directory.
          *
          * @param sslDirectory       the directory {@link Path} containing SSL certificate files
          * @param isCertificateChain the {@link Predicate} to test if a {@link Path} is
          *                           {@link SslPem#getCertificateChain()}
          * @param isPrivateKey       the {@link Predicate} to test if a {@link Path} is {@link SslPem#getPrivateKey()}
+         * @param passphrase         the {@link SslPem#getPassphrase()}
          *
          * @return {@link #sslPems(Supplier)}
          */
         public Builder sslDirectory(final Path sslDirectory, final Predicate<Path> isCertificateChain,
-                final Predicate<Path> isPrivateKey) {
+                final Predicate<Path> isPrivateKey, final @Nullable String passphrase) {
             return sslPems(() -> {
                 final var certificateChains = new ArrayList<String>();
                 final var privateKeys = new ArrayList<String>();
@@ -305,19 +323,28 @@ public final class JetServer implements AutoCloseable {
                         "Found %s certificates, but only %s private keys", certificateChainsSize, privateKeysSize);
                 final var sslPems = new ArrayList<SslPem>(certificateChainsSize);
                 for (var index = 0; index < certificateChainsSize; index++) {
-                    sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index)));
+                    sslPems.add(new SslPem(certificateChains.get(index), privateKeys.get(index), passphrase));
                 }
                 return sslPems;
             });
         }
 
         /**
-         * @return {@link #sslPem(Supplier)} using {@link Files#readString(Path, Charset)}
+         * @return {@link #sslPem(Path, Path, String)} with <code>passphrase</code> set to <code>null</code>
          */
         public Builder sslPem(final Path certificateChain, final Path privateKey) {
+            return sslPem(certificateChain, privateKey, null);
+        }
+
+        /**
+         * @return {@link #sslPem(Supplier)} with {@link SslPem#SslPem(String, String, String)} using
+         * {@link Files#readString(Path, Charset)}
+         */
+        public Builder sslPem(final Path certificateChain, final Path privateKey, final @Nullable String passphrase) {
             return sslPem(() -> {
                 try {
-                    return new SslPem(readString(certificateChain, US_ASCII), readString(privateKey, US_ASCII));
+                    return new SslPem(readString(certificateChain, US_ASCII), readString(privateKey, US_ASCII),
+                            passphrase);
                 } catch (final IOException ioException) {
                     throw new UncheckedIOException(ioException);
                 }
@@ -325,10 +352,18 @@ public final class JetServer implements AutoCloseable {
         }
 
         /**
-         * @return {@link #sslPem(SslPem)} {@link SslPem#SslPem(String, String)}
+         * @return {@link #sslPem(String, String, String)} with <code>passphrase</code> set to <code>null</code>
          */
         public Builder sslPem(final String certificateChain, final String privateKey) {
-            return sslPem(new SslPem(certificateChain, privateKey));
+            return sslPem(certificateChain, privateKey, null);
+        }
+
+        /**
+         * @return {@link #sslPem(SslPem)} {@link SslPem#SslPem(String, String, String)}
+         */
+        public Builder sslPem(final String certificateChain, final String privateKey,
+                final @Nullable String passphrase) {
+            return sslPem(new SslPem(certificateChain, privateKey, passphrase));
         }
 
         /**
@@ -876,15 +911,28 @@ public final class JetServer implements AutoCloseable {
                 for (final var sslPem : sslPemSupplier.get()) {
                     final var certificates = certificateFactory.generateCertificates(new ByteArrayInputStream(
                             sslPem.certificateChain.getBytes(US_ASCII))).toArray(Certificate[]::new);
-                    final var privateKey = KeyFactory.getInstance(certificates[0].getPublicKey().getAlgorithm())
-                            .generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(
-                                    SSL_PEM_PRIVATE_KEY_STRIP_PATTERN.matcher(sslPem.privateKey).replaceAll(""))));
-                    keyStore.setKeyEntry(String.valueOf(keyStore.size()), privateKey, null, certificates);
+                    final var privateKeyBytes = Base64.getDecoder().decode(
+                            SSL_PEM_PRIVATE_KEY_STRIP_PATTERN.matcher(sslPem.privateKey).replaceAll(""));
+                    final PKCS8EncodedKeySpec privateKeySpec;
+                    final var passphrase = sslPem.passphrase;
+                    if (passphrase != null) {
+                        final var encryptedPrivateKeyInfo = new EncryptedPrivateKeyInfo(privateKeyBytes);
+                        final var cipher = Cipher.getInstance(encryptedPrivateKeyInfo.getAlgName());
+                        cipher.init(DECRYPT_MODE,
+                                SecretKeyFactory.getInstance(encryptedPrivateKeyInfo.getAlgName())
+                                        .generateSecret(new PBEKeySpec(passphrase.toCharArray())),
+                                encryptedPrivateKeyInfo.getAlgParameters());
+                        privateKeySpec = encryptedPrivateKeyInfo.getKeySpec(cipher);
+                    } else {
+                        privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+                    }
+                    keyStore.setKeyEntry(String.valueOf(keyStore.size()), KeyFactory.getInstance(certificates[0]
+                            .getPublicKey().getAlgorithm()).generatePrivate(privateKeySpec), null, certificates);
                 }
             }
             sslContextFactory.setKeyStore(keyStore);
-        } catch (final CertificateException | NoSuchAlgorithmException | InvalidKeySpecException | KeyStoreException |
-                IOException exception) {
+        } catch (final Exception exception) {
+            throwIfUnchecked(exception);
             throw new RuntimeException(exception);
         }
     }
