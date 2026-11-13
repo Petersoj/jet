@@ -24,6 +24,7 @@ import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Long.parseLong;
+import static java.lang.Math.max;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
@@ -303,7 +304,7 @@ public final class Cookie {
          * @see #getMaxAge()
          */
         public Builder maxAge(final long maxAge) {
-            requireHttpCookieBuilder().maxAge(maxAge);
+            requireHttpCookieBuilder().maxAge(max(0, maxAge));
             return this;
         }
 
@@ -469,8 +470,8 @@ public final class Cookie {
     }
 
     /**
-     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#MAX_AGE} parsed into
-     * {@link Long}
+     * @return internally-cached {@link #getAttribute(CookieAttribute)} {@link CookieAttribute#MAX_AGE} (never negative)
+     * parsed into {@link Long}
      */
     public @Nullable Long getMaxAge() {
         if (maxAge == null) {

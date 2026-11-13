@@ -40,11 +40,11 @@ public final class CookieTest {
     @Test
     public void parseResponseCookie() {
         assertEquals("a=b", Cookie.parseResponseCookie("a=b").toString());
+        assertEquals("a=b", Cookie.parseResponseCookie("a=b; sameSITE=invalid").toString());
+        assertEquals("a=b", Cookie.parseResponseCookie("a=b; Max-Age=invalid").toString());
         assertEquals("a=b; SameSite=Strict", Cookie.parseResponseCookie("a=b; SameSite=Strict").toString());
         assertEquals("a=b; SameSite=Strict", Cookie.parseResponseCookie("a=b; samesite=strict").toString());
         assertThrows(IllegalArgumentException.class, () -> Cookie.parseResponseCookie("\u0000=b"));
-        assertThrows(IllegalArgumentException.class, () -> Cookie.parseResponseCookie("a=b; SameSite=invalid"));
-        assertThrows(IllegalArgumentException.class, () -> Cookie.parseResponseCookie("a=b; Max-Age=invalid"));
     }
 
     @Test
@@ -359,7 +359,7 @@ public final class CookieTest {
                 .value("b")
                 .maxAge(0)
                 .build().getMaxAge());
-        assertEquals(-1, Cookie.builder()
+        assertEquals(0, Cookie.builder()
                 .name("a")
                 .value("b")
                 .maxAge(-1)
