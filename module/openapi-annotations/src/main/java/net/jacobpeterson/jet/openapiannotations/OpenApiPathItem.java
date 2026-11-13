@@ -69,6 +69,7 @@ public @interface OpenApiPathItem {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#path-item-ref">spec.openapis.org</a>
      */
+    @SuppressWarnings("IdentifierName")
     String $ref() default "";
 
     /**

@@ -2,7 +2,6 @@ package net.jacobpeterson.jet.server.handle.response.compression;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Value;
 import net.jacobpeterson.jet.common.http.header.Header;
@@ -24,7 +23,7 @@ import static net.jacobpeterson.jet.common.http.header.contentencoding.Compressi
  */
 @NullMarked
 @Immutable
-@Value @Builder(toBuilder = true)
+@Value @lombok.Builder(toBuilder = true)
 public class CompressionConfig {
 
     /**

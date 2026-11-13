@@ -1,7 +1,6 @@
 package net.jacobpeterson.jet.server.handle.request.multipart;
 
 import com.google.errorprone.annotations.Immutable;
-import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Value;
 import org.jspecify.annotations.NullMarked;
@@ -14,7 +13,7 @@ import java.nio.file.Path;
  */
 @NullMarked
 @Immutable
-@Value @Builder(toBuilder = true)
+@Value @lombok.Builder(toBuilder = true)
 public class MultipartConfig {
 
     /**

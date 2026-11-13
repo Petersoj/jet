@@ -1,6 +1,5 @@
 package net.jacobpeterson.jet.server.handler.redirect;
 
-import lombok.Builder;
 import lombok.Getter;
 import net.jacobpeterson.jet.common.http.url.Url;
 import net.jacobpeterson.jet.server.handle.Handle;
@@ -17,7 +16,7 @@ import static com.google.common.base.Preconditions.checkState;
  * thrown to expose the infinite redirect.
  */
 @NullMarked
-@Getter @Builder(toBuilder = true)
+@Getter @lombok.Builder(toBuilder = true)
 public class HostRedirectHandler implements Handler {
 
     /**

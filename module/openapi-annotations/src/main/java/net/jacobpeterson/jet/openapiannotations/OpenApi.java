@@ -107,6 +107,7 @@ public @interface OpenApi {
      * <p>
      * Note: defaults to {@link #$SCHEMA_DEFAULT}.
      */
+    @SuppressWarnings("IdentifierName")
     String $schema() default "";
 
     /**
@@ -140,6 +141,7 @@ public @interface OpenApi {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#oas-self">spec.openapis.org</a>
      */
+    @SuppressWarnings("IdentifierName")
     String $self() default "";
 
     /**

@@ -158,6 +158,7 @@ public abstract class JetOpenApiAnnotationsTask extends DefaultTask {
     @OutputDirectories
     public abstract DirectoryProperty getOutputDirectory();
 
+    @SuppressWarnings("IdentifierName")
     @TaskAction
     public void run() {
         final var classLoaderUris = ImmutableSet.<URI>builder();

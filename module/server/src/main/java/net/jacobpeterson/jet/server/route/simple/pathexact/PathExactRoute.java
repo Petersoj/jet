@@ -1,7 +1,6 @@
 package net.jacobpeterson.jet.server.route.simple.pathexact;
 
 import com.google.errorprone.annotations.Immutable;
-import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -21,7 +20,7 @@ import static lombok.EqualsAndHashCode.CacheStrategy.LAZY;
  */
 @NullMarked
 @Immutable
-@Getter @Builder(toBuilder = true) @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
+@Getter @lombok.Builder(toBuilder = true) @EqualsAndHashCode(cacheStrategy = LAZY) @ToString
 public final class PathExactRoute implements Route {
 
     /**

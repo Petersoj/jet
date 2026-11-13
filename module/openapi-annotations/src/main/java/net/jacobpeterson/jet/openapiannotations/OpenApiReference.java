@@ -61,6 +61,7 @@ public @interface OpenApiReference {
      *
      * @see <a href="https://spec.openapis.org/oas/v3.2.0.html#reference-ref">spec.openapis.org</a>
      */
+    @SuppressWarnings("IdentifierName")
     String $ref() default "";
 
     /**

@@ -3,7 +3,6 @@ package net.jacobpeterson.jet.server.handle.response.resource;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.errorprone.annotations.Immutable;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.Value;
@@ -51,7 +50,7 @@ import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
  */
 @NullMarked
 @Immutable
-@Getter @Builder(toBuilder = true) @ToString
+@Getter @lombok.Builder(toBuilder = true) @ToString
 public final class Resource {
 
     /**
