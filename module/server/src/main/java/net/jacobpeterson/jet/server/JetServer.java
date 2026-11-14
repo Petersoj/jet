@@ -153,6 +153,10 @@ public final class JetServer implements AutoCloseable {
         private int httpPort = 8080;
         private int httpsPort = 8443;
         private boolean http2 = true;
+        private @Nullable List<String> sslProtocols;
+        private boolean sslProtocolsSet;
+        private @Nullable List<String> sslCiphers;
+        private boolean sslCiphersSet;
         private @Nullable Duration reloadSslPeriod;
         private @Nullable Duration gracefulStopTimeout;
         private @Nullable Duration connectionIdleTimeout;
@@ -396,6 +400,24 @@ public final class JetServer implements AutoCloseable {
         }
 
         /**
+         * @see #getSslProtocols()
+         */
+        public Builder sslProtocols(final @Nullable List<String> sslProtocols) {
+            this.sslProtocols = sslProtocols;
+            sslProtocolsSet = true;
+            return this;
+        }
+
+        /**
+         * @see #getSslCiphers()
+         */
+        public Builder sslCiphers(final @Nullable List<String> sslCiphers) {
+            this.sslCiphers = sslCiphers;
+            sslCiphersSet = true;
+            return this;
+        }
+
+        /**
          * @see #getReloadSslPeriod()
          */
         public Builder reloadSslPeriod(final Duration reloadSslPeriod) {
@@ -451,6 +473,19 @@ public final class JetServer implements AutoCloseable {
                     httpPort,
                     httpsPort,
                     http2,
+                    !sslProtocolsSet ? ImmutableList.of("TLSv1.3", "TLSv1.2") :
+                            sslProtocols != null ? ImmutableList.copyOf(sslProtocols) : null,
+                    !sslCiphersSet ? ImmutableList.of(
+                            "TLS_AES_128_GCM_SHA256",
+                            "TLS_AES_256_GCM_SHA384",
+                            "TLS_CHACHA20_POLY1305_SHA256",
+                            "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                            "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                            "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+                            "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+                            "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256") :
+                            sslCiphers != null ? ImmutableList.copyOf(sslCiphers) : null,
                     reloadSslPeriod,
                     gracefulStopTimeout != null ? gracefulStopTimeout : ofMinutes(1),
                     connectionIdleTimeout != null ? connectionIdleTimeout : ofMinutes(1),
@@ -533,6 +568,36 @@ public final class JetServer implements AutoCloseable {
     private final @Getter boolean http2;
 
     /**
+     * The SSL/TLS protocols to use, or <code>null</code> to use JVM defaults.
+     * <p>
+     * Defaults to <code>"TLSv1.3", "TLSv1.2"</code>.
+     *
+     * @see <a href="https://docs.tlsref.org/server-side-tls.html#intermediate-compatibility">TLS Intermediate
+     * Compatibility</a>
+     */
+    private final @Getter @Nullable ImmutableList<String> sslProtocols;
+
+    /**
+     * The SSL/TLS ciphers to use, or <code>null</code> to use JVM defaults.
+     * <p>
+     * Defaults to <code>
+     * "TLS_AES_128_GCM_SHA256",
+     * "TLS_AES_256_GCM_SHA384",
+     * "TLS_CHACHA20_POLY1305_SHA256",
+     * "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+     * "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+     * "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+     * "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+     * "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+     * "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+     * </code>.
+     *
+     * @see <a href="https://docs.tlsref.org/server-side-tls.html#intermediate-compatibility">TLS Intermediate
+     * Compatibility</a>
+     */
+    private final @Getter @Nullable ImmutableList<String> sslCiphers;
+
+    /**
      * The period {@link Duration} to call {@link #reloadSsl()}, or <code>null</code> to disable.
      * <p>
      * Defaults to <code>null</code>.
@@ -599,6 +664,12 @@ public final class JetServer implements AutoCloseable {
             final var httpsConfiguration = new HttpConfiguration(httpConfiguration);
             httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
             sslContextFactory = new SslContextFactory.Server();
+            if (sslProtocols != null && !sslProtocols.isEmpty()) {
+                sslContextFactory.setIncludeProtocols(sslProtocols.toArray(String[]::new));
+            }
+            if (sslCiphers != null && !sslCiphers.isEmpty()) {
+                sslContextFactory.setIncludeCipherSuites(sslCiphers.toArray(String[]::new));
+            }
             setKeyStoreFromSslPemsSuppliers(sslContextFactory);
             final var http11Factory = new HttpConnectionFactory(httpsConfiguration);
             final ConnectionFactory[] httpsFactories;
