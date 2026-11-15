@@ -7,9 +7,7 @@ import net.jacobpeterson.jet.server.handle.response.Response;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
@@ -31,7 +29,7 @@ public class Sse {
     private final OutputStream bodyOutputStream;
 
     /**
-     * Calls {@link #send(String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
+     * Calls {@link #send(String, boolean)} with <code>logThrowable</code> set to <code>true</code>.
      */
     public boolean send(final String data) {
         return send(data, true);
@@ -40,12 +38,12 @@ public class Sse {
     /**
      * Calls {@link #send(String, String, boolean)} with <code>event</code> set to <code>null</code>.
      */
-    public boolean send(final String data, final boolean ignoreThrowable) {
-        return send(null, data, ignoreThrowable);
+    public boolean send(final String data, final boolean logThrowable) {
+        return send(null, data, logThrowable);
     }
 
     /**
-     * Calls {@link #send(String, String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
+     * Calls {@link #send(String, String, boolean)} with <code>logThrowable</code> set to <code>true</code>.
      */
     public boolean send(final @Nullable String event, final String data) {
         return send(event, data, true);
@@ -54,12 +52,12 @@ public class Sse {
     /**
      * Calls {@link #send(String, String, String, boolean)} with <code>id</code> set to <code>null</code>.
      */
-    public boolean send(final @Nullable String event, final String data, final boolean ignoreThrowable) {
-        return send(null, event, data, ignoreThrowable);
+    public boolean send(final @Nullable String event, final String data, final boolean logThrowable) {
+        return send(null, event, data, logThrowable);
     }
 
     /**
-     * Calls {@link #send(String, String, String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
+     * Calls {@link #send(String, String, String, boolean)} with <code>logThrowable</code> set to <code>true</code>.
      */
     public boolean send(final @Nullable String id, final @Nullable String event, final String data) {
         return send(id, event, data, true);
@@ -68,12 +66,11 @@ public class Sse {
     /**
      * Sends <code>data</code> with an optional <code>id</code> and <code>event</code>.
      *
-     * @param id              the optional ID {@link String}
-     * @param event           the optional event {@link String}
-     * @param data            the data {@link String}
-     * @param ignoreThrowable <code>true</code> if any {@link Throwable}s thrown internally should be ignored,
-     *                        <code>false</code> otherwise. Note that {@link Throwable}s thrown internally will always
-     *                        call {@link #close()}.
+     * @param id           the optional ID {@link String}
+     * @param event        the optional event {@link String}
+     * @param data         the data {@link String}
+     * @param logThrowable <code>true</code> if any {@link Throwable}s thrown internally should be logged instead of
+     *                     thrown. Note that {@link Throwable}s thrown internally will always call {@link #close()}.
      *
      * @return <code>true</code> if sent successfully, <code>false</code> otherwise
      *
@@ -82,27 +79,29 @@ public class Sse {
      * developer.mozilla.org</a>
      */
     public synchronized boolean send(final @Nullable String id, final @Nullable String event, final String data,
-            final boolean ignoreThrowable) {
+            final boolean logThrowable) {
         try {
+            final var line = new StringBuilder();
             if (id != null) {
-                writeLine("id", sanitize(id));
+                line.append("id: ").append(sanitize(id)).append('\n');
             }
             if (event != null) {
-                writeLine("event", sanitize(event));
+                line.append("event: ").append(sanitize(event)).append('\n');
             }
             for (final var dataLine : NEWLINE_SPLITTER.split(data)) {
-                writeLine("data", dataLine);
+                line.append("data: ").append(dataLine).append('\n');
             }
-            writeFlush();
+            bodyOutputStream.write(line.append('\n').toString().getBytes(UTF_8));
+            bodyOutputStream.flush();
             return true;
         } catch (final Throwable throwable) {
-            closeForThrowable(ignoreThrowable, throwable);
+            closeForThrowable(logThrowable, throwable);
             return false;
         }
     }
 
     /**
-     * Calls {@link #comment(String, boolean)} with <code>ignoreThrowable</code> set to <code>true</code>.
+     * Calls {@link #comment(String, boolean)} with <code>logThrowable</code> set to <code>true</code>.
      */
     public boolean comment(final String comment) {
         return comment(comment, true);
@@ -111,20 +110,19 @@ public class Sse {
     /**
      * Sends a comment.
      *
-     * @param comment         the comment {@link String}
-     * @param ignoreThrowable <code>true</code> if any {@link Throwable}s thrown internally should be ignored,
-     *                        <code>false</code> otherwise. Note that {@link Throwable}s thrown internally will always
-     *                        call {@link #close()}.
+     * @param comment      the comment {@link String}
+     * @param logThrowable <code>true</code> if any {@link Throwable}s thrown internally should be logged instead of
+     *                     thrown. Note that {@link Throwable}s thrown internally will always call {@link #close()}.
      *
      * @return <code>true</code> if sent successfully, <code>false</code> otherwise
      */
-    public synchronized boolean comment(final String comment, final boolean ignoreThrowable) {
+    public synchronized boolean comment(final String comment, final boolean logThrowable) {
         try {
-            writeLine("", sanitize(comment));
-            writeFlush();
+            bodyOutputStream.write((": " + sanitize(comment) + "\n\n").getBytes(UTF_8));
+            bodyOutputStream.flush();
             return true;
         } catch (final Throwable throwable) {
-            closeForThrowable(ignoreThrowable, throwable);
+            closeForThrowable(logThrowable, throwable);
             return false;
         }
     }
@@ -133,41 +131,41 @@ public class Sse {
         return input.replace('\n', ' ');
     }
 
-    private void writeLine(final String beforeColon, final String afterColon) throws IOException {
-        bodyOutputStream.write((beforeColon + ": " + afterColon + "\n").getBytes(UTF_8));
-    }
-
-    private void writeFlush() throws IOException {
-        bodyOutputStream.write('\n');
-        bodyOutputStream.flush();
-    }
-
-    private void closeForThrowable(final boolean ignoreThrowable, final Throwable throwable) {
-        Throwable closeThrowable = null;
+    private void closeForThrowable(final boolean logThrowable, final Throwable throwable) {
         try {
-            close();
-        } catch (final Throwable aCloseThrowable) {
-            closeThrowable = aCloseThrowable;
+            close(false);
+        } catch (final Throwable closeThrowable) {
+            throwable.addSuppressed(throwable);
         }
-        if (ignoreThrowable) {
-            LOGGER.debug("SSE ignored throwable", throwable);
-            throwCheckedOrUnchecked(closeThrowable);
-        } else {
-            if (closeThrowable != null) {
-                throwable.addSuppressed(throwable);
-            }
-            throwCheckedOrUnchecked(throwable);
-        }
+        handleIgnorableThrowable(logThrowable, throwable);
+    }
+
+    /**
+     * Calls {@link #close(boolean)} with <code>logThrowable</code> set to <code>true</code>.
+     */
+    public void close() {
+        close(true);
     }
 
     /**
      * Closes this {@link Sse} {@link Response}.
+     *
+     * @param logThrowable <code>true</code> if any {@link Throwable}s thrown internally should be logged instead of
+     *                     thrown. Note that {@link Throwable}s thrown internally will always call {@link #close()}.
      */
-    public void close() {
+    public void close(final boolean logThrowable) {
         try {
             bodyOutputStream.close();
-        } catch (final IOException ioException) {
-            throw new UncheckedIOException(ioException);
+        } catch (final Throwable throwable) {
+            handleIgnorableThrowable(logThrowable, throwable);
+        }
+    }
+
+    private void handleIgnorableThrowable(final boolean logThrowable, final Throwable throwable) {
+        if (logThrowable) {
+            LOGGER.debug("", throwable);
+        } else {
+            throwCheckedOrUnchecked(throwable);
         }
     }
 }
