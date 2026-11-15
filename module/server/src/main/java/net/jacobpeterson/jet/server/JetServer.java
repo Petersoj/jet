@@ -38,6 +38,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.GracefulHandler;
+import org.eclipse.jetty.util.Blocker;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.VirtualThreadPool;
@@ -52,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -112,7 +114,7 @@ import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.accumula
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.asBodyStreamException;
 import static org.eclipse.jetty.http.UriCompliance.UNSAFE;
-import static org.eclipse.jetty.io.Content.Sink.asOutputStream;
+import static org.eclipse.jetty.io.content.BufferedContentSink.FLUSH_BUFFER;
 import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.ERROR;
 
@@ -745,53 +747,54 @@ public final class JetServer implements AutoCloseable {
                     headers.forEach(jettyResponse.getHeaders()::add);
                     final var bodyOutputStreamApplier = response.getBodyOutputStreamApplier();
                     if (bodyOutputStreamApplier != null) {
-                        try (final var bodyOutputStream = asOutputStream(jettyResponse)) {
-                            bodyOutputStreamApplier.accept(new OutputStream() {
-                                @Override
-                                public void write(final int b) throws IOException {
-                                    try {
-                                        bodyOutputStream.write(b);
-                                    } catch (final Exception exception) {
-                                        throw asBodyStreamException(exception);
-                                    }
-                                }
+                        try (final var bodyOutputStream = new OutputStream() {
 
-                                @Override
-                                public void write(final byte[] b) throws IOException {
-                                    try {
-                                        bodyOutputStream.write(b);
-                                    } catch (final Exception exception) {
-                                        throw asBodyStreamException(exception);
-                                    }
-                                }
+                            // Below is sourced from `org.eclipse.jetty.io.Content.Sink.asOutputStream`
 
-                                @Override
-                                public void write(final byte[] b, final int off, final int len) throws IOException {
-                                    try {
-                                        bodyOutputStream.write(b, off, len);
-                                    } catch (final Exception exception) {
-                                        throw asBodyStreamException(exception);
-                                    }
-                                }
+                            private final Blocker.Shared block = new Blocker.Shared();
+                            private boolean closed;
 
-                                @Override
-                                public void flush() throws IOException {
-                                    try {
-                                        bodyOutputStream.flush();
-                                    } catch (final Exception exception) {
-                                        throw asBodyStreamException(exception);
-                                    }
-                                }
+                            @Override
+                            public void write(final int b) throws IOException {
+                                write(new byte[]{(byte) b}, 0, 1);
+                            }
 
-                                @Override
-                                public void close() throws IOException {
-                                    try {
-                                        bodyOutputStream.close();
-                                    } catch (final Exception exception) {
-                                        throw asBodyStreamException(exception);
-                                    }
+                            @Override
+                            public void write(final byte[] b, final int off, final int len) throws IOException {
+                                try (final var callback = block.callback()) {
+                                    jettyResponse.write(false, ByteBuffer.wrap(b, off, len), callback);
+                                    callback.block();
+                                } catch (final Exception exception) {
+                                    throw asBodyStreamException(exception);
                                 }
-                            });
+                            }
+
+                            @Override
+                            public void flush() throws IOException {
+                                try (final var callback = block.callback()) {
+                                    jettyResponse.write(false, FLUSH_BUFFER, callback);
+                                    callback.block();
+                                } catch (final Exception exception) {
+                                    throw asBodyStreamException(exception);
+                                }
+                            }
+
+                            @Override
+                            public void close() throws IOException {
+                                try (final var callback = block.callback()) {
+                                    if (closed) {
+                                        callback.succeeded();
+                                        return;
+                                    }
+                                    closed = true;
+                                    jettyResponse.write(true, null, callback);
+                                    callback.block();
+                                } catch (final Exception exception) {
+                                    throw asBodyStreamException(exception);
+                                }
+                            }
+                        }) {
+                            bodyOutputStreamApplier.accept(bodyOutputStream);
                         } catch (final Throwable throwable) {
                             if (getCausalChain(throwable).stream().anyMatch(cause ->
                                     cause instanceof BodyStreamException)) {
