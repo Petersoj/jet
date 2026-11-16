@@ -639,7 +639,10 @@ public final class JetServer implements AutoCloseable {
 
     private final ImmutableList<Supplier<List<SslPem>>> sslPemsSuppliers;
     private final Set<Runnable> stopListeners = synchronizedSet(new HashSet<>());
-    private volatile boolean stopCalled;
+    /**
+     * Whether {@link #stop()} has been called.
+     */
+    private volatile @Getter boolean stopCalled;
     private @Nullable Thread shutdownHook;
     private @Nullable Server server;
     private SslContextFactory.@Nullable Server sslContextFactory;
