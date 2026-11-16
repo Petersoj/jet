@@ -1,6 +1,7 @@
 package net.jacobpeterson.jet.server.handle.response.sse;
 
 import com.google.common.base.Splitter;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.jacobpeterson.jet.server.handle.response.Response;
@@ -27,6 +28,11 @@ public class Sse {
     private static final Splitter NEWLINE_SPLITTER = Splitter.on('\n');
 
     private final OutputStream bodyOutputStream;
+    /**
+     * Whether {@link #close(boolean)} has been called (either directly or due to
+     * {@link #send(String, String, String, boolean)} or {@link #comment(String, boolean)} throwing).
+     */
+    private volatile @Getter boolean closeCalled;
 
     /**
      * Calls {@link #send(String, boolean)} with <code>logThrowable</code> set to <code>true</code>.
@@ -135,7 +141,7 @@ public class Sse {
         try {
             close(false);
         } catch (final Throwable closeThrowable) {
-            throwable.addSuppressed(throwable);
+            throwable.addSuppressed(closeThrowable);
         }
         handleIgnorableThrowable(logThrowable, throwable);
     }
@@ -148,12 +154,14 @@ public class Sse {
     }
 
     /**
-     * Closes this {@link Sse} {@link Response}.
+     * Closes this {@link Sse} {@link Response} by closing the response body {@link OutputStream} and setting
+     * {@link #isCloseCalled()} to <code>true</code>.
      *
      * @param logThrowable <code>true</code> if any {@link Throwable}s thrown internally should be logged instead of
      *                     thrown. Note that {@link Throwable}s thrown internally will always call {@link #close()}.
      */
     public void close(final boolean logThrowable) {
+        closeCalled = true;
         try {
             bodyOutputStream.close();
         } catch (final Throwable throwable) {
