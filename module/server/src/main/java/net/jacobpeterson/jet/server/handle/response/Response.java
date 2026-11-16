@@ -796,43 +796,47 @@ public final class Response {
         bodyOutputStreamApplier = bodyOutputStream -> {
             bodyOutputStream.flush();
             final var sse = new Sse(bodyOutputStream);
-            if (keepAlivePeriod != null) {
-                if (keepAliveSeparateThread) {
-                    final var keepAliveFuture = new CompletableFuture<>();
-                    Thread.ofVirtual().start(() -> {
-                        try {
-                            sseKeepAlive(sse, keepAlivePeriod);
-                            keepAliveFuture.complete(null);
-                        } catch (final Throwable throwable) {
-                            keepAliveFuture.completeExceptionally(throwable);
-                        }
-                    });
-                    sseApplier.accept(sse);
-                    try {
-                        getUninterruptibly(keepAliveFuture);
-                    } catch (final ExecutionException executionException) {
-                        throwCheckedOrUnchecked(executionException.getCause());
-                    }
-                } else {
-                    sseApplier.accept(sse);
-                    sseKeepAlive(sse, keepAlivePeriod);
-                }
-            } else {
+            if (keepAlivePeriod == null) {
                 sseApplier.accept(sse);
+                return;
+            }
+            final var latch = new CountDownLatch(1);
+            final Runnable latchCountDown = latch::countDown;
+            final var jetServer = handle.getInternals().getJetServer();
+            try {
+                jetServer.addStopListener(latchCountDown);
+            } catch (final IllegalStateException illegalStateException) {
+                return;
+            }
+            addAfter(() -> jetServer.removeStopListener(latchCountDown));
+            if (!keepAliveSeparateThread) {
+                sseApplier.accept(sse);
+                sseKeepAliveLoop(sse, latch, keepAlivePeriod);
+                return;
+            }
+            final var keepAliveFuture = new CompletableFuture<>();
+            Thread.ofVirtual().start(() -> {
+                try {
+                    sseKeepAliveLoop(sse, latch, keepAlivePeriod);
+                    keepAliveFuture.complete(null);
+                } catch (final Throwable throwable) {
+                    keepAliveFuture.completeExceptionally(throwable);
+                }
+            });
+            sseApplier.accept(sse);
+            try {
+                getUninterruptibly(keepAliveFuture);
+            } catch (final ExecutionException executionException) {
+                throwCheckedOrUnchecked(executionException.getCause());
             }
         };
     }
 
-    private void sseKeepAlive(final Sse sse, final Duration keepAlivePeriod) {
-        final var latch = new CountDownLatch(1);
-        final Runnable latchCountDown = latch::countDown;
-        final var jetServer = handle.getInternals().getJetServer();
-        jetServer.addStopListener(latchCountDown);
-        addAfter(() -> jetServer.removeStopListener(latchCountDown));
-        while (sse.comment("")) {
+    private void sseKeepAliveLoop(final Sse sse, final CountDownLatch latch, final Duration keepAlivePeriod) {
+        do {
             if (awaitUninterruptibly(latch, keepAlivePeriod)) {
                 break;
             }
-        }
+        } while (sse.comment("keepalive"));
     }
 }
