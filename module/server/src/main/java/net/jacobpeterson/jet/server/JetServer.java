@@ -697,18 +697,12 @@ public final class JetServer implements AutoCloseable {
             @Override
             public boolean handle(final org.eclipse.jetty.server.Request jettyRequest,
                     final org.eclipse.jetty.server.Response jettyResponse, final Callback callback) {
-                handle(jettyRequest, jettyResponse);
-                callback.succeeded();
-                return true;
-            }
-
-            private void handle(final org.eclipse.jetty.server.Request jettyRequest,
-                    final org.eclipse.jetty.server.Response jettyResponse) {
                 // This check is still racy with `stop()`, but it decreases the likelihood of `addStopListener()` calls
                 // throwing after `stop()` is called
                 if (stopCalled) {
                     jettyResponse.setStatus(SERVICE_UNAVAILABLE_503.getCode());
-                    return;
+                    callback.succeeded();
+                    return true;
                 }
                 Handle handle = null;
                 try {
@@ -822,6 +816,8 @@ public final class JetServer implements AutoCloseable {
                         }
                     }
                 }
+                callback.succeeded();
+                return true;
             }
 
             private void handleDecompression(final Handle handle) {
