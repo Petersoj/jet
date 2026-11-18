@@ -25,6 +25,26 @@ import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwChe
 @NullMarked
 public class Sse {
 
+    /**
+     * The id prefix: <code>"id: "</code>
+     */
+    public static final String ID_PREFIX = "id: ";
+
+    /**
+     * The event prefix: <code>"event: "</code>
+     */
+    public static final String EVENT_PREFIX = "event: ";
+
+    /**
+     * The data prefix: <code>"data: "</code>
+     */
+    public static final String DATA_PREFIX = "data: ";
+
+    /**
+     * The comment prefix: <code>": "</code>
+     */
+    public static final String COMMENT_PREFIX = ": ";
+
     private static final Splitter NEWLINE_SPLITTER = Splitter.on('\n');
 
     private final OutputStream bodyOutputStream;
@@ -89,13 +109,13 @@ public class Sse {
         try {
             final var line = new StringBuilder();
             if (id != null) {
-                line.append("id: ").append(sanitize(id)).append('\n');
+                line.append(ID_PREFIX).append(sanitize(id)).append('\n');
             }
             if (event != null) {
-                line.append("event: ").append(sanitize(event)).append('\n');
+                line.append(EVENT_PREFIX).append(sanitize(event)).append('\n');
             }
             for (final var dataLine : NEWLINE_SPLITTER.split(data)) {
-                line.append("data: ").append(dataLine).append('\n');
+                line.append(DATA_PREFIX).append(dataLine).append('\n');
             }
             bodyOutputStream.write(line.append('\n').toString().getBytes(UTF_8));
             bodyOutputStream.flush();
@@ -124,7 +144,7 @@ public class Sse {
      */
     public synchronized boolean comment(final String comment, final boolean logThrowable) {
         try {
-            bodyOutputStream.write((": " + sanitize(comment) + "\n\n").getBytes(UTF_8));
+            bodyOutputStream.write((COMMENT_PREFIX + sanitize(comment) + "\n\n").getBytes(UTF_8));
             bodyOutputStream.flush();
             return true;
         } catch (final Throwable throwable) {
