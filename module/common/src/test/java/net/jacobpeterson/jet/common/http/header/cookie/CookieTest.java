@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static java.util.concurrent.TimeUnit.HOURS;
 import static net.jacobpeterson.jet.common.http.header.cookie.CookieSameSite.NONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -155,6 +156,16 @@ public final class CookieTest {
                     .maxAge(Duration.ofSeconds(1))
                     .build().toString()
                     .contains("Max-Age=1"));
+        }
+
+        @Test
+        public void maxAgeLongTimeUnit() {
+            assertTrue(Cookie.builder()
+                    .name("a")
+                    .value("b")
+                    .maxAge(1, HOURS)
+                    .build().toString()
+                    .contains("Max-Age=" + 60 * 60));
         }
 
         @Test

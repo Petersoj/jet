@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -298,6 +299,13 @@ public final class Cookie {
          */
         public Builder maxAge(final Duration maxAge) {
             return maxAge(maxAge.toSeconds());
+        }
+
+        /**
+         * Calls {@link #maxAge(long)} with {@link TimeUnit#toSeconds(long)}.
+         */
+        public Builder maxAge(final long maxAge, final TimeUnit maxAgeUnit) {
+            return maxAge(maxAgeUnit.toSeconds(maxAge));
         }
 
         /**
