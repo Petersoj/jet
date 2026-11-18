@@ -112,7 +112,6 @@ import static net.jacobpeterson.jet.common.http.status.Status.INTERNAL_SERVER_ER
 import static net.jacobpeterson.jet.common.http.status.Status.SERVICE_UNAVAILABLE_503;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.accumulateThrowable;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
-import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.asBodyStreamException;
 import static org.eclipse.jetty.http.UriCompliance.UNSAFE;
 import static org.eclipse.jetty.io.content.BufferedContentSink.FLUSH_BUFFER;
 import static org.slf4j.event.Level.DEBUG;
@@ -762,7 +761,7 @@ public final class JetServer implements AutoCloseable {
                                     jettyResponse.write(false, ByteBuffer.wrap(b, off, len), callback);
                                     callback.block();
                                 } catch (final Exception exception) {
-                                    throw asBodyStreamException(exception);
+                                    throw BodyStreamException.catching(exception);
                                 }
                             }
 
@@ -772,7 +771,7 @@ public final class JetServer implements AutoCloseable {
                                     jettyResponse.write(false, FLUSH_BUFFER, callback);
                                     callback.block();
                                 } catch (final Exception exception) {
-                                    throw asBodyStreamException(exception);
+                                    throw BodyStreamException.catching(exception);
                                 }
                             }
 
@@ -787,7 +786,7 @@ public final class JetServer implements AutoCloseable {
                                     jettyResponse.write(true, null, callback);
                                     callback.block();
                                 } catch (final Exception exception) {
-                                    throw asBodyStreamException(exception);
+                                    throw BodyStreamException.catching(exception);
                                 }
                             }
                         }) {

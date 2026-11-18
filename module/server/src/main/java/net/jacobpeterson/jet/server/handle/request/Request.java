@@ -73,8 +73,6 @@ import static net.jacobpeterson.jet.common.http.header.Header.RANGE;
 import static net.jacobpeterson.jet.common.http.status.Status.BAD_REQUEST_400;
 import static net.jacobpeterson.jet.common.http.status.Status.CONTENT_TOO_LARGE_413;
 import static net.jacobpeterson.jet.common.http.status.Status.RANGE_NOT_SATISFIABLE_416;
-import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.asBodyStreamException;
-import static net.jacobpeterson.jet.server.handle.exception.BodyStreamException.shouldBeBodyStreamException;
 import static org.eclipse.jetty.http.MultiPartFormData.getParts;
 import static org.eclipse.jetty.io.Content.Source.asInputStream;
 
@@ -543,7 +541,7 @@ public final class Request {
                 try {
                     return inputStream.read();
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -552,7 +550,7 @@ public final class Request {
                 try {
                     return inputStream.read(b);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -561,7 +559,7 @@ public final class Request {
                 try {
                     return inputStream.read(b, off, len);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -570,7 +568,7 @@ public final class Request {
                 try {
                     return inputStream.readAllBytes();
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -579,7 +577,7 @@ public final class Request {
                 try {
                     return inputStream.readNBytes(len);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -588,7 +586,7 @@ public final class Request {
                 try {
                     return inputStream.readNBytes(b, off, len);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -597,7 +595,7 @@ public final class Request {
                 try {
                     return inputStream.skip(n);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -606,7 +604,7 @@ public final class Request {
                 try {
                     inputStream.skipNBytes(n);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -615,7 +613,7 @@ public final class Request {
                 try {
                     return inputStream.available();
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -624,7 +622,7 @@ public final class Request {
                 try {
                     inputStream.close();
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -638,7 +636,7 @@ public final class Request {
                 try {
                     inputStream.reset();
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
 
@@ -652,7 +650,7 @@ public final class Request {
                 try {
                     return inputStream.transferTo(out);
                 } catch (final Exception exception) {
-                    throw asBodyStreamException(exception);
+                    throw BodyStreamException.catching(exception);
                 }
             }
         }, boundCount, throwOnClose);
@@ -749,7 +747,7 @@ public final class Request {
             try {
                 parts = getParts(request, request, contentType, jettyConfig);
             } catch (final Exception exception) {
-                if (shouldBeBodyStreamException(exception)) {
+                if (BodyStreamException.matches(exception)) {
                     throw new UncheckedIOException(new BodyStreamException(exception));
                 }
                 throw new StatusException(BAD_REQUEST_400, exception);
