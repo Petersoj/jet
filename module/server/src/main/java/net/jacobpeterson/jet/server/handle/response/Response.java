@@ -336,17 +336,20 @@ public final class Response {
     }
 
     /**
-     * Calls {@link #setBodyInputStream(InputStream, boolean)} with <code>close</code> set to <code>true</code>.
+     * Calls {@link #setBodyInputStream(InputStream, boolean)} with <code>closeAfter</code> set to <code>true</code>.
      */
     public void setBodyInputStream(final @Nullable InputStream bodyInputStream) {
         setBodyInputStream(bodyInputStream, true);
     }
 
     /**
-     * Sets {@link #getBodyOutputStreamApplier()} using {@link InputStream#transferTo(OutputStream)}.
+     * Calls {@link #setBodyOutputStreamApplier(IoConsumer)} with {@link InputStream#transferTo(OutputStream)} in a
+     * try-with-resources block.
      *
      * @param closeAfter <code>true</code> to call {@link #addAfter(Runnable)} with {@link InputStream#close()},
-     *                   <code>false</code> otherwise
+     *                   <code>false</code> otherwise. This should usually be set to <code>true</code> as it is not
+     *                   guaranteed that {@link #getBodyOutputStreamApplier()} will be called. Only set to
+     *                   <code>false</code> if the caller will handle closing the given {@link InputStream}
      */
     public void setBodyInputStream(final @Nullable InputStream bodyInputStream, final boolean closeAfter) {
         if (bodyInputStream == null) {

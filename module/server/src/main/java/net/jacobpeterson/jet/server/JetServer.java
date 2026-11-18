@@ -792,8 +792,8 @@ public final class JetServer implements AutoCloseable {
                         }) {
                             bodyOutputStreamApplier.accept(bodyOutputStream);
                         } catch (final Throwable throwable) {
-                            if (getCausalChain(throwable).stream().anyMatch(cause ->
-                                    cause instanceof BodyStreamException)) {
+                            if (getCausalChain(throwable).stream()
+                                    .anyMatch(cause -> cause instanceof BodyStreamException)) {
                                 LOGGER.debug("Body stream exception", throwable);
                             } else {
                                 throw throwable;

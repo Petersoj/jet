@@ -268,6 +268,7 @@ represents the web server instance. Use the builder to configure and start the w
 - [`sessionStore()`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sessionStore())
 - [`sessionStore(SessionStore)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sessionStore(net.jacobpeterson.jet.server.session.SessionStore))
 - [`router(Router)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#router(net.jacobpeterson.jet.server.router.Router))
+- [`routerThrowableHandler(RouterThrowableHandler)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#routerThrowableHandler(net.jacobpeterson.jet.server.router.RouterThrowableHandler))
 - [`host(String)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#host(java.lang.String))
 - [`httpPort(int)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#httpPort(int))
 - [`httpsPort(int)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#httpsPort(int))
@@ -277,6 +278,8 @@ represents the web server instance. Use the builder to configure and start the w
 - [`sslPem(Path, Path)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sslPem(java.nio.file.Path,java.nio.file.Path))
 - [`sslPem(String, String)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sslPem(java.lang.String,java.lang.String))
 - [`sslPems(Supplier)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sslPems(java.util.function.Supplier))
+- [`sslProtocols(List<String>)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sslProtocols(java.util.List))
+- [`sslCiphers(List<String>)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#sslCiphers(java.util.List))
 - [`reloadSslPeriod(Duration)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#reloadSslPeriod(java.time.Duration))
 - [`gracefulStopTimeout(Duration)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#gracefulStopTimeout(java.time.Duration))
 - [`connectionIdleTimeout(Duration)`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/JetServer.Builder.html#connectionIdleTimeout(java.time.Duration))
@@ -311,10 +314,11 @@ is thrown by some methods for `400 Bad Request` (for example if a request header
 `Exception` for breaking the flow of execution in an implementation handler and returning a response status code.
 
 [`BodyStreamException`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/handle/exception/BodyStreamException.html)
-is thrown by some methods for request/response body streaming client timeouts and early disconnects.
+is thrown by some methods for request/response body streaming failures due to client timeouts, early disconnects, etc.
 
-The `Handler` should not consume these exceptions. `JetServer` expects these exceptions to be thrown for special
-processing (e.g. to set the response status upon a `StatusException` or to not log an error for `BodyStreamException`).
+`Handler` implementations should typically not consume exceptions as they should be propagated to `JetServer`, where
+your `routerThrowableHandler` will be invoked once headers have been cleared and special exceptions have been processed
+(e.g. set the response status for a `StatusException` or to not log an error for `BodyStreamException`).
 
 #### Useful [`Handler`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/handler/Handler.html) Implementations
 
@@ -337,7 +341,6 @@ instances from with automatic cache invalidation using
 Simple handlers for common redirection cases:
 
 - [`HostRedirectHandler`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/handler/redirect/HostRedirectHandler.html)
-- [`NormalizedPathRedirectHandlerWrapper`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/handler/redirect/NormalizedPathRedirectHandlerWrapper.html)
 - [`SecureRedirectHandler`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/handler/redirect/SecureRedirectHandler.html)
 
 #### [`Router`](https://javadoc.io/doc/net.jacobpeterson.jet/server/latest/net/jacobpeterson/jet/server/router/Router.html) Implementations
