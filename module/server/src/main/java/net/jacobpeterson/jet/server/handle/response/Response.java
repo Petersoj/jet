@@ -64,6 +64,7 @@ import static java.time.Duration.ofSeconds;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static net.jacobpeterson.jet.common.http.header.Header.ACCEPT_RANGES;
 import static net.jacobpeterson.jet.common.http.header.Header.CACHE_CONTROL;
 import static net.jacobpeterson.jet.common.http.header.Header.CONNECTION;
@@ -97,6 +98,7 @@ import static net.jacobpeterson.jet.common.util.string.StringUtil.isLikelyUtf8;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.accumulateThrowable;
 import static net.jacobpeterson.jet.common.util.throwable.ThrowableUtil.throwCheckedOrUnchecked;
 import static net.jacobpeterson.jet.server.handle.response.resource.Resource.DEFAULT_PEEK_LENGTH;
+import static net.jacobpeterson.jet.server.handle.response.sse.Sse.KEEPALIVE_COMMENT;
 
 /**
  * {@link Response} is a class that represents a web server request.
@@ -774,8 +776,8 @@ public final class Response {
      *
      * @param sseApplier              the {@link Sse} applier (can be either blocking or non-blocking, but non-blocking
      *                                is recommended)
-     * @param keepAlivePeriod         the period {@link Duration} at which to call {@link Sse#comment(String)} with an
-     *                                empty string, or <code>null</code> to disable. If disabled,
+     * @param keepAlivePeriod         the period {@link Duration} at which to call {@link Sse#comment(String)} with
+     *                                {@link Sse#KEEPALIVE_COMMENT}, or <code>null</code> to disable. If disabled,
      *                                <code>sseApplier</code> must be blocking to keep the {@link Response} thread
      *                                alive.
      * @param keepAliveSeparateThread <code>true</code> if a separate {@link Thread#ofVirtual()} should be used for the
@@ -833,10 +835,12 @@ public final class Response {
     }
 
     private void sseKeepAliveLoop(final Sse sse, final CountDownLatch latch, final Duration keepAlivePeriod) {
+        final var unit = MICROSECONDS;
+        final var period = unit.convert(keepAlivePeriod);
         do {
-            if (awaitUninterruptibly(latch, keepAlivePeriod)) {
+            if (awaitUninterruptibly(latch, period, unit)) {
                 break;
             }
-        } while (sse.comment("keepalive"));
+        } while (sse.comment(KEEPALIVE_COMMENT));
     }
 }

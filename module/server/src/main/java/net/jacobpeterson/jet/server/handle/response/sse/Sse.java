@@ -45,6 +45,11 @@ public class Sse {
      */
     public static final String COMMENT_PREFIX = ": ";
 
+    /**
+     * The keepalive comment: <code>"keepalive"</code>
+     */
+    public static final String KEEPALIVE_COMMENT = "keepalive";
+
     private static final Splitter NEWLINE_SPLITTER = Splitter.on('\n');
 
     private final OutputStream bodyOutputStream;
